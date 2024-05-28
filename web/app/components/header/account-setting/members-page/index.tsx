@@ -38,8 +38,10 @@ const MembersPage = () => {
   const [invitationResults, setInvitationResults] = useState<InvitationResult[]>([])
   const [invitedModalVisible, setInvitedModalVisible] = useState(false)
   const accounts = data?.accounts || []
-  const owner = accounts.filter(account => account.role === 'owner')?.[0]?.email === userProfile.email
+  // 进行owner筛选，集成takin后只需要两个等级的筛选：admin、owner
+  const owner = accounts.filter(account => account.role === 'admin')?.[0]?.email === userProfile.email
   const { plan, enableBilling } = useProviderContext()
+
   const isNotUnlimitedMemberPlan = enableBilling && plan.type !== Plan.team && plan.type !== Plan.enterprise
   const isMemberFull = enableBilling && isNotUnlimitedMemberPlan && accounts.length >= plan.total.teamMembers
 
