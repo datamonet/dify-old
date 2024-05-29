@@ -24,7 +24,7 @@ const SwrInitor = ({
       localStorage?.setItem('console_token', token)
 
     if (!(consoleToken || consoleTokenFromLocalStorage))
-      router.replace('/signin')
+      router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
 
     if (consoleToken) {
       localStorage?.setItem('console_token', consoleToken!)
