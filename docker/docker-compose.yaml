@@ -12,7 +12,7 @@ services:
       # enable DEBUG mode to output more logs
       # DEBUG : true
       # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
-      SECRET_KEY: 35028df1-482c-47fe-90fb-e5b86da5dc9e
+      SECRET_KEY: ''
       # The base URL of console application web frontend, refers to the Console base URL of WEB service if console domain is
       # different from api or web app domain.
       # example: http://cloud.dify.ai
