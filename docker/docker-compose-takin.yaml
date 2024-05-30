@@ -149,7 +149,6 @@ services:
 
       - INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH=${INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH}
     depends_on:
-      - db
       - redis
     volumes:
       # Mount the storage directory to the container, for storing user files.
