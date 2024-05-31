@@ -96,7 +96,7 @@ const MembersPage = () => {
               accounts.map(account => (
                 <div key={account.id} className='flex border-b border-gray-100'>
                   <div className='grow flex items-center py-2 px-3'>
-                    <Avatar size={24} className='mr-2' name={account.name} />
+                    <Avatar size={24} className='mr-2' avatar={account.avatar} name={account.name} />
                     <div className=''>
                       <div className='text-[13px] font-medium text-gray-700 leading-[18px]'>
                         {account.name}
