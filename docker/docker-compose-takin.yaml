@@ -69,8 +69,6 @@ services:
 
       - INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH=${INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH}
 
-    depends_on:
-      - redis
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
@@ -151,8 +149,7 @@ services:
       - SSRF_PROXY_HTTPS_URL=${SSRF_PROXY_HTTPS_URL}
 
       - INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH=${INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH}
-    depends_on:
-      - redis
+
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
@@ -172,21 +169,6 @@ services:
   #    ports:
 #      - "3000:3000"
 
-
-  # The redis cache.
-  redis:
-    image: redis:6-alpine
-    restart: always
-    volumes:
-      # Mount the redis data directory to the container.
-      - ./volumes/redis/data:/data
-    # Set the redis password when startup redis server.
-    command: redis-server --requirepass difyai123456
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-    # uncomment to expose redis port to host
-    # ports:
-    #   - "6379:6379"
 
   # The DifySandbox
   sandbox:
