@@ -20,9 +20,19 @@ class InstalledAppsListApi(Resource):
     @account_initialization_required
     @marshal_with(installed_app_list_fields)
     def get(self):
+
         current_tenant_id = current_user.current_tenant_id
-        installed_apps = db.session.query(InstalledApp).filter(
-            InstalledApp.tenant_id == current_tenant_id
+        current_user_id = current_user.id
+        # installed_apps = db.session.query(InstalledApp).filter(
+        #     InstalledApp.tenant_id == current_tenant_id
+        # ).all()
+
+        # 适配Takin，需要进行用户id的过滤，达到数据隔离的效果。直接使用 join连表查询app的user id
+        installed_apps = db.session.query(InstalledApp).join(
+            App, InstalledApp.app_id == App.id
+        ).filter(
+            InstalledApp.tenant_id == current_tenant_id,
+            App.user_id == current_user_id  #  current_user_id 是要过滤的用户 ID
         ).all()
 
         current_user.role = TenantService.get_user_role(current_user, current_user.current_tenant)
