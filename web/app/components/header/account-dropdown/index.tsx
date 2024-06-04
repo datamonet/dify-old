@@ -43,7 +43,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
     if (localStorage?.getItem('console_token'))
       localStorage.removeItem('console_token')
 
-    router.push('/signin')
+    router.push('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
   }
 
   return (
