@@ -14,7 +14,7 @@ import ToolsNav from './tools-nav'
 import GithubStar from './github-star'
 import { WorkspaceProvider } from '@/context/workspace-context'
 import { useAppContext } from '@/context/app-context'
-import LogoSite from '@/app/components/base/logo/logo-site'
+import LogoSite from '@/app/components/base/logo/logo-takin'
 import PlanComp from '@/app/components/billing/plan'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { useProviderContext } from '@/context/provider-context'
@@ -61,7 +61,7 @@ const Header = () => {
       </div>
       {isMobile && (
         <div className='flex'>
-          <Link href="/apps" className='flex items-center mr-4'>
+          <Link href="https://takin.ai" className='flex items-center mr-4'>
             <LogoSite />
           </Link>
           <GithubStar />

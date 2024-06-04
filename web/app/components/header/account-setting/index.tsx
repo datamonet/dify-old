@@ -29,6 +29,7 @@ import { Colors } from '@/app/components/base/icons/src/vender/line/editor'
 import { Colors as ColorsSolid } from '@/app/components/base/icons/src/vender/solid/editor'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { useProviderContext } from '@/context/provider-context'
+import { useAppContext } from '@/context/app-context'
 
 const iconClassName = `
   w-4 h-4 ml-3 mr-2
@@ -45,6 +46,7 @@ type IAccountSettingProps = {
 
 type GroupItem = {
   key: string
+  role?: string
   name: string
   description?: string
   icon: JSX.Element
@@ -58,6 +60,7 @@ export default function AccountSetting({
   const [activeMenu, setActiveMenu] = useState(activeTab)
   const { t } = useTranslation()
   const { enableBilling, enableReplaceWebAppLogo } = useProviderContext()
+  const { currentWorkspace } = useAppContext()
 
   const workplaceGroupItems = (() => {
     return [
@@ -108,6 +111,7 @@ export default function AccountSetting({
   const menuItems = [
     {
       key: 'workspace-group',
+      role: 'owner',
       name: t('common.settings.workplaceGroup'),
       items: workplaceGroupItems,
     },
@@ -124,6 +128,7 @@ export default function AccountSetting({
         {
           key: 'integrations',
           name: t('common.settings.integrations'),
+          role: 'owner',
           icon: <AtSign className={iconClassName} />,
           activeIcon: <AtSign className={iconClassName} />,
         },
@@ -150,70 +155,99 @@ export default function AccountSetting({
     }
   }, [])
 
-  const activeItem = [...menuItems[0].items, ...menuItems[1].items].find(item => item.key === activeMenu)
+  const activeItem: GroupItem | undefined = [
+    ...menuItems[0].items,
+    ...menuItems[1].items,
+  ].find(item => item.key === activeMenu)
 
   return (
     <Modal
       isShow
-      onClose={() => { }}
+      onClose={() => {
+      }}
       className={s.modal}
-      wrapperClassName='!z-20 pt-[60px]'
+      wrapperClassName="!z-20 pt-[60px]"
     >
-      <div className='flex'>
-        <div className='w-[44px] sm:w-[200px] px-[1px] py-4 sm:p-4 border border-gray-100 shrink-0 sm:shrink-1 flex flex-col items-center sm:items-start'>
-          <div className='mb-8 ml-0 sm:ml-2 text-sm sm:text-base font-medium leading-6 text-gray-900'>{t('common.userProfile.settings')}</div>
-          <div className='w-full'>
-            {
-              menuItems.map(menuItem => (
-                <div key={menuItem.key} className='mb-4'>
-                  <div className='px-2 mb-[6px] text-[10px] sm:text-xs font-medium text-gray-500'>{menuItem.name}</div>
-                  <div>
-                    {
-                      menuItem.items.map(item => (
-                        <div
-                          key={item.key}
-                          className={`
+      <div className="flex">
+        <div
+          className="w-[44px] sm:w-[200px] px-[1px] py-4 sm:p-4 border border-gray-100 shrink-0 sm:shrink-1 flex flex-col items-center sm:items-start">
+          <div className="mb-8 ml-0 sm:ml-2 text-sm sm:text-base font-medium leading-6 text-gray-900">
+            {t('common.userProfile.settings')}
+          </div>
+          <div className="w-full">
+            {menuItems.map(
+              menuItem =>
+                (currentWorkspace.role === 'owner'
+                  || menuItem.role !== 'owner') && (
+                  <div key={menuItem.key} className="mb-4">
+                    <div className="px-2 mb-[6px] text-[10px] sm:text-xs font-medium text-gray-500">
+                      {menuItem.name}
+                    </div>
+                    <div>
+                      {menuItem.items.map(item => (
+                        <>
+                          {(currentWorkspace.role === 'owner'
+                            || item.role !== 'owner') && (
+                            <div
+                              key={item.key}
+                              className={`
                             flex items-center h-[37px] mb-[2px] text-sm cursor-pointer rounded-lg
                             ${activeMenu === item.key ? 'font-semibold text-primary-600 bg-primary-50' : 'font-light text-gray-700'}
                           `}
-                          title={item.name}
-                          onClick={() => setActiveMenu(item.key)}
-                        >
-                          {activeMenu === item.key ? item.activeIcon : item.icon}
-                          {!isMobile && <div className='truncate'>{item.name}</div>}
-                        </div>
-                      ))
-                    }
+                              title={item.name}
+                              onClick={() => setActiveMenu(item.key)}
+                            >
+                              {activeMenu === item.key
+                                ? item.activeIcon
+                                : item.icon}
+                              {!isMobile && (
+                                <div className="truncate">{item.name}</div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))
-            }
+                ),
+            )}
           </div>
         </div>
-        <div ref={scrollRef} className='relative w-[824px] h-[720px] pb-4 overflow-y-auto'>
-          <div className={cn('sticky top-0 px-6 py-4 flex items-center h-14 mb-4 bg-white text-base font-medium text-gray-900 z-20', scrolled && scrolledClassName)}>
-            <div className='shrink-0'>{activeItem?.name}</div>
-            {
-              activeItem?.description && (
-                <div className='shrink-0 ml-2 text-xs text-gray-600'>{activeItem?.description}</div>
-              )
-            }
-            <div className='grow flex justify-end'>
-              <div className='flex items-center justify-center -mr-4 w-6 h-6 cursor-pointer' onClick={onCancel}>
-                <XClose className='w-4 h-4 text-gray-400' />
+        <div
+          ref={scrollRef}
+          className="relative w-[824px] h-[720px] pb-4 overflow-y-auto"
+        >
+          <div
+            className={cn(
+              'sticky top-0 px-6 py-4 flex items-center h-14 mb-4 bg-white text-base font-medium text-gray-900 z-20',
+              scrolled && scrolledClassName,
+            )}
+          >
+            <div className="shrink-0">{activeItem?.name}</div>
+            {activeItem?.description && (
+              <div className="shrink-0 ml-2 text-xs text-gray-600">
+                {activeItem?.description}
+              </div>
+            )}
+            <div className="grow flex justify-end">
+              <div
+                className="flex items-center justify-center -mr-4 w-6 h-6 cursor-pointer"
+                onClick={onCancel}
+              >
+                <XClose className="w-4 h-4 text-gray-400"/>
               </div>
             </div>
           </div>
-          <div className='px-4 sm:px-8 pt-2'>
-            {activeMenu === 'account' && <AccountPage />}
-            {activeMenu === 'members' && <MembersPage />}
-            {activeMenu === 'billing' && <BillingPage />}
-            {activeMenu === 'integrations' && <IntegrationsPage />}
-            {activeMenu === 'language' && <LanguagePage />}
-            {activeMenu === 'provider' && <ModelProviderPage />}
-            {activeMenu === 'data-source' && <DataSourcePage />}
-            {activeMenu === 'api-based-extension' && <ApiBasedExtensionPage />}
-            {activeMenu === 'custom' && <CustomPage />}
+          <div className="px-4 sm:px-8 pt-2">
+            {activeMenu === 'account' && <AccountPage/>}
+            {activeMenu === 'members' && <MembersPage/>}
+            {activeMenu === 'billing' && <BillingPage/>}
+            {activeMenu === 'integrations' && <IntegrationsPage/>}
+            {activeMenu === 'language' && <LanguagePage/>}
+            {activeMenu === 'provider' && <ModelProviderPage/>}
+            {activeMenu === 'data-source' && <DataSourcePage/>}
+            {activeMenu === 'api-based-extension' && <ApiBasedExtensionPage/>}
+            {activeMenu === 'custom' && <CustomPage/>}
           </div>
         </div>
       </div>
