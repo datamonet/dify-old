@@ -132,31 +132,31 @@ const StepOne = ({
                   <span className={cn(s.datasetIcon)} />
                   {t('datasetCreation.stepOne.dataSourceType.file')}
                 </div>
-                <div
-                  className={cn(
-                    s.dataSourceItem,
-                    dataSourceType === DataSourceType.NOTION && s.active,
-                    dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled,
-                  )}
-                  onClick={() => {
-                    if (dataSourceTypeDisable)
-                      return
-                    changeType(DataSourceType.NOTION)
-                    hideFilePreview()
-                    hideNotionPagePreview()
-                  }}
-                >
-                  <span className={cn(s.datasetIcon, s.notion)} />
-                  {t('datasetCreation.stepOne.dataSourceType.notion')}
-                </div>
-                <div
-                  className={cn(s.dataSourceItem, s.disabled, dataSourceType === DataSourceType.WEB && s.active)}
-                // onClick={() => changeType(DataSourceType.WEB)}
-                >
-                  <span className={s.comingTag}>Coming soon</span>
-                  <span className={cn(s.datasetIcon, s.web)} />
-                  {t('datasetCreation.stepOne.dataSourceType.web')}
-                </div>
+                {/* <div */}
+                {/*  className={cn( */}
+                {/*    s.dataSourceItem, */}
+                {/*    dataSourceType === DataSourceType.NOTION && s.active, */}
+                {/*    dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled, */}
+                {/*  )} */}
+                {/*  onClick={() => { */}
+                {/*    if (dataSourceTypeDisable) */}
+                {/*      return */}
+                {/*    changeType(DataSourceType.NOTION) */}
+                {/*    hideFilePreview() */}
+                {/*    hideNotionPagePreview() */}
+                {/*  }} */}
+                {/* > */}
+                {/*  <span className={cn(s.datasetIcon, s.notion)} /> */}
+                {/*  {t('datasetCreation.stepOne.dataSourceType.notion')} */}
+                {/* </div> */}
+                {/* <div */}
+                {/*  className={cn(s.dataSourceItem, s.disabled, dataSourceType === DataSourceType.WEB && s.active)} */}
+                {/* // onClick={() => changeType(DataSourceType.WEB)} */}
+                {/* > */}
+                {/*  <span className={s.comingTag}>Coming soon</span> */}
+                {/*  <span className={cn(s.datasetIcon, s.web)} /> */}
+                {/*  {t('datasetCreation.stepOne.dataSourceType.web')} */}
+                {/* </div> */}
               </div>
             )
           }

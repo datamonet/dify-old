@@ -674,27 +674,27 @@ const StepTwo = ({
                 </div>
               )}
 
-              {(!hasSetIndexType || (hasSetIndexType && indexingType === IndexingType.ECONOMICAL)) && (
-                <div
-                  className={cn(
-                    s.radioItem,
-                    s.indexItem,
-                    !hasSetIndexType && indexType === IndexingType.ECONOMICAL && s.active,
-                    hasSetIndexType && s.disabled,
-                    hasSetIndexType && '!w-full',
-                  )}
-                  onClick={changeToEconomicalType}
-                >
-                  <span className={cn(s.typeIcon, s.economical)} />
-                  {!hasSetIndexType && <span className={cn(s.radio)} />}
-                  <div className={s.typeHeader}>
-                    <div className={s.title}>{t('datasetCreation.stepTwo.economical')}</div>
-                    <div className={s.tip}>{t('datasetCreation.stepTwo.economicalTip')}</div>
-                    <div className='pb-0.5 text-xs font-medium text-gray-500'>{t('datasetCreation.stepTwo.emstimateCost')}</div>
-                    <div className='text-xs font-medium text-gray-800'>0 tokens</div>
-                  </div>
-                </div>
-              )}
+              {/* {(!hasSetIndexType || (hasSetIndexType && indexingType === IndexingType.ECONOMICAL)) && ( */}
+              {/*  <div */}
+              {/*    className={cn( */}
+              {/*      s.radioItem, */}
+              {/*      s.indexItem, */}
+              {/*      !hasSetIndexType && indexType === IndexingType.ECONOMICAL && s.active, */}
+              {/*      hasSetIndexType && s.disabled, */}
+              {/*      hasSetIndexType && '!w-full', */}
+              {/*    )} */}
+              {/*    onClick={changeToEconomicalType} */}
+              {/*  > */}
+              {/*    <span className={cn(s.typeIcon, s.economical)} /> */}
+              {/*    {!hasSetIndexType && <span className={cn(s.radio)} />} */}
+              {/*    <div className={s.typeHeader}> */}
+              {/*      <div className={s.title}>{t('datasetCreation.stepTwo.economical')}</div> */}
+              {/*      <div className={s.tip}>{t('datasetCreation.stepTwo.economicalTip')}</div> */}
+              {/*      <div className='pb-0.5 text-xs font-medium text-gray-500'>{t('datasetCreation.stepTwo.emstimateCost')}</div> */}
+              {/*      <div className='text-xs font-medium text-gray-800'>0 tokens</div> */}
+              {/*    </div> */}
+              {/*  </div> */}
+              {/* )} */}
             </div>
             {hasSetIndexType && (
               <div className='mt-2 text-xs text-gray-500 font-medium'>

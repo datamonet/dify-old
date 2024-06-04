@@ -31,12 +31,12 @@ const IndexMethodRadio = ({
       desc: t('datasetSettings.form.indexMethodHighQualityTip'),
       icon: 'high-quality',
     },
-    {
-      key: 'economy',
-      text: t('datasetSettings.form.indexMethodEconomy'),
-      desc: t('datasetSettings.form.indexMethodEconomyTip'),
-      icon: 'economy',
-    },
+    // {
+    //   key: 'economy',
+    //   text: t('datasetSettings.form.indexMethodEconomy'),
+    //   desc: t('datasetSettings.form.indexMethodEconomyTip'),
+    //   icon: 'economy',
+    // },
   ]
 
   return (
