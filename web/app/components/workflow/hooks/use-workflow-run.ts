@@ -178,7 +178,7 @@ export const useWorkflowRun = () => {
             workflowRunningData,
             setWorkflowRunningData,
           } = workflowStore.getState()
-
+          // TODO：最后workflow结束后的data中最终消耗的总token数量
           setWorkflowRunningData(produce(workflowRunningData!, (draft) => {
             draft.result = {
               ...draft.result,
