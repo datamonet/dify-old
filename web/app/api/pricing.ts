@@ -56,3 +56,16 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
     },
   )
 }
+
+/**
+ * 根据总token数，更新用户积分,并且在bill表中记录消费
+ * @param userId 用户的mongo id
+ * @param totalToken workflow只有总消耗的token数量
+ * @param type 消费类型
+ * @param metadata 消费的元数据
+ */
+export async function updateUserCreditsWithTotalToken(userId: string, totalToken: number, type: string, metadata: any) {
+  // workflow只有总消耗的token数量，默认全部使用gpt-40的output价格计算（$15.00 用于 1M tokens）
+  const USD = totalToken * 0.000015
+  await updateUserCreditsWithUSD(userId, USD, type, metadata)
+}

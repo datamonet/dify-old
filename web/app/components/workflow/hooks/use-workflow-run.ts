@@ -19,9 +19,12 @@ import {
   stopWorkflowRun,
 } from '@/service/workflow'
 import { useFeaturesStore } from '@/app/components/base/features/hooks'
+import { updateUserCreditsWithTotalToken } from '@/app/api/pricing'
+import { useAppContext } from '@/context/app-context'
 
 export const useWorkflowRun = () => {
   const store = useStoreApi()
+  const { userProfile } = useAppContext()
   const workflowStore = useWorkflowStore()
   const reactflow = useReactFlow()
   const featuresStore = useFeaturesStore()
@@ -172,24 +175,28 @@ export const useWorkflowRun = () => {
           if (onWorkflowStarted)
             onWorkflowStarted(params)
         },
-        onWorkflowFinished: (params) => {
+        onWorkflowFinished: async (params) => {
           const { data } = params
           const {
             workflowRunningData,
             setWorkflowRunningData,
           } = workflowStore.getState()
           // TODO：最后workflow结束后的data中最终消耗的总token数量
-          setWorkflowRunningData(produce(workflowRunningData!, (draft) => {
+          const newWorkflowRunningData = (produce(workflowRunningData!, (draft) => {
             draft.result = {
               ...draft.result,
               ...data,
             } as any
           }))
+          setWorkflowRunningData(newWorkflowRunningData)
 
           prevNodeId = ''
+          console.log('workflow', newWorkflowRunningData)
 
           if (onWorkflowFinished)
             onWorkflowFinished(params)
+
+          await updateUserCreditsWithTotalToken(userProfile.takin_id!, newWorkflowRunningData.result.total_tokens || 0, 'Dify Workflow', newWorkflowRunningData)
         },
         onError: (params) => {
           const {
