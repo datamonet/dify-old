@@ -10,7 +10,7 @@ const LogoSite: FC<LogoSiteProps> = ({
 }) => {
   return (
     <img
-      src='/logo/logo-takin-with-text.svg'
+      src='/logo/logo-takin.svg'
       className={classNames('block w-auto h-8', className)}
       alt='logo'
     />

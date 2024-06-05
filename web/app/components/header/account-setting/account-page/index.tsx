@@ -159,7 +159,7 @@ export default function AccountPage() {
         </>
       )}
       <div className='mb-8 flex cursor-pointer text-white'>
-        <a className='px-2.5 py-1.5 text-sm bg-primary-600 rounded-[10px]' href='https://takin.ai/'>Show More</a>
+        <a className='px-2.5 py-1.5 text-sm bg-primary-600 rounded-[10px]' href={`https://takin.ai/user/${userProfile.takin_id}`}>Show More</a>
       </div>
       {/* {editNameModalVisible && ( */}
       {/*  <Modal */}

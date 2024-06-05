@@ -18,6 +18,7 @@ import LogoSite from '@/app/components/base/logo/logo-takin'
 import PlanComp from '@/app/components/billing/plan'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { useProviderContext } from '@/context/provider-context'
+import Credits from '@/app/components/header/credits'
 
 const navClassName = `
   flex items-center relative mr-0 sm:mr-3 px-3 h-8 rounded-xl
@@ -77,6 +78,7 @@ const Header = () => {
       )}
       <div className='flex items-center flex-shrink-0'>
         <EnvNav />
+        <Credits />
         {enableBilling && (
           <div className='mr-3 select-none'>
             <HeaderBillingBtn onClick={() => setShowUpgradePanel(true)} />
