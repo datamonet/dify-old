@@ -29,6 +29,14 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
     totalCost = 0.01
   else totalCost = Number(totalCost.toFixed(2)) // 保留一位小数四舍五入
 
+  await billCollection.insertOne(
+    {
+      userId,
+      type,
+      metadata,
+      cost: totalCost,
+    },
+  )
   if (subscriptionCredits >= totalCost) {
     subscriptionCredits -= totalCost // 如果用户有订阅积分，那么优先消耗订阅积分
   }
@@ -46,13 +54,6 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
         subscription_credits: subscriptionCredits,
         extra_credits: extraCredits,
       },
-    },
-  )
-  await billCollection.insertOne(
-    {
-      userId,
-      type,
-      metadata,
     },
   )
 }
