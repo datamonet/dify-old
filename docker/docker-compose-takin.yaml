@@ -2,7 +2,7 @@ version: '3.1'
 services:
   # API service
   api:
-    image: faye1225/takin-dify-api:0.0.05
+    image: faye1225/takin-dify-api:0.0.5
     restart: always
     environment:
       - MODE=api
@@ -82,7 +82,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: faye1225/takin-dify-api:0.0.05
+    image: faye1225/takin-dify-api:0.0.5
     restart: always
     environment:
       - MODE=worker
