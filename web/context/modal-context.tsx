@@ -26,6 +26,7 @@ import type {
 import ModelLoadBalancingEntryModal from '@/app/components/header/account-setting/model-provider-page/model-modal/model-load-balancing-entry-modal'
 import type { ModelLoadBalancingModalProps } from '@/app/components/header/account-setting/model-provider-page/provider-added-card/model-load-balancing-modal'
 import ModelLoadBalancingModal from '@/app/components/header/account-setting/model-provider-page/provider-added-card/model-load-balancing-modal'
+import CreditsBillingModal from '@/app/components/billing/credits-billing-modal'
 
 export type ModalState<T> = {
   payload: T
@@ -51,6 +52,7 @@ export type ModalContextState = {
   setShowExternalDataToolModal: Dispatch<SetStateAction<ModalState<ExternalDataTool> | null>>
   setShowPricingModal: () => void
   setShowAnnotationFullModal: () => void
+  setShowCreditsBillingModal: () => void
   setShowModelModal: Dispatch<SetStateAction<ModalState<ModelModalType> | null>>
   setShowModelLoadBalancingModal: Dispatch<SetStateAction<ModelLoadBalancingModalProps | null>>
   setShowModelLoadBalancingEntryModal: Dispatch<SetStateAction<ModalState<LoadBalancingEntryModalType> | null>>
@@ -62,6 +64,7 @@ const ModalContext = createContext<ModalContextState>({
   setShowExternalDataToolModal: () => { },
   setShowPricingModal: () => { },
   setShowAnnotationFullModal: () => { },
+  setShowCreditsBillingModal: () => { },
   setShowModelModal: () => { },
   setShowModelLoadBalancingModal: () => { },
   setShowModelLoadBalancingEntryModal: () => { },
@@ -88,6 +91,7 @@ export const ModalContextProvider = ({
   const [showModelModal, setShowModelModal] = useState<ModalState<ModelModalType> | null>(null)
   const [showModelLoadBalancingModal, setShowModelLoadBalancingModal] = useState<ModelLoadBalancingModalProps | null>(null)
   const [showModelLoadBalancingEntryModal, setShowModelLoadBalancingEntryModal] = useState<ModalState<LoadBalancingEntryModalType> | null>(null)
+  const [showCreditsBillingModal, setShowCreditsBillingModal] = useState<boolean>(false)
   const searchParams = useSearchParams()
   const router = useRouter()
   const [showPricingModal, setShowPricingModal] = useState(searchParams.get('show-pricing') === '1')
@@ -175,6 +179,7 @@ export const ModalContextProvider = ({
       setShowModelModal,
       setShowModelLoadBalancingModal,
       setShowModelLoadBalancingEntryModal,
+      setShowCreditsBillingModal: () => setShowCreditsBillingModal(true),
     }}>
       <>
         {children}
@@ -234,6 +239,9 @@ export const ModalContextProvider = ({
               onHide={() => setShowAnnotationFullModal(false)} />
           )
         }
+        {showCreditsBillingModal && <CreditsBillingModal show={showCreditsBillingModal}
+          onHide={() => setShowCreditsBillingModal(false)} />}
+
         {
           !!showModelModal && (
             <ModelModal
@@ -263,6 +271,7 @@ export const ModalContextProvider = ({
             />
           )
         }
+
       </>
     </ModalContext.Provider>
   )

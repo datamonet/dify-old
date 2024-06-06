@@ -4,7 +4,6 @@ import {
   useCallback,
   useMemo,
 } from 'react'
-import { useContext } from 'use-context-selector'
 import type { ModelAndParameter } from '../types'
 import {
   APP_CHAT_WITH_MULTIPLE_MODEL,
@@ -16,7 +15,7 @@ import {
 } from '../hooks'
 import Chat from '@/app/components/base/chat/chat'
 import { useChat } from '@/app/components/base/chat/chat/hooks'
-import ConfigContext, { useDebugConfigurationContext } from '@/context/debug-configuration'
+import { useDebugConfigurationContext } from '@/context/debug-configuration'
 import type { OnSend } from '@/app/components/base/chat/types'
 import { useEventEmitterContextContext } from '@/context/event-emitter'
 import { useProviderContext } from '@/context/provider-context'
@@ -28,6 +27,7 @@ import {
 import Avatar from '@/app/components/base/avatar'
 import { useAppContext } from '@/context/app-context'
 import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { useModalContext } from '@/context/modal-context'
 
 type ChatItemProps = {
   modelAndParameter: ModelAndParameter
@@ -36,7 +36,7 @@ const ChatItem: FC<ChatItemProps> = ({
   modelAndParameter,
 }) => {
   const { userProfile } = useAppContext()
-  const { setShowCreditsBillingModal } = useContext(ConfigContext)
+  const { setShowCreditsBillingModal } = useModalContext()
   const {
     modelConfig,
     appId,
@@ -65,7 +65,7 @@ const ChatItem: FC<ChatItemProps> = ({
 
   const doSend: OnSend = useCallback((message, files) => {
     if ((userProfile.credits || 0) <= 0)
-      return setShowCreditsBillingModal(true)
+      return setShowCreditsBillingModal()
 
     const currentProvider = textGenerationModelList.find(item => item.provider === modelAndParameter.provider)
     const currentModel = currentProvider?.models.find(model => model.model === modelAndParameter.model)

@@ -5,14 +5,13 @@ import {
   useImperativeHandle,
   useMemo,
 } from 'react'
-import { useContext } from 'use-context-selector'
 import {
   useConfigFromDebugContext,
   useFormattingChangedSubscription,
 } from '../hooks'
 import Chat from '@/app/components/base/chat/chat'
 import { useChat } from '@/app/components/base/chat/chat/hooks'
-import ConfigContext, { useDebugConfigurationContext } from '@/context/debug-configuration'
+import { useDebugConfigurationContext } from '@/context/debug-configuration'
 import type { OnSend } from '@/app/components/base/chat/types'
 import { useProviderContext } from '@/context/provider-context'
 import {
@@ -23,6 +22,7 @@ import {
 import Avatar from '@/app/components/base/avatar'
 import { useAppContext } from '@/context/app-context'
 import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { useModalContext } from '@/context/modal-context'
 
 type DebugWithSingleModelProps = {
   checkCanSend?: () => boolean
@@ -34,7 +34,7 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
   checkCanSend,
 }, ref) => {
   const { userProfile } = useAppContext()
-  const { setShowCreditsBillingModal } = useContext(ConfigContext)
+  const { setShowCreditsBillingModal } = useModalContext()
   const {
     modelConfig,
     appId,
@@ -68,7 +68,7 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
 
   const doSend: OnSend = useCallback((message, files) => {
     if ((userProfile.credits || 0) <= 0)
-      return setShowCreditsBillingModal(true)
+      return setShowCreditsBillingModal()
 
     if (checkCanSend && !checkCanSend())
       return
