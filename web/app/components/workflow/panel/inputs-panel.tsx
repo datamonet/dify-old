@@ -4,6 +4,7 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNodes } from 'reactflow'
+import { useContext } from 'use-context-selector'
 import FormItem from '../nodes/_base/components/before-run-form/form-item'
 import {
   BlockEnum,
@@ -19,6 +20,8 @@ import type { StartNodeType } from '../nodes/start/types'
 import { TransferMethod } from '../../base/text-generation/types'
 import Button from '@/app/components/base/button'
 import { useFeatures } from '@/app/components/base/features/hooks'
+import { useAppContext } from '@/context/app-context'
+import ConfigContext from '@/context/debug-configuration'
 
 type Props = {
   onRun: () => void
@@ -27,6 +30,8 @@ type Props = {
 const InputsPanel = ({ onRun }: Props) => {
   const { t } = useTranslation()
   const workflowStore = useWorkflowStore()
+  const { userProfile } = useAppContext()
+  const { setShowCreditsBillingModal } = useContext(ConfigContext)
   const fileSettings = useFeatures(s => s.features.file)
   const nodes = useNodes<StartNodeType>()
   const inputs = useStore(s => s.inputs)
@@ -70,6 +75,9 @@ const InputsPanel = ({ onRun }: Props) => {
   }
 
   const doRun = () => {
+    if ((userProfile.credits || 0) < 100)
+      return setShowCreditsBillingModal(true)
+
     onRun()
     handleRun({ inputs, files })
   }

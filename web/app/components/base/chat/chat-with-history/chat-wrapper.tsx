@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react'
+import { useContext } from 'use-context-selector'
 import Chat from '../chat'
 import type {
   ChatConfig,
@@ -13,6 +14,8 @@ import {
   getUrl,
   stopChatMessageResponding,
 } from '@/service/share'
+import { useAppContext } from '@/context/app-context'
+import ConfigContext from '@/context/debug-configuration'
 
 const ChatWrapper = () => {
   const {
@@ -30,6 +33,9 @@ const ChatWrapper = () => {
     handleFeedback,
     currentChatInstanceRef,
   } = useChatWithHistoryContext()
+  const { userProfile } = useAppContext()
+  const { setShowCreditsBillingModal } = useContext(ConfigContext)
+
   const appConfig = useMemo(() => {
     const config = appParams || {}
 
@@ -61,6 +67,9 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
+    if ((userProfile.credits || 0) < 100)
+      return setShowCreditsBillingModal(true)
+
     const data: any = {
       query: message,
       inputs: currentConversationId ? currentConversationItem?.inputs : newConversationInputs,

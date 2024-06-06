@@ -5,13 +5,14 @@ import {
   useImperativeHandle,
   useMemo,
 } from 'react'
+import { useContext } from 'use-context-selector'
 import {
   useConfigFromDebugContext,
   useFormattingChangedSubscription,
 } from '../hooks'
 import Chat from '@/app/components/base/chat/chat'
 import { useChat } from '@/app/components/base/chat/chat/hooks'
-import { useDebugConfigurationContext } from '@/context/debug-configuration'
+import ConfigContext, { useDebugConfigurationContext } from '@/context/debug-configuration'
 import type { OnSend } from '@/app/components/base/chat/types'
 import { useProviderContext } from '@/context/provider-context'
 import {
@@ -33,6 +34,7 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
   checkCanSend,
 }, ref) => {
   const { userProfile } = useAppContext()
+  const { setShowCreditsBillingModal } = useContext(ConfigContext)
   const {
     modelConfig,
     appId,
@@ -65,6 +67,9 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
   useFormattingChangedSubscription(chatList)
 
   const doSend: OnSend = useCallback((message, files) => {
+    if ((userProfile.credits || 0) < 100)
+      return setShowCreditsBillingModal(true)
+
     if (checkCanSend && !checkCanSend())
       return
     const currentProvider = textGenerationModelList.find(item => item.provider === modelConfig.provider)

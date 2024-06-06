@@ -82,8 +82,7 @@ export const useChat = (
   const { t } = useTranslation()
   const { formatTime } = useTimestamp()
   const { notify } = useToastContext()
-  const { userProfile } = useAppContext()
-
+  const { userProfile, mutateUserProfile } = useAppContext()
   const connversationId = useRef('')
   const hasStopResponded = useRef(false)
   const [isResponding, setIsResponding] = useState(false)
@@ -440,6 +439,7 @@ export const useChat = (
 
           // 更新用户积分,并且在bill表中记录消费, userId 用户的mongo id, USD 消耗的总金额，单位为美元（包括了输入输出的Token）, type 消费类型, metadata 消费的元数据
           await updateUserCreditsWithUSD(userProfile.takin_id!, messageEnd.metadata?.usage.total_price, isAgentMode ? 'Dify Agent' : 'Dify Chat', messageEnd)
+          mutateUserProfile()
         },
         onMessageReplace: (messageReplace) => {
           responseItem.content = messageReplace.answer

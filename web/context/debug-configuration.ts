@@ -97,6 +97,8 @@ type IDebugConfiguration = {
   isShowVisionConfig: boolean
   visionConfig: VisionSettings
   setVisionConfig: (visionConfig: VisionSettings, noNotice?: boolean) => void
+  showCreditsBillingModal: boolean
+  setShowCreditsBillingModal: (value: boolean) => void
 }
 
 const DebugConfigurationContext = createContext<IDebugConfiguration>({
@@ -239,6 +241,8 @@ const DebugConfigurationContext = createContext<IDebugConfiguration>({
     transfer_methods: [TransferMethod.remote_url],
   },
   setVisionConfig: () => { },
+  showCreditsBillingModal: false,
+  setShowCreditsBillingModal: () => { },
 })
 
 export const useDebugConfigurationContext = () => useContext(DebugConfigurationContext)

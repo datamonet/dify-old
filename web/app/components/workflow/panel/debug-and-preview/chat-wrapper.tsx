@@ -6,6 +6,7 @@ import {
   useMemo,
 } from 'react'
 import { useNodes } from 'reactflow'
+import { useContext } from 'use-context-selector'
 import { BlockEnum } from '../../types'
 import {
   useStore,
@@ -24,6 +25,8 @@ import {
   stopChatMessageResponding,
 } from '@/service/debug'
 import { useStore as useAppStore } from '@/app/components/app/store'
+import { useAppContext } from '@/context/app-context'
+import ConfigContext from '@/context/debug-configuration'
 
 const ChatWrapper = forwardRef<ChatWrapperRefType>((_, ref) => {
   const nodes = useNodes<StartNodeType>()
@@ -31,6 +34,8 @@ const ChatWrapper = forwardRef<ChatWrapperRefType>((_, ref) => {
   const startVariables = startNode?.data.variables
   const appDetail = useAppStore(s => s.appDetail)
   const workflowStore = useWorkflowStore()
+  const { userProfile } = useAppContext()
+  const { setShowCreditsBillingModal } = useContext(ConfigContext)
   const featuresStore = useFeaturesStore()
   const inputs = useStore(s => s.inputs)
   const features = featuresStore!.getState().features
@@ -67,6 +72,9 @@ const ChatWrapper = forwardRef<ChatWrapperRefType>((_, ref) => {
   )
 
   const doSend = useCallback<OnSend>((query, files) => {
+    if ((userProfile.credits || 0) < 100)
+      return setShowCreditsBillingModal(true)
+
     handleSend(
       {
         query,

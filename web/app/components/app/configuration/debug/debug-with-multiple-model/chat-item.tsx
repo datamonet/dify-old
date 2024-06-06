@@ -4,6 +4,7 @@ import {
   useCallback,
   useMemo,
 } from 'react'
+import { useContext } from 'use-context-selector'
 import type { ModelAndParameter } from '../types'
 import {
   APP_CHAT_WITH_MULTIPLE_MODEL,
@@ -15,7 +16,7 @@ import {
 } from '../hooks'
 import Chat from '@/app/components/base/chat/chat'
 import { useChat } from '@/app/components/base/chat/chat/hooks'
-import { useDebugConfigurationContext } from '@/context/debug-configuration'
+import ConfigContext, { useDebugConfigurationContext } from '@/context/debug-configuration'
 import type { OnSend } from '@/app/components/base/chat/types'
 import { useEventEmitterContextContext } from '@/context/event-emitter'
 import { useProviderContext } from '@/context/provider-context'
@@ -35,6 +36,7 @@ const ChatItem: FC<ChatItemProps> = ({
   modelAndParameter,
 }) => {
   const { userProfile } = useAppContext()
+  const { setShowCreditsBillingModal } = useContext(ConfigContext)
   const {
     modelConfig,
     appId,
@@ -62,6 +64,9 @@ const ChatItem: FC<ChatItemProps> = ({
   useFormattingChangedSubscription(chatList)
 
   const doSend: OnSend = useCallback((message, files) => {
+    if ((userProfile.credits || 0) < 100)
+      return setShowCreditsBillingModal(true)
+
     const currentProvider = textGenerationModelList.find(item => item.provider === modelAndParameter.provider)
     const currentModel = currentProvider?.models.find(model => model.model === modelAndParameter.model)
     const supportVision = currentModel?.features?.includes(ModelFeatureEnum.vision)
