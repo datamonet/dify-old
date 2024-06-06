@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 class RecommendedAppService:
-
     builtin_data: Optional[dict] = None
 
     @classmethod
@@ -250,3 +249,38 @@ class RecommendedAppService:
                 templates['app_details'][app_id] = app_detail
 
         return templates
+
+    def create_app(self, args: dict) -> dict:
+        app = RecommendedApp(
+            app_id=args['app_id'],
+            category=args.get('category', ''),
+            description=args.get('description', ''),
+            copyright='Takin.AI',
+            privacy_policy='https://Takin.ai'
+        )
+
+        # 将app添加到session并提交
+        db.session.add(app)
+        db.session.commit()
+
+        app_to_update = db.session.query(App).filter_by(id=args['app_id']).first()
+        if app_to_update:
+            app_to_update.is_public = True
+            db.session.commit()
+
+        return {"id": app.id}
+
+    def delete_app(self, id: str) -> None:
+        """
+        Delete recommended app
+        """
+        try:
+            app_to_delete = db.session.query(RecommendedApp).filter_by(id=id).one()
+
+            db.session.delete(app_to_delete)
+            db.session.commit()
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            db.session.rollback()
+
+

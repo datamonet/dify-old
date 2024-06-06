@@ -52,6 +52,33 @@ class RecommendedAppListApi(Resource):
 
         return RecommendedAppService.get_recommended_apps_and_categories(language_prefix)
 
+    @login_required
+    @account_initialization_required
+    def post(self):
+        """Create Recommended App"""
+        parser = reqparse.RequestParser()
+        parser.add_argument('app_id', type=str, required=True, location='json')
+        parser.add_argument('description', type=str, location='json')
+        parser.add_argument('category', type=str, location='json')
+        args = parser.parse_args()
+        app_detail = RecommendedAppService.get_recommend_app_detail(args['app_id'])
+
+        if (app_detail and app_detail.is_publish):
+            return {'message': 'Recommended app already exists'}, 409
+
+        recommended_app_service = RecommendedAppService()
+        app = recommended_app_service.create_app(args)
+
+        return app, 201
+
+
+    @login_required
+    @account_initialization_required
+    def delete(self, id):
+        """Delete app"""
+        RecommendedAppService().delete_app(id)
+        return {'result': 'success'}, 204
+
 
 class RecommendedAppApi(Resource):
     @login_required
