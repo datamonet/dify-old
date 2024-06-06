@@ -64,7 +64,7 @@ const ChatItem: FC<ChatItemProps> = ({
   useFormattingChangedSubscription(chatList)
 
   const doSend: OnSend = useCallback((message, files) => {
-    if ((userProfile.credits || 0) < 100)
+    if ((userProfile.credits || 0) <= 0)
       return setShowCreditsBillingModal(true)
 
     const currentProvider = textGenerationModelList.find(item => item.provider === modelAndParameter.provider)

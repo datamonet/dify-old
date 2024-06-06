@@ -67,7 +67,7 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
   useFormattingChangedSubscription(chatList)
 
   const doSend: OnSend = useCallback((message, files) => {
-    if ((userProfile.credits || 0) < 100)
+    if ((userProfile.credits || 0) <= 0)
       return setShowCreditsBillingModal(true)
 
     if (checkCanSend && !checkCanSend())

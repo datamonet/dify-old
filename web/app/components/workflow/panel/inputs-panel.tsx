@@ -75,7 +75,7 @@ const InputsPanel = ({ onRun }: Props) => {
   }
 
   const doRun = () => {
-    if ((userProfile.credits || 0) < 100)
+    if ((userProfile.credits || 0) <= 0)
       return setShowCreditsBillingModal(true)
 
     onRun()

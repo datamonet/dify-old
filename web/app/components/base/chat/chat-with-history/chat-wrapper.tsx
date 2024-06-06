@@ -67,7 +67,7 @@ const ChatWrapper = () => {
   }, [])
 
   const doSend: OnSend = useCallback((message, files) => {
-    if ((userProfile.credits || 0) < 100)
+    if ((userProfile.credits || 0) <= 0)
       return setShowCreditsBillingModal(true)
 
     const data: any = {
