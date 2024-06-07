@@ -125,7 +125,7 @@ const AppPublisher = ({
           appDetail?.description,
           appMode,
         )
-        notify({ type: 'success', message: t('app.newApp.appCreated') })
+        notify({ type: 'success', message: 'App Posted' })
       }
       else { await deleteRecommendedApp(appDetail?.id || '') }
       setPosted(is_posted)
@@ -245,7 +245,7 @@ const AppPublisher = ({
 
               <Switch
                 checked={posted}
-                onChange={v => handlePosted(v)}
+                onChange={v => !postedLoading && handlePosted(v)}
                 className={`${
                   posted ? 'bg-blue-600' : 'bg-gray-200'
                 } relative inline-flex h-6 w-11 items-center rounded-full`}
