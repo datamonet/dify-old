@@ -63,21 +63,13 @@ class RecommendedAppListApi(Resource):
         args = parser.parse_args()
         app_detail = RecommendedAppService.get_recommend_app_detail(args['app_id'])
 
-        if (app_detail and app_detail.is_publish):
+        if (app_detail and app_detail.get('is_public')):
             return {'message': 'Recommended app already exists'}, 409
 
         recommended_app_service = RecommendedAppService()
         app = recommended_app_service.create_app(args)
 
         return app, 201
-
-
-    @login_required
-    @account_initialization_required
-    def delete(self, id):
-        """Delete app"""
-        RecommendedAppService().delete_app(id)
-        return {'result': 'success'}, 204
 
 
 class RecommendedAppApi(Resource):
@@ -87,6 +79,12 @@ class RecommendedAppApi(Resource):
         app_id = str(app_id)
         return RecommendedAppService.get_recommend_app_detail(app_id)
 
+    @login_required
+    @account_initialization_required
+    def delete(self, app_id):
+        """Delete app"""
+        RecommendedAppService().delete_app(app_id)
+        return {'result': 'success'}, 204
 
 api.add_resource(RecommendedAppListApi, '/explore/apps')
 api.add_resource(RecommendedAppApi, '/explore/apps/<uuid:app_id>')

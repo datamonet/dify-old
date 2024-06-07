@@ -145,7 +145,7 @@ const AppPublisher = ({
       mutate()
     }
     catch (e) {
-      setPosted(false)
+      setPosted(!is_posted)
     }
     setPostedLoading(false)
   }
