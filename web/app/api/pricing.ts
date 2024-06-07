@@ -56,6 +56,7 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
       type,
       metadata,
       cost,
+      createdAt: new Date(),
     },
   )
 
