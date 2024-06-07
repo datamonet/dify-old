@@ -44,6 +44,8 @@ import TooltipPlus from '@/app/components/base/tooltip-plus'
 import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
 import { LanguagesSupported } from '@/i18n/language'
 import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { updateUserCreditsWithUSD } from '@/app/api/pricing'
+import AppContext from '@/context/app-context'
 
 type ValueOf<T> = T[keyof T]
 type StepTwoProps = {
@@ -91,6 +93,7 @@ const StepTwo = ({
   const { t } = useTranslation()
   const { locale } = useContext(I18n)
   const media = useBreakpoints()
+  const { userProfile, mutateUserProfile } = useContext(AppContext)
   const isMobile = media === MediaType.mobile
 
   const { dataset: currentDataset, mutateDatasetRes } = useDatasetDetailContext()
@@ -277,6 +280,7 @@ const StepTwo = ({
     defaultModel: rerankDefaultModel,
     currentModel: isRerankDefaultModelVaild,
   } = useModelListAndDefaultModelAndCurrentProviderAndModel(ModelTypeEnum.rerank)
+
   const getCreationParams = () => {
     let params
     if (segmentationType === SegmentType.CUSTOM && overlap > max) {
@@ -403,6 +407,8 @@ const StepTwo = ({
         mutateDatasetRes()
       onStepChange && onStepChange(+1)
       isSetting && onSave && onSave()
+      await updateUserCreditsWithUSD(userProfile.takin_id!, estimateTokes?.total_price || 0, 'Dify Documents', { dataset_id: datasetId })
+      mutateUserProfile()
     }
     catch (err) {
       Toast.notify({
@@ -658,7 +664,7 @@ const StepTwo = ({
                     {
                       estimateTokes
                         ? (
-                          <div className='text-xs font-medium text-gray-800'>{formatNumber(estimateTokes.tokens)} tokens(<span className='text-yellow-500'>${formatNumber(estimateTokes.total_price)}</span>)</div>
+                          <div className='text-xs font-medium text-gray-800'>{formatNumber(estimateTokes.tokens)} tokens</div>
                         )
                         : (
                           <div className={s.calculating}>{t('datasetCreation.stepTwo.calculating')}</div>
@@ -841,12 +847,12 @@ const StepTwo = ({
                 <div className='flex items-center mt-8 py-2'>
                   <Button onClick={() => onStepChange && onStepChange(-1)}>{t('datasetCreation.stepTwo.previousStep')}</Button>
                   <div className={s.divider} />
-                  <Button loading={isCreating} type='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.nextStep')}</Button>
+                  <Button loading={isCreating} disabled={!estimateTokes?.total_price} type='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.nextStep')}</Button>
                 </div>
               )
               : (
                 <div className='flex items-center mt-8 py-2'>
-                  <Button loading={isCreating} type='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.save')}</Button>
+                  <Button loading={isCreating} disabled={!estimateTokes?.total_price} type='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.save')}</Button>
                   <Button className='ml-2' onClick={onCancel}>{t('datasetCreation.stepTwo.cancel')}</Button>
                 </div>
               )}

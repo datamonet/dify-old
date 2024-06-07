@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useContext } from 'use-context-selector'
 import AppUnavailable from '../../base/app-unavailable'
 import { ModelTypeEnum } from '../../header/account-setting/model-provider-page/declarations'
 import StepsNavBar from './steps-nav-bar'
@@ -14,6 +15,7 @@ import { fetchDatasetDetail } from '@/service/datasets'
 import type { NotionPage } from '@/models/common'
 import { useModalContext } from '@/context/modal-context'
 import { useDefaultModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
+import AppContext from '@/context/app-context'
 
 type DatasetUpdateFormProps = {
   datasetId?: string
@@ -21,7 +23,9 @@ type DatasetUpdateFormProps = {
 
 const DatasetUpdateForm = ({ datasetId }: DatasetUpdateFormProps) => {
   const { t } = useTranslation()
-  const { setShowAccountSettingModal } = useModalContext()
+  const { userProfile } = useContext(AppContext)
+
+  const { setShowAccountSettingModal, setShowCreditsBillingModal } = useModalContext()
   const [hasConnection, setHasConnection] = useState(true)
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(DataSourceType.FILE)
   const [step, setStep] = useState(1)
@@ -67,6 +71,8 @@ const DatasetUpdateForm = ({ datasetId }: DatasetUpdateFormProps) => {
   }
 
   const nextStep = useCallback(() => {
+    if ((userProfile.credits || 0) <= 0)
+      return setShowCreditsBillingModal()
     setStep(step + 1)
   }, [step, setStep])
 
