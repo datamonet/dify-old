@@ -275,7 +275,7 @@ class RecommendedAppService:
         Delete recommended app
         """
         try:
-            app_to_delete = db.session.query(RecommendedApp).filter_by(id=id).one()
+            app_to_delete = db.session.query(RecommendedApp).filter_by(app_id=id).one()
 
             db.session.delete(app_to_delete)
             db.session.commit()
