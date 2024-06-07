@@ -76,7 +76,20 @@ const AppPublisher = ({
   const { app_base_url: appBaseURL = '', access_token: accessToken = '' } = appDetail?.site ?? {}
   const appMode = (appDetail?.mode !== 'completion' && appDetail?.mode !== 'workflow') ? 'chat' : appDetail.mode
   const appURL = `${appBaseURL}/${appMode}/${accessToken}`
-  const { mutate } = useSWR(['/explore/apps'], fetchAppList)
+  const { mutate } = useSWR(
+    ['/explore/apps'],
+    () =>
+      fetchAppList().then(({ categories, recommended_apps }) => ({
+        categories,
+        allList: recommended_apps.sort((a, b) => a.position - b.position),
+      })),
+    {
+      fallbackData: {
+        categories: [],
+        allList: [],
+      },
+    },
+  )
   const language = useGetLanguage()
   const formatTimeFromNow = useCallback((time: number) => {
     return dayjs(time).locale(language === 'zh_Hans' ? 'zh-cn' : language.replace('_', '-')).fromNow()

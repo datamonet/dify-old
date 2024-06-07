@@ -46,5 +46,5 @@ export const createRecommendedApp = (id: string, description?: string, category?
 }
 
 export const deleteRecommendedApp = (id: string) => {
-  return del<CommonResponse>(`apps/${id}`)
+  return del<CommonResponse>(`/explore/apps/${id}`)
 }
