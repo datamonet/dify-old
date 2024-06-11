@@ -6,6 +6,7 @@ export type AppBasicInfo = {
   icon_background: string
   name: string
   description: string
+  username?: string
 }
 
 export type AppCategory = 'Writing' | 'Translate' | 'HR' | 'Programming' | 'Assistant'

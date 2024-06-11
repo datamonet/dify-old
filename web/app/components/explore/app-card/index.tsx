@@ -55,6 +55,7 @@ const AppCard = ({
             {appBasicInfo.mode === 'agent-chat' && <div className='truncate'>{t('app.types.agent').toUpperCase()}</div>}
             {appBasicInfo.mode === 'workflow' && <div className='truncate'>{t('app.types.workflow').toUpperCase()}</div>}
             {appBasicInfo.mode === 'completion' && <div className='truncate'>{t('app.types.completion').toUpperCase()}</div>}
+            {appBasicInfo.username && <span className="px-2">By {appBasicInfo.username}</span>}
           </div>
         </div>
       </div>
