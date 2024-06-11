@@ -39,7 +39,8 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
       url: '/logout',
       params: {},
     })
-    document.cookie = '__Secure-next-auth.session-token=; Max-Age=0; path=/; secure; HttpOnly;'
+    // 删除主域名下的cookie
+    document.cookie = '__Secure-next-auth.session-token=; Max-Age=0; path=/; domain=.takin.ai; secure; HttpOnly;'
 
     if (localStorage?.getItem('console_token'))
       localStorage.removeItem('console_token')
