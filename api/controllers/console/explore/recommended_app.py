@@ -12,7 +12,8 @@ app_fields = {
     'name': fields.String,
     'mode': fields.String,
     'icon': fields.String,
-    'icon_background': fields.String
+    'icon_background': fields.String,
+    'username': fields.String
 }
 
 recommended_app_fields = {
