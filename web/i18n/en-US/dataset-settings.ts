@@ -11,7 +11,7 @@ const translation = {
     descWrite: 'Learn how to write a good Knowledge description.',
     permissions: 'Permissions',
     permissionsOnlyMe: 'Only me',
-    permissionsAllMember: 'All team members',
+    permissionsAllMember: 'Everyone',
     indexMethod: 'Index Method',
     indexMethodHighQuality: 'High Quality',
     indexMethodHighQualityTip: 'Call OpenAI\'s embedding interface for processing to provide higher accuracy when users query.',

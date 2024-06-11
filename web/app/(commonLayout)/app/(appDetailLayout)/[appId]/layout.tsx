@@ -103,7 +103,7 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
         router.replace(`/app/${appId}/configuration`)
       }
       else {
-        setAppDetail(res)
+        setAppDetail({ ...res, enable_api: false, enable_site: false })
         setNavigation(getNavigations(appId, isCurrentWorkspaceManager, res.mode))
       }
     })

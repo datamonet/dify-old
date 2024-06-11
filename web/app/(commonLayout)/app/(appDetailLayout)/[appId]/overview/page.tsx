@@ -1,6 +1,5 @@
 import React from 'react'
 import ChartView from './chartView'
-import CardView from './cardView'
 import { getLocaleOnServer, useTranslation as translate } from '@/i18n/server'
 import ApikeyInfoPanel from '@/app/components/app/overview/apikey-info-panel'
 
@@ -23,7 +22,7 @@ const Overview = async ({
       <div className='flex flex-row items-center justify-between mb-4 text-xl text-gray-900'>
         {t('overview.title')}
       </div>
-      <CardView appId={appId} />
+      {/* <CardView appId={appId} /> */}
       <ChartView appId={appId} />
     </div>
   )
