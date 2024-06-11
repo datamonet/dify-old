@@ -31,7 +31,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
 
   const { locale } = useContext(I18n)
   const { t } = useTranslation()
-  const { userProfile, langeniusVersionInfo } = useAppContext()
+  const { userProfile, currentWorkspace, langeniusVersionInfo } = useAppContext()
   const { setShowAccountSettingModal } = useModalContext()
 
   const handleLogout = async () => {
@@ -39,6 +39,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
       url: '/logout',
       params: {},
     })
+    document.cookie = '__Secure-next-auth.session-token=; Max-Age=0; path=/; secure; HttpOnly;'
 
     if (localStorage?.getItem('console_token'))
       localStorage.removeItem('console_token')
@@ -100,7 +101,11 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                   </div>
                   <div className="px-1 py-1">
                     <Menu.Item>
-                      <div className={itemClassName} onClick={() => setShowAccountSettingModal({ payload: 'account' })}>
+                      <div className={itemClassName} onClick={() => {
+                        if (currentWorkspace.role === 'owner')
+                          setShowAccountSettingModal({ payload: 'account' })
+                        else router.push(`https://takin.ai/user/${userProfile.takin_id}`)
+                      }}>
                         <div>{t('common.userProfile.settings')}</div>
                       </div>
                     </Menu.Item>
