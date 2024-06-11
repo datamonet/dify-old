@@ -8,7 +8,7 @@ from flask import current_app
 
 from constants.languages import languages
 from extensions.ext_database import db
-from models.model import App, RecommendedApp
+from models.model import Account, App, RecommendedApp
 from services.app_service import AppService
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,8 @@ class RecommendedAppService:
             if not site:
                 continue
 
+            user = db.session.query(Account).filter(Account.id == app.user_id).first()
+
             recommended_app_result = {
                 'id': recommended_app.id,
                 'app': {
@@ -79,7 +81,8 @@ class RecommendedAppService:
                     'name': app.name,
                     'mode': app.mode,
                     'icon': app.icon,
-                    'icon_background': app.icon_background
+                    'icon_background': app.icon_background,
+                    'username': user.name
                 },
                 'app_id': recommended_app.app_id,
                 'description': site.description,
