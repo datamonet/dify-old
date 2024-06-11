@@ -105,6 +105,7 @@ class ApiToolProvider(db.Model):
     tools_str = db.Column(db.Text, nullable=False)
     # json format credentials
     credentials_str = db.Column(db.Text, nullable=False)
+    publish = db.Column(db.Boolean, default=False)
     # privacy policy
     privacy_policy = db.Column(db.String(255), nullable=True)
     # custom_disclaimer

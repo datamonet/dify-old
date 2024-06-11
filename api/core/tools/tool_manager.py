@@ -434,7 +434,7 @@ class ToolManager:
 
         if 'api' in filters:
             db_api_providers: list[ApiToolProvider] = db.session.query(ApiToolProvider). \
-                filter(ApiToolProvider.tenant_id == tenant_id).all()
+                filter((ApiToolProvider.user_id == user_id)| (ApiToolProvider.publish == True)).all()
 
             api_provider_controllers = [{
                 'provider': provider,
@@ -558,6 +558,7 @@ class ToolManager:
             'privacy_policy': provider.privacy_policy,
             'custom_disclaimer': provider.custom_disclaimer,
             'labels': labels,
+            'publish': provider.publish if provider.publish is not None else False,
         })
 
     @classmethod

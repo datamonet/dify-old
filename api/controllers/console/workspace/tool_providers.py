@@ -201,6 +201,7 @@ class ToolApiProviderUpdateApi(Resource):
         parser.add_argument('privacy_policy', type=str, required=True, nullable=True, location='json')
         parser.add_argument('labels', type=list[str], required=False, nullable=True, location='json')
         parser.add_argument('custom_disclaimer', type=str, required=True, nullable=True, location='json')
+        parser.add_argument('publish', type=bool, required=False, nullable=False, location='json')
 
         args = parser.parse_args()
 
@@ -215,6 +216,7 @@ class ToolApiProviderUpdateApi(Resource):
             args['schema'],
             args['privacy_policy'],
             args['custom_disclaimer'],
+            args.get('publish', False),
             args.get('labels', []),
         )
 

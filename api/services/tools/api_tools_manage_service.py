@@ -37,7 +37,7 @@ class ApiToolManageService:
                 tool_bundles, schema_type = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(schema, warning=warnings)
             except Exception as e:
                 raise ValueError(f'invalid schema: {str(e)}')
-            
+
             credentials_schema = [
                 ToolProviderCredentials(
                     name='auth_type',
@@ -109,15 +109,15 @@ class ApiToolManageService:
 
     @staticmethod
     def create_api_tool_provider(
-        user_id: str, tenant_id: str, provider_name: str, icon: dict, credentials: dict,
-        schema_type: str, schema: str, privacy_policy: str, custom_disclaimer: str, labels: list[str]
+            user_id: str, tenant_id: str, provider_name: str, icon: dict, credentials: dict,
+            schema_type: str, schema: str, privacy_policy: str, custom_disclaimer: str, labels: list[str]
     ):
         """
             create api tool provider
         """
         if schema_type not in [member.value for member in ApiProviderSchemaType]:
             raise ValueError(f'invalid schema type {schema}')
-        
+
         # check if the provider exists
         provider: ApiToolProvider = db.session.query(ApiToolProvider).filter(
             ApiToolProvider.tenant_id == tenant_id,
@@ -131,7 +131,7 @@ class ApiToolManageService:
         extra_info = {}
         # extra info like description will be set here
         tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(schema, extra_info)
-        
+
         if len(tool_bundles) > 100:
             raise ValueError('the number of apis should be less than 100')
 
@@ -172,11 +172,11 @@ class ApiToolManageService:
         # update labels
         ToolLabelManager.update_tool_labels(provider_controller, labels)
 
-        return { 'result': 'success' }
-    
+        return {'result': 'success'}
+
     @staticmethod
     def get_api_tool_provider_remote_schema(
-        user_id: str, tenant_id: str, url: str
+            user_id: str, tenant_id: str, url: str
     ):
         """
             get api tool provider remote schema
@@ -197,14 +197,14 @@ class ApiToolManageService:
         except Exception as e:
             logger.error(f"parse api schema error: {str(e)}")
             raise ValueError('invalid schema, please check the url you provided')
-        
+
         return {
             'schema': schema
         }
 
     @staticmethod
     def list_api_tool_provider_tools(
-        user_id: str, tenant_id: str, provider: str
+            user_id: str, tenant_id: str, provider: str
     ) -> list[UserTool]:
         """
             list api tool provider tools
@@ -216,10 +216,10 @@ class ApiToolManageService:
 
         if provider is None:
             raise ValueError(f'you have not added provider {provider}')
-        
+
         controller = ToolTransformService.api_provider_to_controller(db_provider=provider)
         labels = ToolLabelManager.get_tool_labels(controller)
-        
+
         return [
             ToolTransformService.tool_to_user_tool(
                 tool_bundle,
@@ -229,15 +229,15 @@ class ApiToolManageService:
 
     @staticmethod
     def update_api_tool_provider(
-        user_id: str, tenant_id: str, provider_name: str, original_provider: str, icon: dict, credentials: dict, 
-        schema_type: str, schema: str, privacy_policy: str, custom_disclaimer: str, labels: list[str]
+            user_id: str, tenant_id: str, provider_name: str, original_provider: str, icon: dict, credentials: dict,
+            schema_type: str, schema: str, privacy_policy: str, custom_disclaimer: str, publish: bool, labels: list[str]
     ):
         """
             update api tool provider
         """
         if schema_type not in [member.value for member in ApiProviderSchemaType]:
             raise ValueError(f'invalid schema type {schema}')
-        
+
         # check if the provider exists
         provider: ApiToolProvider = db.session.query(ApiToolProvider).filter(
             ApiToolProvider.tenant_id == tenant_id,
@@ -251,7 +251,7 @@ class ApiToolManageService:
         extra_info = {}
         # extra info like description will be set here
         tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(schema, extra_info)
-        
+
         # update db provider
         provider.name = provider_name
         provider.icon = json.dumps(icon)
@@ -261,6 +261,7 @@ class ApiToolManageService:
         provider.tools_str = json.dumps(jsonable_encoder(tool_bundles))
         provider.privacy_policy = privacy_policy
         provider.custom_disclaimer = custom_disclaimer
+        provider.publish = publish
 
         if 'auth_type' not in credentials:
             raise ValueError('auth_type is required')
@@ -295,11 +296,11 @@ class ApiToolManageService:
         # update labels
         ToolLabelManager.update_tool_labels(provider_controller, labels)
 
-        return { 'result': 'success' }
-    
+        return {'result': 'success'}
+
     @staticmethod
     def delete_api_tool_provider(
-        user_id: str, tenant_id: str, provider_name: str
+            user_id: str, tenant_id: str, provider_name: str
     ):
         """
             delete tool provider
@@ -311,47 +312,47 @@ class ApiToolManageService:
 
         if provider is None:
             raise ValueError(f'you have not added provider {provider_name}')
-        
+
         db.session.delete(provider)
         db.session.commit()
 
-        return { 'result': 'success' }
-    
+        return {'result': 'success'}
+
     @staticmethod
     def get_api_tool_provider(
-        user_id: str, tenant_id: str, provider: str
+            user_id: str, tenant_id: str, provider: str
     ):
         """
             get api tool provider
         """
         return ToolManager.user_get_api_provider(provider=provider, tenant_id=tenant_id)
-    
+
     @staticmethod
     def test_api_tool_preview(
-        tenant_id: str, 
-        provider_name: str,
-        tool_name: str, 
-        credentials: dict, 
-        parameters: dict, 
-        schema_type: str, 
-        schema: str
+            tenant_id: str,
+            provider_name: str,
+            tool_name: str,
+            credentials: dict,
+            parameters: dict,
+            schema_type: str,
+            schema: str
     ):
         """
             test api tool before adding api tool provider
         """
         if schema_type not in [member.value for member in ApiProviderSchemaType]:
             raise ValueError(f'invalid schema type {schema_type}')
-        
+
         try:
             tool_bundles, _ = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(schema)
         except Exception as e:
             raise ValueError('invalid schema')
-        
+
         # get tool bundle
         tool_bundle = next(filter(lambda tb: tb.operation_id == tool_name, tool_bundles), None)
         if tool_bundle is None:
             raise ValueError(f'invalid tool name {tool_name}')
-        
+
         db_provider: ApiToolProvider = db.session.query(ApiToolProvider).filter(
             ApiToolProvider.tenant_id == tenant_id,
             ApiToolProvider.name == provider_name,
@@ -382,7 +383,7 @@ class ApiToolManageService:
         # decrypt credentials
         if db_provider.id:
             tool_configuration = ToolConfigurationManager(
-                tenant_id=tenant_id, 
+                tenant_id=tenant_id,
                 provider_controller=provider_controller
             )
             decrypted_credentials = tool_configuration.decrypt_tool_credentials(credentials)
@@ -402,20 +403,20 @@ class ApiToolManageService:
             })
             result = tool.validate_credentials(credentials, parameters)
         except Exception as e:
-            return { 'error': str(e) }
-        
-        return { 'result': result or 'empty response' }
-    
+            return {'error': str(e)}
+
+        return {'result': result or 'empty response'}
+
     @staticmethod
     def list_api_tools(
-        user_id: str, tenant_id: str
+            user_id: str, tenant_id: str
     ) -> list[UserToolProvider]:
         """
             list api tools
         """
         # get all api providers
         db_providers: list[ApiToolProvider] = db.session.query(ApiToolProvider).filter(
-            ApiToolProvider.tenant_id == tenant_id
+            (ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True)
         ).all() or []
 
         result: list[UserToolProvider] = []
@@ -440,8 +441,8 @@ class ApiToolManageService:
             for tool in tools:
                 user_provider.tools.append(ToolTransformService.tool_to_user_tool(
                     tenant_id=tenant_id,
-                    tool=tool, 
-                    credentials=user_provider.original_credentials, 
+                    tool=tool,
+                    credentials=user_provider.original_credentials,
                     labels=labels
                 ))
 
