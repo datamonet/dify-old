@@ -6,6 +6,7 @@ import { useContext } from 'use-context-selector'
 import classNames from 'classnames'
 import Link from 'next/link'
 import { Menu, Transition } from '@headlessui/react'
+import { signOut } from 'next-auth/react'
 import Indicator from '../indicator'
 import AccountAbout from '../account-about'
 import WorkplaceSelector from './workplace-selector'
@@ -39,7 +40,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
       url: '/logout',
       params: {},
     })
-
+    signOut()
     if (localStorage?.getItem('console_token'))
       localStorage.removeItem('console_token')
 

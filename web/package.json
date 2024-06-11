@@ -53,6 +53,7 @@
     "mongodb": "^6.7.0",
     "negotiator": "^0.6.3",
     "next": "^14.0.4",
+    "next-auth": "^4.24.7",
     "next-nprogress-bar": "^2.3.8",
     "qrcode.react": "^3.1.0",
     "qs": "^6.11.1",
