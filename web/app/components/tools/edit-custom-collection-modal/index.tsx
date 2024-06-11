@@ -17,6 +17,7 @@ import EmojiPicker from '@/app/components/base/emoji-picker'
 import AppIcon from '@/app/components/base/app-icon'
 import { parseParamsSchema } from '@/service/tools'
 import LabelSelector from '@/app/components/tools/labels/selector'
+import PermissionsRadio from '@/app/components/datasets/settings/permissions-radio'
 
 const fieldNameClassNames = 'py-2 leading-5 text-sm font-medium text-gray-900'
 type Props = {
@@ -56,6 +57,7 @@ const EditCustomCollectionModal: FC<Props> = ({
       },
       schema_type: '',
       schema: '',
+      publish: false,
     }
     : payload)
 
@@ -177,9 +179,12 @@ const EditCustomCollectionModal: FC<Props> = ({
               <div>
                 <div className={fieldNameClassNames}>{t('tools.createTool.name')}</div>
                 <div className='flex items-center justify-between gap-3'>
-                  <AppIcon size='large' onClick={() => { setShowEmojiPicker(true) }} className='cursor-pointer' icon={emoji.content} background={emoji.background} />
+                  <AppIcon size='large' onClick={() => {
+                    setShowEmojiPicker(true)
+                  }} className='cursor-pointer' icon={emoji.content} background={emoji.background}/>
                   <input
-                    className='h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow' placeholder={t('tools.createTool.toolNamePlaceHolder')!}
+                    className='h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow'
+                    placeholder={t('tools.createTool.toolNamePlaceHolder')!}
                     value={customCollection.provider}
                     onChange={(e) => {
                       const newCollection = produce(customCollection, (draft) => {
@@ -203,10 +208,10 @@ const EditCustomCollectionModal: FC<Props> = ({
                       className='flex items-center h-[18px] space-x-1  text-[#155EEF]'
                     >
                       <div className='text-xs font-normal'>{t('tools.createTool.viewSchemaSpec')}</div>
-                      <LinkExternal02 className='w-3 h-3' />
+                      <LinkExternal02 className='w-3 h-3'/>
                     </a>
                   </div>
-                  <GetSchema onChange={setSchema} />
+                  <GetSchema onChange={setSchema}/>
 
                 </div>
                 <textarea
@@ -225,7 +230,8 @@ const EditCustomCollectionModal: FC<Props> = ({
                     <thead className='text-gray-500 uppercase'>
                       <tr className={cn(paramsSchemas.length > 0 && 'border-b', 'border-gray-200')}>
                         <th className="p-2 pl-3 font-medium">{t('tools.createTool.availableTools.name')}</th>
-                        <th className="p-2 pl-3 font-medium w-[236px]">{t('tools.createTool.availableTools.description')}</th>
+                        <th
+                          className="p-2 pl-3 font-medium w-[236px]">{t('tools.createTool.availableTools.description')}</th>
                         <th className="p-2 pl-3 font-medium">{t('tools.createTool.availableTools.method')}</th>
                         <th className="p-2 pl-3 font-medium">{t('tools.createTool.availableTools.path')}</th>
                         <th className="p-2 pl-3 font-medium w-[54px]">{t('tools.createTool.availableTools.action')}</th>
@@ -259,16 +265,19 @@ const EditCustomCollectionModal: FC<Props> = ({
               {/* Authorization method */}
               <div>
                 <div className={fieldNameClassNames}>{t('tools.createTool.authMethod.title')}</div>
-                <div className='flex items-center h-9 justify-between px-2.5 bg-gray-100 rounded-lg cursor-pointer' onClick={() => setCredentialsModalShow(true)}>
-                  <div className='text-sm font-normal text-gray-900'>{t(`tools.createTool.authMethod.types.${credential.auth_type}`)}</div>
-                  <Settings01 className='w-4 h-4 text-gray-700 opacity-60' />
+                <div className='flex items-center h-9 justify-between px-2.5 bg-gray-100 rounded-lg cursor-pointer'
+                  onClick={() => setCredentialsModalShow(true)}>
+                  <div
+                    className='text-sm font-normal text-gray-900'>{t(`tools.createTool.authMethod.types.${credential.auth_type}`)}</div>
+                  <Settings01 className='w-4 h-4 text-gray-700 opacity-60'/>
                 </div>
               </div>
 
               {/* Labels */}
               <div>
-                <div className='py-2 leading-5 text-sm font-medium text-gray-900'>{t('tools.createTool.toolInput.label')}</div>
-                <LabelSelector value={labels} onChange={handleLabelSelect} />
+                <div
+                  className='py-2 leading-5 text-sm font-medium text-gray-900'>{t('tools.createTool.toolInput.label')}</div>
+                <LabelSelector value={labels} onChange={handleLabelSelect}/>
               </div>
 
               {/* Privacy Policy */}
@@ -282,7 +291,8 @@ const EditCustomCollectionModal: FC<Props> = ({
                     })
                     setCustomCollection(newCollection)
                   }}
-                  className='w-full h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow' placeholder={t('tools.createTool.privacyPolicyPlaceholder') || ''} />
+                  className='w-full h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow'
+                  placeholder={t('tools.createTool.privacyPolicyPlaceholder') || ''}/>
               </div>
 
               <div>
@@ -295,14 +305,34 @@ const EditCustomCollectionModal: FC<Props> = ({
                     })
                     setCustomCollection(newCollection)
                   }}
-                  className='w-full h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow' placeholder={t('tools.createTool.customDisclaimerPlaceholder') || ''} />
+                  className='w-full h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow'
+                  placeholder={t('tools.createTool.customDisclaimerPlaceholder') || ''}/>
+              </div>
+              <div className="py-2 flex flex-col w-full">
+                <div className={fieldNameClassNames}>
+                  {t('datasetSettings.form.permissions')}
+                </div>
+
+                <PermissionsRadio
+                  itemClassName="sm:w-[280px]"
+                  value={customCollection.publish ? 'all_team_members' : 'only_me'}
+                  onChange={() => {
+                    const newCollection = produce(customCollection, (draft) => {
+                      draft.publish = !draft.publish
+                    })
+                    setCustomCollection(newCollection)
+                  }}
+                />
+
               </div>
 
             </div>
-            <div className={cn(isEdit ? 'justify-between' : 'justify-end', 'mt-2 shrink-0 flex py-4 px-6 rounded-b-[10px] bg-gray-50 border-t border-black/5')} >
+            <div
+              className={cn(isEdit ? 'justify-between' : 'justify-end', 'mt-2 shrink-0 flex py-4 px-6 rounded-b-[10px] bg-gray-50 border-t border-black/5')}>
               {
                 isEdit && (
-                  <Button className='flex items-center h-8 !px-3 !text-[13px] font-medium !text-gray-700' onClick={onRemove}>{t('common.operation.remove')}</Button>
+                  <Button className='flex items-center h-8 !px-3 !text-[13px] font-medium !text-gray-700'
+                    onClick={onRemove}>{t('common.operation.remove')}</Button>
                 )
               }
               <div className='flex space-x-2 '>

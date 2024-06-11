@@ -101,6 +101,7 @@ export type CustomCollectionBackend = {
   tools?: ParamItem[]
   id: string
   labels: string[]
+  publish: boolean
 }
 
 export type ParamItem = {
