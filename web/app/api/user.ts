@@ -25,5 +25,11 @@ export async function getUserInfo(email: string) {
 }
 
 export async function deleteCookie(name: string) {
-  cookies().set(name, '')
+  cookies().set(name, '', {
+    domain: '.takin.ai', // 确保跨子域名的cookie
+    path: '/', // 确保路径正确
+    expires: new Date(0), // 设置过期时间为过去的时间点
+    secure: true, // 如果在 HTTPS 环境下
+    httpOnly: true, // 如果需要httpOnly属性
+  })
 }
