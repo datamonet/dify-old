@@ -78,7 +78,7 @@ class RecommendedAppService:
                 'id': recommended_app.id,
                 'app': {
                     'id': app.id,
-                    'name': doc.name or user.name,
+                    'name': doc['name'] or user.name,
                     'mode': app.mode,
                     'icon': app.icon,
                     'icon_background': app.icon_background,
