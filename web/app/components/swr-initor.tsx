@@ -20,7 +20,8 @@ const SwrInitor = ({
   const [init, setInit] = useState(false)
 
   useEffect(() => {
-    localStorage?.setItem('console_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnJ5andhbmdAZ21haWwuY29tIiwiZXhwIjoxNzIwNjg1OTY5LCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.F2XgBjVOm-UKStZ4Dt4zoqa1AWWgtteuzPkC6CsCNfE')
+    if (token)
+      localStorage?.setItem('console_token', token)
 
     if (!(consoleToken || consoleTokenFromLocalStorage))
       router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
