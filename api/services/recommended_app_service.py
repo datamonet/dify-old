@@ -7,7 +7,7 @@ import requests
 from flask import current_app
 
 from constants.languages import languages
-from extensions.ext_database import db
+from extensions.ext_database import collection, db
 from models.model import Account, App, RecommendedApp
 from services.app_service import AppService
 
@@ -73,12 +73,12 @@ class RecommendedAppService:
                 continue
 
             user = db.session.query(Account).filter(Account.id == app.user_id).first()
-
+            doc = collection.find_one({'email':user.email})
             recommended_app_result = {
                 'id': recommended_app.id,
                 'app': {
                     'id': app.id,
-                    'name': app.name,
+                    'name': doc.username,
                     'mode': app.mode,
                     'icon': app.icon,
                     'icon_background': app.icon_background,
