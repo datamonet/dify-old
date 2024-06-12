@@ -9,7 +9,6 @@ import classNames from 'classnames'
 import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
 import type { ModelAndParameter } from '../configuration/debug/types'
-import SuggestedAction from './suggested-action'
 import PublishWithMultipleModel from './publish-with-multiple-model'
 import Button from '@/app/components/base/button'
 import {
@@ -21,11 +20,6 @@ import EmbeddedModal from '@/app/components/app/overview/embedded'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { useGetLanguage } from '@/context/i18n'
 import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
-import { PlayCircle } from '@/app/components/base/icons/src/vender/line/mediaAndDevices'
-import { CodeBrowser } from '@/app/components/base/icons/src/vender/line/development'
-import { LeftIndent02 } from '@/app/components/base/icons/src/vender/line/editor'
-import { FileText } from '@/app/components/base/icons/src/vender/line/files'
-import WorkflowToolConfigureButton from '@/app/components/tools/workflow-tool/configure-button'
 import type { InputVar } from '@/app/components/workflow/types'
 import { createRecommendedApp, deleteRecommendedApp, fetchAppDetail, fetchAppList } from '@/service/explore'
 import { ToastContext } from '@/app/components/base/toast'
@@ -258,51 +252,51 @@ const AppPublisher = ({
             </div>
 
           </div>
-          <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'>
-            <SuggestedAction disabled={!publishedAt} link={appURL}
-              icon={<PlayCircle/>}>{t('workflow.common.runApp')}</SuggestedAction>
-            {appDetail?.mode === 'workflow'
-              ? (
-                <SuggestedAction
-                  disabled={!publishedAt}
-                  link={`${appURL}${appURL.includes('?') ? '&' : '?'}mode=batch`}
-                  icon={<LeftIndent02 className='w-4 h-4'/>}
-                >
-                  {t('workflow.common.batchRunApp')}
-                </SuggestedAction>
-              )
-              : (
-                <SuggestedAction
-                  onClick={() => {
-                    setEmbeddingModalOpen(true)
-                    handleTrigger()
-                  }}
-                  disabled={!publishedAt}
-                  icon={<CodeBrowser className='w-4 h-4'/>}
-                >
-                  {t('workflow.common.embedIntoSite')}
-                </SuggestedAction>
-              )}
-            <SuggestedAction disabled={!publishedAt} link='./develop' icon={<FileText
-              className='w-4 h-4'/>}>{t('workflow.common.accessAPIReference')}</SuggestedAction>
-            {appDetail?.mode === 'workflow' && (
-              <WorkflowToolConfigureButton
-                disabled={!publishedAt}
-                published={!!toolPublished}
-                detailNeedUpdate={!!toolPublished && published}
-                workflowAppId={appDetail?.id}
-                icon={{
-                  content: appDetail?.icon,
-                  background: appDetail?.icon_background,
-                }}
-                name={appDetail?.name}
-                description={appDetail?.description}
-                inputs={inputs}
-                handlePublish={handlePublish}
-                onRefreshData={onRefreshData}
-              />
-            )}
-          </div>
+          {/* <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'> */}
+          {/*  <SuggestedAction disabled={!publishedAt} link={appURL} */}
+          {/*    icon={<PlayCircle/>}>{t('workflow.common.runApp')}</SuggestedAction> */}
+          {/*  {appDetail?.mode === 'workflow' */}
+          {/*    ? ( */}
+          {/*      <SuggestedAction */}
+          {/*        disabled={!publishedAt} */}
+          {/*        link={`${appURL}${appURL.includes('?') ? '&' : '?'}mode=batch`} */}
+          {/*        icon={<LeftIndent02 className='w-4 h-4'/>} */}
+          {/*      > */}
+          {/*        {t('workflow.common.batchRunApp')} */}
+          {/*      </SuggestedAction> */}
+          {/*    ) */}
+          {/*    : ( */}
+          {/*      <SuggestedAction */}
+          {/*        onClick={() => { */}
+          {/*          setEmbeddingModalOpen(true) */}
+          {/*          handleTrigger() */}
+          {/*        }} */}
+          {/*        disabled={!publishedAt} */}
+          {/*        icon={<CodeBrowser className='w-4 h-4'/>} */}
+          {/*      > */}
+          {/*        {t('workflow.common.embedIntoSite')} */}
+          {/*      </SuggestedAction> */}
+          {/*    )} */}
+          {/*  <SuggestedAction disabled={!publishedAt} link='./develop' icon={<FileText */}
+          {/*    className='w-4 h-4'/>}>{t('workflow.common.accessAPIReference')}</SuggestedAction> */}
+          {/*  {appDetail?.mode === 'workflow' && ( */}
+          {/*    <WorkflowToolConfigureButton */}
+          {/*      disabled={!publishedAt} */}
+          {/*      published={!!toolPublished} */}
+          {/*      detailNeedUpdate={!!toolPublished && published} */}
+          {/*      workflowAppId={appDetail?.id} */}
+          {/*      icon={{ */}
+          {/*        content: appDetail?.icon, */}
+          {/*        background: appDetail?.icon_background, */}
+          {/*      }} */}
+          {/*      name={appDetail?.name} */}
+          {/*      description={appDetail?.description} */}
+          {/*      inputs={inputs} */}
+          {/*      handlePublish={handlePublish} */}
+          {/*      onRefreshData={onRefreshData} */}
+          {/*    /> */}
+          {/*  )} */}
+          {/* </div> */}
         </div>
       </PortalToFollowElemContent>
       <EmbeddedModal
