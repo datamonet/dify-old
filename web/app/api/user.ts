@@ -25,5 +25,6 @@ export async function getUserInfo(email: string) {
 }
 
 export async function deleteCookie(name: string) {
-  cookies().delete(name)
+  const cookieStore = cookies()
+  cookieStore.delete(name)
 }

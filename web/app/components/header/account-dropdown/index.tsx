@@ -6,7 +6,6 @@ import { Menu, Transition } from '@headlessui/react'
 import AccountAbout from '../account-about'
 import WorkplaceSelector from './workplace-selector'
 import Avatar from '@/app/components/base/avatar'
-import { logout } from '@/service/common'
 import { useAppContext } from '@/context/app-context'
 import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
 import { LogOut01 } from '@/app/components/base/icons/src/vender/line/general'
@@ -32,15 +31,15 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
   const handleLogout = async () => {
     await deleteCookie('__Secure-next-auth.session-token')
 
-    await logout({
-      url: '/logout',
-      params: {},
-    })
-
-    if (localStorage?.getItem('console_token'))
-      localStorage.removeItem('console_token')
-
-    router.push('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
+    // await logout({
+    //   url: '/logout',
+    //   params: {},
+    // })
+    //
+    // if (localStorage?.getItem('console_token'))
+    //   localStorage.removeItem('console_token')
+    //
+    // router.push('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
   }
 
   return (
