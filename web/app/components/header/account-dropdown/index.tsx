@@ -11,6 +11,7 @@ import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
 import { LogOut01 } from '@/app/components/base/icons/src/vender/line/general'
 import { useModalContext } from '@/context/modal-context'
 import { deleteCookie } from '@/app/api/user'
+import { logout } from '@/service/common'
 
 export type IAppSelecotr = {
   isMobile: boolean
@@ -31,15 +32,15 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
   const handleLogout = async () => {
     await deleteCookie('__Secure-next-auth.session-token')
 
-    // await logout({
-    //   url: '/logout',
-    //   params: {},
-    // })
-    //
-    // if (localStorage?.getItem('console_token'))
-    //   localStorage.removeItem('console_token')
-    //
-    // router.push('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
+    await logout({
+      url: '/logout',
+      params: {},
+    })
+
+    if (localStorage?.getItem('console_token'))
+      localStorage.removeItem('console_token')
+
+    router.push('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
   }
 
   return (
