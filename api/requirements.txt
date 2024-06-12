@@ -86,3 +86,4 @@ tidb-vector==0.0.9
 google-cloud-aiplatform==1.49.0
 vanna[postgres,mysql,clickhouse,duckdb]==0.5.5
 pymongo
+tencentcloud-sdk-python-hunyuan~=3.0.1158
