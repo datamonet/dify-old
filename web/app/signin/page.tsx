@@ -5,7 +5,6 @@ import Script from 'next/script'
 import { useRouter } from 'next/navigation'
 import Loading from '../components/base/loading'
 import Forms from './forms'
-import Header from './_header'
 import style from './page.module.css'
 import UserSSOForm from './userSSOForm'
 import { IS_CE_EDITION } from '@/config'
@@ -33,18 +32,18 @@ const SignIn = () => {
       {!IS_CE_EDITION && (
         <>
           <Script strategy="beforeInteractive" async src={'https://www.googletagmanager.com/gtag/js?id=AW-11217955271'}></Script>
-          <Script
-            id="ga-monitor-register"
-            dangerouslySetInnerHTML={{
-              __html: `
-window.dataLayer2 = window.dataLayer2 || [];
-function gtag(){dataLayer2.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'AW-11217955271"');
-        `,
-            }}
-          >
-          </Script>
+          {/*          <Script */}
+          {/*            id="ga-monitor-register" */}
+          {/*            dangerouslySetInnerHTML={{ */}
+          {/*              __html: ` */}
+          {/* window.dataLayer2 = window.dataLayer2 || []; */}
+          {/* function gtag(){dataLayer2.push(arguments);} */}
+          {/* gtag('js', new Date()); */}
+          {/* gtag('config', 'AW-11217955271"'); */}
+          {/*        `, */}
+          {/*            }} */}
+          {/*          > */}
+          {/*          </Script> */}
         </>
       )}
       <div className={cn(
@@ -60,7 +59,7 @@ gtag('config', 'AW-11217955271"');
             'space-between',
           )
         }>
-          <Header />
+          {/* <Header /> */}
 
           {loading && (
             <div className={

@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Link from 'next/link'
@@ -13,8 +13,7 @@ import classNames from 'classnames'
 import Loading from '../components/base/loading'
 import Button from '@/app/components/base/button'
 
-import { fetchInitValidateStatus, fetchSetupStatus, setup } from '@/service/common'
-import type { InitValidateStatusResponse, SetupStatusResponse } from '@/models/common'
+import { setup } from '@/service/common'
 
 const validPassword = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/
 
@@ -62,20 +61,20 @@ const InstallForm = () => {
     handleSubmit(onSubmit)()
   }
 
-  useEffect(() => {
-    fetchSetupStatus().then((res: SetupStatusResponse) => {
-      if (res.step === 'finished') {
-        window.location.href = '/signin'
-      }
-      else {
-        fetchInitValidateStatus().then((res: InitValidateStatusResponse) => {
-          if (res.status === 'not_started')
-            window.location.href = '/init'
-        })
-      }
-      setLoading(false)
-    })
-  }, [])
+  // useEffect(() => {
+  //   fetchSetupStatus().then((res: SetupStatusResponse) => {
+  //     if (res.step === 'finished') {
+  //       window.location.href = '/signin'
+  //     }
+  //     else {
+  //       fetchInitValidateStatus().then((res: InitValidateStatusResponse) => {
+  //         if (res.status === 'not_started')
+  //           window.location.href = '/init'
+  //       })
+  //     }
+  //     setLoading(false)
+  //   })
+  // }, [])
 
   return (
     loading
