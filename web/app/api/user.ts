@@ -33,3 +33,7 @@ export async function deleteCookie(name: string) {
     httpOnly: true, // 如果需要httpOnly属性
   })
 }
+
+export function getCookie(name: string) {
+  return cookies().get(name)?.value
+}
