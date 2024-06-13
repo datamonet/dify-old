@@ -25,12 +25,11 @@ const SwrInitor = ({
       if (res) {
         localStorage?.setItem('console_token', res)
         router.replace('/apps', { forceOptimisticNavigation: false } as any)
-        router.refresh()
       }
       else {
+        router.refresh()
         localStorage?.removeItem('console_token')
         router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
-        router.refresh()
       }
     })
   }
