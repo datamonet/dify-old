@@ -22,14 +22,15 @@ const SwrInitor = ({
 
   const handleConsoleToken = async () => {
     await getCookie('__Secure-next-auth.session-token').then((res) => {
-      router.refresh()
       if (res) {
         localStorage?.setItem('console_token', res)
         router.replace('/apps', { forceOptimisticNavigation: false } as any)
+        router.refresh()
       }
       else {
         localStorage?.removeItem('console_token')
         router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
+        router.refresh()
       }
     })
   }
