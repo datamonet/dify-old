@@ -3,32 +3,34 @@
 import { SWRConfig } from 'swr'
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
-import { getCookie } from '@/app/api/user'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type SwrInitorProps = {
   children: ReactNode
+  token?: string
 }
 const SwrInitor = ({
   children,
+  token,
 }: SwrInitorProps) => {
   const router = useRouter()
-  const handleConsoleToken = async () => {
-    // const token = getCookie('next-auth.session-token')
-    await getCookie('__Secure-next-auth.session-token').then((res) => {
-      if (res) {
-        localStorage?.setItem('console_token', res)
-        router.replace('/apps', { forceOptimisticNavigation: false } as any)
-      }
-      else {
-        localStorage?.removeItem('console_token')
-        router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
-      }
-    })
-  }
+  const searchParams = useSearchParams()
+  const consoleToken = searchParams.get('console_token')
+  const consoleTokenFromLocalStorage = localStorage?.getItem('console_token')
 
   useEffect(() => {
-    handleConsoleToken()
+    if (token)
+      localStorage?.setItem('console_token', token)
+    else
+      localStorage?.removeItem('console_token')
+
+    if (!(consoleToken || consoleTokenFromLocalStorage))
+      router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
+
+    if (consoleToken) {
+      localStorage?.setItem('console_token', consoleToken!)
+      router.replace('/apps', { forceOptimisticNavigation: false } as any)
+    }
   }, [])
 
   return <SWRConfig value={{
