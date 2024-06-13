@@ -39,7 +39,7 @@ const SwrInitor = ({
       localStorage?.setItem('console_token', token)
     else
       localStorage?.removeItem('console_token')
-    // 防止重定向速度太快，再查询一次cookie
+    // takin.ai: 防止重定向速度太快，再查询一次cookie
     if (!(consoleToken || consoleTokenFromLocalStorage))
       handleConsoleToken()
 
