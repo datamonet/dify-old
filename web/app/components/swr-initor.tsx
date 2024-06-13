@@ -16,6 +16,7 @@ const SwrInitor = ({
   const consoleTokenFromLocalStorage = localStorage?.getItem('console_token')
 
   useEffect(() => {
+    console.log(token, consoleToken, consoleTokenFromLocalStorage)
     if (token)
       localStorage?.setItem('console_token', token)
     else

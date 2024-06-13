@@ -33,6 +33,7 @@ import { useModalContext } from '@/context/modal-context'
 import { useProviderContext } from '@/context/provider-context'
 import { ConfigurationMethodEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import Loading from '@/app/components/base/loading'
+import { useAppContext } from '@/context/app-context'
 
 type Props = {
   collection: Collection
@@ -46,9 +47,11 @@ const ProviderDetail = ({
   const { t } = useTranslation()
   const { locale } = useContext(I18n)
   const language = getLanguage(locale)
+  const { currentWorkspace } = useAppContext()
 
   const needAuth = collection.allow_delete || collection.type === CollectionType.model
   const isAuthed = collection.is_team_authorization
+  const isEdited = currentWorkspace.role === 'owner'
   const isBuiltIn = collection.type === CollectionType.builtIn
   const isModel = collection.type === CollectionType.model
 
@@ -215,6 +218,7 @@ const ProviderDetail = ({
       <div className='flex gap-1 border-b-[0.5px] border-black/5'>
         {(collection.type === CollectionType.builtIn) && needAuth && (
           <Button
+            disabled={!isEdited}
             type={isAuthed ? 'default' : 'primary'}
             className={cn('shrink-0 my-3 w-full flex items-center', isAuthed && 'bg-white')}
             onClick={() => {

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import cn from 'classnames'
 import Script from 'next/script'
+import { useRouter } from 'next/navigation'
 import Loading from '../components/base/loading'
 import Forms from './forms'
 import Header from './_header'
@@ -14,10 +15,13 @@ import { defaultSystemFeatures } from '@/types/feature'
 import { getSystemFeatures } from '@/service/common'
 
 const SignIn = () => {
+  const router = useRouter()
   const [loading, setLoading] = useState<boolean>(true)
   const [systemFeatures, setSystemFeatures] = useState<SystemFeatures>(defaultSystemFeatures)
 
   useEffect(() => {
+    router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
+
     getSystemFeatures().then((res) => {
       setSystemFeatures(res)
     }).finally(() => {
