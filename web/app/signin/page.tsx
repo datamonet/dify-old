@@ -17,12 +17,11 @@ const SignIn = () => {
   const router = useRouter()
   const [loading, setLoading] = useState<boolean>(true)
   const [systemFeatures, setSystemFeatures] = useState<SystemFeatures>(defaultSystemFeatures)
-  router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
-
   useEffect(() => {
     getSystemFeatures().then((res) => {
       setSystemFeatures(res)
     }).finally(() => {
+      router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
       setLoading(false)
     })
   }, [])

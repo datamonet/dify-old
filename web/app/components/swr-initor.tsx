@@ -14,11 +14,8 @@ const SwrInitor = ({
 }: SwrInitorProps) => {
   const router = useRouter()
   const handleConsoleToken = async () => {
-    // TODO:测试环境的cookie名字和生产环境cookie名字都需要加
     // const token = getCookie('next-auth.session-token')
-    await getCookie('next-auth.session-token').then((res) => {
-      console.log('res')
-      console.log(res)
+    await getCookie('__Secure-next-auth.session-token').then((res) => {
       if (res) {
         localStorage?.setItem('console_token', res)
         router.replace('/apps', { forceOptimisticNavigation: false } as any)
