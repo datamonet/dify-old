@@ -74,15 +74,16 @@ class RecommendedAppService:
 
             user = db.session.query(Account).filter(Account.id == app.user_id).first()
             doc = collection.find_one({'email':user.email})
+
             recommended_app_result = {
                 'id': recommended_app.id,
                 'app': {
                     'id': app.id,
-                    'name': doc['name'] or user.name,
+                    'name': app.name,
                     'mode': app.mode,
                     'icon': app.icon,
                     'icon_background': app.icon_background,
-                    'username': user.name
+                    'username': doc['name']
                 },
                 'app_id': recommended_app.app_id,
                 'description': site.description,
