@@ -4,7 +4,6 @@ import { Fragment, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Menu, Transition } from '@headlessui/react'
 import AccountAbout from '../account-about'
-import WorkplaceSelector from './workplace-selector'
 import Avatar from '@/app/components/base/avatar'
 import { useAppContext } from '@/context/app-context'
 import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
@@ -91,10 +90,10 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                       </div>
                     </div>
                   </Menu.Item>
-                  <div className='px-1 py-1'>
-                    <div className='mt-2 px-3 text-xs font-medium text-gray-500'>{t('common.userProfile.workspace')}</div>
-                    <WorkplaceSelector />
-                  </div>
+                  {/* <div className='px-1 py-1'> */}
+                  {/*  <div className='mt-2 px-3 text-xs font-medium text-gray-500'>{t('common.userProfile.workspace')}</div> */}
+                  {/*  <WorkplaceSelector /> */}
+                  {/* </div> */}
                   <div className="px-1 py-1">
                     <Menu.Item>
                       <div className={itemClassName} onClick={() => {
