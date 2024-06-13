@@ -338,7 +338,9 @@ class ToolManager:
         """
             list all the builtin providers
         """
-        include_tools = ['webscraper', 'pubmed', 'arxiv', 'yahoo', 'wikipedia', 'duckduckgo', 'time', 'stackexchange']
+        # takin tools filter 过滤
+        include_tools = ['slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed', 'arxiv', 'yahoo', 'wikipedia',
+                         'duckduckgo', 'time', 'stackexchange']
         for provider in listdir(path.join(path.dirname(path.realpath(__file__)), 'provider', 'builtin')):
             if provider.startswith('__'):
                 continue
@@ -434,7 +436,7 @@ class ToolManager:
 
         if 'api' in filters:
             db_api_providers: list[ApiToolProvider] = db.session.query(ApiToolProvider). \
-                filter((ApiToolProvider.user_id == user_id)| (ApiToolProvider.publish == True)).all()
+                filter((ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True)).all()
 
             api_provider_controllers = [{
                 'provider': provider,
