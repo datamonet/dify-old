@@ -32,7 +32,6 @@ const SwrInitor = ({
         router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps')
         router.refresh()
       }
-      router.refresh()
     })
   }
 
