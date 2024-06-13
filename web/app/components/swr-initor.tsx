@@ -1,7 +1,7 @@
 'use client'
 
 import { SWRConfig } from 'swr'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getCookie } from '@/app/api/user'
@@ -16,11 +16,16 @@ const SwrInitor = ({
   const searchParams = useSearchParams()
   const consoleToken = searchParams.get('console_token')
   const consoleTokenFromLocalStorage = localStorage?.getItem('console_token')
-  const token = getCookie('__Secure-next-auth.session-token')
-  // TODO:测试环境的cookie名字和生产环境cookie名字都需要加
-  // const token = getCookie('next-auth.session-token')
+  const [token, setToken] = useState<string | undefined>()
+  const handleConsoleToken = async () => {
+    const res = await getCookie('__Secure-next-auth.session-token')
+    setToken(res)
+    // TODO:测试环境的cookie名字和生产环境cookie名字都需要加
+    // const token = getCookie('next-auth.session-token')
+  }
 
   useEffect(() => {
+    handleConsoleToken()
     if (token)
       localStorage?.setItem('console_token', token)
     else

@@ -34,6 +34,6 @@ export async function deleteCookie(name: string) {
   })
 }
 
-export function getCookie(name: string) {
+export async function getCookie(name: string) {
   return cookies().get(name)?.value
 }
