@@ -1,13 +1,16 @@
 'use client'
 
+import { SWRConfig } from 'swr'
 import { useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 type SwrInitorProps = {
-  // children: ReactNode
+  children: ReactNode
   token?: string
 }
 const SwrInitor = ({
+  children,
   token,
 }: SwrInitorProps) => {
   const router = useRouter()
@@ -31,7 +34,12 @@ const SwrInitor = ({
     }
   }, [])
 
-  return null
+  return <SWRConfig value={{
+    shouldRetryOnError: false,
+    revalidateOnFocus: false,
+  }}>
+    {children}
+  </SWRConfig>
 }
 
 export default SwrInitor
