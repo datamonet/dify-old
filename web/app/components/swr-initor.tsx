@@ -1,7 +1,7 @@
 'use client'
 
 import { SWRConfig } from 'swr'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getCookie } from '@/app/api/user'
@@ -18,8 +18,11 @@ const SwrInitor = ({
   const searchParams = useSearchParams()
   const consoleToken = searchParams.get('console_token')
   const consoleTokenFromLocalStorage = localStorage?.getItem('console_token')
+  const [init, setInit] = useState(false)
+
   const handleConsoleToken = async () => {
     await getCookie('__Secure-next-auth.session-token').then((res) => {
+      router.refresh()
       if (res) {
         localStorage?.setItem('console_token', res)
         router.replace('/apps', { forceOptimisticNavigation: false } as any)
@@ -44,14 +47,19 @@ const SwrInitor = ({
       localStorage?.setItem('console_token', consoleToken!)
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
     }
+    setInit(true)
   }, [])
 
-  return <SWRConfig value={{
-    shouldRetryOnError: false,
-    revalidateOnFocus: false,
-  }}>
-    {children}
-  </SWRConfig>
+  return init
+    ? (
+      <SWRConfig value={{
+        shouldRetryOnError: false,
+        revalidateOnFocus: false,
+      }}>
+        {children}
+      </SWRConfig>
+    )
+    : null
 }
 
 export default SwrInitor
