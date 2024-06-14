@@ -13,8 +13,8 @@ import type { NavIcon } from '@/app/components/app-sidebar/navLink'
 import { fetchAppDetail } from '@/service/apps'
 import { useAppContext } from '@/context/app-context'
 import Loading from '@/app/components/base/loading'
-import { BarChartSquare02, FileHeart02, PromptEngineering, TerminalSquare } from '@/app/components/base/icons/src/vender/line/development'
-import { BarChartSquare02 as BarChartSquare02Solid, FileHeart02 as FileHeart02Solid, PromptEngineering as PromptEngineeringSolid, TerminalSquare as TerminalSquareSolid } from '@/app/components/base/icons/src/vender/solid/development'
+import { BarChartSquare02, FileHeart02, PromptEngineering } from '@/app/components/base/icons/src/vender/line/development'
+import { BarChartSquare02 as BarChartSquare02Solid, FileHeart02 as FileHeart02Solid, PromptEngineering as PromptEngineeringSolid } from '@/app/components/base/icons/src/vender/solid/development'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 
 export type IAppDetailLayoutProps = {
@@ -56,12 +56,13 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
         }]
         : []
       ),
-      {
-        name: t('common.appMenus.apiAccess'),
-        href: `/app/${appId}/develop`,
-        icon: TerminalSquare,
-        selectedIcon: TerminalSquareSolid,
-      },
+      // 隐藏开发页面
+      // {
+      //   name: t('common.appMenus.apiAccess'),
+      //   href: `/app/${appId}/develop`,
+      //   icon: TerminalSquare,
+      //   selectedIcon: TerminalSquareSolid,
+      // },
       {
         name: mode !== 'workflow'
           ? t('common.appMenus.logAndAnn')
