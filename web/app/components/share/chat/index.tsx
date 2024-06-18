@@ -666,6 +666,7 @@ const Main: FC<IMainProps> = ({
           setIsShowSuggestion(true)
         }
         setRespondingFalse()
+        console.log('chat----completed')
       },
       onFile(file) {
         const lastThought = responseItem.agent_thoughts?.[responseItem.agent_thoughts?.length - 1]
@@ -748,6 +749,7 @@ const Main: FC<IMainProps> = ({
             draft.push({ ...responseItem })
           })
         setChatList(newListWithAnswer)
+        console.log('chat', newListWithAnswer)
       },
       onMessageReplace: (messageReplace) => {
         if (isInstalledApp) {

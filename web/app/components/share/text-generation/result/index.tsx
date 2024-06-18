@@ -18,6 +18,8 @@ import { TransferMethod, type VisionFile, type VisionSettings } from '@/types/ap
 import { NodeRunningStatus, WorkflowRunningStatus } from '@/app/components/workflow/types'
 import type { WorkflowProcess } from '@/app/components/base/chat/types'
 import { sleep } from '@/utils'
+import { updateUserCreditsWithTotalToken } from '@/app/api/pricing'
+import { useAppContext } from '@/context/app-context'
 
 export type IResultProps = {
   isWorkflow: boolean
@@ -66,6 +68,8 @@ const Result: FC<IResultProps> = ({
   visionConfig,
   completionFiles,
 }) => {
+  const { userProfile, mutateUserProfile } = useAppContext()
+
   const [isResponding, { setTrue: setRespondingTrue, setFalse: setRespondingFalse }] = useBoolean(false)
   useEffect(() => {
     if (controlStopResponding)
@@ -260,7 +264,7 @@ const Result: FC<IResultProps> = ({
               }
             }))
           },
-          onWorkflowFinished: ({ data }) => {
+          onWorkflowFinished: async ({ data }) => {
             if (isTimeout)
               return
             if (data.error) {
@@ -281,6 +285,8 @@ const Result: FC<IResultProps> = ({
             setMessageId(tempMessageId)
             onCompleted(getCompletionRes(), taskId, true)
             isEnd = true
+            await updateUserCreditsWithTotalToken(userProfile.takin_id!, data.total_tokens || 0, 'Dify Workflow', data)
+            mutateUserProfile()
           },
           onTextChunk: (params) => {
             const { data: { text } } = params
@@ -305,6 +311,7 @@ const Result: FC<IResultProps> = ({
           tempMessageId = messageId
           res.push(data)
           setCompletionRes(res.join(''))
+          console.log(data)
         },
         onCompleted: () => {
           if (isTimeout)
@@ -313,6 +320,7 @@ const Result: FC<IResultProps> = ({
           setMessageId(tempMessageId)
           onCompleted(getCompletionRes(), taskId, true)
           isEnd = true
+          console.log(getCompletionRes())
         },
         onMessageReplace: (messageReplace) => {
           res = [messageReplace.answer]

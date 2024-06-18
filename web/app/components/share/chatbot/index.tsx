@@ -648,6 +648,7 @@ const Main: FC<IMainProps> = ({
             draft.push({ ...responseItem })
           })
         setChatList(newListWithAnswer)
+        console.log('chatbot', newListWithAnswer)
       },
       onMessageReplace: (messageReplace) => {
         if (isInstalledApp) {
