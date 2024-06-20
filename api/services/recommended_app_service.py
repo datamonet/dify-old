@@ -83,7 +83,7 @@ class RecommendedAppService:
                     'mode': app.mode,
                     'icon': app.icon,
                     'icon_background': app.icon_background,
-                    'username': doc['name']
+                    'username': doc['name'] or user.name
                 },
                 'app_id': recommended_app.app_id,
                 'description': site.description,
