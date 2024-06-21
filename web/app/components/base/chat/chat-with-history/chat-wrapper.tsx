@@ -31,6 +31,7 @@ const ChatWrapper = () => {
     appMeta,
     handleFeedback,
     currentChatInstanceRef,
+    appData,
   } = useChatWithHistoryContext()
   const { userProfile } = useAppContext()
   const { setShowCreditsBillingModal } = useModalContext()
@@ -135,6 +136,7 @@ const ChatWrapper = () => {
 
   return (
     <Chat
+      appData={appData}
       config={appConfig}
       chatList={chatList}
       isResponding={isResponding}

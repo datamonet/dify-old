@@ -2,11 +2,11 @@
 import { useTranslation } from 'react-i18next'
 import { Fragment, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { RiArrowDownSLine } from '@remixicon/react'
 import { Menu, Transition } from '@headlessui/react'
 import AccountAbout from '../account-about'
 import Avatar from '@/app/components/base/avatar'
 import { useAppContext } from '@/context/app-context'
-import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
 import { LogOut01 } from '@/app/components/base/icons/src/vender/line/general'
 import { useModalContext } from '@/context/modal-context'
 import { deleteCookie } from '@/app/api/user'
@@ -61,7 +61,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                   <Avatar name={userProfile.name} className='sm:mr-2 mr-0' size={32} />
                   {!isMobile && <>
                     {userProfile.name}
-                    <ChevronDown className="w-3 h-3 ml-1 text-gray-700" />
+                    <RiArrowDownSLine className="w-3 h-3 ml-1 text-gray-700" />
                   </>}
                 </Menu.Button>
               </div>

@@ -54,6 +54,7 @@ const ProviderDetail = ({
   const isEdited = currentWorkspace.role === 'owner'
   const isBuiltIn = collection.type === CollectionType.builtIn
   const isModel = collection.type === CollectionType.model
+  const { isCurrentWorkspaceManager } = useAppContext()
 
   const [isDetailLoading, setIsDetailLoading] = useState(false)
 
@@ -198,7 +199,7 @@ const ProviderDetail = ({
       <div className='flex items-center py-1 gap-2'>
         <div className='relative shrink-0'>
           {typeof collection.icon === 'string' && (
-            <div className='w-8 h-8 bg-center bg-cover bg-no-repeat rounded-md' style={{ backgroundImage: `url(${collection.icon})` }}/>
+            <div className='w-8 h-8 bg-center bg-cover bg-no-repeat rounded-md' style={{ backgroundImage: `url(${collection.icon})` }} />
           )}
           {typeof collection.icon !== 'string' && (
             <AppIcon
@@ -218,13 +219,16 @@ const ProviderDetail = ({
       <div className='flex gap-1 border-b-[0.5px] border-black/5'>
         {(collection.type === CollectionType.builtIn) && needAuth && (
           <Button
+
             disabled={!isEdited}
-            type={isAuthed ? 'default' : 'primary'}
-            className={cn('shrink-0 my-3 w-full flex items-center', isAuthed && 'bg-white')}
+            variant={isAuthed ? 'secondary' : 'primary'}
+            className={cn('shrink-0 my-3 w-full', isAuthed && 'bg-white')}
+
             onClick={() => {
               if (collection.type === CollectionType.builtIn || collection.type === CollectionType.model)
                 showSettingAuthModal()
             }}
+
           >
             {isAuthed && <Indicator className='mr-2' color={'green'} />}
             <div className={cn('text-white leading-[18px] text-[13px] font-medium', isAuthed && '!text-gray-700')}>
@@ -234,7 +238,7 @@ const ProviderDetail = ({
         )}
         {collection.type === CollectionType.custom && !isDetailLoading && (
           <Button
-            className={cn('shrink-0 my-3 w-full flex items-center bg-white')}
+            className={cn('shrink-0 my-3 w-full')}
             onClick={() => setIsShowEditCustomCollectionModal(true)}
           >
             <Settings01 className='mr-1 w-4 h-4 text-gray-500' />
@@ -244,8 +248,8 @@ const ProviderDetail = ({
         {collection.type === CollectionType.workflow && !isDetailLoading && customCollection && (
           <>
             <Button
-              type='primary'
-              className={cn('shrink-0 my-3 w-[183px] flex items-center')}
+              variant='primary'
+              className={cn('shrink-0 my-3 w-[183px]')}
             >
               <a className='flex items-center text-white' href={`/app/${(customCollection as WorkflowToolProviderResponse).workflow_app_id}/workflow`} rel='noreferrer' target='_blank'>
                 <div className='leading-5 text-sm font-medium'>{t('tools.openInStudio')}</div>
@@ -253,8 +257,9 @@ const ProviderDetail = ({
               </a>
             </Button>
             <Button
-              className={cn('shrink-0 my-3 w-[183px] flex items-center bg-white')}
+              className={cn('shrink-0 my-3 w-[183px]')}
               onClick={() => setIsShowEditWorkflowToolModal(true)}
+              disabled={!isCurrentWorkspaceManager}
             >
               <div className='leading-5 text-sm font-medium text-gray-700'>{t('tools.createTool.editAction')}</div>
             </Button>
@@ -263,7 +268,7 @@ const ProviderDetail = ({
       </div>
       {/* Tools */}
       <div className='pt-3'>
-        {isDetailLoading && <div className='flex h-[200px]'><Loading type='app'/></div>}
+        {isDetailLoading && <div className='flex h-[200px]'><Loading type='app' /></div>}
         {!isDetailLoading && (
           <div className='text-xs font-medium leading-6 text-gray-500'>
             {collection.type === CollectionType.workflow && <span className=''>{t('tools.createTool.toolInput.title').toLocaleUpperCase()}</span>}

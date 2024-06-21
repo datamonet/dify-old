@@ -46,6 +46,8 @@ import {
 } from './hooks'
 import Header from './header'
 import CustomNode from './nodes'
+import CustomNoteNode from './note-node'
+import { CUSTOM_NOTE_NODE } from './note-node/constants'
 import Operator from './operator'
 import CustomEdge from './custom-edge'
 import CustomConnectionLine from './custom-connection-line'
@@ -64,8 +66,10 @@ import {
   getKeyboardKeyCodeBySystem,
   initialEdges,
   initialNodes,
+  isEventTargetInputArea,
 } from './utils'
 import {
+  CUSTOM_NODE,
   ITERATION_CHILDREN_Z_INDEX,
   WORKFLOW_DATA_UPDATE,
 } from './constants'
@@ -76,10 +80,11 @@ import { useEventEmitterContextContext } from '@/context/event-emitter'
 import Confirm from '@/app/components/base/confirm/common'
 
 const nodeTypes = {
-  custom: CustomNode,
+  [CUSTOM_NODE]: CustomNode,
+  [CUSTOM_NOTE_NODE]: CustomNoteNode,
 }
 const edgeTypes = {
-  custom: CustomEdge,
+  [CUSTOM_NODE]: CustomEdge,
 }
 
 type WorkflowProps = {
@@ -213,8 +218,18 @@ const Workflow: FC<WorkflowProps> = memo(({
 
   useKeyPress('delete', handleNodesDelete)
   useKeyPress(['delete', 'backspace'], handleEdgeDelete)
-  useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.c`, handleNodesCopy, { exactMatch: true, useCapture: true })
-  useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.v`, handleNodesPaste, { exactMatch: true, useCapture: true })
+  useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.c`, (e) => {
+    if (isEventTargetInputArea(e.target as HTMLElement))
+      return
+
+    handleNodesCopy()
+  }, { exactMatch: true, useCapture: true })
+  useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.v`, (e) => {
+    if (isEventTargetInputArea(e.target as HTMLElement))
+      return
+
+    handleNodesPaste()
+  }, { exactMatch: true, useCapture: true })
   useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.d`, handleNodesDuplicate, { exactMatch: true, useCapture: true })
   useKeyPress(`${getKeyboardKeyCodeBySystem('alt')}.r`, handleStartWorkflowRun, { exactMatch: true, useCapture: true })
 

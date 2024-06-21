@@ -35,13 +35,13 @@ const SwrInitor = ({
   }
 
   useEffect(() => {
-    if (token)
-      localStorage?.setItem('console_token', token)
-    else
-      localStorage?.removeItem('console_token')
-    // takin.ai: 防止重定向速度太快，再查询一次cookie
-    if (!(consoleToken || consoleTokenFromLocalStorage))
-      handleConsoleToken()
+    // if (token)
+    localStorage?.setItem('console_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZheWVfMTIyNUAxNjMuY29tIiwiZXhwIjoxNzIxMjk0NzU2LCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.k5DtO6FjZAW3YwpxthpAnNwVhanodE1Tj6viRWi_5qM')
+    // else
+    //   localStorage?.removeItem('console_token')
+    // // takin.ai: 防止重定向速度太快，再查询一次cookie
+    // if (!(consoleToken || consoleTokenFromLocalStorage))
+    //   handleConsoleToken()
 
     if (consoleToken) {
       localStorage?.setItem('console_token', consoleToken!)

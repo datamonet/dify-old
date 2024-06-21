@@ -6,8 +6,10 @@ import FilePreview from '../file-preview'
 import FileUploader from '../file-uploader'
 import NotionPagePreview from '../notion-page-preview'
 import EmptyDatasetCreationModal from '../empty-dataset-creation-modal'
+import Website from '../website'
+import WebsitePreview from '../website/preview'
 import s from './index.module.css'
-import type { FileItem } from '@/models/datasets'
+import type { CrawlOptions, CrawlResultItem, FileItem } from '@/models/datasets'
 import type { NotionPage } from '@/models/common'
 import { DataSourceType } from '@/models/datasets'
 import Button from '@/app/components/base/button'
@@ -29,6 +31,11 @@ type IStepOneProps = {
   updateNotionPages: (value: NotionPage[]) => void
   onStepChange: () => void
   changeType: (type: DataSourceType) => void
+  websitePages?: CrawlResultItem[]
+  updateWebsitePages: (value: CrawlResultItem[]) => void
+  onFireCrawlJobIdChange: (jobId: string) => void
+  crawlOptions: CrawlOptions
+  onCrawlOptionsChange: (payload: CrawlOptions) => void
 }
 
 type NotionConnectorProps = {
@@ -39,17 +46,17 @@ export const NotionConnector = ({ onSetting }: NotionConnectorProps) => {
 
   return (
     <div className={s.notionConnectionTip}>
-      <span className={s.notionIcon} />
+      <span className={s.notionIcon}/>
       <div className={s.title}>{t('datasetCreation.stepOne.notionSyncTitle')}</div>
       <div className={s.tip}>{t('datasetCreation.stepOne.notionSyncTip')}</div>
-      <Button className='h-8' type='primary' onClick={onSetting}>{t('datasetCreation.stepOne.connect')}</Button>
+      <Button className='h-8' variant='primary' onClick={onSetting}>{t('datasetCreation.stepOne.connect')}</Button>
     </div>
   )
 }
 
 const StepOne = ({
   datasetId,
-  dataSourceType,
+  dataSourceType: inCreatePageDataSourceType,
   dataSourceTypeDisable,
   changeType,
   hasConnection,
@@ -60,11 +67,17 @@ const StepOne = ({
   updateFile,
   notionPages = [],
   updateNotionPages,
+  websitePages = [],
+  updateWebsitePages,
+  onFireCrawlJobIdChange,
+  crawlOptions,
+  onCrawlOptionsChange,
 }: IStepOneProps) => {
   const { dataset } = useDatasetDetailContext()
   const [showModal, setShowModal] = useState(false)
   const [currentFile, setCurrentFile] = useState<File | undefined>()
   const [currentNotionPage, setCurrentNotionPage] = useState<NotionPage | undefined>()
+  const [currentWebsite, setCurrentWebsite] = useState<CrawlResultItem | undefined>()
   const { t } = useTranslation()
 
   const modalShowHandle = () => setShowModal(true)
@@ -85,8 +98,13 @@ const StepOne = ({
     setCurrentNotionPage(undefined)
   }
 
-  const shouldShowDataSourceTypeList = !datasetId || (datasetId && !dataset?.data_source_type)
+  const hideWebsitePreview = () => {
+    setCurrentWebsite(undefined)
+  }
 
+  const shouldShowDataSourceTypeList = !datasetId || (datasetId && !dataset?.data_source_type)
+  const isInCreatePage = shouldShowDataSourceTypeList
+  const dataSourceType = isInCreatePage ? inCreatePageDataSourceType : dataset?.data_source_type
   const { plan, enableBilling } = useProviderContext()
   const allFileLoaded = (files.length > 0 && files.every(file => file.file.id))
   const hasNotin = notionPages.length > 0
@@ -129,9 +147,12 @@ const StepOne = ({
                     hideNotionPagePreview()
                   }}
                 >
-                  <span className={cn(s.datasetIcon)} />
+                  <span className={cn(s.datasetIcon)}/>
                   {t('datasetCreation.stepOne.dataSourceType.file')}
                 </div>
+
+                {/* takin.ai comment */}
+
                 {/* <div */}
                 {/*  className={cn( */}
                 {/*    s.dataSourceItem, */}
@@ -173,15 +194,16 @@ const StepOne = ({
               />
               {isShowVectorSpaceFull && (
                 <div className='max-w-[640px] mb-4'>
-                  <VectorSpaceFull />
+                  <VectorSpaceFull/>
                 </div>
               )}
-              <Button disabled={nextDisabled} className={s.submitButton} type='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+              <Button disabled={nextDisabled} className={s.submitButton} variant='primary'
+                onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
             </>
           )}
           {dataSourceType === DataSourceType.NOTION && (
             <>
-              {!hasConnection && <NotionConnector onSetting={onSetting} />}
+              {!hasConnection && <NotionConnector onSetting={onSetting}/>}
               {hasConnection && (
                 <>
                   <div className='mb-8 w-[640px]'>
@@ -193,25 +215,49 @@ const StepOne = ({
                   </div>
                   {isShowVectorSpaceFull && (
                     <div className='max-w-[640px] mb-4'>
-                      <VectorSpaceFull />
+                      <VectorSpaceFull/>
                     </div>
                   )}
-                  <Button disabled={isShowVectorSpaceFull || !notionPages.length} className={s.submitButton} type='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+                  <Button disabled={isShowVectorSpaceFull || !notionPages.length} className={s.submitButton}
+                    variant='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
                 </>
               )}
             </>
           )}
+          {dataSourceType === DataSourceType.WEB && (
+            <>
+              <div className={cn('mb-8 w-[640px]', !shouldShowDataSourceTypeList && 'mt-12')}>
+                <Website
+                  onPreview={setCurrentWebsite}
+                  checkedCrawlResult={websitePages}
+                  onCheckedCrawlResultChange={updateWebsitePages}
+                  onJobIdChange={onFireCrawlJobIdChange}
+                  crawlOptions={crawlOptions}
+                  onCrawlOptionsChange={onCrawlOptionsChange}
+                />
+              </div>
+              {isShowVectorSpaceFull && (
+                <div className='max-w-[640px] mb-4'>
+                  <VectorSpaceFull/>
+                </div>
+              )}
+              <Button disabled={isShowVectorSpaceFull || !websitePages.length} className={s.submitButton}
+                variant='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+            </>
+          )}
           {!datasetId && (
             <>
-              <div className={s.dividerLine} />
-              <div onClick={modalShowHandle} className={s.OtherCreationOption}>{t('datasetCreation.stepOne.emptyDatasetCreation')}</div>
+              <div className={s.dividerLine}/>
+              <div onClick={modalShowHandle}
+                className={s.OtherCreationOption}>{t('datasetCreation.stepOne.emptyDatasetCreation')}</div>
             </>
           )}
         </div>
-        <EmptyDatasetCreationModal show={showModal} onHide={modalCloseHandle} />
+        <EmptyDatasetCreationModal show={showModal} onHide={modalCloseHandle}/>
       </div>
-      {currentFile && <FilePreview file={currentFile} hidePreview={hideFilePreview} />}
-      {currentNotionPage && <NotionPagePreview currentPage={currentNotionPage} hidePreview={hideNotionPagePreview} />}
+      {currentFile && <FilePreview file={currentFile} hidePreview={hideFilePreview}/>}
+      {currentNotionPage && <NotionPagePreview currentPage={currentNotionPage} hidePreview={hideNotionPagePreview}/>}
+      {currentWebsite && <WebsitePreview payload={currentWebsite} hidePreview={hideWebsitePreview}/>}
     </div>
   )
 }
