@@ -169,9 +169,9 @@ def load_user_from_request(request_from_flask_login):
             raise Unauthorized('Invalid Authorization header format. Expected \'Bearer <api-key>\' format.')
 
     decoded = PassportService().verify(auth_token)
-    user_id = decoded.get('user_id')
-
-    return AccountService.load_logged_in_account(account_id=user_id, token=auth_token)
+    # 此处为适应takin的mongo数据库，只查询固定的邮件用户
+    email = decoded.get('email')
+    return AccountService.load_logged_in_account(email=email, token=auth_token)
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
