@@ -130,57 +130,57 @@ const StepOne = ({
           )
         }
         <div className={s.form}>
-          {
-            shouldShowDataSourceTypeList && (
-              <div className='flex items-center mb-8 flex-wrap gap-y-4'>
-                <div
-                  className={cn(
-                    s.dataSourceItem,
-                    dataSourceType === DataSourceType.FILE && s.active,
-                    dataSourceTypeDisable && dataSourceType !== DataSourceType.FILE && s.disabled,
-                  )}
-                  onClick={() => {
-                    if (dataSourceTypeDisable)
-                      return
-                    changeType(DataSourceType.FILE)
-                    hideFilePreview()
-                    hideNotionPagePreview()
-                  }}
-                >
-                  <span className={cn(s.datasetIcon)}/>
-                  {t('datasetCreation.stepOne.dataSourceType.file')}
-                </div>
+          {/* { */}
+          {/*  shouldShowDataSourceTypeList && ( */}
+          {/*    <div className='flex items-center mb-8 flex-wrap gap-y-4'> */}
+          {/*      <div */}
+          {/*        className={cn( */}
+          {/*          s.dataSourceItem, */}
+          {/*          dataSourceType === DataSourceType.FILE && s.active, */}
+          {/*          dataSourceTypeDisable && dataSourceType !== DataSourceType.FILE && s.disabled, */}
+          {/*        )} */}
+          {/*        onClick={() => { */}
+          {/*          if (dataSourceTypeDisable) */}
+          {/*            return */}
+          {/*          changeType(DataSourceType.FILE) */}
+          {/*          hideFilePreview() */}
+          {/*          hideNotionPagePreview() */}
+          {/*        }} */}
+          {/*      > */}
+          {/*        <span className={cn(s.datasetIcon)}/> */}
+          {/*        {t('datasetCreation.stepOne.dataSourceType.file')} */}
+          {/*      </div> */}
 
-                {/* takin.ai comment */}
+          {/*      /!* takin.ai comment *!/ */}
 
-                {/* <div */}
-                {/*  className={cn( */}
-                {/*    s.dataSourceItem, */}
-                {/*    dataSourceType === DataSourceType.NOTION && s.active, */}
-                {/*    dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled, */}
-                {/*  )} */}
-                {/*  onClick={() => { */}
-                {/*    if (dataSourceTypeDisable) */}
-                {/*      return */}
-                {/*    changeType(DataSourceType.NOTION) */}
-                {/*    hideFilePreview() */}
-                {/*    hideNotionPagePreview() */}
-                {/*  }} */}
-                {/* > */}
-                {/*  <span className={cn(s.datasetIcon, s.notion)} /> */}
-                {/*  {t('datasetCreation.stepOne.dataSourceType.notion')} */}
-                {/* </div> */}
-                {/* <div */}
-                {/*  className={cn(s.dataSourceItem, s.disabled, dataSourceType === DataSourceType.WEB && s.active)} */}
-                {/* // onClick={() => changeType(DataSourceType.WEB)} */}
-                {/* > */}
-                {/*  <span className={s.comingTag}>Coming soon</span> */}
-                {/*  <span className={cn(s.datasetIcon, s.web)} /> */}
-                {/*  {t('datasetCreation.stepOne.dataSourceType.web')} */}
-                {/* </div> */}
-              </div>
-            )
-          }
+          {/*      /!* <div *!/ */}
+          {/*      /!*  className={cn( *!/ */}
+          {/*      /!*    s.dataSourceItem, *!/ */}
+          {/*      /!*    dataSourceType === DataSourceType.NOTION && s.active, *!/ */}
+          {/*      /!*    dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled, *!/ */}
+          {/*      /!*  )} *!/ */}
+          {/*      /!*  onClick={() => { *!/ */}
+          {/*      /!*    if (dataSourceTypeDisable) *!/ */}
+          {/*      /!*      return *!/ */}
+          {/*      /!*    changeType(DataSourceType.NOTION) *!/ */}
+          {/*      /!*    hideFilePreview() *!/ */}
+          {/*      /!*    hideNotionPagePreview() *!/ */}
+          {/*      /!*  }} *!/ */}
+          {/*      /!* > *!/ */}
+          {/*      /!*  <span className={cn(s.datasetIcon, s.notion)} /> *!/ */}
+          {/*      /!*  {t('datasetCreation.stepOne.dataSourceType.notion')} *!/ */}
+          {/*      /!* </div> *!/ */}
+          {/*      /!* <div *!/ */}
+          {/*      /!*  className={cn(s.dataSourceItem, s.disabled, dataSourceType === DataSourceType.WEB && s.active)} *!/ */}
+          {/*      /!* // onClick={() => changeType(DataSourceType.WEB)} *!/ */}
+          {/*      /!* > *!/ */}
+          {/*      /!*  <span className={s.comingTag}>Coming soon</span> *!/ */}
+          {/*      /!*  <span className={cn(s.datasetIcon, s.web)} /> *!/ */}
+          {/*      /!*  {t('datasetCreation.stepOne.dataSourceType.web')} *!/ */}
+          {/*      /!* </div> *!/ */}
+          {/*    </div> */}
+          {/*  ) */}
+          {/* } */}
           {dataSourceType === DataSourceType.FILE && (
             <>
               <FileUploader
