@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 import classNames from 'classnames'
 import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
+import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import type { ModelAndParameter } from '../configuration/debug/types'
 import PublishWithMultipleModel from './publish-with-multiple-model'
 import Button from '@/app/components/base/button'
@@ -19,7 +20,6 @@ import {
 import EmbeddedModal from '@/app/components/app/overview/embedded'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { useGetLanguage } from '@/context/i18n'
-import { ChevronDown } from '@/app/components/base/icons/src/vender/line/arrows'
 import type { InputVar } from '@/app/components/workflow/types'
 import { createRecommendedApp, deleteRecommendedApp, fetchAppDetail, fetchAppList } from '@/service/explore'
 import { ToastContext } from '@/app/components/base/toast'
@@ -171,14 +171,14 @@ const AppPublisher = ({
     >
       <PortalToFollowElemTrigger onClick={handleTrigger}>
         <Button
-          type='primary'
+          variant='primary'
           className={`
             pl-3 pr-2 py-0 h-8 text-[13px] font-medium
             ${disabled && 'cursor-not-allowed opacity-50'}
           `}
         >
           {t('workflow.common.publish')}
-          <ChevronDown className='ml-0.5'/>
+          <ChevronDownIcon className='ml-0.5 w-3.5 h-3.5'/>
         </Button>
       </PortalToFollowElemTrigger>
       <PortalToFollowElemContent className='z-[11]'>
@@ -221,7 +221,7 @@ const AppPublisher = ({
               )
               : (
                 <Button
-                  type='primary'
+                  variant='primary'
                   className={classNames(
                     'mt-3 px-3 py-0 w-full h-8 border-[0.5px] border-primary-700 rounded-lg text-[13px] font-medium',
                     (publishDisabled || published) && 'border-transparent',
