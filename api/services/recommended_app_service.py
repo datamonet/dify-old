@@ -63,6 +63,7 @@ class RecommendedAppService:
 
         categories = set()
         recommended_apps_result = []
+        community_apps_result = []
         for recommended_app in recommended_apps:
             app = recommended_app.app
             if not app or not app.is_public:
@@ -73,9 +74,9 @@ class RecommendedAppService:
                 continue
 
             user = db.session.query(Account).filter(Account.id == app.user_id).first()
-            doc = collection.find_one({'email':user.email})
+            doc = collection.find_one({'email': user.email})
 
-            recommended_app_result = {
+            app_result = {
                 'id': recommended_app.id,
                 'app': {
                     'id': app.id,
@@ -94,11 +95,17 @@ class RecommendedAppService:
                 'position': recommended_app.position,
                 'is_listed': recommended_app.is_listed
             }
-            recommended_apps_result.append(recommended_app_result)
+            # Takin.AI command 修改推荐的app
+            if user.email == 'curator@takin.ai' or user.email == 'harryjwang@gmail.com':
+                recommended_apps_result.append(app_result)
+            else:
+                community_apps_result.append(app_result)
 
             categories.add(recommended_app.category)  # add category to categories
+            categories.add('community')  # add category to categories
 
-        return {'recommended_apps': recommended_apps_result, 'categories': sorted(list(categories))}
+        return {'recommended_apps': recommended_apps_result, 'community': community_apps_result,
+                'categories': sorted(list(categories))}
 
     @classmethod
     def _fetch_recommended_apps_from_dify_official(cls, language: str) -> dict:

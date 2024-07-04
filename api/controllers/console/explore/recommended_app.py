@@ -30,6 +30,7 @@ recommended_app_fields = {
 
 recommended_app_list_fields = {
     'recommended_apps': fields.List(fields.Nested(recommended_app_fields)),
+    'community': fields.List(fields.Nested(recommended_app_fields)),
     'categories': fields.List(fields.String)
 }
 
