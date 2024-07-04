@@ -87,7 +87,7 @@ class RecommendedAppService:
                     'username': doc.get('name') or user.name
                 },
                 'app_id': recommended_app.app_id,
-                'description': site.description,
+                'description': app.description, # Takin command:推荐应用的description和apps同步
                 'copyright': site.copyright,
                 'privacy_policy': site.privacy_policy,
                 'custom_disclaimer': site.custom_disclaimer,
