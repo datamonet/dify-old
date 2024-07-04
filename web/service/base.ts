@@ -380,7 +380,6 @@ const baseFetch = <T>(
                   if (!silent)
                     Toast.notify({ type: 'error', message: data.message })
                 })
-                globalThis.location.href = `${globalThis.location.origin}/apps`
             }
             return Promise.reject(resClone)
           }
