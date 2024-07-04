@@ -71,13 +71,17 @@ const AppPublisher = ({
   const { mutate } = useSWR(
     ['/explore/apps'],
     () =>
-      fetchAppList().then(({ categories, recommended_apps }) => ({
+      fetchAppList().then(({ categories, community, recommended_apps }) => ({
         categories,
-        allList: recommended_apps.sort((a, b) => a.position - b.position),
+        community,
+        recommended_apps,
+        allList: [...community, ...recommended_apps].sort((a, b) => a.position - b.position),
       })),
     {
       fallbackData: {
         categories: [],
+        community: [],
+        recommended_apps: [],
         allList: [],
       },
     },
