@@ -93,7 +93,7 @@ const Apps = ({
       else
         return allList.filter(item => (item.app.mode === 'workflow') && item.category === currCategory)
     }
-  }, [currentType, currCategory, allCategoriesEn, allList])
+  }, [currentType, currCategory, allCategoriesEn, allList, recommended_apps, community])
 
   const [currApp, setCurrApp] = React.useState<App | null>(null)
   const [isShowCreateModal, setIsShowCreateModal] = React.useState(false)
