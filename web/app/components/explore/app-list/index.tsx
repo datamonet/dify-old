@@ -48,19 +48,23 @@ const Apps = ({
     defaultTab: allCategoriesEn,
     disableSearchParams: pageType !== PageType.EXPLORE,
   })
-
+  // Takin command:为分类增加一个community
   const {
-    data: { categories, allList },
+    data: { categories, community, recommended_apps, allList },
   } = useSWR(
     ['/explore/apps'],
     () =>
-      fetchAppList().then(({ categories, recommended_apps }) => ({
+      fetchAppList().then(({ categories, community, recommended_apps }) => ({
         categories,
-        allList: recommended_apps.sort((a, b) => a.position - b.position),
+        community,
+        recommended_apps,
+        allList: [...community, ...recommended_apps].sort((a, b) => a.position - b.position),
       })),
     {
       fallbackData: {
         categories: [],
+        community: [],
+        recommended_apps: [],
         allList: [],
       },
     },
@@ -69,7 +73,7 @@ const Apps = ({
   const filteredList = useMemo(() => {
     if (currCategory === allCategoriesEn) {
       if (!currentType)
-        return allList
+        return recommended_apps
       else if (currentType === 'chatbot')
         return allList.filter(item => (item.app.mode === 'chat' || item.app.mode === 'advanced-chat'))
       else if (currentType === 'agent')
@@ -78,7 +82,9 @@ const Apps = ({
         return allList.filter(item => (item.app.mode === 'workflow'))
     }
     else {
-      if (!currentType)
+      if (!currentType && currCategory === 'community')
+        return community
+      else if (!currentType && currCategory !== 'community')
         return allList.filter(item => item.category === currCategory)
       else if (currentType === 'chatbot')
         return allList.filter(item => (item.app.mode === 'chat' || item.app.mode === 'advanced-chat') && item.category === currCategory)
@@ -126,7 +132,7 @@ const Apps = ({
   if (!categories) {
     return (
       <div className="flex h-full items-center">
-        <Loading type="area" />
+        <Loading type="area"/>
       </div>
     )
   }
@@ -148,7 +154,7 @@ const Apps = ({
       )}>
         {pageType !== PageType.EXPLORE && (
           <>
-            <AppTypeSelector value={currentType} onChange={setCurrentType} />
+            <AppTypeSelector value={currentType} onChange={setCurrentType}/>
             <div className='mx-2 w-[1px] h-3.5 bg-gray-200'/>
           </>
         )}

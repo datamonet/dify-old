@@ -6,6 +6,7 @@ export const fetchAppList = () => {
   return get<{
     categories: AppCategory[]
     recommended_apps: App[]
+    community: App[]
   }>('/explore/apps')
 }
 

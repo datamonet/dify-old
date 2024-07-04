@@ -28,10 +28,9 @@ const Category: FC<ICategoryProps> = ({
   allCategoriesEn,
 }) => {
   const { t } = useTranslation()
-  const isAllCategories = !list.includes(value)
-
+  const isAllCategories = !list.includes(value) && value !== 'community'
   const itemClassName = (isSelected: boolean) => cn(
-    'flex items-center px-3 py-[7px] h-[32px] rounded-lg border-[0.5px] border-transparent text-gray-700 font-medium leading-[18px] cursor-pointer hover:bg-gray-200',
+    'flex items-center px-3 py-[7px] h-[32px] rounded-lg border-[0.5px] border-transparent text-gray-700 font-medium leading-[18px] cursor-pointer hover:bg-gray-200 capitalize',
     isSelected && 'bg-white border-gray-200 shadow-xs text-primary-600 hover:bg-white',
   )
 
@@ -43,6 +42,13 @@ const Category: FC<ICategoryProps> = ({
       >
         <ThumbsUp className='mr-1 w-3.5 h-3.5'/>
         {t('explore.apps.allCategories')}
+      </div>
+      {/* Takin command:为分类增加一个community */}
+      <div
+        className={itemClassName(value === 'community')}
+        onClick={() => onChange('community')}
+      >
+        Community
       </div>
       {list.map(name => (
         <div
