@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import cn from 'classnames'
 import { useSWRConfig } from 'swr'
 import { unstable_serialize } from 'swr/infinite'
-import PermissionsRadio from '../permissions-radio'
 import IndexMethodRadio from '../index-method-radio'
 import RetrievalMethodConfig from '@/app/components/datasets/common/retrieval-method-config'
 import EconomicalRetrievalMethodConfig from '@/app/components/datasets/common/economical-retrieval-method-config'
@@ -165,18 +164,19 @@ const Form = () => {
           </a>
         </div>
       </div>
-      <div className={rowClass}>
-        <div className={labelClass}>
-          <div>{t('datasetSettings.form.permissions')}</div>
-        </div>
-        <div className='w-full sm:w-[480px]'>
-          <PermissionsRadio
-            disable={!currentDataset?.embedding_available}
-            value={permission}
-            onChange={v => setPermission(v)}
-          />
-        </div>
-      </div>
+      {/* Takin command: knowledge暂时默认私密，不允许公开。这部分有很多的问题：公开之后，所有人可以编辑甚至删除 */}
+      {/* <div className={rowClass}> */}
+      {/*  <div className={labelClass}> */}
+      {/*    <div>{t('datasetSettings.form.permissions')}</div> */}
+      {/*  </div> */}
+      {/*  <div className='w-full sm:w-[480px]'> */}
+      {/*    <PermissionsRadio */}
+      {/*      disable={!currentDataset?.embedding_available} */}
+      {/*      value={permission} */}
+      {/*      onChange={v => setPermission(v)} */}
+      {/*    /> */}
+      {/*  </div> */}
+      {/* </div> */}
       {currentDataset && currentDataset.indexing_technique && (
         <>
           <div className='w-full h-0 border-b-[0.5px] border-b-gray-200 my-2' />

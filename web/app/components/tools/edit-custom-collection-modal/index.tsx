@@ -17,7 +17,6 @@ import EmojiPicker from '@/app/components/base/emoji-picker'
 import AppIcon from '@/app/components/base/app-icon'
 import { parseParamsSchema } from '@/service/tools'
 import LabelSelector from '@/app/components/tools/labels/selector'
-import PermissionsRadio from '@/app/components/datasets/settings/permissions-radio'
 
 const fieldNameClassNames = 'py-2 leading-5 text-sm font-medium text-gray-900'
 type Props = {
@@ -308,23 +307,23 @@ const EditCustomCollectionModal: FC<Props> = ({
                   className='w-full h-10 px-3 text-sm font-normal bg-gray-100 rounded-lg grow'
                   placeholder={t('tools.createTool.customDisclaimerPlaceholder') || ''}/>
               </div>
-              <div className="py-2 flex flex-col w-full">
-                <div className={fieldNameClassNames}>
-                  {t('datasetSettings.form.permissions')}
-                </div>
+              {/* Takin command: tools暂时默认私密，不允许公开。这部分有很多的问题：公开之后，所有人可以编辑甚至删除 */}
+              {/* <div className="py-2 flex flex-col w-full"> */}
+              {/*  <div className={fieldNameClassNames}> */}
+              {/*    {t('datasetSettings.form.permissions')} */}
+              {/*  </div> */}
+              {/* <PermissionsRadio */}
+              {/*  itemClassName="sm:w-[280px]" */}
+              {/*  value={customCollection.publish ? 'all_team_members' : 'only_me'} */}
+              {/*  onChange={() => { */}
+              {/*    const newCollection = produce(customCollection, (draft) => { */}
+              {/*      draft.publish = !draft.publish */}
+              {/*    }) */}
+              {/*    setCustomCollection(newCollection) */}
+              {/*  }} */}
+              {/* /> */}
 
-                <PermissionsRadio
-                  itemClassName="sm:w-[280px]"
-                  value={customCollection.publish ? 'all_team_members' : 'only_me'}
-                  onChange={() => {
-                    const newCollection = produce(customCollection, (draft) => {
-                      draft.publish = !draft.publish
-                    })
-                    setCustomCollection(newCollection)
-                  }}
-                />
-
-              </div>
+              {/* </div> */}
 
             </div>
             <div
