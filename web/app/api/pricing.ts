@@ -2,6 +2,16 @@
 import { ObjectId } from 'mongodb'
 import clientPromise from '@/service/mongo'
 
+// --------------------------------------------------关于Takin.AI的扣费逻辑解析 start----------------------------------------------------------------------
+/**
+ * 积分主要分为subscription_credits，extra_credits。所有的消耗都优先extra_credits
+ * 📌📌📌所有情况下，extra_credits都可以可以使用。只是free用户无法购买
+ * free用户只能升级plan【或者加入了某个team，有人转账】来增加积分，无法购买extra_credits
+ * 付费用户可以购买plan以及extra_credits，一旦停止订阅后，subscription_credits到期后清空，extra_credits还可以使用
+ * Team的转账默认是优先extra_credits转到extra_credits
+ */
+// --------------------------------------------------关于Takin.AI的扣费逻辑解析 end----------------------------------------------------------------------
+
 /**
  * 更新用户积分,并且在bill表中记录消费
  * @param userId 用户的mongo id
@@ -30,14 +40,14 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
     totalCost = 0.01
   else totalCost = Number(totalCost.toFixed(2)) // 保留一位小数四舍五入
 
-  if (subscriptionCredits >= totalCost) {
-    subscriptionCredits -= totalCost // 如果用户有订阅积分，那么优先消耗订阅积分
+  if (extraCredits >= totalCost) {
+    extraCredits -= totalCost // 如果用户有extraCredits，那么优先消耗extraCredits
   }
   else {
-    // 如果用户订阅积分不足，那么消耗充值积分
-    totalCost -= subscriptionCredits // 先减去用户还剩下的订阅积分
-    subscriptionCredits = 0
-    extraCredits = Math.max(extraCredits - totalCost, 0) // 使用充值的其余积分补足
+    // 如果用户extraCredits不足，那么消耗subscriptionCredits
+    totalCost -= extraCredits // 先减去用户还剩下的extraCredits
+    extraCredits = 0
+    subscriptionCredits = Math.max(subscriptionCredits - totalCost, 0) // 使用subscriptionCredits补足
   }
 
   await userCollection.updateOne(
