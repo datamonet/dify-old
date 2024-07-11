@@ -339,7 +339,8 @@ class ToolManager:
             list all the builtin providers
         """
         # takin tools filter 过滤
-        include_tools = ['slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed', 'arxiv', 'yahoo', 'wikipedia',
+        include_tools = ['dalle', 'slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed', 'arxiv', 'yahoo',
+                         'wikipedia',
                          'duckduckgo', 'time', 'stackexchange']
         for provider in listdir(path.join(path.dirname(path.realpath(__file__)), 'provider', 'builtin')):
             if provider.startswith('__'):
