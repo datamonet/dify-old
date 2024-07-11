@@ -1,12 +1,12 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import cn from 'classnames'
 import Script from 'next/script'
 import { useRouter } from 'next/navigation'
 import Loading from '../components/base/loading'
 import Forms from './forms'
 import style from './page.module.css'
 import UserSSOForm from './userSSOForm'
+import cn from '@/utils/classnames'
 import { IS_CE_EDITION } from '@/config'
 
 import type { SystemFeatures } from '@/types/feature'

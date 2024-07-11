@@ -13,6 +13,7 @@ from controllers.console.setup import setup_required
 from controllers.console.wraps import account_initialization_required
 from core.app.apps.base_app_queue_manager import AppQueueManager
 from core.app.entities.app_invoke_entities import InvokeFrom
+from core.errors.error import AppInvokeQuotaExceededError
 from fields.workflow_fields import workflow_fields
 from fields.workflow_run_fields import workflow_run_node_execution_fields
 from libs import helper
@@ -107,6 +108,34 @@ class DraftWorkflowApi(Resource):
             "hash": workflow.unique_hash,
             "updated_at": TimestampField().format(workflow.updated_at or workflow.created_at)
         }
+
+
+class DraftWorkflowImportApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    @get_app_model(mode=[AppMode.ADVANCED_CHAT, AppMode.WORKFLOW])
+    @marshal_with(workflow_fields)
+    def post(self, app_model: App):
+        """
+        Import draft workflow
+        """
+        # The role of the current user in the ta table must be admin, owner, or editor
+        if not current_user.is_editor:
+            raise Forbidden()
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('data', type=str, required=True, nullable=False, location='json')
+        args = parser.parse_args()
+
+        workflow_service = WorkflowService()
+        workflow = workflow_service.import_draft_workflow(
+            app_model=app_model,
+            data=args['data'],
+            account=current_user
+        )
+
+        return workflow
 
 
 class AdvancedChatDraftWorkflowRunApi(Resource):
@@ -251,7 +280,7 @@ class DraftWorkflowRunApi(Resource):
             )
 
             return helper.compact_generate_response(response)
-        except ValueError as e:
+        except (ValueError, AppInvokeQuotaExceededError) as e:
             raise e
         except Exception as e:
             logging.exception("internal server error.")
@@ -439,6 +468,7 @@ class ConvertToWorkflowApi(Resource):
 
 
 api.add_resource(DraftWorkflowApi, '/apps/<uuid:app_id>/workflows/draft')
+api.add_resource(DraftWorkflowImportApi, '/apps/<uuid:app_id>/workflows/draft/import')
 api.add_resource(AdvancedChatDraftWorkflowRunApi, '/apps/<uuid:app_id>/advanced-chat/workflows/draft/run')
 api.add_resource(DraftWorkflowRunApi, '/apps/<uuid:app_id>/workflows/draft/run')
 api.add_resource(WorkflowTaskStopApi, '/apps/<uuid:app_id>/workflow-runs/tasks/<string:task_id>/stop')

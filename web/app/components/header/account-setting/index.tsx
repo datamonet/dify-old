@@ -1,7 +1,6 @@
 'use client'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
-import cn from 'classnames'
 import {
   RiAccountCircleFill,
   RiAccountCircleLine,
@@ -30,6 +29,7 @@ import ApiBasedExtensionPage from './api-based-extension-page'
 import DataSourcePage from './data-source-page'
 import ModelProviderPage from './model-provider-page'
 import s from './index.module.css'
+import cn from '@/utils/classnames'
 import BillingPage from '@/app/components/billing/billing-page'
 import CustomPage from '@/app/components/custom/custom-page'
 import Modal from '@/app/components/base/modal'
@@ -66,9 +66,12 @@ export default function AccountSetting({
   const [activeMenu, setActiveMenu] = useState(activeTab)
   const { t } = useTranslation()
   const { enableBilling, enableReplaceWebAppLogo } = useProviderContext()
-  const { currentWorkspace } = useAppContext()
+  const { isCurrentWorkspaceDatasetOperator } = useAppContext()
+
 
   const workplaceGroupItems = (() => {
+    if (isCurrentWorkspaceDatasetOperator)
+      return []
     return [
       {
         key: 'provider',
@@ -175,29 +178,23 @@ export default function AccountSetting({
       className={s.modal}
       wrapperClassName='pt-[60px]'
     >
-      <div className="flex">
-        <div
-          className="w-[44px] sm:w-[200px] px-[1px] py-4 sm:p-4 border border-gray-100 shrink-0 sm:shrink-1 flex flex-col items-center sm:items-start">
-          <div className="mb-8 ml-0 sm:ml-2 text-sm sm:text-base font-medium leading-6 text-gray-900">
-            {t('common.userProfile.settings')}
-          </div>
-          <div className="w-full">
-            {menuItems.map(
-              menuItem =>
-                (currentWorkspace.role === 'owner'
-                  || menuItem.role !== 'owner') && (
-                  <div key={menuItem.key} className="mb-4">
-                    <div className="px-2 mb-[6px] text-[10px] sm:text-xs font-medium text-gray-500">
-                      {menuItem.name}
-                    </div>
-                    <div>
-                      {menuItem.items.map(item => (
-                        <>
-                          {(currentWorkspace.role === 'owner'
-                            || item.role !== 'owner') && (
-                            <div
-                              key={item.key}
-                              className={`
+
+      <div className='flex'>
+        <div className='w-[44px] sm:w-[200px] px-[1px] py-4 sm:p-4 border border-gray-100 shrink-0 sm:shrink-1 flex flex-col items-center sm:items-start'>
+          <div className='mb-8 ml-0 sm:ml-2 text-sm sm:text-base font-medium leading-6 text-gray-900'>{t('common.userProfile.settings')}</div>
+          <div className='w-full'>
+            {
+              menuItems.map(menuItem => (
+                <div key={menuItem.key} className='mb-4'>
+                  {!isCurrentWorkspaceDatasetOperator && (
+                    <div className='px-2 mb-[6px] text-[10px] sm:text-xs font-medium text-gray-500'>{menuItem.name}</div>
+                  )}
+                  <div>
+                    {
+                      menuItem.items.map(item => (
+                        <div
+                          key={item.key}
+                          className={`
                             flex items-center h-[37px] mb-[2px] text-sm cursor-pointer rounded-lg
                             ${activeMenu === item.key ? 'font-semibold text-primary-600 bg-primary-50' : 'font-light text-gray-700'}
                           `}
