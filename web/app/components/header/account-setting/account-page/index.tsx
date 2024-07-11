@@ -153,7 +153,6 @@ export default function AccountPage() {
         <div className='mb-8'>
           <div className='mb-1 text-sm font-medium text-gray-900'>{t('common.account.password')}</div>
           <div className='mb-2 text-xs text-gray-500'>{t('common.account.passwordTip')}</div>
-
           <Button onClick={() => setEditPasswordModalVisible(true)}>{userProfile.is_password_set ? t('common.account.resetPassword') : t('common.account.setPassword')}</Button>
         </div>
       )}
@@ -171,7 +170,6 @@ export default function AccountPage() {
         )}
         {!IS_CE_EDITION && <Button className='mt-2 text-[#D92D20]' onClick={() => setShowDeleteAccountModal(true)}>{t('common.account.delete')}</Button>}
       </div>
-
       {editNameModalVisible && (
         <Modal
           isShow
@@ -186,9 +184,7 @@ export default function AccountPage() {
             onChange={e => setEditName(e.target.value)}
           />
           <div className='flex justify-end mt-10'>
-
             <Button className='mr-2' onClick={() => setEditNameModalVisible(false)}>{t('common.operation.cancel')}</Button>
-
             <Button
               disabled={editing || !editName}
               variant='primary'

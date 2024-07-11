@@ -167,7 +167,6 @@ def load_user_from_request(request_from_flask_login):
         auth_scheme = auth_scheme.lower()
         if auth_scheme != 'bearer':
             raise Unauthorized('Invalid Authorization header format. Expected \'Bearer <api-key>\' format.')
-
     decoded = PassportService().verify(auth_token)
     # 此处为适应takin的mongo数据库，只查询固定的邮件用户
     email = decoded.get('email')

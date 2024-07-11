@@ -219,16 +219,13 @@ const ProviderDetail = ({
       <div className='flex gap-1 border-b-[0.5px] border-black/5'>
         {(collection.type === CollectionType.builtIn) && needAuth && (
           <Button
-
-            disabled={!isEdited}
             variant={isAuthed ? 'secondary' : 'primary'}
             className={cn('shrink-0 my-3 w-full', isAuthed && 'bg-white')}
-
             onClick={() => {
               if (collection.type === CollectionType.builtIn || collection.type === CollectionType.model)
                 showSettingAuthModal()
             }}
-
+            disabled={!isCurrentWorkspaceManager}
           >
             {isAuthed && <Indicator className='mr-2' color={'green'} />}
             <div className={cn('text-white leading-[18px] text-[13px] font-medium', isAuthed && '!text-gray-700')}>

@@ -18,11 +18,10 @@ import { TransferMethod, type VisionFile, type VisionSettings } from '@/types/ap
 import { NodeRunningStatus, WorkflowRunningStatus } from '@/app/components/workflow/types'
 import type { WorkflowProcess } from '@/app/components/base/chat/types'
 import { sleep } from '@/utils'
+import type { SiteInfo } from '@/models/share'
 
 import { updateUserCreditsWithTotalToken } from '@/app/api/pricing'
 import { useAppContext } from '@/context/app-context'
-
-import type { SiteInfo } from '@/models/share'
 
 export type IResultProps = {
   isWorkflow: boolean

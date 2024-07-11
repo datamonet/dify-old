@@ -216,10 +216,13 @@ class AccountService:
         redis_client.delete(_get_login_cache_key(account_id=account.id, token=token))
 
     @staticmethod
+
     def load_logged_in_account(*, email: str, token: str):
         # if not redis_client.get(_get_login_cache_key(account_id=account_id, token=token)):
         #     return None
+        # takin command:检查用户不使用id，使用email
         return AccountService.load_user(email)
+
 
 def _get_login_cache_key(*, account_id: str, token: str):
     return f"account_login:{account_id}:{token}"

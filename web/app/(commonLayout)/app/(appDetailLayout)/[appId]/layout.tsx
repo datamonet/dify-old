@@ -9,6 +9,8 @@ import {
   RiDashboard2Line,
   RiFileList3Fill,
   RiFileList3Line,
+  RiTerminalBoxFill,
+  RiTerminalBoxLine,
   RiTerminalWindowFill,
   RiTerminalWindowLine,
 } from '@remixicon/react'
@@ -82,6 +84,24 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
         : []
       ),
       {
+
+        name: t('common.appMenus.apiAccess'),
+        href: `/app/${appId}/develop`,
+        icon: RiTerminalBoxLine,
+        selectedIcon: RiTerminalBoxFill,
+      },
+      ...(isCurrentWorkspaceManager
+        ? [{
+          name: mode !== 'workflow'
+            ? t('common.appMenus.logAndAnn')
+            : t('common.appMenus.logs'),
+          href: `/app/${appId}/logs`,
+          icon: RiFileList3Line,
+          selectedIcon: RiFileList3Fill,
+        }]
+        : []
+      ),
+      {
         name: t('common.appMenus.overview'),
         href: `/app/${appId}/overview`,
         icon: RiDashboard2Line,
@@ -113,7 +133,7 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
         router.replace(`/app/${appId}/configuration`)
       }
       else {
-        setAppDetail({ ...res, enable_api: false, enable_site: false })
+        setAppDetail(res)
         setNavigation(getNavigations(appId, isCurrentWorkspaceManager, isCurrentWorkspaceEditor, res.mode))
       }
     }).catch((e: any) => {

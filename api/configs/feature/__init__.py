@@ -95,7 +95,7 @@ class FileUploadConfigs(BaseModel):
     """
     UPLOAD_FILE_SIZE_LIMIT: NonNegativeInt = Field(
         description='size limit in Megabytes for uploading files',
-        default=100,
+        default=100, # takin command:上传文件的默认大小改到100
     )
 
     UPLOAD_FILE_BATCH_LIMIT: NonNegativeInt = Field(

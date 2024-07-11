@@ -134,8 +134,7 @@ export default function AccountSetting({
         {
           key: 'integrations',
           name: t('common.settings.integrations'),
-
-          role: 'owner',
+          role: 'owner', // takin command:用户权限过滤
           icon: <RiApps2AddLine className={iconClassName} />,
           activeIcon: <RiApps2AddFill className={iconClassName} />,
 
@@ -233,7 +232,6 @@ export default function AccountSetting({
             <div className='grow flex justify-end'>
               <div className='flex items-center justify-center -mr-4 w-6 h-6 cursor-pointer' onClick={onCancel}>
                 <RiCloseLine className='w-4 h-4 text-gray-400' />
-
               </div>
             </div>
           </div>

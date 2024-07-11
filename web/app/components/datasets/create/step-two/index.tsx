@@ -47,7 +47,6 @@ import TooltipPlus from '@/app/components/base/tooltip-plus'
 import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
 import { LanguagesSupported } from '@/i18n/language'
 import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-
 import { updateUserCreditsWithUSD } from '@/app/api/pricing'
 import AppContext from '@/context/app-context'
 
@@ -903,14 +902,14 @@ const StepTwo = ({
                   <Button onClick={() => onStepChange && onStepChange(-1)}>{t('datasetCreation.stepTwo.previousStep')}</Button>
                   <div className={s.divider} />
 
-                  <Button loading={isCreating} disabled={!estimateTokes?.total_price} variant='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.nextStep')}</Button>
+                  <Button loading={isCreating} variant='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.nextStep')}</Button>
 
                 </div>
               )
               : (
                 <div className='flex items-center mt-8 py-2'>
 
-                  <Button loading={isCreating} disabled={!estimateTokes?.total_price} variant='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.save')}</Button>
+                  <Button loading={isCreating} variant='primary' onClick={createHandle}>{t('datasetCreation.stepTwo.save')}</Button>
 
                   <Button className='ml-2' onClick={onCancel}>{t('datasetCreation.stepTwo.cancel')}</Button>
                 </div>

@@ -130,6 +130,7 @@ const StepOne = ({
           )
         }
         <div className={s.form}>
+          {/* -----takin command------ */}
           {/* { */}
           {/*  shouldShowDataSourceTypeList && ( */}
           {/*    <div className='flex items-center mb-8 flex-wrap gap-y-4'> */}
@@ -147,40 +148,41 @@ const StepOne = ({
           {/*          hideNotionPagePreview() */}
           {/*        }} */}
           {/*      > */}
-          {/*        <span className={cn(s.datasetIcon)}/> */}
+          {/*        <span className={cn(s.datasetIcon)} /> */}
           {/*        {t('datasetCreation.stepOne.dataSourceType.file')} */}
           {/*      </div> */}
-
-          {/*      /!* takin.ai comment *!/ */}
-
-          {/*      /!* <div *!/ */}
-          {/*      /!*  className={cn( *!/ */}
-          {/*      /!*    s.dataSourceItem, *!/ */}
-          {/*      /!*    dataSourceType === DataSourceType.NOTION && s.active, *!/ */}
-          {/*      /!*    dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled, *!/ */}
-          {/*      /!*  )} *!/ */}
-          {/*      /!*  onClick={() => { *!/ */}
-          {/*      /!*    if (dataSourceTypeDisable) *!/ */}
-          {/*      /!*      return *!/ */}
-          {/*      /!*    changeType(DataSourceType.NOTION) *!/ */}
-          {/*      /!*    hideFilePreview() *!/ */}
-          {/*      /!*    hideNotionPagePreview() *!/ */}
-          {/*      /!*  }} *!/ */}
-          {/*      /!* > *!/ */}
-          {/*      /!*  <span className={cn(s.datasetIcon, s.notion)} /> *!/ */}
-          {/*      /!*  {t('datasetCreation.stepOne.dataSourceType.notion')} *!/ */}
-          {/*      /!* </div> *!/ */}
-          {/*      /!* <div *!/ */}
-          {/*      /!*  className={cn(s.dataSourceItem, s.disabled, dataSourceType === DataSourceType.WEB && s.active)} *!/ */}
-          {/*      /!* // onClick={() => changeType(DataSourceType.WEB)} *!/ */}
-          {/*      /!* > *!/ */}
-          {/*      /!*  <span className={s.comingTag}>Coming soon</span> *!/ */}
-          {/*      /!*  <span className={cn(s.datasetIcon, s.web)} /> *!/ */}
-          {/*      /!*  {t('datasetCreation.stepOne.dataSourceType.web')} *!/ */}
-          {/*      /!* </div> *!/ */}
+          {/*      <div */}
+          {/*        className={cn( */}
+          {/*          s.dataSourceItem, */}
+          {/*          dataSourceType === DataSourceType.NOTION && s.active, */}
+          {/*          dataSourceTypeDisable && dataSourceType !== DataSourceType.NOTION && s.disabled, */}
+          {/*        )} */}
+          {/*        onClick={() => { */}
+          {/*          if (dataSourceTypeDisable) */}
+          {/*            return */}
+          {/*          changeType(DataSourceType.NOTION) */}
+          {/*          hideFilePreview() */}
+          {/*          hideNotionPagePreview() */}
+          {/*        }} */}
+          {/*      > */}
+          {/*        <span className={cn(s.datasetIcon, s.notion)} /> */}
+          {/*        {t('datasetCreation.stepOne.dataSourceType.notion')} */}
+          {/*      </div> */}
+          {/*      <div */}
+          {/*        className={cn( */}
+          {/*          s.dataSourceItem, */}
+          {/*          dataSourceType === DataSourceType.WEB && s.active, */}
+          {/*          dataSourceTypeDisable && dataSourceType !== DataSourceType.WEB && s.disabled, */}
+          {/*        )} */}
+          {/*        onClick={() => changeType(DataSourceType.WEB)} */}
+          {/*      > */}
+          {/*        <span className={cn(s.datasetIcon, s.web)} /> */}
+          {/*        {t('datasetCreation.stepOne.dataSourceType.web')} */}
+          {/*      </div> */}
           {/*    </div> */}
           {/*  ) */}
           {/* } */}
+
           {dataSourceType === DataSourceType.FILE && (
             <>
               <FileUploader
@@ -197,8 +199,10 @@ const StepOne = ({
                   <VectorSpaceFull/>
                 </div>
               )}
+
               <Button disabled={nextDisabled} className={s.submitButton} variant='primary'
                 onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+
             </>
           )}
           {dataSourceType === DataSourceType.NOTION && (
@@ -218,8 +222,10 @@ const StepOne = ({
                       <VectorSpaceFull/>
                     </div>
                   )}
+
                   <Button disabled={isShowVectorSpaceFull || !notionPages.length} className={s.submitButton}
                     variant='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+
                 </>
               )}
             </>
@@ -238,11 +244,13 @@ const StepOne = ({
               </div>
               {isShowVectorSpaceFull && (
                 <div className='max-w-[640px] mb-4'>
+
                   <VectorSpaceFull/>
                 </div>
               )}
               <Button disabled={isShowVectorSpaceFull || !websitePages.length} className={s.submitButton}
                 variant='primary' onClick={onStepChange}>{t('datasetCreation.stepOne.button')}</Button>
+
             </>
           )}
           {!datasetId && (
@@ -255,9 +263,11 @@ const StepOne = ({
         </div>
         <EmptyDatasetCreationModal show={showModal} onHide={modalCloseHandle}/>
       </div>
+
       {currentFile && <FilePreview file={currentFile} hidePreview={hideFilePreview}/>}
       {currentNotionPage && <NotionPagePreview currentPage={currentNotionPage} hidePreview={hideNotionPagePreview}/>}
       {currentWebsite && <WebsitePreview payload={currentWebsite} hidePreview={hideWebsitePreview}/>}
+
     </div>
   )
 }
