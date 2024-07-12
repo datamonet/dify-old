@@ -178,7 +178,7 @@ class OAICompatEmbeddingModel(_CommonOAI_API_Compat, TextEmbeddingModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise CredentialsValidateFailedError('Credentials validation failed: JSON decode error')
 
             if 'model' not in json_result:

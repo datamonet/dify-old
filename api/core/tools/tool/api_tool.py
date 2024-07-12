@@ -109,9 +109,9 @@ class ApiTool(Tool):
                 response = response.json()
                 try:
                     return json.dumps(response, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     return json.dumps(response)
-            except Exception as e:
+            except Exception:
                 return response.text
         else:
             raise ValueError(f'Invalid response type {type(response)}')
@@ -266,7 +266,7 @@ class ApiTool(Tool):
                     raise ValueError(f"Invalid type {property['type']} for property {property}")
             elif 'anyOf' in property and isinstance(property['anyOf'], list):
                 return self._convert_body_property_any_of(property, value, property['anyOf'])
-        except ValueError as e:
+        except ValueError:
             return value
 
     def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:

@@ -174,7 +174,7 @@ class AdvancedChatDraftWorkflowRunApi(Resource):
             raise ConversationCompletedError()
         except ValueError as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -211,7 +211,7 @@ class AdvancedChatDraftRunIterationNodeApi(Resource):
             raise ConversationCompletedError()
         except ValueError as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -248,7 +248,7 @@ class WorkflowDraftRunIterationNodeApi(Resource):
             raise ConversationCompletedError()
         except ValueError as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -282,7 +282,7 @@ class DraftWorkflowRunApi(Resource):
             return helper.compact_generate_response(response)
         except (ValueError, AppInvokeQuotaExceededError) as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 

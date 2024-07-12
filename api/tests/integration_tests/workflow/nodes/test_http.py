@@ -6,7 +6,6 @@ from core.app.entities.app_invoke_entities import InvokeFrom
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.nodes.base_node import UserFrom
 from core.workflow.nodes.http_request.http_request_node import HttpRequestNode
-from tests.integration_tests.workflow.nodes.__mock.http import setup_http_mock
 
 BASIC_NODE_DATA = {
     'tenant_id': '1',

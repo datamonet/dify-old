@@ -191,7 +191,7 @@ class WorkflowTool(Tool):
                         try:
                             files.append(FileVar(**item))
                             has_file = True
-                        except Exception as e:
+                        except Exception:
                             pass
                 if has_file:
                     continue

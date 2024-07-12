@@ -357,7 +357,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
             try:
                 chunk_json = json.loads(chunk)
                 # stream ended
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 yield create_final_llm_result_chunk(
                     index=chunk_index,
                     message=AssistantPromptMessage(content=""),

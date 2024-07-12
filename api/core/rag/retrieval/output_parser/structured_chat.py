@@ -21,5 +21,5 @@ class StructuredChatOutputParser:
                     )
             else:
                 return ReactFinish({"output": text}, text)
-        except Exception as e:
+        except Exception:
             raise ValueError(f"Could not parse LLM output: {text}")

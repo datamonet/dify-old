@@ -112,7 +112,7 @@ class StableDiffusionTool(BuiltinTool):
             }))
             if response.status_code != 200:
                 raise ToolProviderCredentialValidationError('Failed to set model, please tell user to set model')
-        except Exception as e:
+        except Exception:
             raise ToolProviderCredentialValidationError('Failed to set model, please tell user to set model')
 
         # get image id and image variable
@@ -176,7 +176,7 @@ class StableDiffusionTool(BuiltinTool):
                 return []
             else:
                 return [d['model_name'] for d in response.json()]
-        except Exception as e:
+        except Exception:
             return []
 
     def img2img(self, base_url: str, tool_parameters: dict[str, Any]) \
@@ -250,7 +250,7 @@ class StableDiffusionTool(BuiltinTool):
                                             meta={ 'mime_type': 'image/png' },
                                             save_as=self.VARIABLE_KEY.IMAGE.value)
             
-        except Exception as e:
+        except Exception:
             return self.create_text_message('Failed to generate image')
 
     def text2img(self, base_url: str, tool_parameters: dict[str, Any]) \
@@ -284,7 +284,7 @@ class StableDiffusionTool(BuiltinTool):
                                             meta={ 'mime_type': 'image/png' },
                                             save_as=self.VARIABLE_KEY.IMAGE.value)
             
-        except Exception as e:
+        except Exception:
             return self.create_text_message('Failed to generate image')
 
     def get_runtime_parameters(self) -> list[ToolParameter]:

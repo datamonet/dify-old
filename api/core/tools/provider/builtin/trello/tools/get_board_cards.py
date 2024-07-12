@@ -35,7 +35,7 @@ class GetBoardCardsTool(BuiltinTool):
             response = requests.get(url)
             response.raise_for_status()
             cards = response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to retrieve board cards")
 
         cards_summary = "\n".join([f"{card['name']} (ID: {card['id']})" for card in cards])

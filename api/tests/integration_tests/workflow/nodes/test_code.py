@@ -7,7 +7,6 @@ from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.nodes.base_node import UserFrom
 from core.workflow.nodes.code.code_node import CodeNode
 from models.workflow import WorkflowNodeExecutionStatus
-from tests.integration_tests.workflow.nodes.__mock.code_executor import setup_code_executor_mock
 
 CODE_MAX_STRING_LENGTH = int(getenv('CODE_MAX_STRING_LENGTH', '10000'))
 

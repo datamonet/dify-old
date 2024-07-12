@@ -36,7 +36,7 @@ class FirecrawlApp:
                 response = requests.request(method, url, json=data, headers=headers)
                 response.raise_for_status()
                 return response.json()
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.RequestException:
                 if i < retries - 1:
                     time.sleep(backoff_factor * (2 ** i))
                 else:

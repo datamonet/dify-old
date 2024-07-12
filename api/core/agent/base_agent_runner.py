@@ -341,7 +341,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_input, dict):
                 try:
                     tool_input = json.dumps(tool_input, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     tool_input = json.dumps(tool_input)
 
             agent_thought.tool_input = tool_input
@@ -350,7 +350,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(observation, dict):
                 try:
                     observation = json.dumps(observation, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     observation = json.dumps(observation)
                     
             agent_thought.observation = observation
@@ -390,7 +390,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_invoke_meta, dict):
                 try:
                     tool_invoke_meta = json.dumps(tool_invoke_meta, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     tool_invoke_meta = json.dumps(tool_invoke_meta)
 
             agent_thought.tool_meta_str = tool_invoke_meta
@@ -440,11 +440,11 @@ class BaseAgentRunner(AppRunner):
                         tool_call_response: list[ToolPromptMessage] = []
                         try:
                             tool_inputs = json.loads(agent_thought.tool_input)
-                        except Exception as e:
+                        except Exception:
                             tool_inputs = { tool: {} for tool in tools }
                         try:
                             tool_responses = json.loads(agent_thought.observation)
-                        except Exception as e:
+                        except Exception:
                             tool_responses = { tool: agent_thought.observation for tool in tools }
 
                         for tool in tools:

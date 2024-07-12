@@ -345,7 +345,7 @@ class ApiToolManageService:
 
         try:
             tool_bundles, _ = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(schema)
-        except Exception as e:
+        except Exception:
             raise ValueError('invalid schema')
 
         # get tool bundle

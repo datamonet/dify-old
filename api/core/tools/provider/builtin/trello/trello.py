@@ -23,13 +23,13 @@ class TrelloProvider(BuiltinToolProviderController):
         try:
             response = requests.get(url)
             response.raise_for_status()  # Raises an HTTPError for bad responses
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError:
             if response.status_code == 401:
                 # Unauthorized, indicating invalid credentials
                 raise ToolProviderCredentialValidationError("Invalid Trello credentials: Unauthorized.")
             # Handle other potential HTTP errors
             raise ToolProviderCredentialValidationError("Error validating Trello credentials")
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             # Handle other exceptions, such as connection errors
             raise ToolProviderCredentialValidationError("Error validating Trello credentials")
         

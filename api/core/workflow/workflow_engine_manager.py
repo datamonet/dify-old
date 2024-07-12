@@ -317,7 +317,7 @@ class WorkflowEngineManager:
                     callbacks=callbacks
                 )
                 return
-        except GenerateTaskStoppedException as e:
+        except GenerateTaskStoppedException:
             return
         except Exception as e:
             self._workflow_run_failed(
@@ -825,7 +825,7 @@ class WorkflowEngineManager:
             node_run_result = node.run(
                 variable_pool=workflow_run_state.variable_pool
             )
-        except GenerateTaskStoppedException as e:
+        except GenerateTaskStoppedException:
             node_run_result = NodeRunResult(
                 status=WorkflowNodeExecutionStatus.FAILED,
                 error='Workflow stopped.'

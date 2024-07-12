@@ -157,7 +157,7 @@ class AppService:
         """
         try:
             import_data = yaml.safe_load(data)
-        except yaml.YAMLError as e:
+        except yaml.YAMLError:
             raise ValueError("Invalid YAML format in data argument.")
 
         app_data = import_data.get('app')
@@ -299,7 +299,7 @@ class AppService:
 
                     # override tool parameters
                     tool['tool_parameters'] = masked_parameter
-                except Exception as e:
+                except Exception:
                     pass
 
             # override agent mode

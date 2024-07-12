@@ -39,7 +39,7 @@ class UpdateBoardByIdTool(BuiltinTool):
         try:
             response = requests.put(url, params=params)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to update board")
 
         updated_board = response.json()

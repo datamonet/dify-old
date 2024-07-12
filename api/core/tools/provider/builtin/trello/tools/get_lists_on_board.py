@@ -35,7 +35,7 @@ class GetListsFromBoardTool(BuiltinTool):
             response = requests.get(url)
             response.raise_for_status()
             lists = response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to retrieve lists")
 
         lists_info = "\n".join([f"{list['name']} (ID: {list['id']})" for list in lists])

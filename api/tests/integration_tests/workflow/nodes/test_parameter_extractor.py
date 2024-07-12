@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Optional
 from unittest.mock import MagicMock
@@ -8,7 +7,6 @@ import pytest
 from core.app.entities.app_invoke_entities import InvokeFrom, ModelConfigWithCredentialsEntity
 from core.entities.provider_configuration import ProviderConfiguration, ProviderModelBundle
 from core.entities.provider_entities import CustomConfiguration, CustomProviderConfiguration, SystemConfiguration
-from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.model_providers.model_provider_factory import ModelProviderFactory
@@ -21,8 +19,6 @@ from models.provider import ProviderType
 
 """FOR MOCK FIXTURES, DO NOT REMOVE"""
 from models.workflow import WorkflowNodeExecutionStatus
-from tests.integration_tests.model_runtime.__mock.anthropic import setup_anthropic_mock
-from tests.integration_tests.model_runtime.__mock.openai import setup_openai_mock
 
 
 def get_mocked_fetch_model_config(

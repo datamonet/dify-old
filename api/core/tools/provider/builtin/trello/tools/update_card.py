@@ -37,7 +37,7 @@ class UpdateCardByIdTool(BuiltinTool):
         try:
             response = requests.put(url, params=params)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to update card")
 
         updated_card_info = f"Card '{card_id}' updated successfully."

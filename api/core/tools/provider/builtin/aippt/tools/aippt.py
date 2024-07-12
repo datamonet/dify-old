@@ -179,7 +179,7 @@ class AIPPTGenerateTool(BuiltinTool):
                         try:
                             data = json_loads(data)
                             outline += data.get('content', '')
-                        except Exception as e:
+                        except Exception:
                             pass
                     elif event == 'close':
                         break
@@ -226,7 +226,7 @@ class AIPPTGenerateTool(BuiltinTool):
                             try:
                                 data = json_loads(data)
                                 content += data.get('content', '')
-                            except Exception as e:
+                            except Exception:
                                 pass
                         elif event == 'close':
                             break
@@ -505,7 +505,7 @@ class AIPPTGenerateTool(BuiltinTool):
         """
         try:
             colors, styles = self.get_styles(user_id='__dify_system__')
-        except Exception as e:
+        except Exception:
             colors, styles = [
                 {'id': '-1', 'name': '__default__', 'en_name': '__default__'}
             ], [

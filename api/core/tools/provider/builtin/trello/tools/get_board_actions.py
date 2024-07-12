@@ -35,7 +35,7 @@ class GetBoardActionsTool(BuiltinTool):
             response = requests.get(url)
             response.raise_for_status()
             actions = response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to retrieve board actions")
 
         actions_summary = "\n".join([f"{action['type']}: {action.get('data', {}).get('text', 'No details available')}" for action in actions])

@@ -94,7 +94,7 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
                     prompt='Who are you?',
                     stream=True,
                     model=model)
-            except BadRequestError as e:
+            except BadRequestError:
                 raise CredentialsValidateFailedError('Only available for models running on with the `text-generation-inference`. '
                                                      'To learn more about the TGI project, please refer to https://github.com/huggingface/text-generation-inference.')
         except Exception as ex:

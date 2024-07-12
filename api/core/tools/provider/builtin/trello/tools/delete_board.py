@@ -34,7 +34,7 @@ class DeleteBoardTool(BuiltinTool):
         try:
             response = requests.delete(url)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to delete board")
 
         return self.create_text_message(text=f"Board with ID {board_id} deleted successfully.")

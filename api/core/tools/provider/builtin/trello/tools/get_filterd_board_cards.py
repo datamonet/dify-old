@@ -36,7 +36,7 @@ class GetFilteredBoardCardsTool(BuiltinTool):
             response = requests.get(url)
             response.raise_for_status()
             filtered_cards = response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to retrieve filtered cards")
 
         card_details = "\n".join([f"{card['name']} (ID: {card['id']})" for card in filtered_cards])

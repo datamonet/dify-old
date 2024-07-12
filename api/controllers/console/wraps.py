@@ -116,7 +116,7 @@ def cloud_utm_record(view):
                 if utm_info:
                     utm_info = json.loads(utm_info)
                     OperationService.record_utm(current_user.current_tenant_id, utm_info)
-        except Exception as e:
+        except Exception:
             pass
         return view(*args, **kwargs)
 

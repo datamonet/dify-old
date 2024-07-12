@@ -147,7 +147,7 @@ class DatasetDocumentListApi(Resource):
         # "yes", "true", "t", "y", "1" convert to True, while others convert to False.
         try:
             fetch = string_to_bool(request.args.get('fetch', default='false'))
-        except (ArgumentTypeError, ValueError, Exception) as e:
+        except (ArgumentTypeError, ValueError, Exception):
             fetch = False
         dataset = DatasetService.get_dataset(dataset_id)
         if not dataset:

@@ -48,7 +48,7 @@ class XinferenceHelper:
                 expired_keys = [model_uid for model_uid, model in cache.items() if model['expires'] < time()]
                 for model_uid in expired_keys:
                     del cache[model_uid]
-        except RuntimeError as e:
+        except RuntimeError:
             pass
 
     @staticmethod

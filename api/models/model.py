@@ -1255,7 +1255,7 @@ class MessageAgentThought(db.Model):
                 return json.loads(self.tool_labels_str)
             else:
                 return {}
-        except Exception as e:
+        except Exception:
             return {}
 
     @property
@@ -1265,7 +1265,7 @@ class MessageAgentThought(db.Model):
                 return json.loads(self.tool_meta_str)
             else:
                 return {}
-        except Exception as e:
+        except Exception:
             return {}
 
     @property
@@ -1288,7 +1288,7 @@ class MessageAgentThought(db.Model):
                 return {
                     tool: {} for tool in tools
                 }
-        except Exception as e:
+        except Exception:
             return {}
 
     @property
@@ -1311,7 +1311,7 @@ class MessageAgentThought(db.Model):
                 return {
                     tool: {} for tool in tools
                 }
-        except Exception as e:
+        except Exception:
             if self.observation:
                 return {
                     tool: self.observation for tool in tools

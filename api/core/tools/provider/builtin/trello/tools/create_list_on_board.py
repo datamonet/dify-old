@@ -40,7 +40,7 @@ class CreateListOnBoardTool(BuiltinTool):
         try:
             response = requests.post(url, params=params)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             return self.create_text_message("Failed to create list")
 
         new_list = response.json()

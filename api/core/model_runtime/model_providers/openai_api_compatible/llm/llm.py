@@ -147,7 +147,7 @@ class OAIAPICompatLargeLanguageModel(_CommonOAI_API_Compat, LargeLanguageModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise CredentialsValidateFailedError('Credentials validation failed: JSON decode error')
 
             if (completion_type is LLMMode.CHAT and json_result['object'] == ''):
@@ -441,7 +441,7 @@ class OAIAPICompatLargeLanguageModel(_CommonOAI_API_Compat, LargeLanguageModel):
                 try:
                     chunk_json = json.loads(decoded_chunk)
                 # stream ended
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     yield create_final_llm_result_chunk(
                         index=chunk_index + 1,
                         message=AssistantPromptMessage(content=""),

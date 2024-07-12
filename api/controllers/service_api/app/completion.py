@@ -76,7 +76,7 @@ class CompletionApi(Resource):
             raise CompletionRequestError(e.description)
         except (ValueError, AppInvokeQuotaExceededError) as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -139,7 +139,7 @@ class ChatApi(Resource):
             raise CompletionRequestError(e.description)
         except (ValueError, AppInvokeQuotaExceededError) as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 

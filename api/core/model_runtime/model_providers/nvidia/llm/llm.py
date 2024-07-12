@@ -147,7 +147,7 @@ class NVIDIALargeLanguageModel(OAIAPICompatLargeLanguageModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise CredentialsValidateFailedError('Credentials validation failed: JSON decode error')
         except CredentialsValidateFailedError:
             raise

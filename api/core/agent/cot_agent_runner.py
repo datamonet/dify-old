@@ -351,7 +351,7 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         for key, value in inputs.items():
             try:
                 instruction = instruction.replace(f'{{{{{key}}}}}', str(value))
-            except Exception as e:
+            except Exception:
                 continue
 
         return instruction

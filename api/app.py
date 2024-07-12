@@ -26,7 +26,6 @@ from werkzeug.exceptions import Unauthorized
 from commands import register_commands
 
 # DO NOT REMOVE BELOW
-from events import event_handlers
 from extensions import (
     ext_celery,
     ext_code_based_extension,
@@ -45,7 +44,6 @@ from extensions.ext_login import login_manager
 from libs.passport import PassportService
 
 # TODO: Find a way to avoid importing models here
-from models import account, dataset, model, source, task, tool, tools, web
 from services.account_service import AccountService
 
 # DO NOT REMOVE ABOVE

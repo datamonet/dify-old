@@ -123,7 +123,7 @@ class FunctionCallAgentRunner(BaseAgentRunner):
                             tool_call_inputs = json.dumps({
                                 tool_call[1]: tool_call[2] for tool_call in tool_calls
                             }, ensure_ascii=False)
-                        except json.JSONDecodeError as e:
+                        except json.JSONDecodeError:
                             # ensure ascii to avoid encoding error
                             tool_call_inputs = json.dumps({
                                 tool_call[1]: tool_call[2] for tool_call in tool_calls
@@ -152,7 +152,7 @@ class FunctionCallAgentRunner(BaseAgentRunner):
                         tool_call_inputs = json.dumps({
                             tool_call[1]: tool_call[2] for tool_call in tool_calls
                         }, ensure_ascii=False)
-                    except json.JSONDecodeError as e:
+                    except json.JSONDecodeError:
                         # ensure ascii to avoid encoding error
                         tool_call_inputs = json.dumps({
                             tool_call[1]: tool_call[2] for tool_call in tool_calls

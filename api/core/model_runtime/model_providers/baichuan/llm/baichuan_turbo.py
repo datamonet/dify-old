@@ -85,7 +85,7 @@ class BaichuanModel:
                 line = line[5:].strip()
             try:
                 data = loads(line)
-            except Exception as e:
+            except Exception:
                 if line.strip() == '[DONE]':
                     return
             choices = data.get('choices', [])

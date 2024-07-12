@@ -525,7 +525,7 @@ def add_qdrant_doc_id_index(field: str):
                 else:
                     click.echo(click.style(f'Failed to create qdrant index, collection_name:{binding.collection_name}.', fg='red'))
 
-    except Exception as e:
+    except Exception:
         click.echo(click.style('Failed to create qdrant client.', fg='red'))
 
     click.echo(

@@ -250,7 +250,7 @@ class MoonshotLargeLanguageModel(OAIAPICompatLargeLanguageModel):
                 try:
                     chunk_json = json.loads(decoded_chunk)
                 # stream ended
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     yield create_final_llm_result_chunk(
                         index=chunk_index + 1,
                         message=AssistantPromptMessage(content=""),

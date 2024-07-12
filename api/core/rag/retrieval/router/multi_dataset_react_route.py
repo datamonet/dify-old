@@ -74,7 +74,7 @@ class ReactMultiDatasetRouter:
             return self._react_invoke(query=query, model_config=model_config,
                                       model_instance=model_instance,
                                       tools=dataset_tools, user_id=user_id, tenant_id=tenant_id)
-        except Exception as e:
+        except Exception:
             return None
 
     def _react_invoke(
