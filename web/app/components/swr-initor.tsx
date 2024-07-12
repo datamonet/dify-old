@@ -35,16 +35,16 @@ const SwrInitor = ({
   }
 
   useEffect(() => {
-    // if (token)
-    localStorage?.setItem('console_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZheWVfMTIyNUAxNjMuY29tIiwiZXhwIjoxNzIzMzU3NzE4LCJpc3MiOiJTRUxGX0hPU1RFRCIsInN1YiI6IkNvbnNvbGUgQVBJIFBhc3Nwb3J0In0.wxhO5phtMD6j1wfoOAxqEAtmS7MrGrErbq37WjPIEp8')
-    // else
-    //   localStorage?.removeItem('console_token')
-    // // takin.ai: 防止重定向速度太快，再查询一次cookie
-    // if (!(consoleToken || consoleTokenFromLocalStorage))
-    //   handleConsoleToken()
+    if (token)
+      localStorage?.setItem('console_token', token)
+    else
+      localStorage?.removeItem('console_token')
+    // takin.ai: 防止重定向速度太快，再查询一次cookie
+    if (!(consoleToken || consoleTokenFromLocalStorage))
+      handleConsoleToken()
 
     if (consoleToken) {
-      localStorage?.setItem('console_token', consoleToken)
+      localStorage?.setItem('console_token', consoleToken!)
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
     }
     setInit(true)
