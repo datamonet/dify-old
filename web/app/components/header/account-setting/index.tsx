@@ -67,8 +67,6 @@ export default function AccountSetting({
   const { t } = useTranslation()
   const { enableBilling, enableReplaceWebAppLogo } = useProviderContext()
   const { isCurrentWorkspaceDatasetOperator } = useAppContext()
-
-
   const workplaceGroupItems = (() => {
     if (isCurrentWorkspaceDatasetOperator)
       return []
@@ -173,12 +171,10 @@ export default function AccountSetting({
   return (
     <Modal
       isShow
-      onClose={() => {
-      }}
+      onClose={() => { }}
       className={s.modal}
       wrapperClassName='pt-[60px]'
     >
-
       <div className='flex'>
         <div className='w-[44px] sm:w-[200px] px-[1px] py-4 sm:p-4 border border-gray-100 shrink-0 sm:shrink-1 flex flex-col items-center sm:items-start'>
           <div className='mb-8 ml-0 sm:ml-2 text-sm sm:text-base font-medium leading-6 text-gray-900'>{t('common.userProfile.settings')}</div>
@@ -198,26 +194,20 @@ export default function AccountSetting({
                             flex items-center h-[37px] mb-[2px] text-sm cursor-pointer rounded-lg
                             ${activeMenu === item.key ? 'font-semibold text-primary-600 bg-primary-50' : 'font-light text-gray-700'}
                           `}
-                              title={item.name}
-                              onClick={() => setActiveMenu(item.key)}
-                            >
-                              {activeMenu === item.key
-                                ? item.activeIcon
-                                : item.icon}
-                              {!isMobile && (
-                                <div className="truncate">{item.name}</div>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      ))}
-                    </div>
+                          title={item.name}
+                          onClick={() => setActiveMenu(item.key)}
+                        >
+                          {activeMenu === item.key ? item.activeIcon : item.icon}
+                          {!isMobile && <div className='truncate'>{item.name}</div>}
+                        </div>
+                      ))
+                    }
                   </div>
-                ),
-            )}
+                </div>
+              ))
+            }
           </div>
         </div>
-
         <div ref={scrollRef} className='relative w-[824px] h-[720px] pb-4 overflow-y-auto'>
           <div className={cn('sticky top-0 px-6 py-4 flex items-center h-14 mb-4 bg-white text-base font-medium text-gray-900 z-20', scrolled && scrolledClassName)}>
             <div className='shrink-0'>{activeItem?.name}</div>
@@ -232,16 +222,16 @@ export default function AccountSetting({
               </div>
             </div>
           </div>
-          <div className="px-4 sm:px-8 pt-2">
-            {activeMenu === 'account' && <AccountPage/>}
-            {activeMenu === 'members' && <MembersPage/>}
-            {activeMenu === 'billing' && <BillingPage/>}
-            {activeMenu === 'integrations' && <IntegrationsPage/>}
-            {activeMenu === 'language' && <LanguagePage/>}
-            {activeMenu === 'provider' && <ModelProviderPage/>}
-            {activeMenu === 'data-source' && <DataSourcePage/>}
-            {activeMenu === 'api-based-extension' && <ApiBasedExtensionPage/>}
-            {activeMenu === 'custom' && <CustomPage/>}
+          <div className='px-4 sm:px-8 pt-2'>
+            {activeMenu === 'account' && <AccountPage />}
+            {activeMenu === 'members' && <MembersPage />}
+            {activeMenu === 'billing' && <BillingPage />}
+            {activeMenu === 'integrations' && <IntegrationsPage />}
+            {activeMenu === 'language' && <LanguagePage />}
+            {activeMenu === 'provider' && <ModelProviderPage />}
+            {activeMenu === 'data-source' && <DataSourcePage />}
+            {activeMenu === 'api-based-extension' && <ApiBasedExtensionPage />}
+            {activeMenu === 'custom' && <CustomPage />}
           </div>
         </div>
       </div>
