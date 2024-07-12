@@ -158,7 +158,6 @@ python = "^3.10"
 python-docx = "~1.1.0"
 python-dotenv = "1.0.0"
 pyyaml = "~6.0.1"
-pymongo = "~4.7.2"
 readabilipy = "0.2.0"
 redis = { version = "~5.0.3", extras = ["hiredis"] }
 replicate = "~0.22.0"
@@ -180,6 +179,7 @@ zhipuai = "1.0.7"
 ############################################################
 # Tool dependencies required by tool implementations
 ############################################################
+pymongo = "^4.8.0"
 
 [tool.poetry.group.tool.dependencies]
 arxiv = "2.1.0"
