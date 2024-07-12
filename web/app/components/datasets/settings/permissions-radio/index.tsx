@@ -47,6 +47,7 @@ const PermissionsRadio = ({
               s.item,
               option.key === value && s['item-active'],
               disable && s.disable,
+              'px-1',
             )}
             onClick={() => {
               if (!disable)
