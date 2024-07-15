@@ -20,6 +20,7 @@ const SwrInitor = ({
   const [init, setInit] = useState(false)
 
   useEffect(() => {
+    console.log('进入useEffect hook，token内容：', token)
     if (token)
       localStorage?.setItem('console_token', token)
     else
