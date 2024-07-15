@@ -8,8 +8,6 @@ import {
   RiDashboard2Line,
   RiFileList3Fill,
   RiFileList3Line,
-  RiTerminalBoxFill,
-  RiTerminalBoxLine,
   RiTerminalWindowFill,
   RiTerminalWindowLine,
 } from '@remixicon/react'
@@ -67,29 +65,12 @@ const AppDetailLayout: FC<IAppDetailLayoutProps> = (props) => {
       ),
       // Takin.AI hidden apiAccess page
       // {
+      //
       //   name: t('common.appMenus.apiAccess'),
       //   href: `/app/${appId}/develop`,
       //   icon: RiTerminalBoxLine,
       //   selectedIcon: RiTerminalBoxFill,
       // },
-      ...(isCurrentWorkspaceManager
-        ? [{
-          name: mode !== 'workflow'
-            ? t('common.appMenus.logAndAnn')
-            : t('common.appMenus.logs'),
-          href: `/app/${appId}/logs`,
-          icon: RiFileList3Line,
-          selectedIcon: RiFileList3Fill,
-        }]
-        : []
-      ),
-      {
-
-        name: t('common.appMenus.apiAccess'),
-        href: `/app/${appId}/develop`,
-        icon: RiTerminalBoxLine,
-        selectedIcon: RiTerminalBoxFill,
-      },
       ...(isCurrentWorkspaceManager
         ? [{
           name: mode !== 'workflow'
