@@ -8,11 +8,9 @@ from flask import current_app
 
 from configs import dify_config
 from constants.languages import languages
-
 from extensions.ext_database import collection, db
 from models.model import Account, App, RecommendedApp
 from services.app_dsl_service import AppDslService
-
 
 logger = logging.getLogger(__name__)
 

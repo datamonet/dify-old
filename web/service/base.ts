@@ -359,7 +359,7 @@ const baseFetch = <T>(
                     return Promise.reject(data)
                   })
                 }
-                // Takin修改，避免登录跳转到/init
+                // Takin command 修改，避免登录跳转到/init
                 // const loginUrl = `${globalThis.location.origin}/signin`
                 // bodyJson.then((data: ResponseError) => {
                 //   if (data.code === 'init_validate_failed' && IS_CE_EDITION && !silent)
