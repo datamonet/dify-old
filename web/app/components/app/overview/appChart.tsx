@@ -7,7 +7,6 @@ import useSWR from 'swr'
 import dayjs from 'dayjs'
 import { get } from 'lodash-es'
 import { useTranslation } from 'react-i18next'
-import { formatNumber } from '@/utils/format'
 import Basic from '@/app/components/app-sidebar/basic'
 import Loading from '@/app/components/base/loading'
 import type { AppDailyConversationsResponse, AppDailyEndUsersResponse, AppTokenCostsResponse } from '@/models/app'
@@ -232,19 +231,20 @@ const Chart: React.FC<IChartProps> = ({
       <div className='mb-3'>
         <Basic name={title} type={timePeriod} hoverTip={explanation} />
       </div>
-      <div className='mb-4 flex-1'>
-        <Basic
-          isExtraInLine={CHART_TYPE_CONFIG[chartType].showTokens}
-          name={chartType !== 'costs' ? (sumData.toLocaleString() + unit) : `${sumData < 1000 ? sumData : (`${formatNumber(Math.round(sumData / 1000))}k`)}`}
-          type={!CHART_TYPE_CONFIG[chartType].showTokens
-            ? ''
-            : <span>{t('appOverview.analysis.tokenUsage.consumed')} Tokens<span className='text-sm'>
-              <span className='ml-1 text-gray-500'>(</span>
-              <span className='text-orange-400'>~{sum(statistics.map(item => parseFloat(get(item, 'total_price', '0')))).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 4 })}</span>
-              <span className='text-gray-500'>)</span>
-            </span></span>}
-          textStyle={{ main: `!text-3xl !font-normal ${sumData === 0 ? '!text-gray-300' : ''}` }} />
-      </div>
+      {/* Takin.AI command: hidden overview的美元显示 */}
+      {/* <div className='mb-4 flex-1'> */}
+      {/*  <Basic */}
+      {/*    isExtraInLine={CHART_TYPE_CONFIG[chartType].showTokens} */}
+      {/*    name={chartType !== 'costs' ? (sumData.toLocaleString() + unit) : `${sumData < 1000 ? sumData : (`${formatNumber(Math.round(sumData / 1000))}k`)}`} */}
+      {/*    type={!CHART_TYPE_CONFIG[chartType].showTokens */}
+      {/*      ? '' */}
+      {/*      : <span>{t('appOverview.analysis.tokenUsage.consumed')} Tokens<span className='text-sm'> */}
+      {/*        <span className='ml-1 text-gray-500'>(</span> */}
+      {/*        <span className='text-orange-400'>~{sum(statistics.map(item => parseFloat(get(item, 'total_price', '0')))).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 4 })}</span> */}
+      {/*        <span className='text-gray-500'>)</span> */}
+      {/*      </span></span>} */}
+      {/*    textStyle={{ main: `!text-3xl !font-normal ${sumData === 0 ? '!text-gray-300' : ''}` }} /> */}
+      {/* </div> */}
       <ReactECharts option={options} style={{ height: 160 }} />
     </div>
   )
