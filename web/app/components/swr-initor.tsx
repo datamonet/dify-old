@@ -30,7 +30,7 @@ const SwrInitor = ({
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
 
     setInit(true)
-  }, [token])
+  }, [])
 
   return init
     ? (
