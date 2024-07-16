@@ -358,7 +358,9 @@ class AppDslService:
         :param icon: app icon
         :param icon_background: app icon background
         """
+        # takin command:因为takin的app做了用户数据的隔离，此处需要增加一个用户id
         app = App(
+            user_id=account.id,
             tenant_id=tenant_id,
             mode=app_mode.value,
             name=name,
