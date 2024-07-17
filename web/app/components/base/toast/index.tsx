@@ -125,6 +125,9 @@ Toast.notify = ({
 
     root.render(<Toast type={type} message={message} duration={duration} className={className} />)
     document.body.appendChild(holder)
+
+    const defaultDuring = type === 'success' ? 3000 : 6000
+
     setTimeout(() => {
       if (holder)
         holder.remove()
