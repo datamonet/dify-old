@@ -128,8 +128,8 @@ const Apps = ({
       Toast.notify({ type: 'error', message: t('app.newApp.appCreateFailed') })
     }
   }
-
-  if (!categories) {
+  // takin command: 如果没有获取到categories或者community或者recommended_apps，显示loading
+  if (categories.length === 0 || allList.length === 0) {
     return (
       <div className="flex h-full items-center">
         <Loading type="area"/>
