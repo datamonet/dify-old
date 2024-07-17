@@ -331,6 +331,10 @@ class AppDslService:
 
         app.app_model_config_id = app_model_config.id
 
+        # takin command: 关于explore无法添加app 的bug修复
+        db.session.add(app)  #  app app_model_config_id添加到数据库会话
+        db.session.commit()  # 提交更改
+
         app_model_config_was_updated.send(
             app,
             app_model_config=app_model_config
