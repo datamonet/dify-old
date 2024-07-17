@@ -136,7 +136,10 @@ const AppPublisher = ({
         )
         notify({ type: 'success', message: 'App Posted' })
       }
-      else { await deleteRecommendedApp(appDetail?.id || '') }
+      else {
+        await deleteRecommendedApp(appDetail?.id || '')
+        notify({ type: 'success', message: 'App Posted' })
+      }
       setPosted(is_posted)
       mutate()
     }

@@ -42,7 +42,6 @@ def test_get(setup_http_mock):
             'headers': 'X-Header:123',
             'params': 'A:b',
             'body': None,
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -51,7 +50,6 @@ def test_get(setup_http_mock):
     data = result.process_data.get('request', '')
 
     assert '?A=b' in data
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
 
 
@@ -102,7 +100,6 @@ def test_custom_authorization_header(setup_http_mock):
             'headers': 'X-Header:123',
             'params': 'A:b',
             'body': None,
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -112,7 +109,6 @@ def test_custom_authorization_header(setup_http_mock):
 
     assert '?A=b' in data
     assert 'X-Header: 123' in data
-    assert 'X-Auth: Auth' in data
 
 
 @pytest.mark.parametrize('setup_http_mock', [['none']], indirect=True)
@@ -135,7 +131,6 @@ def test_template(setup_http_mock):
             'headers': 'X-Header:123\nX-Header2:{{#a.b123.args2#}}',
             'params': 'A:b\nTemplate:{{#a.b123.args2#}}',
             'body': None,
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -144,7 +139,6 @@ def test_template(setup_http_mock):
 
     assert '?A=b' in data
     assert 'Template=2' in data
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
     assert 'X-Header2: 2' in data
 
@@ -172,7 +166,6 @@ def test_json(setup_http_mock):
                 'type': 'json',
                 'data': '{"a": "{{#a.b123.args1#}}"}'
             },
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -180,7 +173,6 @@ def test_json(setup_http_mock):
     data = result.process_data.get('request', '')
 
     assert '{"a": "1"}' in data
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
 
 
@@ -206,7 +198,6 @@ def test_x_www_form_urlencoded(setup_http_mock):
                 'type': 'x-www-form-urlencoded',
                 'data': 'a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}'
             },
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -214,7 +205,6 @@ def test_x_www_form_urlencoded(setup_http_mock):
     data = result.process_data.get('request', '')
 
     assert 'a=1&b=2' in data
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
 
 
@@ -240,7 +230,6 @@ def test_form_data(setup_http_mock):
                 'type': 'form-data',
                 'data': 'a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}'
             },
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -251,7 +240,6 @@ def test_form_data(setup_http_mock):
     assert '1' in data
     assert 'form-data; name="b"' in data
     assert '2' in data
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
 
 
@@ -277,14 +265,12 @@ def test_none_data(setup_http_mock):
                 'type': 'none',
                 'data': '123123123'
             },
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
     result = node.run(pool)
     data = result.process_data.get('request', '')
 
-    assert 'api-key: Basic ak-xxx' in data
     assert 'X-Header: 123' in data
     assert '123123123' not in data
 
@@ -304,7 +290,6 @@ def test_mock_404(setup_http_mock):
             'body': None,
             'params': '',
             'headers': 'X-Header:123',
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
@@ -333,7 +318,6 @@ def test_multi_colons_parse(setup_http_mock):
                 'type': 'form-data',
                 'data': 'Referer:http://example5.com\nRedirect:http://example6.com'
             },
-            'mask_authorization_header': False,
         }
     }, **BASIC_NODE_DATA)
 
