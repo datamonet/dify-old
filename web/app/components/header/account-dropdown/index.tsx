@@ -2,19 +2,17 @@
 import { useTranslation } from 'react-i18next'
 import { Fragment, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useContext } from 'use-context-selector'
 import { RiArrowDownSLine } from '@remixicon/react'
 import { Menu, Transition } from '@headlessui/react'
 import AccountAbout from '../account-about'
-import WorkplaceSelector from './workplace-selector'
 import classNames from '@/utils/classnames'
-import I18n from '@/context/i18n'
 import Avatar from '@/app/components/base/avatar'
 import { useAppContext } from '@/context/app-context'
 import { LogOut01 } from '@/app/components/base/icons/src/vender/line/general'
 import { useModalContext } from '@/context/modal-context'
 import { deleteCookie } from '@/app/api/user'
 import { logout } from '@/service/common'
+import Indicator from '@/app/components/header/indicator'
 
 export type IAppSelecotr = {
   isMobile: boolean
@@ -137,19 +135,19 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                     {/*    <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' /> */}
                     {/*  </Link> */}
                     {/* </Menu.Item> */}
-                    {/* { */}
-                    {/*  document?.body?.getAttribute('data-public-site-about') !== 'hide' && ( */}
-                    {/*    <Menu.Item> */}
-                    {/*      <div className={classNames(itemClassName, 'justify-between')} onClick={() => setAboutVisible(true)}> */}
-                    {/*        <div>{t('common.userProfile.about')}</div> */}
-                    {/*        <div className='flex items-center'> */}
-                    {/*          <div className='mr-2 text-xs font-normal text-gray-500'>{langeniusVersionInfo.current_version}</div> */}
-                    {/*          <Indicator color={langeniusVersionInfo.current_version === langeniusVersionInfo.latest_version ? 'green' : 'orange'} /> */}
-                    {/*        </div> */}
-                    {/*      </div> */}
-                    {/*    </Menu.Item> */}
-                    {/*  ) */}
-                    {/* } */}
+                    {
+                      document?.body?.getAttribute('data-public-site-about') !== 'hide' && (
+                        <Menu.Item>
+                          <div className={classNames(itemClassName, 'justify-between')} onClick={() => setAboutVisible(true)}>
+                            <div>{t('common.userProfile.about')}</div>
+                            <div className='flex items-center'>
+                              <div className='mr-2 text-xs font-normal text-gray-500'>{langeniusVersionInfo.current_version}</div>
+                              <Indicator color={langeniusVersionInfo.current_version === langeniusVersionInfo.latest_version ? 'green' : 'orange'} />
+                            </div>
+                          </div>
+                        </Menu.Item>
+                      )
+                    }
                   </div>
                   <Menu.Item>
                     <div className='p-1' onClick={() => handleLogout()}>

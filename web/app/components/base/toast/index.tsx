@@ -40,8 +40,8 @@ const Toast = ({
   return <div className={classNames(
     className,
     'fixed rounded-md p-4 my-4 mx-8 z-[9999]',
-    'top-0',
-    'right-0',
+    'top-12',
+    'right-1/2', // takin command: 错误弹窗放在中间
     type === 'success' ? 'bg-green-50' : '',
     type === 'error' ? 'bg-red-50' : '',
     type === 'warning' ? 'bg-yellow-50' : '',
@@ -89,7 +89,7 @@ export const ToastProvider = ({
   const placeholder: IToastProps = {
     type: 'info',
     message: 'Toast message',
-    duration: 3000,
+    duration: 6000, // takin command: 修改错误弹窗的时间为6s，原来的代码是3s
   }
   const [params, setParams] = React.useState<IToastProps>(placeholder)
 

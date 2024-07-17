@@ -11,7 +11,7 @@ const translation = {
     descWrite: 'Learn how to write a good Knowledge description.',
     permissions: 'Permissions',
     permissionsOnlyMe: 'Only me',
-    permissionsAllMember: 'All team members',
+    permissionsAllMember: 'Everyone',
     permissionsInvitedMembers: 'Partial team members',
     me: '(You)',
     indexMethod: 'Index Method',
