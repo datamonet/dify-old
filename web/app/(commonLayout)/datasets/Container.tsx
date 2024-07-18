@@ -38,7 +38,6 @@ const Container = () => {
     ]
   }, [currentWorkspace.role, t])
 
-
   const [activeTab, setActiveTab] = useTabSearchParams({
     defaultTab: 'dataset',
   })
