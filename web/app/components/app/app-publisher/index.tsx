@@ -19,7 +19,7 @@ import {
 import EmbeddedModal from '@/app/components/app/overview/embedded'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { useGetLanguage } from '@/context/i18n'
-
+import WorkflowToolConfigureButton from '@/app/components/tools/workflow-tool/configure-button'
 import type { InputVar } from '@/app/components/workflow/types'
 import { createRecommendedApp, deleteRecommendedApp, fetchAppDetail, fetchAppList } from '@/service/explore'
 import { ToastContext } from '@/app/components/base/toast'
@@ -247,9 +247,24 @@ const AppPublisher = ({
                 }
                 }
               />
-
             </div>
-
+            {appDetail?.mode === 'workflow' && (
+              <WorkflowToolConfigureButton
+                disabled={!publishedAt}
+                published={!!toolPublished}
+                detailNeedUpdate={!!toolPublished && published}
+                workflowAppId={appDetail?.id}
+                icon={{
+                  content: appDetail?.icon,
+                  background: appDetail?.icon_background,
+                }}
+                name={appDetail?.name}
+                description={appDetail?.description}
+                inputs={inputs}
+                handlePublish={handlePublish}
+                onRefreshData={onRefreshData}
+              />
+            )}
           </div>
           {/* <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'> */}
           {/*  <SuggestedAction disabled={!publishedAt} link={appURL} */}
