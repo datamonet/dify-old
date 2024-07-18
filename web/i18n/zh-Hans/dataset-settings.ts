@@ -11,7 +11,7 @@ const translation = {
     descWrite: '了解如何编写更好的知识库描述。',
     permissions: '可见权限',
     permissionsOnlyMe: '只有我',
-    permissionsAllMember: '所有团队成员',
+    permissionsAllMember: '所有人',
     permissionsInvitedMembers: '部分团队成员',
     me: '（你）',
     indexMethod: '索引模式',

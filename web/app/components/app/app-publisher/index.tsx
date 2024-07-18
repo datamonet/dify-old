@@ -63,11 +63,9 @@ const AppPublisher = ({
   const [published, setPublished] = useState(false)
   const [open, setOpen] = useState(false)
   const [posted, setPosted] = useState(false)
-  const [postedLoading, setPostedLoading] = useState(false)
   const appDetail = useAppStore(state => state.appDetail)
   const { app_base_url: appBaseURL = '', access_token: accessToken = '' } = appDetail?.site ?? {}
   const appMode = (appDetail?.mode !== 'completion' && appDetail?.mode !== 'workflow') ? 'chat' : appDetail.mode
-  const appURL = `${appBaseURL}/${appMode}/${accessToken}`
   const { mutate } = useSWR(
     ['/explore/apps'],
     () =>
@@ -87,13 +85,31 @@ const AppPublisher = ({
     },
   )
   const language = useGetLanguage()
+
   const formatTimeFromNow = useCallback((time: number) => {
     return dayjs(time).locale(language === 'zh_Hans' ? 'zh-cn' : language.replace('_', '-')).fromNow()
   }, [language])
 
+  const handlePosted = async () => {
+    if (posted) {
+      await createRecommendedApp(
+        appDetail?.id || '',
+        appDetail?.description,
+        appMode,
+      )
+    }
+    else {
+      await deleteRecommendedApp(appDetail?.id || '')
+    }
+    mutate()
+  }
+
   const handlePublish = async (modelAndParameter?: ModelAndParameter) => {
     try {
+      // takin command:设置app的公开状态
+      await handlePosted()
       await onPublish?.(modelAndParameter)
+
       setPublished(true)
     }
     catch (e) {
@@ -124,30 +140,6 @@ const AppPublisher = ({
     if (state)
       setPublished(false)
   }, [disabled, onToggle, open])
-
-  const handlePosted = async (is_posted: boolean) => {
-    setPostedLoading(true)
-    try {
-      if (is_posted) {
-        await createRecommendedApp(
-          appDetail?.id || '',
-          appDetail?.description,
-          appMode,
-        )
-        notify({ type: 'success', message: 'App Posted' })
-      }
-      else {
-        await deleteRecommendedApp(appDetail?.id || '')
-        notify({ type: 'success', message: 'App Posted' })
-      }
-      setPosted(is_posted)
-      mutate()
-    }
-    catch (e) {
-      setPosted(!is_posted)
-    }
-    setPostedLoading(false)
-  }
 
   useMemo(() => {
     const handlePostStatus = async () => {
@@ -245,12 +237,15 @@ const AppPublisher = ({
               <div className="flex space-x-1 items-start py-2 text-sm text-gray-500">
                 {t('datasetSettings.form.permissions')}
               </div>
-
+              {/* takincommand:增加app的权限管理，公开以及私密的状态 */}
               <PermissionsRadio
                 itemClassName="sm:w-36 text-sm px-0"
-                disable={postedLoading}
                 value={posted ? 'all_team_members' : 'only_me'}
-                onChange={() => handlePosted(!posted)}
+                onChange={(v) => {
+                  setPosted(v === 'all_team_members')
+                  setPublished(false)
+                }
+                }
               />
 
             </div>
