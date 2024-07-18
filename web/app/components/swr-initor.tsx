@@ -15,6 +15,7 @@ const SwrInitor = ({
   token,
 }: SwrInitorProps) => {
   const router = useRouter()
+  const consoleTokenFromLocalStorage = localStorage?.getItem('console_token')
   const [init, setInit] = useState(false)
 
   const handleConsoleToken = async () => {
@@ -29,6 +30,8 @@ const SwrInitor = ({
 
   useMemo(() => {
     if (token) {
+      if (consoleTokenFromLocalStorage)
+        return setInit(true)
       localStorage?.setItem('console_token', token)
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
     }
