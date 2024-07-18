@@ -70,9 +70,10 @@ class RecommendedAppService:
             if not app or not app.is_public:
                 continue
 
-            site = app.site
-            if not site:
-                continue
+            # Takin command:此处暂时隐藏
+            # site = app.site
+            # if not site:
+            #     continue
 
             user = db.session.query(Account).filter(Account.id == app.user_id).first()
             doc = collection.find_one({'email': user.email})
@@ -89,9 +90,12 @@ class RecommendedAppService:
                 },
                 'app_id': recommended_app.app_id,
                 'description': app.description, # Takin command:推荐应用的description和apps同步
-                'copyright': site.copyright,
-                'privacy_policy': site.privacy_policy,
-                'custom_disclaimer': site.custom_disclaimer,
+                'copyright': '',
+                'privacy_policy': '',
+                'custom_disclaimer': '',
+                # 'copyright': site.copyright,
+                # 'privacy_policy': site.privacy_policy,
+                # 'custom_disclaimer': site.custom_disclaimer,
                 'category': recommended_app.category,
                 'position': recommended_app.position,
                 'is_listed': recommended_app.is_listed
