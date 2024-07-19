@@ -64,8 +64,7 @@ class RecommendedAppListApi(Resource):
         parser.add_argument('category', type=str, location='json')
         args = parser.parse_args()
         app_detail = RecommendedAppService.get_recommend_app_detail(args['app_id'])
-
-        if (app_detail and app_detail.get('is_public')):
+        if (app_detail):
             return {'message': 'Recommended app already exists'}, 409
 
         recommended_app_service = RecommendedAppService()
