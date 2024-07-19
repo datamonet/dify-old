@@ -6,8 +6,7 @@ from os import listdir, path
 from threading import Lock
 from typing import Any, Union
 
-from flask import current_app
-
+from configs import dify_config
 from core.agent.entities import AgentToolEntity
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.helper.module_import_helper import load_single_subclass_from_source
@@ -577,7 +576,7 @@ class ToolManager:
         provider_type = provider_type
         provider_id = provider_id
         if provider_type == 'builtin':
-            return (current_app.config.get("CONSOLE_API_URL")
+            return (dify_config.CONSOLE_API_URL
                     + "/console/api/workspaces/current/tool-provider/builtin/"
                     + provider_id
                     + "/icon")
@@ -586,7 +585,7 @@ class ToolManager:
                 provider: ApiToolProvider = db.session.query(ApiToolProvider).filter(
                     ApiToolProvider.tenant_id == tenant_id,
                     ApiToolProvider.id == provider_id
-                )
+                ).first()
                 return json.loads(provider.icon)
             except:
                 return {
@@ -604,6 +603,5 @@ class ToolManager:
             return json.loads(provider.icon)
         else:
             raise ValueError(f"provider type {provider_type} not found")
-
 
 ToolManager.load_builtin_providers_cache()
