@@ -43,6 +43,7 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
   if (extraCredits >= totalCost) {
     extraCredits -= totalCost // 如果用户有extraCredits，那么优先消耗extraCredits
   }
+
   else {
     // 如果用户extraCredits不足，那么消耗subscriptionCredits
     totalCost -= extraCredits // 先减去用户还剩下的extraCredits

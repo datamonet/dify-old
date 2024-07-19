@@ -5,7 +5,6 @@ import React, {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
-import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
 import { RiArrowDownSLine } from '@remixicon/react'
 import type { ModelAndParameter } from '../configuration/debug/types'
@@ -22,7 +21,6 @@ import { useGetLanguage } from '@/context/i18n'
 import WorkflowToolConfigureButton from '@/app/components/tools/workflow-tool/configure-button'
 import type { InputVar } from '@/app/components/workflow/types'
 import { createRecommendedApp, deleteRecommendedApp, fetchAppDetail, fetchAppList } from '@/service/explore'
-import { ToastContext } from '@/app/components/base/toast'
 import PermissionsRadio from '@/app/components/datasets/settings/permissions-radio'
 
 export type AppPublisherProps = {
@@ -59,7 +57,6 @@ const AppPublisher = ({
   onRefreshData,
 }: AppPublisherProps) => {
   const { t } = useTranslation()
-  const { notify } = useContext(ToastContext)
   const [published, setPublished] = useState(false)
   const [open, setOpen] = useState(false)
   const [posted, setPosted] = useState(false)
