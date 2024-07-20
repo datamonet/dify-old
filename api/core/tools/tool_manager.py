@@ -338,7 +338,8 @@ class ToolManager:
             list all the builtin providers
         """
         # takin tools filter 过滤
-        include_tools = ['slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed', 'arxiv', 'yahoo',
+        include_tools = ['chart', 'code', 'bing', 'slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed',
+                         'arxiv', 'yahoo',
                          'wikipedia',
                          'duckduckgo', 'time', 'stackexchange']
         for provider in listdir(path.join(path.dirname(path.realpath(__file__)), 'provider', 'builtin')):
@@ -603,5 +604,6 @@ class ToolManager:
             return json.loads(provider.icon)
         else:
             raise ValueError(f"provider type {provider_type} not found")
+
 
 ToolManager.load_builtin_providers_cache()
