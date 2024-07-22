@@ -30,7 +30,7 @@ const SwrInitor = ({
 
   useMemo(() => {
     if (token) {
-      if (consoleTokenFromLocalStorage)
+      if (consoleTokenFromLocalStorage && consoleTokenFromLocalStorage === token) // 此处为了防止takin切换账号，dify没反应的情况
         return setInit(true)
       localStorage?.setItem('console_token', token)
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
