@@ -32,3 +32,17 @@ server {
     # placeholder for https config defined in https.conf.template
     ${HTTPS_CONFIG}
 }
+
+# takin command: add takin api port; New server block for handling port 8080
+server {
+    listen 8080;
+    server_name ${NGINX_SERVER_NAME};
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
