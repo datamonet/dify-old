@@ -109,7 +109,7 @@ class RecommendedAppService:
             categories.add(recommended_app.category)  # add category to categories
 
         return {'recommended_apps': recommended_apps_result, 'community': community_apps_result,
-                'categories': sorted(list(categories))}
+                'categories': sorted(categories)}
 
 
     @classmethod
