@@ -13,6 +13,8 @@ import { useModalContext } from '@/context/modal-context'
 import { deleteCookie } from '@/app/api/user'
 import { logout } from '@/service/common'
 import Indicator from '@/app/components/header/indicator'
+import { useProviderContext } from '@/context/provider-context'
+import { Plan } from '@/app/components/billing/type'
 
 export type IAppSelecotr = {
   isMobile: boolean
@@ -29,6 +31,8 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
   const { t } = useTranslation()
   const { userProfile, currentWorkspace, langeniusVersionInfo } = useAppContext()
   const { setShowAccountSettingModal } = useModalContext()
+  const { plan } = useProviderContext()
+  const canEmailSupport = plan.type === Plan.professional || plan.type === Plan.team || plan.type === Plan.enterprise
 
   const handleLogout = async () => {
     await deleteCookie('__Secure-next-auth.session-token')
@@ -106,6 +110,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                         <div>{t('common.userProfile.settings')}</div>
                       </div>
                     </Menu.Item>
+
                     {/* <Menu.Item> */}
                     {/*  <Link */}
                     {/*    className={classNames(itemClassName, 'group justify-between')} */}
@@ -135,6 +140,7 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                     {/*    <ArrowUpRight className='hidden w-[14px] h-[14px] text-gray-500 group-hover:flex' /> */}
                     {/*  </Link> */}
                     {/* </Menu.Item> */}
+
                     {
                       document?.body?.getAttribute('data-public-site-about') !== 'hide' && (
                         <Menu.Item>

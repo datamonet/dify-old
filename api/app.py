@@ -1,7 +1,5 @@
 import os
 
-from configs import dify_config
-
 if os.environ.get("DEBUG", "false").lower() != 'true':
     from gevent import monkey
 
@@ -23,7 +21,9 @@ from flask import Flask, Response, request
 from flask_cors import CORS
 from werkzeug.exceptions import Unauthorized
 
+import contexts
 from commands import register_commands
+from configs import dify_config
 
 # DO NOT REMOVE BELOW
 from extensions import (
@@ -176,9 +176,15 @@ def load_user_from_request(request_from_flask_login):
         if auth_scheme != 'bearer':
             raise Unauthorized('Invalid Authorization header format. Expected \'Bearer <api-key>\' format.')
     decoded = PassportService().verify(auth_token)
+
     # 此处为适应takin的mongo数据库，只查询固定的邮件用户
     email = decoded.get('email')
-    return AccountService.load_logged_in_account(email=email, token=auth_token)
+    account = AccountService.load_logged_in_account(email=email, token=auth_token)
+    if account:
+        contexts.tenant_id.set(account.current_tenant_id)
+    return account
+
+
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():

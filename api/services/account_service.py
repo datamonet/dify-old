@@ -48,6 +48,7 @@ class AccountService:
 
     @staticmethod
     def load_user(email: str) -> Account:
+        # takin command:使用用户的email查询
         account = Account.query.filter_by(email=email).first()
         if not account:
             return None
@@ -55,7 +56,7 @@ class AccountService:
         if account.status in [AccountStatus.BANNED.value, AccountStatus.CLOSED.value]:
             raise Unauthorized("Account is banned or closed.")
 
-        current_tenant = TenantAccountJoin.query.filter_by(account_id=account.id, current=True).first()
+        current_tenant: TenantAccountJoin = TenantAccountJoin.query.filter_by(account_id=account.id, current=True).first()
         if current_tenant:
             account.current_tenant_id = current_tenant.tenant_id
         else:

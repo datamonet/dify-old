@@ -28,7 +28,8 @@ const Category: FC<ICategoryProps> = ({
   allCategoriesEn,
 }) => {
   const { t } = useTranslation()
-  const isAllCategories = !list.includes(value) && value !== 'community'
+  // takin command:多加了一个community
+  const isAllCategories = !list.includes(value as AppCategory) && value !== 'community'
   const itemClassName = (isSelected: boolean) => cn(
     'flex items-center px-3 py-[7px] h-[32px] rounded-lg border-[0.5px] border-transparent text-gray-700 font-medium leading-[18px] cursor-pointer hover:bg-gray-200 capitalize',
     isSelected && 'bg-white border-gray-200 shadow-xs text-primary-600 hover:bg-white',
