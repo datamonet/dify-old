@@ -459,7 +459,8 @@ class ToolManager:
         if 'workflow' in filters:
             # get workflow providers
             workflow_providers: list[WorkflowToolProvider] = db.session.query(WorkflowToolProvider). \
-                filter(WorkflowToolProvider.tenant_id == tenant_id).all()
+                filter(WorkflowToolProvider.user_id == user_id).all()
+            # takin command: workflow tool 仅自己可见； https://github.com/datamonet/takin-chat/issues/450
 
             workflow_provider_controllers = []
             for provider in workflow_providers:
