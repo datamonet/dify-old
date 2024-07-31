@@ -28,8 +28,8 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
     .collection('bill')
 
   const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) })
-  // USD转换为credits，$1=100credits， Takin加价，Takin系数为2
-  const cost = USD * 100 * 1.25
+  // USD转换为credits，$1=100credits， Takin加价，Takin系数为1.5
+  const cost = USD * 100 * 1.5
   let totalCost = cost
 
   let subscriptionCredits = userInfo?.subscription_credits as number || 0 // 用户订阅的积分
