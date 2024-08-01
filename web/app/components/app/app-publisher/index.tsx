@@ -59,6 +59,7 @@ const AppPublisher = ({
   const { t } = useTranslation()
   const [published, setPublished] = useState(false)
   const [open, setOpen] = useState(false)
+  const [postStatus, setPostStatus] = useState(false)
   const [posted, setPosted] = useState(false)
   const appDetail = useAppStore(state => state.appDetail)
   const { app_base_url: appBaseURL = '', access_token: accessToken = '' } = appDetail?.site ?? {}
@@ -88,6 +89,9 @@ const AppPublisher = ({
   }, [language])
 
   const handlePosted = async () => {
+    if (postStatus === posted)
+      return
+
     if (posted) {
       await createRecommendedApp(
         appDetail?.id || '',
@@ -143,6 +147,7 @@ const AppPublisher = ({
       try {
         const response = await fetchAppDetail(appDetail?.id || '')
         setPosted(!!response)
+        setPostStatus(!!response)
       }
       catch (e) {
         setPosted(false)
