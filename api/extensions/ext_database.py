@@ -2,8 +2,8 @@ import os
 
 import dotenv
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData
 from pymongo import MongoClient
+from sqlalchemy import MetaData
 
 dotenv.load_dotenv()
 
