@@ -6,7 +6,6 @@ import { BookOpenIcon } from '@heroicons/react/24/outline'
 import { useTranslation } from 'react-i18next'
 import { useSWRConfig } from 'swr'
 import { unstable_serialize } from 'swr/infinite'
-import PermissionSelector from '../permission-selector'
 import IndexMethodRadio from '../index-method-radio'
 import cn from '@/utils/classnames'
 import RetrievalMethodConfig from '@/app/components/datasets/common/retrieval-method-config'
@@ -263,20 +262,18 @@ const Form = () => {
             )}
         </div>
       </div>
-      {currentDataset?.embedding_available && (
-        <div className={rowClass}>
-          <div className={labelClass} />
-          <div className='w-[480px]'>
-            <Button
-              className='min-w-24'
-              variant='primary'
-              onClick={handleSave}
-            >
-              {t('datasetSettings.form.save')}
-            </Button>
-          </div>
+      <div className={rowClass}>
+        <div className={labelClass} />
+        <div className='w-[480px]'>
+          <Button
+            className='min-w-24'
+            variant='primary'
+            onClick={handleSave}
+          >
+            {t('datasetSettings.form.save')}
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
