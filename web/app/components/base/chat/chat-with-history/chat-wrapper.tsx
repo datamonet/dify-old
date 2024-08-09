@@ -32,6 +32,7 @@ const ChatWrapper = () => {
     handleFeedback,
     currentChatInstanceRef,
     appData,
+    themeBuilder,
   } = useChatWithHistoryContext()
   const { userProfile } = useAppContext()
   const { setShowCreditsBillingModal } = useModalContext()
@@ -150,6 +151,7 @@ const ChatWrapper = () => {
       onFeedback={handleFeedback}
       suggestedQuestions={suggestedQuestions}
       hideProcessDetail
+      themeBuilder={themeBuilder}
     />
   )
 }
