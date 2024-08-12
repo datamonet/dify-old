@@ -1,6 +1,7 @@
 'use server'
 import { ObjectId } from 'mongodb'
 import clientPromise from '@/service/mongo'
+import type { NodeTracing } from '@/types/workflow'
 
 // --------------------------------------------------关于Takin.AI的扣费逻辑解析 start----------------------------------------------------------------------
 /**
@@ -85,4 +86,30 @@ export async function updateUserCreditsWithTotalToken(userId: string, totalToken
   // workflow只有总消耗的token数量，默认全部使用gpt-40的output价格计算（$15.00 用于 1M tokens）
   const USD = totalToken * 0.000015
   return await updateUserCreditsWithUSD(userId, USD, type, metadata)
+}
+
+/**
+ * 根据总token数，更新用户积分,并且在bill表中记录消费
+ * @param userId 用户的mongo id
+ * @param tracing workflow 消耗数据
+ * @param metadata 消费的元数据
+ */
+export async function updateUserCreditsWithTracing(userId: string, tracing: NodeTracing[], metadata: any) {
+  let cost = 0
+
+  for (const trace of tracing) {
+    // eslint-disable-next-line max-statements-per-line
+    if (trace.node_type === 'llm') { cost += trace.outputs.usage.total_price }
+    else if (trace.node_type === 'tool') {
+      switch (trace.title) {
+        case 'dalle3':
+          cost += 0.003
+          break
+        default:
+          break
+      }
+    }
+  }
+  console.log(cost)
+  return await updateUserCreditsWithUSD(userId, cost, 'Dify Workflow', metadata)
 }

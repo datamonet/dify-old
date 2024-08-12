@@ -21,10 +21,9 @@ import {
   stopWorkflowRun,
 } from '@/service/workflow'
 import { useFeaturesStore } from '@/app/components/base/features/hooks'
-import { updateUserCreditsWithTotalToken } from '@/app/api/pricing'
+import { updateUserCreditsWithTracing } from '@/app/api/pricing'
 import { useAppContext } from '@/context/app-context'
 import { AudioPlayerManager } from '@/app/components/base/audio-btn/audio.player.manager'
-
 
 export const useWorkflowRun = () => {
   const store = useStoreApi()
@@ -225,7 +224,9 @@ export const useWorkflowRun = () => {
           if (onWorkflowFinished)
             onWorkflowFinished(params)
           // takin command:需要将newWorkflowRunningData赋值，方便传输到扣费函数中
-          await updateUserCreditsWithTotalToken(userProfile.takin_id!, newWorkflowRunningData.result.total_tokens || 0, 'Dify Workflow', newWorkflowRunningData)
+          // console.log('newWorkflowRunningData', newWorkflowRunningData)
+          // await updateUserCreditsWithTotalToken(userProfile.takin_id!, newWorkflowRunningData.result.total_tokens || 0, 'Dify Workflow', newWorkflowRunningData)
+          await updateUserCreditsWithTracing(userProfile.takin_id!, newWorkflowRunningData.tracing!, newWorkflowRunningData)
           mutateUserProfile()
         },
         onError: (params) => {
