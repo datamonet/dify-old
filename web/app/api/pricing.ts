@@ -102,7 +102,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
     if (trace.node_type === 'llm') { cost += trace.outputs.usage.total_price }
     else if (trace.node_type === 'tool') {
       switch (trace.title) {
-        case 'dalle3':
+        case 'dalle':
           cost += 0.003
           break
         default:
