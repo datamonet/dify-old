@@ -339,7 +339,7 @@ class ToolManager:
         """
         # takin tools filter 过滤
         include_tools = ['chart', 'code', 'bing', 'slack', 'twilio', 'youtube', 'feishu', 'webscraper', 'pubmed',
-                         'arxiv', 'yahoo',
+                         'arxiv', 'yahoo', 'dalle'
                          'wikipedia',
                          'duckduckgo', 'time', 'stackexchange']
         for provider in listdir(path.join(path.dirname(path.realpath(__file__)), 'provider', 'builtin')):
