@@ -100,6 +100,9 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
   for (const trace of tracing) {
     // eslint-disable-next-line max-statements-per-line
     if (trace.node_type === 'llm') { cost += parseFloat(trace.outputs.usage.total_price) }
+    // eslint-disable-next-line max-statements-per-line
+    else if (trace.node_type === 'parameter-extractor') { cost += parseFloat(trace.process_data.usage.total_price) }
+
     else if (trace.node_type === 'tool') {
       switch (trace.title) {
         case 'dalle':
