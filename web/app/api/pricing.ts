@@ -98,10 +98,20 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
   let cost = 0
 
   for (const trace of tracing) {
-    // eslint-disable-next-line max-statements-per-line
-    if (trace.node_type === 'llm') { cost += parseFloat(trace.outputs.usage.total_price) }
-    // eslint-disable-next-line max-statements-per-line
-    else if (trace.node_type === 'parameter-extractor') { cost += parseFloat(trace.process_data.usage.total_price) }
+    if (trace.node_type === 'llm') {
+      console.log('llm', trace.outputs.usage.total_price)
+      cost += parseFloat(trace.outputs.usage.total_price)
+    }
+
+    else if (trace.node_type === 'parameter-extractor') {
+      console.log('parameter-extractor', trace.process_data.usage.total_price)
+      cost += parseFloat(trace.process_data.usage.total_price)
+    }
+
+    else if (trace.node_type === 'question-classifier') {
+      console.log('classifier', trace.process_data.usage.total_price)
+      cost += parseFloat(trace.process_data.usage.total_price)
+    }
 
     else if (trace.node_type === 'tool') {
       switch (trace.title) {
