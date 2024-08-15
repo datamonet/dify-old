@@ -21,7 +21,7 @@ import { sleep } from '@/utils'
 import type { SiteInfo } from '@/models/share'
 import { TEXT_GENERATION_TIMEOUT_MS } from '@/config'
 
-import { updateUserCreditsWithTotalToken } from '@/app/api/pricing'
+import { updateUserCreditsWithTracing } from '@/app/api/pricing'
 import { useAppContext } from '@/context/app-context'
 
 export type IResultProps = {
@@ -272,9 +272,11 @@ const Result: FC<IResultProps> = ({
           onWorkflowFinished: async ({ data }) => {
             if (isTimeout)
               return
+            const workflowProcessData = getWorkflowProccessData()
+
             if (data.error) {
               notify({ type: 'error', message: data.error })
-              setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
+              setWorkflowProccessData(produce(workflowProcessData!, (draft) => {
                 draft.status = WorkflowRunningStatus.Failed
               }))
               setRespondingFalse()
@@ -282,7 +284,7 @@ const Result: FC<IResultProps> = ({
               isEnd = true
               return
             }
-            setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
+            setWorkflowProccessData(produce(workflowProcessData!, (draft) => {
               draft.status = WorkflowRunningStatus.Succeeded
             }))
             if (!data.outputs) {
@@ -292,7 +294,7 @@ const Result: FC<IResultProps> = ({
               setCompletionRes(data.outputs)
               const isStringOutput = Object.keys(data.outputs).length === 1 && typeof data.outputs[Object.keys(data.outputs)[0]] === 'string'
               if (isStringOutput) {
-                setWorkflowProccessData(produce(getWorkflowProccessData()!, (draft) => {
+                setWorkflowProccessData(produce(workflowProcessData!, (draft) => {
                   draft.resultText = data.outputs[Object.keys(data.outputs)[0]]
                 }))
               }
@@ -301,7 +303,9 @@ const Result: FC<IResultProps> = ({
             setMessageId(tempMessageId)
             onCompleted(getCompletionRes(), taskId, true)
             isEnd = true
-            await updateUserCreditsWithTotalToken(userProfile.takin_id!, data.total_tokens || 0, 'Dify Workflow', data)
+            console.log('workflowProcessData', workflowProcessData)
+            // takin command:需要将workflowProcessData赋值，方便传输到扣费函数中
+            await updateUserCreditsWithTracing(userProfile.takin_id!, workflowProcessData!.tracing!, workflowProcessData)
             mutateUserProfile()
           },
           onTextChunk: (params) => {
@@ -327,7 +331,6 @@ const Result: FC<IResultProps> = ({
           tempMessageId = messageId
           res.push(data)
           setCompletionRes(res.join(''))
-          console.log(data)
         },
         onCompleted: () => {
           if (isTimeout)
@@ -336,7 +339,6 @@ const Result: FC<IResultProps> = ({
           setMessageId(tempMessageId)
           onCompleted(getCompletionRes(), taskId, true)
           isEnd = true
-          console.log(getCompletionRes())
         },
         onMessageReplace: (messageReplace) => {
           res = [messageReplace.answer]

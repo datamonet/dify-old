@@ -98,17 +98,17 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
   let cost = 0
 
   for (const trace of tracing) {
-    if (trace.node_type === 'llm') {
+    if (trace.node_type === 'llm' && trace.status === 'succeeded') {
       console.log('llm', trace.outputs.usage.total_price)
       cost += parseFloat(trace.outputs.usage.total_price)
     }
 
-    else if (trace.node_type === 'parameter-extractor') {
+    else if (trace.node_type === 'parameter-extractor' && trace.status === 'succeeded') {
       console.log('parameter-extractor', trace.process_data.usage.total_price)
       cost += parseFloat(trace.process_data.usage.total_price)
     }
 
-    else if (trace.node_type === 'question-classifier') {
+    else if (trace.node_type === 'question-classifier' && trace.status === 'succeeded') {
       console.log('classifier', trace.process_data.usage.total_price)
       cost += parseFloat(trace.process_data.usage.total_price)
     }
