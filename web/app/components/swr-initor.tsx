@@ -27,11 +27,13 @@ const SwrInitor = ({
       else { router.replace('https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps') }
     })
   }
+  const token1 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZmF5ZSIsImVtYWlsIjoiZG9uZ3lpbWVuZzI3OEBnbWFpbC5jb20iLCJpYXQiOjE3MjI5Mzc1Nzh9.XgnUd_hKBHsMdfeQrNwEZtVu-iHkb3G2KlgFySxxdMQ'
+  // const token1 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZmF5ZSIsImVtYWlsIjoiZmF5ZV8xMjI1QDE2My5jb20iLCJpYXQiOjE3MjI5Mzc1Nzh9.vGrYPMBZ5D6VE_Jus2C8Icp21NTn9yJ6IbBr95WrDYY'
   useMemo(() => {
-    if (token) {
-      if (consoleTokenFromLocalStorage && consoleTokenFromLocalStorage === token) // 此处为了防止takin切换账号，dify没反应的情况
+    if (token1) {
+      if (consoleTokenFromLocalStorage && consoleTokenFromLocalStorage === token1) // 此处为了防止takin切换账号，dify没反应的情况
         return setInit(true)
-      localStorage?.setItem('console_token', token)
+      localStorage?.setItem('console_token', token1)
       router.replace('/apps', { forceOptimisticNavigation: false } as any)
     }
     else {
