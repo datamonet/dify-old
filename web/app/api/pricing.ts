@@ -115,8 +115,12 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
 
     else if (trace.node_type === 'tool') {
       switch (trace.title) {
-        case 'dalle':
+        case 'DALL-E 3':
           cost += 0.12
+          break
+
+        case 'DALL-E 2':
+          cost += 0.02
           break
         default:
           break
