@@ -163,7 +163,7 @@ class WorkflowToolManageService:
         :return: the list of tools
         """
         db_tools = db.session.query(WorkflowToolProvider).filter(
-            WorkflowToolProvider.tenant_id == user_id  # takin command: List workflow tools需要过滤，只返回自己的工具
+            WorkflowToolProvider.user_id == user_id  # takin command: List workflow tools需要过滤，只返回自己的工具
             # WorkflowToolProvider.tenant_id == tenant_id
         ).all()
 
