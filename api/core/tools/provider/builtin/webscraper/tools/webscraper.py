@@ -22,11 +22,14 @@ class WebscraperTool(BuiltinTool):
             # get webpage
             result = self.get_url(url, user_agent=user_agent)
 
-            if tool_parameters.get('generate_summary'):
-                # summarize and return
-                return self.create_text_message(self.summary(user_id=user_id, content=result))
-            else:
-                # return full webpage
-                return self.create_text_message(result)
+
+            # takin command: 禁止网路爬虫使用大模型
+            # if tool_parameters.get('generate_summary'):
+            #     # summarize and return
+            #     return self.create_text_message(self.summary(user_id=user_id, content=result))
+            # else:
+            #     # return full webpage
+            #     return self.create_text_message(result)
+            return self.create_text_message(result)
         except Exception as e:
             raise ToolInvokeError(str(e))
