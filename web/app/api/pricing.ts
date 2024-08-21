@@ -114,13 +114,43 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
     }
 
     else if (trace.node_type === 'tool') {
+      console.log('trace.node_type ', trace.title)
       switch (trace.title) {
         case 'DALL-E 3':
-          cost += 0.12
+          // eslint-disable-next-line no-case-declarations
+          const { dalle3Size, dalle3N, quality } = trace.outputs.json[0]
+          // eslint-disable-next-line no-case-declarations
+          const dalle3Pricing = (() => {
+            switch (dalle3Size) {
+              case '1024×1024':
+                return quality === 'standard' ? 0.040 : 0.080 // 0.040 for standard, 0.080 for HD
+              case '1024×1792':
+              case '1792×1024':
+                return quality === 'standard' ? 0.080 : 0.120 // 0.080 for standard, 0.120 for HD
+              default:
+                return 0.120 // Default value if size is unknown
+            }
+          })()
+          cost += dalle3Pricing * parseFloat(dalle3N)
           break
 
         case 'DALL-E 2':
-          cost += 0.02
+          // eslint-disable-next-line no-case-declarations
+          const { dalle2Size, dalle2N } = trace.outputs.json[0]
+          // eslint-disable-next-line no-case-declarations
+          const dalle2Pricing = (() => {
+            switch (dalle2Size) {
+              case '1024×1024':
+                return 0.020
+              case '512×512':
+                return 0.018
+              case '256×256':
+                return 0.016
+              default:
+                return 0.020 // Default value if size is unknown
+            }
+          })()
+          cost += dalle2Pricing * parseFloat(dalle2N)
           break
         default:
           break
