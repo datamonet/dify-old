@@ -24,6 +24,9 @@ import { NEED_REFRESH_APP_LIST_KEY } from '@/config'
 import { useAppContext } from '@/context/app-context'
 import { getRedirection } from '@/utils/app-redirection'
 import SearchInput from '@/app/components/base/search-input'
+// takin command:增加share 卡片
+import Modal from '@/app/components/base/modal'
+import ShareAppCard from '@/app/components/explore/share-app-card'
 
 type AppsProps = {
   pageType?: PageType
@@ -48,6 +51,7 @@ const Apps = ({
   const { hasEditPermission } = useContext(ExploreContext)
   const allCategoriesEn = t('explore.apps.allCategories', { lng: 'en' })
 
+  const [showShare, setShowShare] = useState('')
   const [keywords, setKeywords] = useState('')
   const [searchKeywords, setSearchKeywords] = useState('')
 
@@ -167,12 +171,14 @@ const Apps = ({
   }
 
   useMemo(() => {
-    if (searchParamsAppId && searchParamsCategory && categories.length > 0) {
-      setKeywords(searchParamsAppId)
-      setSearchKeywords(searchParamsAppId)
+    if (searchParamsCategory && categories.length > 0)
       setCurrCategory(searchParamsCategory)
-    }
   }, [categories])
+
+  useMemo(() => {
+    if (searchParamsAppId)
+      setShowShare(searchParamsAppId)
+  }, [searchParamsAppId])
 
   if (!categories || categories.length === 0) {
     return (
@@ -239,6 +245,7 @@ const Apps = ({
           ))}
         </nav>
       </div>
+
       {isShowCreateModal && (
         <CreateAppModal
           appIcon={currApp?.app.icon || ''}
@@ -250,6 +257,24 @@ const Apps = ({
           onHide={() => setIsShowCreateModal(false)}
         />
       )}
+      {/* takin command:增加share 卡片 */}
+      <Modal
+        isShow={!!showShare}
+        className="!bg-transparent !shadow-none"
+        onClose={() => setShowShare('')}
+        wrapperClassName='pt-[60px]'
+      >
+        {allList.filter(app => app.app_id === showShare).map(app => <ShareAppCard
+          key={app.app_id}
+          isExplore={pageType === PageType.EXPLORE}
+          app={app}
+          canCreate={hasEditPermission}
+          onCreate={() => {
+            setCurrApp(app)
+            setIsShowCreateModal(true)
+          }}
+        />)}
+      </Modal>
     </div>
   )
 }
