@@ -65,7 +65,7 @@ const ShareAppCard = ({
           <div className={cn('flex items-center w-full space-x-2')}>
             <Button variant='primary' className='grow h-7' onClick={() => onCreate()}>
               <PlusIcon className='w-4 h-4 mr-1'/>
-              <span className='text-xs'>{t('explore.ShareAppCard.addToWorkspace')}</span>
+              <span className='text-xs'>{t('explore.appCard.addToWorkspace')}</span>
             </Button>
           </div>
 
