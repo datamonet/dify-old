@@ -2,6 +2,8 @@
 import { ObjectId } from 'mongodb'
 import clientPromise from '@/service/mongo'
 import type { NodeTracing } from '@/types/workflow'
+import type { ChatItem } from '@/app/components/base/chat/types'
+import type { ToolItem } from '@/types/app'
 
 // --------------------------------------------------关于Takin.AI的扣费逻辑解析 start----------------------------------------------------------------------
 /**
@@ -76,16 +78,61 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
 }
 
 /**
- * 根据总token数，更新用户积分,并且在bill表中记录消费
- * @param userId 用户的mongo id
- * @param totalToken workflow只有总消耗的token数量
- * @param type 消费类型
- * @param metadata 消费的元数据
+ * 根据信息判断agent是否使用了tool，并计算额外的扣费
+ * @param responseItem 用户的mongo id
+ * @returns totalCost额外工具的扣费
  */
-export async function updateUserCreditsWithTotalToken(userId: string, totalToken: number, type: string, metadata: any) {
-  // workflow只有总消耗的token数量，默认全部使用gpt-40的output价格计算（$15.00 用于 1M tokens）
-  const USD = totalToken * 0.000015
-  return await updateUserCreditsWithUSD(userId, USD, type, metadata)
+export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools: ToolItem[]) {
+  const tools = responseItem.agent_thoughts?.map(thought => thought.tool)
+
+  // Calculate the total USD cost
+  const totalCost = tools?.reduce((acc, toolName) => {
+    // Find the corresponding agentTool
+    const agentTool = agentTools.find(at => at.tool_name === toolName)
+
+    if (agentTool) {
+      switch (toolName) {
+        case 'takin_dalle3':
+          // eslint-disable-next-line no-case-declarations
+          const { size: dalle3Size, n: dalle3N, quality } = agentTool.tool_parameters
+          // eslint-disable-next-line no-case-declarations
+          const dalle3Pricing = (() => {
+            switch (dalle3Size) {
+              case 'square':
+                return quality === 'standard' ? 0.040 : 0.080 // 0.040 for standard, 0.080 for HD
+              case 'vertical':
+              case 'horizontal':
+                return quality === 'standard' ? 0.080 : 0.120 // 0.080 for standard, 0.120 for HD
+              default:
+                return 0.120 // Default value if size is unknown
+            }
+          })()
+          return acc + dalle3Pricing * parseFloat(dalle3N || 1)
+        case 'takin_dalle2':
+          // eslint-disable-next-line no-case-declarations
+          const { size: dalle2Size, n: dalle2N } = agentTool.tool_parameters
+          // eslint-disable-next-line no-case-declarations
+          const dalle2Pricing = (() => {
+            switch (dalle2Size) {
+              case 'large':
+                return 0.020
+              case 'medium':
+                return 0.018
+              case 'small':
+                return 0.016
+              default:
+                return 0.020 // Default value if size is unknown
+            }
+          })()
+          return acc + dalle2Pricing * parseFloat(dalle2N || 1)
+        default:
+          return acc + 0
+      }
+    }
+
+    return acc
+  }, 0)
+  return totalCost || 0
 }
 
 /**
@@ -118,7 +165,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
       switch (trace.title) {
         case 'DALL-E 3':
           // eslint-disable-next-line no-case-declarations
-          const { dalle3Size, dalle3N, quality } = trace.outputs.json[0]
+          const { size: dalle3Size, n: dalle3N, quality } = trace.outputs.json[0]
           // eslint-disable-next-line no-case-declarations
           const dalle3Pricing = (() => {
             switch (dalle3Size) {
@@ -131,12 +178,12 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
                 return 0.120 // Default value if size is unknown
             }
           })()
-          cost += dalle3Pricing * parseFloat(dalle3N)
+          cost += dalle3Pricing * parseFloat(dalle3N || 1)
           break
 
         case 'DALL-E 2':
           // eslint-disable-next-line no-case-declarations
-          const { dalle2Size, dalle2N } = trace.outputs.json[0]
+          const { size: dalle2Size, n: dalle2N } = trace.outputs.json[0]
           // eslint-disable-next-line no-case-declarations
           const dalle2Pricing = (() => {
             switch (dalle2Size) {
@@ -150,7 +197,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
                 return 0.020 // Default value if size is unknown
             }
           })()
-          cost += dalle2Pricing * parseFloat(dalle2N)
+          cost += dalle2Pricing * parseFloat(dalle2N || 1)
           break
         default:
           break

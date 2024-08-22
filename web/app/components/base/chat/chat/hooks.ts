@@ -23,7 +23,7 @@ import type { Annotation } from '@/models/log'
 import { WorkflowRunningStatus } from '@/app/components/workflow/types'
 import useTimestamp from '@/hooks/use-timestamp'
 import { useAppContext } from '@/context/app-context'
-import { updateUserCreditsWithUSD } from '@/app/api/pricing'
+import { updateUSDWithAgentTool, updateUserCreditsWithUSD } from '@/app/api/pricing'
 import { AudioPlayerManager } from '@/app/components/base/audio-btn/audio.player.manager'
 
 type GetAbortController = (abortController: AbortController) => void
@@ -454,8 +454,9 @@ export const useChat = (
             })
           handleUpdateChatList(newListWithAnswer)
 
+          const toolsCost = await updateUSDWithAgentTool(responseItem, config?.agent_mode?.tools || [])
           // 更新用户积分,并且在bill表中记录消费, userId 用户的mongo id, USD 消耗的总金额，单位为美元（包括了输入输出的Token）, type 消费类型, metadata 消费的元数据
-          await updateUserCreditsWithUSD(userProfile.takin_id!, messageEnd.metadata?.usage.total_price, isAgentMode ? 'Dify Agent' : 'Dify Chat', messageEnd)
+          await updateUserCreditsWithUSD(userProfile.takin_id!, messageEnd.metadata?.usage.total_price + toolsCost, isAgentMode ? 'Dify Agent' : 'Dify Chat', messageEnd)
           mutateUserProfile()
         },
         onMessageReplace: (messageReplace) => {
