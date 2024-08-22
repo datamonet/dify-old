@@ -26,6 +26,7 @@ class AppParameterApi(InstalledAppResource):
     }
 
     parameters_fields = {
+        'agent_mode': fields.Raw,
         'opening_statement': fields.String,
         'suggested_questions': fields.Raw,
         'suggested_questions_after_answer': fields.Raw,
@@ -59,7 +60,7 @@ class AppParameterApi(InstalledAppResource):
             user_input_form = features_dict.get('user_input_form', [])
 
         return {
-            'agent_mode':features_dict, # takin command:explore中需要返回agent的配置，主要用于tools的扣费
+            'agent_mode':features_dict.get('agent_mode'), # takin command:explore中需要返回agent的配置，主要用于tools的扣费
             'opening_statement': features_dict.get('opening_statement'),
             'suggested_questions': features_dict.get('suggested_questions', []),
             'suggested_questions_after_answer': features_dict.get('suggested_questions_after_answer',
