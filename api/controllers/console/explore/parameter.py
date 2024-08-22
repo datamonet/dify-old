@@ -26,7 +26,7 @@ class AppParameterApi(InstalledAppResource):
     }
 
     parameters_fields = {
-        'agent_mode': fields.Raw,
+        'agent_mode': fields.Raw, # takin command:explore中需要返回agent的配置，主要用于tools的扣费
         'opening_statement': fields.String,
         'suggested_questions': fields.Raw,
         'suggested_questions_after_answer': fields.Raw,
