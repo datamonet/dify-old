@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
 import { useDebounceFn } from 'ahooks'
+import { RiCloseLine } from '@remixicon/react'
 import Toast from '../../base/toast'
 import s from './style.module.css'
 import cn from '@/utils/classnames'
@@ -264,10 +265,13 @@ const Apps = ({
       {/* takin command:增加share 卡片 */}
       <Modal
         isShow={!!showShare}
-        className="!bg-transparent !shadow-none"
+        className="!bg-transparent !shadow-none relative"
         onClose={() => setShowShare('')}
         wrapperClassName='pt-[60px]'
       >
+        <div className='absolute right-4 top-4 p-4 cursor-pointer' onClick={() => setShowShare('')}>
+          <RiCloseLine className='w-4 h-4 text-gray-500'/>
+        </div>
         {allList.filter(app => app.app_id === showShare).map(app => <ShareAppCard
           key={app.app_id}
           isExplore={pageType === PageType.EXPLORE}
