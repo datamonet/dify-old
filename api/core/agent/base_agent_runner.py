@@ -64,15 +64,19 @@ class BaseAgentRunner(AppRunner):
         """
         Agent runner
         :param tenant_id: tenant id
+        :param application_generate_entity: application generate entity
+        :param conversation: conversation
         :param app_config: app generate entity
         :param model_config: model config
         :param config: dataset config
         :param queue_manager: queue manager
         :param message: message
         :param user_id: user id
-        :param agent_llm_callback: agent llm callback
-        :param callback: callback
         :param memory: memory
+        :param prompt_messages: prompt messages
+        :param variables_pool: variables pool
+        :param db_variables: db variables
+        :param model_instance: model instance
         """
         self.tenant_id = tenant_id
         self.application_generate_entity = application_generate_entity
@@ -341,7 +345,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_input, dict):
                 try:
                     tool_input = json.dumps(tool_input, ensure_ascii=False)
-                except Exception:
+                except Exception as e:
                     tool_input = json.dumps(tool_input)
 
             agent_thought.tool_input = tool_input
@@ -350,7 +354,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(observation, dict):
                 try:
                     observation = json.dumps(observation, ensure_ascii=False)
-                except Exception:
+                except Exception as e:
                     observation = json.dumps(observation)
                     
             agent_thought.observation = observation
@@ -390,7 +394,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_invoke_meta, dict):
                 try:
                     tool_invoke_meta = json.dumps(tool_invoke_meta, ensure_ascii=False)
-                except Exception:
+                except Exception as e:
                     tool_invoke_meta = json.dumps(tool_invoke_meta)
 
             agent_thought.tool_meta_str = tool_invoke_meta
@@ -440,12 +444,12 @@ class BaseAgentRunner(AppRunner):
                         tool_call_response: list[ToolPromptMessage] = []
                         try:
                             tool_inputs = json.loads(agent_thought.tool_input)
-                        except Exception:
+                        except Exception as e:
                             tool_inputs = { tool: {} for tool in tools }
                         try:
                             tool_responses = json.loads(agent_thought.observation)
-                        except Exception:
-                            tool_responses = { tool: agent_thought.observation for tool in tools }
+                        except Exception as e:
+                            tool_responses = dict.fromkeys(tools, agent_thought.observation)
 
                         for tool in tools:
                             # generate a uuid for tool call

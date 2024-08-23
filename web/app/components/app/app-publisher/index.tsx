@@ -22,6 +22,7 @@ import WorkflowToolConfigureButton from '@/app/components/tools/workflow-tool/co
 import type { InputVar } from '@/app/components/workflow/types'
 import { createRecommendedApp, deleteRecommendedApp, fetchAppDetail, fetchAppList } from '@/service/explore'
 import PermissionsRadio from '@/app/components/datasets/settings/permissions-radio'
+import { appDefaultIconBackground } from '@/config'
 
 export type AppPublisherProps = {
   disabled?: boolean
@@ -256,8 +257,8 @@ const AppPublisher = ({
                 detailNeedUpdate={!!toolPublished && published}
                 workflowAppId={appDetail?.id}
                 icon={{
-                  content: appDetail?.icon,
-                  background: appDetail?.icon_background,
+                  content: (appDetail.icon_type === 'image' ? '🤖' : appDetail?.icon) || '🤖',
+                  background: (appDetail.icon_type === 'image' ? appDefaultIconBackground : appDetail?.icon_background) || appDefaultIconBackground,
                 }}
                 name={appDetail?.name}
                 description={appDetail?.description}
