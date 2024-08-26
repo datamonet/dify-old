@@ -84,6 +84,13 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
  */
 export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools: ToolItem[]) {
   const tools = responseItem.agent_thoughts?.map(thought => thought.tool)
+  // 根据用户生成的图片数量进行扣费
+  const messageFilesMap = (responseItem.agent_thoughts || []).reduce((map, thought) => {
+    if (thought.tool)
+      map[thought.tool] = (thought.message_files || []).length
+
+    return map
+  }, {} as Record<string, number>)
 
   // Calculate the total USD cost
   const totalCost = tools?.reduce((acc, toolName) => {
@@ -125,6 +132,20 @@ export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools:
             }
           })()
           return acc + dalle2Pricing * parseFloat(dalle2N || 1)
+        case 'flux_dev':
+        case 'flux_schnell':
+          // eslint-disable-next-line no-case-declarations
+          const fluxCost = 0.003 * (messageFilesMap[toolName] || 1) // 根据用户生成的图片数量进行扣费，默认一张
+          acc += fluxCost
+          break
+        case 'flux_pro':
+          // eslint-disable-next-line no-case-declarations
+          const fluxProCost = 0.055 * (messageFilesMap[toolName] || 1)
+          acc += fluxProCost
+          break
+        case 'google_search':
+          acc += 0.015
+          break
         default:
           return acc + 0
       }
@@ -132,6 +153,7 @@ export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools:
 
     return acc
   }, 0)
+  console.log('agent totalCost', totalCost)
   return totalCost || 0
 }
 
@@ -198,6 +220,20 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
             }
           })()
           cost += dalle2Pricing * parseFloat(dalle2N || 1)
+          break
+        case 'FLUX DEV':
+        case 'FLUX SCHNELL':
+          // eslint-disable-next-line no-case-declarations
+          const fluxCost = 0.003 * (trace.outputs.json.length || 1)
+          cost += fluxCost
+          break
+        case 'FLUX PRO':
+          // eslint-disable-next-line no-case-declarations
+          const fluxProCost = 0.055 * (trace.outputs.json.length || 1)
+          cost += fluxProCost
+          break
+        case 'GoogleSearch':
+          cost += 0.015
           break
         default:
           break
