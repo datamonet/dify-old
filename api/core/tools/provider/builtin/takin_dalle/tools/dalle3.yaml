@@ -3,7 +3,7 @@ identity:
   author: Takin
   label:
     en_US: DALL-E 3
-    zh_Hans: DALL-E 3 绘画
+    zh_Hans: DALL-E 3
     pt_BR: DALL-E 3
   description:
     en_US: DALL-E 3 is a powerful drawing tool that can draw the image you want based on your prompt, compared to DallE 2, DallE 3 has stronger drawing ability, but it will consume more resources

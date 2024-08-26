@@ -3,7 +3,7 @@ identity:
   author: Takin
   label:
     en_US: FLUX DEV
-    zh_Hans: FLUX DEV 绘画
+    zh_Hans: FLUX DEV
   description:
     en_US: FLUX DEV is a powerful drawing tool that can draw the image you want based on your prompt
     zh_Hans: FLUX DEV 是一个强大的绘画工具，它可以根据您的提示词绘制出您想要的图像
