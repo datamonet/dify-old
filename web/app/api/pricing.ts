@@ -233,6 +233,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
           cost += fluxProCost
           break
         case 'GoogleSearch':
+        case '谷歌搜索':
           cost += 0.015
           break
         default:
