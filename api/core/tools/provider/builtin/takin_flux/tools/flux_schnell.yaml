@@ -1,0 +1,97 @@
+identity:
+  name: flux_schnell
+  author: Takin
+  label:
+    en_US: FLUX SCHNELL
+    zh_Hans: FLUX SCHNELL 绘画
+  description:
+    en_US: FLUX SCHNELL is a powerful drawing tool that can draw the image you want based on your prompt
+    zh_Hans: FLUX SCHNELL 是一个强大的绘画工具，它可以根据您的提示词绘制出您想要的图像
+    pt_BR: FLUX SCHNELL is a powerful drawing tool that can draw the image you want based on your prompt
+description:
+  human:
+    en_US: FLUX SCHNELL is a text to image tool
+    zh_Hans: FLUX SCHNELL 是一个文本到图像的工具
+    pt_BR: FLUX SCHNELL is a text to image tool
+  llm: FLUX SCHNELL is a tool used to generate images from text
+parameters:
+  - name: prompt
+    type: string
+    required: true
+    label:
+      en_US: Prompt
+      zh_Hans: 提示词
+      pt_BR: Prompt
+    human_description:
+      en_US: Image prompt
+      zh_Hans: 图像提示词
+      pt_BR: Image prompt
+    llm_description: Image prompt
+    form: llm
+  - name: size
+    type: select
+    required: false
+    human_description:
+      en_US: used for selecting the image size
+      zh_Hans: 用于选择图像大小
+      pt_BR: used for selecting the image size
+    label:
+      en_US: Image size
+      zh_Hans: 图像大小
+      pt_BR: Image size
+    form: form
+    options:
+      - value: "1:1"
+        label:
+          en_US: "1:1"
+          zh_Hans: "1:1"
+          pt_BR: "1:1"
+      - value: "4:5"
+        label:
+          en_US: "4:5"
+          zh_Hans: "4:5"
+          pt_BR: "4:5"
+      - value: "16:9"
+        label:
+          en_US: "16:9"
+          zh_Hans: "16:9"
+          pt_BR: "16:9"
+      - value: "5:4"
+        label:
+          en_US: "5:4"
+          zh_Hans: "5:4"
+          pt_BR: "5:4"
+      - value: "9:16"
+        label:
+          en_US: "9:16"
+          zh_Hans: "9:16"
+          pt_BR: "9:16"
+    default: "1:1"
+  - name: num_outputs
+    type: number
+    required: false
+    human_description:
+      en_US: used for selecting the number of images
+      zh_Hans: 用于选择图像数量
+      pt_BR: used for selecting the number of images
+    label:
+      en_US: Number of images
+      zh_Hans: 图像数量
+      pt_BR: Number of images
+    form: form
+    min: 1
+    max: 4
+    default: 1
+  - name: seed
+    type: number
+    required: false
+    label:
+      en_US: Seed
+      zh_Hans: Seed
+      pt_BR: Seed
+    human_description:
+      en_US: Seed
+      zh_Hans: Seed
+      pt_BR: Seed
+    form: form
+    default: 0

@@ -1,0 +1,31 @@
+identity:
+  name: takin_flux
+  author: Takin
+  label:
+    en_US: FLUX
+    zh_Hans: FLUX 绘画
+    pt_BR: FLUX
+  description:
+    en_US: FLUX art
+    zh_Hans: FLUX 绘画
+    pt_BR: FLUX art
+  icon: icon.png
+  tags:
+    - image
+    - productivity
+credentials_for_provider:
+  replicate_api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Replicate API key
+      zh_Hans: Replicate API key
+      pt_BR: Replicate API key
+    help:
+      en_US: Please input your Replicate API key
+      zh_Hans: 请输入你的 Replicate API key
+      pt_BR: Please input your Replicate API key
+    placeholder:
+      en_US: Please input your Replicate API key
+      zh_Hans: 请输入你的 Replicate API key
+      pt_BR: Please input your Replicate API key

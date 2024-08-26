@@ -1,14 +1,14 @@
 from typing import Any
 
 from core.tools.errors import ToolProviderCredentialValidationError
-from core.tools.provider.builtin.takin_dalle.tools.dalle2 import DallE2Tool
+from core.tools.provider.builtin.takin_flux.tools.flux_dev import FluxDevTool
 from core.tools.provider.builtin_tool_provider import BuiltinToolProviderController
 
 
-class DALLEProvider(BuiltinToolProviderController):
+class FLUXProvider(BuiltinToolProviderController):
     def _validate_credentials(self, credentials: dict[str, Any]) -> None:
         try:
-            DallE2Tool().fork_tool_runtime(
+            FluxDevTool().fork_tool_runtime(
                 runtime={
                     "credentials": credentials,
                 }
@@ -16,8 +16,6 @@ class DALLEProvider(BuiltinToolProviderController):
                 user_id='',
                 tool_parameters={
                     "prompt": "cute girl, blue eyes, white hair, anime style",
-                    "size": "small",
-                    "n": 1
                 },
             )
         except Exception as e:
