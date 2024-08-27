@@ -1,0 +1,50 @@
+identity:
+  author: Takin
+  name: send_email
+  label:
+    en_US: SendEmail
+    zh_Hans: SendEmail
+    pt_BR: SendEmail
+description:
+  human:
+    en_US: Send messages through email.
+    zh_Hans: 通过email发送消息。
+    pt_BR: Send messages email.
+  llm: Send messages through email.
+parameters:
+  - name: to_email
+    type: string
+    required: true
+    label:
+      en_US: Recipient email
+      zh_Hans: 收件人邮件
+      pt_BR: Recipient email
+    human_description:
+      en_US: Please enter the recipient's email address, separated by commas for multiple recipients.
+      zh_Hans: 请输入收件人的邮箱地址，如果有多个收件人请用逗号分割
+      pt_BR: Please enter the recipient's email address, separated by commas for multiple recipients.
+    form: form
+  - name: subject
+    type: string
+    required: true
+    label:
+      en_US: Subject
+      zh_Hans: 邮件标题
+      pt_BR: Subject
+    human_description:
+      en_US: Please enter the subject of your email
+      zh_Hans: 请输入邮件标题
+      pt_BR: Please enter the subject of your email
+    form: form
+  - name: content
+    type: string
+    required: true
+    label:
+      en_US: Content
+      zh_Hans: 邮件内容
+      pt_BR: Content
+    human_description:
+      en_US: Please enter the content of your email
+      zh_Hans: 请输入邮件内容
+      pt_BR: Please enter the content of your email
+    form: form
