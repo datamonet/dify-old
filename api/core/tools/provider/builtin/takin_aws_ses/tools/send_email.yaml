@@ -35,7 +35,8 @@ parameters:
       en_US: Please enter the subject of your email
       zh_Hans: 请输入邮件标题
       pt_BR: Please enter the subject of your email
-    form: form
+    form: llm
+    llm_description: subject of your email
   - name: content
     type: string
     required: true
@@ -47,4 +48,5 @@ parameters:
       en_US: Please enter the content of your email
       zh_Hans: 请输入邮件内容
       pt_BR: Please enter the content of your email
-    form: form
+    llm_description: content of your email
+    form: llm
