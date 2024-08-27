@@ -83,6 +83,7 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
  * @returns totalCost额外工具的扣费
  */
 export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools: ToolItem[]) {
+  console.log('responseItem', responseItem)
   const tools = responseItem.agent_thoughts?.map(thought => thought.tool)
   // 根据用户生成的图片数量进行扣费
   const messageFilesMap = (responseItem.agent_thoughts || []).reduce((map, thought) => {
@@ -98,6 +99,7 @@ export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools:
     const agentTool = agentTools.find(at => at.tool_name === toolName)
 
     if (agentTool) {
+      console.log('toolName', agentTool)
       switch (toolName) {
         case 'takin_dalle3':
           // eslint-disable-next-line no-case-declarations
@@ -145,6 +147,12 @@ export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools:
           break
         case 'google_search':
           acc += 0.015
+          break
+        case 'send_email':
+          // eslint-disable-next-line no-case-declarations
+          const emails = agentTool.tool_parameters.to_email.split(',').flatMap((part: string) => part.split('，').map(email => email.trim()))
+          // 获取 emails 的长度
+          acc += 0.00008 * (emails.length || 1)
           break
         default:
           return acc + 0
@@ -235,6 +243,9 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
         case 'GoogleSearch':
         case '谷歌搜索':
           cost += 0.015
+          break
+        case 'SendEmail':
+          cost += 0.00008 * (trace.outputs.json[0].count || 1)
           break
         default:
           break
