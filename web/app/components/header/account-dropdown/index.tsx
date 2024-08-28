@@ -1,8 +1,8 @@
 'use client'
 import { useTranslation } from 'react-i18next'
-import { Fragment, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { RiArrowDownSLine } from '@remixicon/react'
+import { RiArrowDownSLine, RiCloseLine } from '@remixicon/react'
 import { Menu, Transition } from '@headlessui/react'
 import AccountAbout from '../account-about'
 import classNames from '@/utils/classnames'
@@ -15,6 +15,8 @@ import { logout } from '@/service/common'
 import Indicator from '@/app/components/header/indicator'
 import { useProviderContext } from '@/context/provider-context'
 import { Plan } from '@/app/components/billing/type'
+import Modal from '@/app/components/base/modal'
+import LanguagePage from '@/app/components/header/account-setting/language-page'
 
 export type IAppSelecotr = {
   isMobile: boolean
@@ -27,6 +29,8 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
   `
   const router = useRouter()
   const [aboutVisible, setAboutVisible] = useState(false)
+  // takin command：在外部增加切换语言的弹窗
+  const [showModal, setShowModal] = useState(false)
 
   const { t } = useTranslation()
   const { userProfile, currentWorkspace, langeniusVersionInfo } = useAppContext()
@@ -111,6 +115,11 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
                       </div>
                     </Menu.Item>
 
+                    <Menu.Item>
+                      <div className={itemClassName} onClick={() => setShowModal(true)}>
+                        <div>{t('common.settings.language')}</div>
+                      </div>
+                    </Menu.Item>
                     {/* <Menu.Item> */}
                     {/*  <Link */}
                     {/*    className={classNames(itemClassName, 'group justify-between')} */}
@@ -174,6 +183,18 @@ export default function AppSelector({ isMobile }: IAppSelecotr) {
       {
         aboutVisible && <AccountAbout onCancel={() => setAboutVisible(false)} langeniusVersionInfo={langeniusVersionInfo} />
       }
+
+      {/* takin command：在外部增加切换语言的弹窗 */}
+      <Modal
+        isShow={showModal}
+        onClose={() => setShowModal(false)}
+        wrapperClassName='pt-[60px]'
+      >
+        <div className='flex justify-end items-end ' onClick={() => setShowModal(false)}>
+          <RiCloseLine className='w-4 h-4 text-gray-500'/>
+        </div>
+        <LanguagePage/>
+      </Modal>
     </div >
   )
 }
