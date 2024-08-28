@@ -2,9 +2,9 @@ identity:
   author: Takin
   name: send_email
   label:
-    en_US: AWS SES Email
-    zh_Hans: AWS SES Email
-    pt_BR: AWS SES Email
+    en_US: SendEmail
+    zh_Hans: SendEmail
+    pt_BR: SendEmail
 description:
   human:
     en_US: Send emails using AWS Simple Email Service (SES)

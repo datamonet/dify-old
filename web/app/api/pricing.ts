@@ -245,7 +245,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
           cost += 0.015
           break
         case 'SendEmail':
-          cost += 0.00008 * (trace.outputs.json[0].count || 1)
+          cost += 0.0007 * (trace.outputs.json[0].count || 1)
           break
         default:
           break

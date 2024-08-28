@@ -2,13 +2,13 @@ identity:
   author: Takin
   name: takin_aws_ses
   label:
-    en_US: SendEmail
-    zh_Hans: SendEmail
-    pt_BR: SendEmail
+    en_US: AWS SES Email
+    zh_Hans: AWS SES Email
+    pt_BR: AWS SES Email
   description:
-    en_US: Send messages through email.
-    zh_Hans: 通过email发送消息。
-    pt_BR: Send messages email.
+    en_US: Send emails using AWS Simple Email Service (SES)
+    zh_Hans: 使用 AWS 电子邮件服务 (SES) 发送电子邮件
+    pt_BR: Send emails using AWS Simple Email Service (SES)
   icon: icon.svg
   tags:
     - social
