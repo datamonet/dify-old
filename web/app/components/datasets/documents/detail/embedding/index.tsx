@@ -255,7 +255,8 @@ const EmbeddingDetail: FC<Props> = ({ detail, stopPosition = 'top', datasetId: d
             <div className={cn(s.commonIcon, s.highIcon)} />
             {t('datasetDocuments.embedding.highQuality')} · {t('datasetDocuments.embedding.estimate')}
             <span className={s.tokens}>{formatNumber(indexingEstimateDetail?.tokens || 0)}</span>tokens
-            (<span className={s.price}>${formatNumber(indexingEstimateDetail?.total_price || 0)}</span>)
+            {/* takin command:隐藏cost */}
+            {/* (<span className={s.price}>${formatNumber(indexingEstimateDetail?.total_price || 0)}</span>) */}
           </div>
         )}
         {localIndexingTechnique === 'economy' && (

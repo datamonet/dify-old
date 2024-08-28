@@ -21,7 +21,7 @@ import {
   createDocument,
   createFirstDocument,
   fetchFileIndexingEstimate as didFetchFileIndexingEstimate,
-  fetchDefaultProcessRule,
+  fetchDefaultProcessRule, fetchIndexingEstimateBatch,
 } from '@/service/datasets'
 import Button from '@/app/components/base/button'
 import Loading from '@/app/components/base/loading'
@@ -445,7 +445,16 @@ const StepTwo = ({
         mutateDatasetRes()
       onStepChange && onStepChange(+1)
       isSetting && onSave && onSave()
-      await updateUserCreditsWithUSD(userProfile.takin_id!, estimateTokes?.total_price || 0, 'Dify Documents', { dataset_id: datasetId })
+      let cost = estimateTokes?.total_price || 0
+      try {
+        const response = await fetchIndexingEstimateBatch({ datasetId: res.dataset?.id || '', batchId: res.batch })
+        if (response)
+          cost = response.total_price
+      }
+      catch (err) {
+        console.log(err)
+      }
+      await updateUserCreditsWithUSD(userProfile.takin_id!, cost, 'Dify Documents', { dataset_id: datasetId })
       mutateUserProfile()
     }
     catch (err) {
