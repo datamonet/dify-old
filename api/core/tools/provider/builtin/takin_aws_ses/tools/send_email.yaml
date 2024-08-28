@@ -2,15 +2,15 @@ identity:
   author: Takin
   name: send_email
   label:
-    en_US: SendEmail
-    zh_Hans: SendEmail
-    pt_BR: SendEmail
+    en_US: AWS SES Email
+    zh_Hans: AWS SES Email
+    pt_BR: AWS SES Email
 description:
   human:
-    en_US: Send messages through email.
-    zh_Hans: 通过email发送消息。
-    pt_BR: Send messages email.
-  llm: Send messages through email.
+    en_US: Send emails using AWS Simple Email Service (SES)
+    zh_Hans: 使用 AWS 电子邮件服务 (SES) 发送电子邮件
+    pt_BR: Send emails using AWS Simple Email Service (SES)
+  llm: Send emails using AWS Simple Email Service (SES)
 parameters:
   - name: to_email
     type: string
