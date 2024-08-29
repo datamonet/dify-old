@@ -1,5 +1,5 @@
 identity:
-  author: Takin
+  author: Takin.AI
   name: takin_aws_ses
   label:
     en_US: AWS SES Email
