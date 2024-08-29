@@ -106,6 +106,7 @@ export const AppContextProvider: FC<AppContextProviderProps> = ({ children }) =>
       const mongoUser = await getUserInfo(result.email)
       setUserProfile({
         ...result,
+        role: mongoUser?.role,
         name: mongoUser?.name || result.name,
         avatar: mongoUser?.avatar || result.avatar,
         credits: mongoUser?.credits || 0,

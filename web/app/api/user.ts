@@ -8,6 +8,7 @@ type MongoUser = {
   email: string
   avatar: string
   credits: number
+  role: number
 } | null
 
 /**

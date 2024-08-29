@@ -15,6 +15,7 @@ import type { Tag } from '@/app/components/base/tag-management/constant'
 import Checkbox from '@/app/components/base/checkbox'
 import { bindTag, createTag, fetchTagList, unBindTag } from '@/service/tag'
 import { ToastContext } from '@/app/components/base/toast'
+import { useAppContext } from '@/context/app-context'
 
 type TagSelectorProps = {
   targetID: string
@@ -33,6 +34,7 @@ type PanelProps = {
 
 const Panel = (props: PanelProps) => {
   const { t } = useTranslation()
+  const { userProfile } = useAppContext()
   const { notify } = useContext(ToastContext)
   const { targetID, type, value, selectedTags, onCacheUpdate, onChange, onCreate } = props
   const tagList = useTagStore(s => s.tagList)
@@ -127,12 +129,14 @@ const Panel = (props: PanelProps) => {
   return (
     <div className='relative w-full bg-white rounded-lg border-[0.5px] border-gray-200'>
       <div className='p-2 border-b-[0.5px] border-black/5'>
-        <SearchInput placeholder={t('common.tag.selectorPlaceholder') || ''} white value={keywords} onChange={handleKeywordsChange} />
+        <SearchInput placeholder={t('common.tag.selectorPlaceholder') || ''} white value={keywords}
+          onChange={handleKeywordsChange}/>
       </div>
       {keywords && notExisted && (
         <div className='p-1'>
-          <div className='flex items-center gap-2 pl-3 py-[6px] pr-2 rounded-lg cursor-pointer hover:bg-gray-100' onClick={createNewTag}>
-            <RiAddLine className='h-4 w-4 text-gray-500' />
+          <div className='flex items-center gap-2 pl-3 py-[6px] pr-2 rounded-lg cursor-pointer hover:bg-gray-100'
+            onClick={createNewTag}>
+            <RiAddLine className='h-4 w-4 text-gray-500'/>
             <div className='grow text-sm text-gray-700 leading-5 truncate'>
               {`${t('common.tag.create')} `}
               <span className='font-medium'>{`"${keywords}"`}</span>
@@ -141,7 +145,7 @@ const Panel = (props: PanelProps) => {
         </div>
       )}
       {keywords && notExisted && filteredTagList.length > 0 && (
-        <Divider className='!h-[1px] !my-0' />
+        <Divider className='!h-[1px] !my-0'/>
       )}
       {(filteredTagList.length > 0 || filteredSelectedTagList.length > 0) && (
         <div className='p-1 max-h-[172px] overflow-y-auto'>
@@ -154,7 +158,8 @@ const Panel = (props: PanelProps) => {
               <Checkbox
                 className='shrink-0'
                 checked={selectedTagIDs.includes(tag.id)}
-                onCheck={() => { }}
+                onCheck={() => {
+                }}
               />
               <div title={tag.name} className='grow text-sm text-gray-700 leading-5 truncate'>{tag.name}</div>
             </div>
@@ -183,15 +188,20 @@ const Panel = (props: PanelProps) => {
           </div>
         </div>
       )}
-      <Divider className='!h-[1px] !my-0' />
-      <div className='p-1'>
-        <div className='flex items-center gap-2 pl-3 py-[6px] pr-2 rounded-lg cursor-pointer hover:bg-gray-100' onClick={() => setShowTagManagementModal(true)}>
-          <Tag03 className='h-4 w-4 text-gray-500' />
-          <div className='grow text-sm text-gray-700 leading-5 truncate'>
-            {t('common.tag.manageTags')}
+      <Divider className='!h-[1px] !my-0'/>
+
+      {/* takin command：tag修改只能管理员 */}
+      {userProfile && (userProfile.role || 10) >= 50
+        && <div className='p-1'>
+          <div className='flex items-center gap-2 pl-3 py-[6px] pr-2 rounded-lg cursor-pointer hover:bg-gray-100'
+            onClick={() => setShowTagManagementModal(true)}>
+            <Tag03 className='h-4 w-4 text-gray-500'/>
+            <div className='grow text-sm text-gray-700 leading-5 truncate'>
+              {t('common.tag.manageTags')}
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   )
 }
@@ -226,7 +236,7 @@ const TagSelector: FC<TagSelectorProps> = ({
       <div className={cn(
         'group/tip relative w-full flex items-center gap-1 px-2 py-[7px] rounded-md cursor-pointer hover:bg-gray-100',
       )}>
-        <Tag01 className='shrink-0 w-3 h-3' />
+        <Tag01 className='shrink-0 w-3 h-3'/>
         <div className='grow text-xs text-start leading-[18px] font-normal truncate'>
           {!triggerContent ? t('common.tag.addTag') : triggerContent}
         </div>
@@ -250,7 +260,7 @@ const TagSelector: FC<TagSelectorProps> = ({
           }
           position={position}
           trigger="click"
-          btnElement={<Trigger />}
+          btnElement={<Trigger/>}
           btnClassName={open =>
             cn(
               open ? '!bg-gray-100 !text-gray-700' : '!bg-transparent',
