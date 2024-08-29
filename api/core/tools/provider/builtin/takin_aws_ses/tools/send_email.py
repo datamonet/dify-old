@@ -37,7 +37,7 @@ class SendEmailTool(BuiltinTool):
         # 然后对每个部分使用中文逗号分割，并将结果扁平化
         emails = [email.strip() for part in emails for email in part.split('，')]
         response = client.send_email(
-            Source="Takin AI <norely@takin.ai>",
+            Source="Takin.AI <norely@takin.ai>",
             Destination={
                 'ToAddresses': emails
             },
