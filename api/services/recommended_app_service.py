@@ -101,7 +101,7 @@ class RecommendedAppService:
                 'is_listed': recommended_app.is_listed
             }
             # Takin.AI command 修改推荐的app TODO: 根据用户角色区分 -[mongo role = 50] admin的role才能推送到recommended_apps_result
-            if user.email == 'curator@takin.ai' or user.email == 'harryjwang@gmail.com':
+            if user.email == 'curator@takin.ai':
                 recommended_apps_result.append(app_result)
             else:
                 community_apps_result.append(app_result)
