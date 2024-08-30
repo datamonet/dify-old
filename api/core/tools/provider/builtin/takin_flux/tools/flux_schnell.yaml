@@ -27,7 +27,7 @@ parameters:
       zh_Hans: 图像提示词
       pt_BR: Image prompt
     llm_description: Image prompt
-    form: form
+    form: llm
   - name: size
     type: select
     required: false
