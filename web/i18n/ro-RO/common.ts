@@ -73,6 +73,7 @@ const translation = {
     modifiedSuccessfully: 'Modificat cu succes',
     modifiedUnsuccessfully: 'Modificare eșuată',
     copySuccessfully: 'Copiat cu succes',
+    copyLinkSuccessfully: 'Link copiat în clipboard',
     paySucceeded: 'Plata a reușit',
     payCancelled: 'Plata a fost anulată',
     generatedSuccessfully: 'Generat cu succes',

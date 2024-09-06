@@ -74,6 +74,7 @@ const translation = {
     modifiedSuccessfully: 'Erfolgreich geändert',
     modifiedUnsuccessfully: 'Änderung nicht erfolgreich',
     copySuccessfully: 'Erfolgreich kopiert',
+    copyLinkSuccessfully: 'Link in die Zwischenablage kopiert',
     paySucceeded: 'Zahlung erfolgreich',
     payCancelled: 'Zahlung abgebrochen',
     generatedSuccessfully: 'Erfolgreich generiert',

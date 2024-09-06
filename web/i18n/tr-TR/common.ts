@@ -78,6 +78,7 @@ const translation = {
     modifiedSuccessfully: 'Başarıyla değiştirildi',
     modifiedUnsuccessfully: 'Değiştirme başarısız oldu',
     copySuccessfully: 'Başarıyla kopyalandı',
+    copyLinkSuccessfully: 'Bağlantı panoya kopyalandı',
     paySucceeded: 'Ödeme başarılı oldu',
     payCancelled: 'Ödeme iptal edildi',
     generatedSuccessfully: 'Başarıyla oluşturuldu',

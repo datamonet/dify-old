@@ -78,6 +78,7 @@ const translation = {
     modifiedSuccessfully: 'با موفقیت تغییر یافت',
     modifiedUnsuccessfully: 'تغییر ناموفق بود',
     copySuccessfully: 'با موفقیت کپی شد',
+    copyLinkSuccessfully: 'لینک به کلیپ بورد کپی شد',
     paySucceeded: 'پرداخت موفق',
     payCancelled: 'پرداخت لغو شد',
     generatedSuccessfully: 'با موفقیت تولید شد',

@@ -74,6 +74,7 @@ const translation = {
     modifiedSuccessfully: 'Успішно змінено',
     modifiedUnsuccessfully: 'Змінити не вдалося',
     copySuccessfully: 'Скопійовано успішно',
+    copyLinkSuccessfully: 'Посилання скопійовано в буфер обміну',
     paySucceeded: 'Платіж пройшов успішно',
     payCancelled: 'Платіж скасовано',
     generatedSuccessfully: 'Успішно згенеровано',

@@ -74,6 +74,7 @@ const translation = {
     modifiedSuccessfully: '변경이 성공적으로 이루어졌습니다',
     modifiedUnsuccessfully: '변경에 실패했습니다',
     copySuccessfully: '복사가 성공적으로 이루어졌습니다',
+    copyLinkSuccessfully: '링크가 클립보드에 복사되었습니다',
     paySucceeded: '결제가 성공했습니다',
     payCancelled: '결제가 취소되었습니다',
     generatedSuccessfully: '생성이 성공적으로 이루어졌습니다',

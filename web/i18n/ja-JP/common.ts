@@ -78,6 +78,7 @@ const translation = {
     modifiedSuccessfully: '変更が正常に行われました',
     modifiedUnsuccessfully: '変更が失敗しました',
     copySuccessfully: 'コピーが正常に行われました',
+    copyLinkSuccessfully: 'リンクがクリップボードにコピーされました',
     paySucceeded: '支払いが成功しました',
     payCancelled: '支払いがキャンセルされました',
     generatedSuccessfully: '生成が成功しました',

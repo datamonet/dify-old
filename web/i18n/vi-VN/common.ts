@@ -74,6 +74,7 @@ const translation = {
     modifiedSuccessfully: 'Chỉnh sửa thành công',
     modifiedUnsuccessfully: 'Chỉnh sửa không thành công',
     copySuccessfully: 'Đã sao chép thành công',
+    copyLinkSuccessfully: 'Đã sao chép liên kết vào clipboard',
     paySucceeded: 'Thanh toán thành công',
     payCancelled: 'Thanh toán đã hủy',
     generatedSuccessfully: 'Tạo thành công',

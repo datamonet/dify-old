@@ -78,6 +78,7 @@ const translation = {
     modifiedSuccessfully: 'सफलतापूर्वक संशोधित किया गया',
     modifiedUnsuccessfully: 'संशोधन असफल रहा',
     copySuccessfully: 'सफलतापूर्वक कॉपी किया गया',
+    copyLinkSuccessfully: 'लिंक क्लिपबोर्ड पर कॉपी की गई',
     paySucceeded: 'भुगतान सफल रहा',
     payCancelled: 'भुगतान रद्द कर दिया गया',
     generatedSuccessfully: 'सफलतापूर्वक उत्पन्न हुआ',
