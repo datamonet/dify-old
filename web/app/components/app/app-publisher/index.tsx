@@ -63,6 +63,7 @@ const AppPublisher = ({
   const [postStatus, setPostStatus] = useState(false)
   const [posted, setPosted] = useState(false)
   const appDetail = useAppStore(state => state.appDetail)
+  const [publishedTime, setPublishedTime] = useState<number | undefined>(publishedAt)
   const { app_base_url: appBaseURL = '', access_token: accessToken = '' } = appDetail?.site ?? {}
   const appMode = (appDetail?.mode !== 'completion' && appDetail?.mode !== 'workflow') ? 'chat' : appDetail.mode
   const { mutate } = useSWR(
@@ -113,6 +114,7 @@ const AppPublisher = ({
       await onPublish?.(modelAndParameter)
 
       setPublished(true)
+      setPublishedTime(Date.now())
     }
     catch (e) {
       setPublished(false)
@@ -124,8 +126,7 @@ const AppPublisher = ({
       await onRestore?.()
       setOpen(false)
     }
-    catch (e) {
-    }
+    catch (e) { }
   }, [onRestore])
 
   const handleTrigger = useCallback(() => {
@@ -185,14 +186,13 @@ const AppPublisher = ({
         <div className='w-[336px] bg-white rounded-2xl border-[0.5px] border-gray-200 shadow-xl'>
           <div className='p-4 pt-3'>
             <div className='flex items-center h-6 text-xs font-medium text-gray-500 uppercase'>
-              {publishedAt ? t('workflow.common.latestPublished') : t('workflow.common.currentDraftUnpublished')}
+              {publishedTime ? t('workflow.common.latestPublished') : t('workflow.common.currentDraftUnpublished')}
             </div>
-            {publishedAt
+            {publishedTime
               ? (
                 <div className='flex justify-between items-center h-[18px]'>
-                  <div
-                    className='flex items-center mt-[3px] mb-[3px] leading-[18px] text-[13px] font-medium text-gray-700'>
-                    {t('workflow.common.publishedAt')} {formatTimeFromNow(publishedAt)}
+                  <div className='flex items-center mt-[3px] mb-[3px] leading-[18px] text-[13px] font-medium text-gray-700'>
+                    {t('workflow.common.publishedAt')} {formatTimeFromNow(publishedTime)}
                   </div>
                   <Button
                     className={`
@@ -217,7 +217,7 @@ const AppPublisher = ({
                 <PublishWithMultipleModel
                   multipleModelConfigs={multipleModelConfigs}
                   onSelect={item => handlePublish(item)}
-                  // textGenerationModelList={textGenerationModelList}
+                // textGenerationModelList={textGenerationModelList}
                 />
               )
               : (
@@ -230,7 +230,7 @@ const AppPublisher = ({
                   {
                     published
                       ? t('workflow.common.published')
-                      : publishedAt ? t('workflow.common.update') : t('workflow.common.publish')
+                      : publishedTime ? t('workflow.common.update') : t('workflow.common.publish')
                   }
                 </Button>
               )
@@ -252,7 +252,7 @@ const AppPublisher = ({
             </div>
             {appDetail?.mode === 'workflow' && (
               <WorkflowToolConfigureButton
-                disabled={!publishedAt}
+                disabled={!publishedTime}
                 published={!!toolPublished}
                 detailNeedUpdate={!!toolPublished && published}
                 workflowAppId={appDetail?.id}
@@ -322,7 +322,7 @@ const AppPublisher = ({
         appBaseUrl={appBaseURL}
         accessToken={accessToken}
       />
-    </PortalToFollowElem>
+    </PortalToFollowElem >
   )
 }
 

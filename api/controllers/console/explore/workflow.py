@@ -35,8 +35,8 @@ class InstalledAppWorkflowRunApi(InstalledAppResource):
             raise NotWorkflowAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument('inputs', type=dict, required=True, nullable=False, location='json')
-        parser.add_argument('files', type=list, required=False, location='json')
+        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
+        parser.add_argument("files", type=list, required=False, location="json")
         args = parser.parse_args()
 
         try:
@@ -60,7 +60,7 @@ class InstalledAppWorkflowRunApi(InstalledAppResource):
             raise CompletionRequestError(e.description)
         except ValueError as e:
             raise e
-        except Exception:
+        except Exception as e:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -77,10 +77,10 @@ class InstalledAppWorkflowTaskStopApi(InstalledAppResource):
 
         AppQueueManager.set_stop_flag(task_id, InvokeFrom.EXPLORE, current_user.id)
 
-        return {
-            "result": "success"
-        }
+        return {"result": "success"}
 
 
-api.add_resource(InstalledAppWorkflowRunApi, '/installed-apps/<uuid:installed_app_id>/workflows/run')
-api.add_resource(InstalledAppWorkflowTaskStopApi, '/installed-apps/<uuid:installed_app_id>/workflows/tasks/<string:task_id>/stop')
+api.add_resource(InstalledAppWorkflowRunApi, "/installed-apps/<uuid:installed_app_id>/workflows/run")
+api.add_resource(
+    InstalledAppWorkflowTaskStopApi, "/installed-apps/<uuid:installed_app_id>/workflows/tasks/<string:task_id>/stop"
+)

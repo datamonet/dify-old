@@ -9,6 +9,7 @@ export type AppBasicInfo = {
   name: string
   description: string
   username?: string
+  use_icon_as_answer_icon: boolean
 }
 
 export type AppCategory = 'Writing' | 'Translate' | 'HR' | 'Programming' | 'Assistant'
