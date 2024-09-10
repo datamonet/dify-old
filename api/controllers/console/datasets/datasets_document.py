@@ -417,7 +417,8 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
         info_list = []
         extract_settings = []
         for document in documents:
-            if document.indexing_status in ["completed", "error"]:
+            # takin command:除了错误的都返回
+            if document.indexing_status in ["error"]:
                 raise DocumentAlreadyFinishedError()
             data_source_info = document.data_source_info_dict
             # format document files info
