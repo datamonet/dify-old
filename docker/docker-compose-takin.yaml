@@ -131,7 +131,8 @@ services:
       SENTRY_DSN: ${WEB_SENTRY_DSN:-}
       MONGODB_URI: ${MONGODB_URI:-}
       MONGODB_NAME: ${MONGODB_NAME:-}
-
+      EMAIL_ACCESS_KEY_ID: ${EMAIL_SECRET_ACCESS_KEY:-}
+      EMAIL_SECRET_ACCESS_KEY: ${EMAIL_SECRET_ACCESS_KEY:-}
   # The DifySandbox
   sandbox:
     image: langgenius/dify-sandbox:0.2.6

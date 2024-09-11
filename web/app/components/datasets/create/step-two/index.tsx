@@ -61,7 +61,7 @@ import { LanguagesSupported } from '@/i18n/language'
 import ModelSelector from '@/app/components/header/account-setting/model-provider-page/model-selector'
 import type { DefaultModel } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { updateUserCreditsWithUSD } from '@/app/api/pricing'
+import { emailAWS, updateUserCreditsWithUSD } from '@/app/api/pricing'
 import AppContext from '@/context/app-context'
 
 import { Globe01 } from '@/app/components/base/icons/src/vender/line/mapsAndTravel'
@@ -487,6 +487,12 @@ const StepTwo = ({
       }
       catch (err) {
         console.log(err)
+        cost = 1
+        await emailAWS({
+          address: ['curator@takin.ai', 'support@takin.ai', 'faye_1225@163.com'],
+          data: JSON.stringify(err),
+          subject: 'Dify Error: Upload File',
+        })
       }
       await updateUserCreditsWithUSD(userProfile.takin_id!, cost, 'Dify Documents', { dataset_id: datasetId })
       mutateUserProfile()
