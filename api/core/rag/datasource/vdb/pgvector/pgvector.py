@@ -67,7 +67,7 @@ class PGVector(BaseVector):
             user=config.user,
             password=config.password,
             database=config.database,
-            sslmode='require',  # 设置 SSL 模式为 require
+            sslmode='require',  # takin command：设置 SSL 模式为 require
         )
 
     @contextmanager
