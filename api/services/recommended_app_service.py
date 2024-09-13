@@ -54,6 +54,7 @@ class RecommendedAppService:
         recommended_apps = (
             db.session.query(RecommendedApp)
             .filter(RecommendedApp.is_listed == True, RecommendedApp.language == language)
+            .order_by(RecommendedApp.created_at.desc())  # takin command:添加排序
             .all()
         )
 
@@ -61,6 +62,7 @@ class RecommendedAppService:
             recommended_apps = (
                 db.session.query(RecommendedApp)
                 .filter(RecommendedApp.is_listed == True, RecommendedApp.language == languages[0])
+                .order_by(RecommendedApp.created_at.desc())  # takin command:添加排序
                 .all()
             )
 
