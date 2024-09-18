@@ -273,13 +273,13 @@ const Result: FC<IResultProps> = ({
               }
             }))
           },
-          onWorkflowFinished: async ({ data}) => {
+          onWorkflowFinished: async ({ data }) => {
             if (isTimeout) {
-              notify({ type: 'warning', message: t('appDebug.warningMessage.timeoutExceeded')})
+              notify({ type: 'warning', message: t('appDebug.warningMessage.timeoutExceeded') })
               return
             }
             if (data.error) {
-              notify({ type: 'error', message: data.error})
+              notify({ type: 'error', message: data.error })
               setWorkflowProcessData(produce(getWorkflowProcessData()!, (draft) => {
                 draft.status = WorkflowRunningStatus.Failed
               }))
@@ -293,7 +293,8 @@ const Result: FC<IResultProps> = ({
             }))
             if (!data.outputs) {
               setCompletionRes('')
-            } else {
+            }
+            else {
               setCompletionRes(data.outputs)
               const isStringOutput = Object.keys(data.outputs).length === 1 && typeof data.outputs[Object.keys(data.outputs)[0]] === 'string'
               if (isStringOutput) {
