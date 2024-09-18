@@ -164,7 +164,7 @@ def initialize_extensions(app):
 @login_manager.request_loader
 def load_user_from_request(request_from_flask_login):
     """Load user based on the request."""
-    if request.blueprint not in ["console", "inner_api"]:
+    if request.blueprint not in {"console", "inner_api"}:
         return None
     # Check if the user_id contains a dot, indicating the old format
     auth_header = request.headers.get("Authorization", "")
@@ -184,7 +184,7 @@ def load_user_from_request(request_from_flask_login):
     user_id = decoded.get("user_id")
 
     # 此处为适应takin的mongo数据库，只查询固定的邮件用户
-    email = decoded.get('email')
+    email = decoded.get("email")
     account = AccountService.load_logged_in_account(email=email, token=auth_token)
     if account:
         contexts.tenant_id.set(account.current_tenant_id)

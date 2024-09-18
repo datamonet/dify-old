@@ -224,7 +224,6 @@ class ToolApiProviderUpdateApi(Resource):
         parser.add_argument("custom_disclaimer", type=str, required=True, nullable=True, location="json")
         parser.add_argument("publish", type=bool, required=False, nullable=False, location="json")
 
-
         args = parser.parse_args()
 
         return ApiToolManageService.update_api_tool_provider(
@@ -239,8 +238,7 @@ class ToolApiProviderUpdateApi(Resource):
             args["privacy_policy"],
             args["custom_disclaimer"],
             args.get("labels", []),
-            args.get('publish', False),
-
+            args.get("publish", False),
         )
 
 
@@ -331,7 +329,7 @@ class ToolApiProviderPreviousTestApi(Resource):
 
         return ApiToolManageService.test_api_tool_preview(
             current_user.current_tenant_id,
-            args["provider_name"] if args["provider_name"] else "",
+            args["provider_name"] or "",
             args["tool_name"],
             args["credentials"],
             args["parameters"],

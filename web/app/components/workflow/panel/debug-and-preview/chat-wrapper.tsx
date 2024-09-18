@@ -110,9 +110,9 @@ const ChatWrapper = forwardRef<ChatWrapperRefType, ChatWrapperProps>(({ showConv
         chatList={chatList}
         isResponding={isResponding}
         chatContainerClassName='px-3'
-        chatContainerInnerClassName='pt-6'
+        chatContainerInnerClassName='pt-6 w-full max-w-full mx-auto'
         chatFooterClassName='px-4 rounded-bl-2xl'
-        chatFooterInnerClassName='pb-4'
+        chatFooterInnerClassName='pb-4 w-full max-w-full mx-auto'
         onSend={doSend}
         onStopResponding={handleStop}
         chatNode={(
@@ -125,6 +125,7 @@ const ChatWrapper = forwardRef<ChatWrapperRefType, ChatWrapperProps>(({ showConv
             }
           </>
         )}
+        noSpacing
         suggestedQuestions={suggestedQuestions}
         showPromptLog
         chatAnswerContainerInner='!pr-2'

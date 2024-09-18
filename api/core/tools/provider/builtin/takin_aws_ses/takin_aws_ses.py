@@ -13,7 +13,7 @@ class SendgridProvider(BuiltinToolProviderController):
                     "credentials": credentials,
                 }
             ).invoke(
-                user_id='',
+                user_id="",
                 tool_parameters={
                     "subject": "Test",
                     "content": "This is a test email",

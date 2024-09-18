@@ -7,6 +7,7 @@ from _pytest.monkeypatch import MonkeyPatch
 
 
 class MockedHttp:
+    @staticmethod
     def httpx_request(
         method: Literal["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"], url: str, **kwargs
     ) -> httpx.Response:
@@ -26,7 +27,7 @@ class MockedHttp:
         return response
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_http_mock(request, monkeypatch: MonkeyPatch):
     monkeypatch.setattr(httpx, "request", MockedHttp.httpx_request)
     yield

@@ -1,6 +1,7 @@
 import json
 import logging
 from os import path
+from pathlib import Path
 from typing import Optional
 
 import requests
@@ -80,7 +81,7 @@ class RecommendedAppService:
             #     continue
 
             user = db.session.query(Account).filter(Account.id == app.user_id).first()
-            doc = collection.find_one({'email': user.email})
+            doc = collection.find_one({"email": user.email})
             app_result = {
                 "id": recommended_app.id,
                 "app": {
@@ -89,7 +90,7 @@ class RecommendedAppService:
                     "mode": app.mode,
                     "icon": app.icon,
                     "icon_background": app.icon_background,
-                    "username": doc.get('name') or user.name
+                    "username": doc.get("name") or user.name,
                 },
                 "app_id": recommended_app.app_id,
                 "description": app.description,
@@ -101,16 +102,18 @@ class RecommendedAppService:
                 "is_listed": recommended_app.is_listed,
             }
             # Takin.AI command 修改推荐的app TODO: 根据用户角色区分 -[mongo role = 50] admin的role才能推送到recommended_apps_result
-            if user.email == 'curator@takin.ai':
+            if user.email == "curator@takin.ai":
                 recommended_apps_result.append(app_result)
             else:
                 community_apps_result.append(app_result)
 
             categories.add(recommended_app.category)  # add category to categories
 
-        return {"recommended_apps": recommended_apps_result, "community": community_apps_result,
-                "categories": sorted(categories)}
-
+        return {
+            "recommended_apps": recommended_apps_result,
+            "community": community_apps_result,
+            "categories": sorted(categories),
+        }
 
     @classmethod
     def _fetch_recommended_apps_from_dify_official(cls, language: str) -> dict:
@@ -231,10 +234,9 @@ class RecommendedAppService:
             return cls.builtin_data
 
         root_path = current_app.root_path
-        with open(path.join(root_path, "constants", "recommended_apps.json"), encoding="utf-8") as f:
-            json_data = f.read()
-            data = json.loads(json_data)
-            cls.builtin_data = data
+        cls.builtin_data = json.loads(
+            Path(path.join(root_path, "constants", "recommended_apps.json")).read_text(encoding="utf-8")
+        )
 
         return cls.builtin_data
 
@@ -272,7 +274,7 @@ class RecommendedAppService:
             category=args.get("category", ""),
             description=args.get("description", ""),
             copyright="Takin.AI",
-            privacy_policy="https://Takin.ai"
+            privacy_policy="https://Takin.ai",
         )
 
         # 将app添加到session并提交
@@ -298,5 +300,3 @@ class RecommendedAppService:
         except Exception as e:
             logging.error(f"An error occurred: {e}")
             db.session.rollback()
-
-

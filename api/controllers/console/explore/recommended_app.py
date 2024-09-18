@@ -13,7 +13,7 @@ app_fields = {
     "mode": fields.String,
     "icon": fields.String,
     "icon_background": fields.String,
-    "username": fields.String
+    "username": fields.String,
 }
 
 recommended_app_fields = {
@@ -31,7 +31,7 @@ recommended_app_fields = {
 recommended_app_list_fields = {
     "recommended_apps": fields.List(fields.Nested(recommended_app_fields)),
     "community": fields.List(fields.Nested(recommended_app_fields)),
-    "categories": fields.List(fields.String)
+    "categories": fields.List(fields.String),
 }
 
 
@@ -64,7 +64,7 @@ class RecommendedAppListApi(Resource):
         parser.add_argument("category", type=str, location="json")
         args = parser.parse_args()
         app_detail = RecommendedAppService.get_recommend_app_detail(args["app_id"])
-        if (app_detail):
+        if app_detail:
             return {"message": "Recommended app already exists"}, 409
 
         recommended_app_service = RecommendedAppService()
@@ -86,6 +86,7 @@ class RecommendedAppApi(Resource):
         """Delete app"""
         RecommendedAppService().delete_app(app_id)
         return {"result": "success"}, 204
+
 
 api.add_resource(RecommendedAppListApi, "/explore/apps")
 api.add_resource(RecommendedAppApi, "/explore/apps/<uuid:app_id>")

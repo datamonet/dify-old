@@ -20,11 +20,11 @@ def get_app_model(view: Optional[Callable] = None, *, mode: Union[AppMode, list[
 
             del kwargs["app_id"]
 
-            app_model = db.session.query(App).filter(
-                App.id == app_id,
-                App.user_id == current_user.id,
-                App.status == "normal"
-            ).first()
+            app_model = (
+                db.session.query(App)
+                .filter(App.id == app_id, App.user_id == current_user.id, App.status == "normal")
+                .first()
+            )
 
             if not app_model:
                 raise AppNotFoundError()

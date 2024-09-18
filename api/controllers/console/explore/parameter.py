@@ -24,7 +24,7 @@ class AppParameterApi(InstalledAppResource):
     system_parameters_fields = {"image_file_size_limit": fields.String}
 
     parameters_fields = {
-        "agent_mode": fields.Raw, # takin command:explore中需要返回agent的配置，主要用于tools的扣费
+        "agent_mode": fields.Raw,  # takin command:explore中需要返回agent的配置，主要用于tools的扣费
         "opening_statement": fields.String,
         "suggested_questions": fields.Raw,
         "suggested_questions_after_answer": fields.Raw,
@@ -44,7 +44,7 @@ class AppParameterApi(InstalledAppResource):
         """Retrieve app parameters."""
         app_model = installed_app.app
 
-        if app_model.mode in [AppMode.ADVANCED_CHAT.value, AppMode.WORKFLOW.value]:
+        if app_model.mode in {AppMode.ADVANCED_CHAT.value, AppMode.WORKFLOW.value}:
             workflow = app_model.workflow
             if workflow is None:
                 raise AppUnavailableError()
@@ -58,7 +58,9 @@ class AppParameterApi(InstalledAppResource):
             user_input_form = features_dict.get("user_input_form", [])
 
         return {
-            "agent_mode":features_dict.get('agent_mode'), # takin command:explore中需要返回agent的配置，主要用于tools的扣费
+            "agent_mode": features_dict.get(
+                "agent_mode"
+            ),  # takin command:explore中需要返回agent的配置，主要用于tools的扣费
             "opening_statement": features_dict.get("opening_statement"),
             "suggested_questions": features_dict.get("suggested_questions", []),
             "suggested_questions_after_answer": features_dict.get(
@@ -85,7 +87,6 @@ class AppParameterApi(InstalledAppResource):
                 },
             ),
             "system_parameters": {"image_file_size_limit": dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT},
-
         }
 
 

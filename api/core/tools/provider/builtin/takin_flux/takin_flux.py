@@ -13,11 +13,10 @@ class FLUXProvider(BuiltinToolProviderController):
                     "credentials": credentials,
                 }
             ).invoke(
-                user_id='',
+                user_id="",
                 tool_parameters={
                     "prompt": "cute girl, blue eyes, white hair, anime style",
                 },
             )
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))
-        

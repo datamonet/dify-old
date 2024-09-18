@@ -28,7 +28,7 @@ import { AudioPlayerManager } from '@/app/components/base/audio-btn/audio.player
 
 type GetAbortController = (abortController: AbortController) => void
 type SendCallback = {
-  onGetConvesationMessages?: (conversationId: string, getAbortController: GetAbortController) => Promise<any>
+  onGetConversationMessages?: (conversationId: string, getAbortController: GetAbortController) => Promise<any>
   onGetSuggestedQuestions?: (responseItemId: string, getAbortController: GetAbortController) => Promise<any>
   onConversationComplete?: (conversationId: string) => void
   isPublicAPI?: boolean
@@ -201,7 +201,7 @@ export const useChat = (
     url: string,
     data: any,
     {
-      onGetConvesationMessages,
+      onGetConversationMessages,
       onGetSuggestedQuestions,
       onConversationComplete,
       isPublicAPI,
@@ -243,8 +243,6 @@ export const useChat = (
       message_files: [],
       isAnswer: true,
     }
-
-    let isInIteration = false
 
     handleResponding(true)
     hasStopResponded.current = false
@@ -327,8 +325,8 @@ export const useChat = (
           if (onConversationComplete)
             onConversationComplete(conversationId.current)
 
-          if (conversationId.current && !hasStopResponded.current && onGetConvesationMessages) {
-            const { data }: any = await onGetConvesationMessages(
+          if (conversationId.current && !hasStopResponded.current && onGetConversationMessages) {
+            const { data }: any = await onGetConversationMessages(
               conversationId.current,
               newAbortController => conversationMessagesAbortControllerRef.current = newAbortController,
             )
@@ -511,12 +509,13 @@ export const useChat = (
               ...responseItem,
             }
           }))
-          isInIteration = true
         },
         onIterationFinish: ({ data }) => {
           const tracing = responseItem.workflowProcess!.tracing!
-          tracing[tracing.length - 1] = {
-            ...tracing[tracing.length - 1],
+          const iterationIndex = tracing.findIndex(item => item.node_id === data.node_id
+            && (item.execution_metadata?.parallel_id === data.execution_metadata?.parallel_id || item.parallel_id === data.execution_metadata?.parallel_id))!
+          tracing[iterationIndex] = {
+            ...tracing[iterationIndex],
             ...data,
             status: WorkflowRunningStatus.Succeeded,
           } as any
@@ -528,10 +527,9 @@ export const useChat = (
               ...responseItem,
             }
           }))
-          isInIteration = false
         },
         onNodeStarted: ({ data }) => {
-          if (isInIteration)
+          if (data.iteration_id)
             return
 
           responseItem.workflowProcess!.tracing!.push({
@@ -547,10 +545,15 @@ export const useChat = (
           }))
         },
         onNodeFinished: ({ data }) => {
-          if (isInIteration)
+          if (data.iteration_id)
             return
 
-          const currentIndex = responseItem.workflowProcess!.tracing!.findIndex(item => item.node_id === data.node_id)
+          const currentIndex = responseItem.workflowProcess!.tracing!.findIndex((item) => {
+            if (!item.execution_metadata?.parallel_id)
+              return item.node_id === data.node_id
+
+            return item.node_id === data.node_id && (item.execution_metadata?.parallel_id === data.execution_metadata.parallel_id)
+          })
           responseItem.workflowProcess!.tracing[currentIndex] = data as any
           handleUpdateChatList(produce(chatListRef.current, (draft) => {
             const currentIndex = draft.findIndex(item => item.id === responseItem.id)

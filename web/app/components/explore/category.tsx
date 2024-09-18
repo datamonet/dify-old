@@ -16,7 +16,7 @@ export type ICategoryProps = {
   value: string
   onChange: (value: AppCategory | string) => void
   /**
-   * default value for searchparam 'category' in en
+   * default value for search param 'category' in en
    */
   allCategoriesEn: string
 }

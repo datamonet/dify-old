@@ -53,7 +53,7 @@ def test__get_completion_model_prompt_messages():
             "#context#": context,
             "#histories#": "\n".join(
                 [
-                    f"{'Human' if prompt.role.value == 'user' else 'Assistant'}: " f"{prompt.content}"
+                    f"{'Human' if prompt.role.value == 'user' else 'Assistant'}: {prompt.content}"
                     for prompt in history_prompt_messages
                 ]
             ),
@@ -160,7 +160,7 @@ def test__get_chat_model_prompt_messages_with_files_no_memory(get_chat_model_arg
     assert prompt_messages[3].content[1].data == files[0].url
 
 
-@pytest.fixture
+@pytest.fixture()
 def get_chat_model_args():
     model_config_mock = MagicMock(spec=ModelConfigEntity)
     model_config_mock.provider = "openai"

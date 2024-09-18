@@ -176,7 +176,8 @@ class ApiToolManageService:
         get api tool provider remote schema
         """
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"
+            " Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
             "Accept": "*/*",
         }
 
@@ -235,7 +236,7 @@ class ApiToolManageService:
         privacy_policy: str,
         custom_disclaimer: str,
         labels: list[str],
-            publish: bool,
+        publish: bool,
     ):
         """
         update api tool provider
@@ -431,9 +432,12 @@ class ApiToolManageService:
         db_providers: list[ApiToolProvider] = (
             db.session.query(ApiToolProvider).filter(ApiToolProvider.tenant_id == tenant_id).all() or []
         )
-        db_providers: list[ApiToolProvider] = db.session.query(ApiToolProvider).filter(
-            (ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True)
-        ).all() or []
+        db_providers: list[ApiToolProvider] = (
+            db.session.query(ApiToolProvider)
+            .filter((ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True))
+            .all()
+            or []
+        )
 
         result: list[UserToolProvider] = []
 
@@ -442,26 +446,21 @@ class ApiToolManageService:
             provider_controller = ToolTransformService.api_provider_to_controller(db_provider=provider)
             labels = ToolLabelManager.get_tool_labels(provider_controller)
             user_provider = ToolTransformService.api_provider_to_user_provider(
-                provider_controller,
-                db_provider=provider,
-                decrypt_credentials=True
+                provider_controller, db_provider=provider, decrypt_credentials=True
             )
             user_provider.labels = labels
 
             # add icon
             ToolTransformService.repack_provider(user_provider)
 
-            tools = provider_controller.get_tools(
-                user_id=user_id, tenant_id=tenant_id
-            )
+            tools = provider_controller.get_tools(user_id=user_id, tenant_id=tenant_id)
 
             for tool in tools:
-                user_provider.tools.append(ToolTransformService.tool_to_user_tool(
-                    tenant_id=tenant_id,
-                    tool=tool,
-                    credentials=user_provider.original_credentials,
-                    labels=labels
-                ))
+                user_provider.tools.append(
+                    ToolTransformService.tool_to_user_tool(
+                        tenant_id=tenant_id, tool=tool, credentials=user_provider.original_credentials, labels=labels
+                    )
+                )
 
             result.append(user_provider)
 

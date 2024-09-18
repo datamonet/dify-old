@@ -184,7 +184,7 @@ class HostedFetchAppTemplateConfig(BaseSettings):
         description="the mode for fetching app templates,"
         " default to remote,"
         " available values: remote, db, builtin",
-        default="db", # takin command:the mode for fetching app templates
+        default="db",  # takin command:the mode for fetching app templates
         # default="remote",
     )
 

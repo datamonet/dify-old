@@ -27,12 +27,15 @@ class InstalledAppsListApi(Resource):
         # ).all()
 
         # 适配Takin，需要进行用户id的过滤，达到数据隔离的效果。直接使用 join连表查询app的user id
-        installed_apps = db.session.query(InstalledApp).join(
-            App, InstalledApp.app_id == App.id
-        ).filter(
-            InstalledApp.tenant_id == current_tenant_id,
-            App.user_id == current_user_id  #  current_user_id 是要过滤的用户 ID
-        ).all()
+        installed_apps = (
+            db.session.query(InstalledApp)
+            .join(App, InstalledApp.app_id == App.id)
+            .filter(
+                InstalledApp.tenant_id == current_tenant_id,
+                App.user_id == current_user_id,  # current_user_id 是要过滤的用户 ID
+            )
+            .all()
+        )
 
         current_user.role = TenantService.get_user_role(current_user, current_user.current_tenant)
         installed_apps = [
@@ -42,7 +45,7 @@ class InstalledAppsListApi(Resource):
                 "app_owner_tenant_id": installed_app.app_owner_tenant_id,
                 "is_pinned": installed_app.is_pinned,
                 "last_used_at": installed_app.last_used_at,
-                "editable": current_user.role in ["owner", "admin"],
+                "editable": current_user.role in {"owner", "admin"},
                 "uninstallable": current_tenant_id == installed_app.app_owner_tenant_id,
             }
             for installed_app in installed_apps

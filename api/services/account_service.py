@@ -32,7 +32,7 @@ from services.errors.account import (
     NoPermissionError,
     RateLimitExceededError,
     RoleAlreadyAssignedError,
-    TenantNotFound,
+    TenantNotFoundError,
 )
 from tasks.mail_invite_member_task import send_invite_member_mail_task
 from tasks.mail_reset_password_task import send_reset_password_mail_task
@@ -48,7 +48,7 @@ class AccountService:
         if not account:
             return None
 
-        if account.status in [AccountStatus.BANNED.value, AccountStatus.CLOSED.value]:
+        if account.status in {AccountStatus.BANNED.value, AccountStatus.CLOSED.value}:
             raise Unauthorized("Account is banned or closed.")
 
         current_tenant: TenantAccountJoin = TenantAccountJoin.query.filter_by(
@@ -93,7 +93,7 @@ class AccountService:
         if not account:
             raise AccountLoginError("Invalid email or password.")
 
-        if account.status == AccountStatus.BANNED.value or account.status == AccountStatus.CLOSED.value:
+        if account.status in {AccountStatus.BANNED.value, AccountStatus.CLOSED.value}:
             raise AccountLoginError("Account is banned or closed.")
 
         if account.status == AccountStatus.PENDING.value:
@@ -224,13 +224,11 @@ class AccountService:
         redis_client.delete(_get_login_cache_key(account_id=account.id, token=token))
 
     @staticmethod
-
     def load_logged_in_account(*, email: str, token: str):
         # if not redis_client.get(_get_login_cache_key(account_id=account_id, token=token)):
         #     return None
         # takin command:检查用户不使用id，使用email
         return AccountService.load_user(email)
-
 
     @classmethod
     def send_reset_password_email(cls, account):
@@ -315,13 +313,13 @@ class TenantService:
         """Get tenant by account and add the role"""
         tenant = account.current_tenant
         if not tenant:
-            raise TenantNotFound("Tenant not found.")
+            raise TenantNotFoundError("Tenant not found.")
 
         ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
         if ta:
             tenant.role = ta.role
         else:
-            raise TenantNotFound("Tenant not found for the account.")
+            raise TenantNotFoundError("Tenant not found for the account.")
         return tenant
 
     @staticmethod
@@ -431,7 +429,7 @@ class TenantService:
             "remove": [TenantAccountRole.OWNER],
             "update": [TenantAccountRole.OWNER],
         }
-        if action not in ["add", "remove", "update"]:
+        if action not in {"add", "remove", "update"}:
             raise InvalidActionError("Invalid action.")
 
         if member:
@@ -548,7 +546,7 @@ class RegisterService:
         """Register account"""
         try:
             account = AccountService.create_account(
-                email=email, name=name, interface_language=language if language else languages[0], password=password
+                email=email, name=name, interface_language=language or languages[0], password=password
             )
             account.status = AccountStatus.ACTIVE.value if not status else status.value
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -618,8 +616,8 @@ class RegisterService:
             "email": account.email,
             "workspace_id": tenant.id,
         }
-        expiryHours = dify_config.INVITE_EXPIRY_HOURS
-        redis_client.setex(cls._get_invitation_token_key(token), expiryHours * 60 * 60, json.dumps(invitation_data))
+        expiry_hours = dify_config.INVITE_EXPIRY_HOURS
+        redis_client.setex(cls._get_invitation_token_key(token), expiry_hours * 60 * 60, json.dumps(invitation_data))
         return token
 
     @classmethod
