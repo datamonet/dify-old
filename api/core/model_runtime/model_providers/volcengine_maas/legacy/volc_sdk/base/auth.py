@@ -104,7 +104,7 @@ class Signer:
 
         signed_headers = {}
         for key in request.headers:
-            if key in ["Content-Type", "Content-Md5", "Host"] or key.startswith("X-"):
+            if key in {"Content-Type", "Content-Md5", "Host"} or key.startswith("X-"):
                 signed_headers[key.lower()] = request.headers[key]
 
         if "host" in signed_headers:

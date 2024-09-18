@@ -380,9 +380,9 @@ class ToolManager:
         ]
 
         for provider in listdir(path.join(path.dirname(path.realpath(__file__)), "provider", "builtin")):
-            if provider.startswith("__"):
-                continue
             if provider not in include_tools:
+                continue
+            if provider.startswith("__"):
                 continue
             if path.isdir(path.join(path.dirname(path.realpath(__file__)), "provider", "builtin", provider)):
                 if provider.startswith("__"):

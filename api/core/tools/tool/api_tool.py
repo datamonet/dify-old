@@ -191,7 +191,7 @@ class ApiTool(Tool):
             else:
                 body = body
 
-        if method in ("get", "head", "post", "put", "delete", "patch"):
+        if method in {"get", "head", "post", "put", "delete", "patch"}:
             response = getattr(ssrf_proxy, method)(
                 url,
                 params=params,
@@ -224,9 +224,9 @@ class ApiTool(Tool):
                     elif option["type"] == "string":
                         return str(value)
                     elif option["type"] == "boolean":
-                        if str(value).lower() in ["true", "1"]:
+                        if str(value).lower() in {"true", "1"}:
                             return True
-                        elif str(value).lower() in ["false", "0"]:
+                        elif str(value).lower() in {"false", "0"}:
                             return False
                         else:
                             continue  # Not a boolean, try next option
