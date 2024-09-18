@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
 import { useDebounceFn } from 'ahooks'
 import { RiCloseLine } from '@remixicon/react'
+import useSWRInfinite from 'swr/infinite'
 import Toast from '../../base/toast'
 import s from './style.module.css'
 import cn from '@/utils/classnames'
@@ -14,8 +15,9 @@ import ExploreContext from '@/context/explore-context'
 import type { App } from '@/models/explore'
 import Category from '@/app/components/explore/category'
 import AppCard from '@/app/components/explore/app-card'
+import StudioAppCard from '@/app/(commonLayout)/apps/AppCard'
 import { fetchAppDetail, fetchAppList } from '@/service/explore'
-import { importApp } from '@/service/apps'
+import { fetchAppList as appList, importApp } from '@/service/apps'
 import { useTabSearchParams } from '@/hooks/use-tab-searchparams'
 import CreateAppModal from '@/app/components/explore/create-app-modal'
 import AppTypeSelector from '@/app/components/app/type-selector'
@@ -28,6 +30,7 @@ import SearchInput from '@/app/components/base/search-input'
 // takin command:增加share 卡片
 import Modal from '@/app/components/base/modal'
 import ShareAppCard from '@/app/components/explore/share-app-card'
+import type { AppListResponse } from '@/models/app'
 
 type AppsProps = {
   pageType?: PageType
@@ -37,6 +40,23 @@ type AppsProps = {
 export enum PageType {
   EXPLORE = 'explore',
   CREATE = 'create',
+}
+
+const getKey = (
+  pageIndex: number,
+  previousPageData: AppListResponse,
+  activeTab: string,
+  tags: string[],
+  keywords: string,
+) => {
+  if (!pageIndex || previousPageData.has_more) {
+    const params: any = { url: 'apps', params: { page: pageIndex + 1, limit: 30, name: keywords } }
+
+    params.params.mode = activeTab
+    params.params.tag_ids = tags
+    return params
+  }
+  return null
 }
 
 const Apps = ({
@@ -77,7 +97,7 @@ const Apps = ({
     ['/explore/apps'],
     () =>
       fetchAppList().then(({ categories, community, recommended_apps }) => ({
-        categories,
+        categories: ['favourite', ...categories],
         community,
         recommended_apps,
         allList: [...community, ...recommended_apps].sort((a, b) => a.position - b.position),
@@ -90,6 +110,12 @@ const Apps = ({
         allList: [],
       },
     },
+  )
+
+  const { data, mutate } = useSWRInfinite(
+    (pageIndex: number, previousPageData: AppListResponse) => getKey(pageIndex, previousPageData, 'all', ['b0524f83-eb2d-4ede-b654-b1a2b9d5fb00'], searchKeywords),
+    appList,
+    { revalidateFirstPage: true },
   )
 
   const filteredList = useMemo(() => {
@@ -183,6 +209,13 @@ const Apps = ({
       setShowShare(searchParamsAppId)
   }, [searchParamsAppId])
 
+  useEffect(() => {
+    if (localStorage.getItem(NEED_REFRESH_APP_LIST_KEY) === '1') {
+      localStorage.removeItem(NEED_REFRESH_APP_LIST_KEY)
+      mutate()
+    }
+  }, [])
+
   if (!categories || categories.length === 0) {
     return (
       <div className="flex h-full items-center">
@@ -234,18 +267,26 @@ const Apps = ({
             'grid content-start shrink-0',
             pageType === PageType.EXPLORE ? 'gap-4 px-6 sm:px-12' : 'gap-3 px-8  sm:!grid-cols-2 md:!grid-cols-3 lg:!grid-cols-4',
           )}>
-          {searchFilteredList.map(app => (
-            <AppCard
-              key={app.app_id}
-              isExplore={pageType === PageType.EXPLORE}
-              app={app}
-              canCreate={hasEditPermission}
-              onCreate={() => {
-                setCurrApp(app)
-                setIsShowCreateModal(true)
-              }}
-            />
-          ))}
+          {
+            currCategory === 'favourite'
+              ? (<> {data?.map(({ data: apps }) => apps.map(app => (
+                <StudioAppCard key={app.id} app={app} onRefresh={mutate} />
+              )))}</>)
+              : (<>
+                {searchFilteredList.map(app => (
+                  <AppCard
+                    key={app.app_id}
+                    isExplore={pageType === PageType.EXPLORE}
+                    app={app}
+                    canCreate={hasEditPermission}
+                    onCreate={() => {
+                      setCurrApp(app)
+                      setIsShowCreateModal(true)
+                    }}
+                  />
+                ))}</>)
+          }
+
         </nav>
       </div>
 

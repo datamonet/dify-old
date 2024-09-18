@@ -25,6 +25,7 @@ import SearchInput from '@/app/components/base/search-input'
 import { useStore as useTagStore } from '@/app/components/base/tag-management/store'
 import TagManagementModal from '@/app/components/base/tag-management'
 import TagFilter from '@/app/components/base/tag-management/filter'
+import { FavouriteTag } from '@/app/components/base/tag-management/favourite'
 
 const getKey = (
   pageIndex: number,
@@ -43,7 +44,6 @@ const getKey = (
 
     if (tags.length)
       params.params.tag_ids = tags
-
     return params
   }
   return null
@@ -132,6 +132,7 @@ const Apps = () => {
           options={options}
         />
         <div className='flex items-center gap-2'>
+          <FavouriteTag value={tagFilterValue} onChange={handleTagsChange}/>
           <TagFilter type='app' value={tagFilterValue} onChange={handleTagsChange} />
           <SearchInput className='w-[200px]' value={keywords} onChange={handleKeywordsChange} />
         </div>

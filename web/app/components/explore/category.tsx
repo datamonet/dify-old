@@ -11,7 +11,8 @@ const categoryI18n = exploreI18n.category
 
 export type ICategoryProps = {
   className?: string
-  list: AppCategory[]
+  list: string[] // takin command:方便修改，直接变成string[]
+  // list: AppCategory[]
   value: string
   onChange: (value: AppCategory | string) => void
   /**
@@ -41,7 +42,7 @@ const Category: FC<ICategoryProps> = ({
         className={itemClassName(isAllCategories)}
         onClick={() => onChange(allCategoriesEn)}
       >
-        <ThumbsUp className='mr-1 w-3.5 h-3.5' />
+        <ThumbsUp className='mr-1 w-3.5 h-3.5'/>
         {t('explore.apps.allCategories')}
       </div>
       {/* Takin command:为分类增加一个community */}
@@ -51,15 +52,21 @@ const Category: FC<ICategoryProps> = ({
       >
         Community
       </div>
-      {list.map(name => (
-        <div
-          key={name}
-          className={itemClassName(name === value)}
-          onClick={() => onChange(name)}
-        >
-          {categoryI18n[name] ? t(`explore.category.${name}`) : name}
-        </div>
-      ))}
+      <div
+        className={itemClassName(value === 'favourite')}
+        onClick={() => onChange('favourite')}
+      >
+        Favourite
+      </div>
+      {/* {list.map(name => ( */}
+      {/*  <div */}
+      {/*    key={name} */}
+      {/*    className={itemClassName(name === value)} */}
+      {/*    onClick={() => onChange(name)} */}
+      {/*  > */}
+      {/*    {categoryI18n[name] ? t(`explore.category.${name}`) : name} */}
+      {/*  </div> */}
+      {/* ))} */}
     </div>
   )
 }

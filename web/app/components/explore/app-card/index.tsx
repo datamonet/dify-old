@@ -11,6 +11,7 @@ import AppIcon from '@/app/components/base/app-icon'
 import { AiText, ChatBot, CuteRobote } from '@/app/components/base/icons/src/vender/solid/communication'
 import { Route } from '@/app/components/base/icons/src/vender/solid/mapsAndTravel'
 import Toast from '@/app/components/base/toast'
+import { FavouriteBtn } from '@/app/components/base/tag-management/favourite'
 
 export type AppCardProps = {
   app: App
@@ -76,6 +77,12 @@ const AppCard = ({
             {appBasicInfo.username && <span className="px-2">By {appBasicInfo.username}</span>}
           </div>
         </div>
+        <div className="flex justify-end space-x-2 mb-5">
+          <div onClick={() => onClickCopy()}>
+            <RiShareLine className='w-4 h-4 mr-1 hover:text-blue-600'/>
+          </div>
+          <FavouriteBtn app={appBasicInfo}/>
+        </div>
       </div>
       <div className="description-wrapper h-[90px] px-[14px] text-xs leading-normal text-gray-500 ">
         <div className='line-clamp-4 group-hover:line-clamp-2'>
@@ -84,16 +91,10 @@ const AppCard = ({
       </div>
       {isExplore && canCreate && (
         <div className={cn('hidden items-center flex-wrap min-h-[42px] px-[14px] pt-2 pb-[10px] bg-white group-hover:flex absolute bottom-0 left-0 right-0')}>
-          <div className={cn('flex items-center w-full space-x-2')}>
-            <Button variant='primary' className='grow h-7' onClick={() => onCreate()}>
-              <PlusIcon className='w-4 h-4 mr-1'/>
-              <span className='text-xs'>{t('explore.appCard.addToWorkspace')}</span>
-            </Button>
-            <Button variant='secondary-accent' className='grow h-7' onClick={() => onClickCopy()}>
-              <RiShareLine className='w-4 h-4 mr-1'/>
-              <span className='text-xs'>Share</span>
-            </Button>
-          </div>
+          <Button variant='primary' className='grow h-7' onClick={() => onCreate()}>
+            <PlusIcon className='w-4 h-4 mr-1'/>
+            <span className='text-xs'>{t('explore.appCard.addToWorkspace')}</span>
+          </Button>
         </div>
       )}
       {!isExplore && (
