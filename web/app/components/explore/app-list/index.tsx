@@ -269,9 +269,18 @@ const Apps = ({
           )}>
           {
             currCategory === 'favourite'
-              ? (<> {data?.map(({ data: apps }) => apps.map(app => (
-                <StudioAppCard key={app.id} app={app} onRefresh={mutate} />
-              )))}</>)
+              ? (
+                <>
+                  {data?.map(({ data: apps }) => (
+                    apps.length === 0
+                      // eslint-disable-next-line react/jsx-key
+                      ? <div className="text-sm text-zinc-400 px-4 ">No favourite apps have been added yet</div>
+                      : apps.map(app => (
+                        <StudioAppCard key={app.id} app={app} onRefresh={mutate} />
+                      ))
+                  ))}
+                </>
+              )
               : (<>
                 {searchFilteredList.map(app => (
                   <AppCard
