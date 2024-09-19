@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
@@ -84,6 +84,7 @@ const Apps = ({
     setKeywords(value)
     handleSearch()
   }
+  const anchorRef = useRef<HTMLDivElement>(null)
 
   const [currentType, setCurrentType] = useState<string>('')
   const [currCategory, setCurrCategory] = useTabSearchParams({
@@ -112,7 +113,7 @@ const Apps = ({
     },
   )
 
-  const { data, mutate } = useSWRInfinite(
+  const { data, mutate, setSize } = useSWRInfinite(
     (pageIndex: number, previousPageData: AppListResponse) => getKey(pageIndex, previousPageData, 'all', ['b0524f83-eb2d-4ede-b654-b1a2b9d5fb00'], searchKeywords),
     appList,
     { revalidateFirstPage: true },
@@ -162,6 +163,18 @@ const Apps = ({
       )
     }
   }, [searchKeywords, filteredList])
+
+  useEffect(() => {
+    let observer: IntersectionObserver | undefined
+    if (anchorRef.current && currCategory === 'favourite') {
+      observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting)
+          setSize((size: number) => size + 1)
+      }, { rootMargin: '100px' })
+      observer.observe(anchorRef.current)
+    }
+    return () => observer?.disconnect()
+  }, [anchorRef, mutate, currCategory, categories])
 
   const [currApp, setCurrApp] = React.useState<App | null>(null)
   const [isShowCreateModal, setIsShowCreateModal] = React.useState(false)
@@ -276,9 +289,10 @@ const Apps = ({
                       // eslint-disable-next-line react/jsx-key
                       ? <div className="text-sm text-zinc-400 px-4 ">No favourite apps have been added yet</div>
                       : apps.map(app => (
-                        <StudioAppCard key={app.id} app={app} onRefresh={mutate} />
+                        <StudioAppCard key={app.id} app={app} onRefresh={mutate}/>
                       ))
                   ))}
+                  <div ref={anchorRef} className='h-0'></div>
                 </>
               )
               : (<>
@@ -297,6 +311,7 @@ const Apps = ({
           }
 
         </nav>
+
       </div>
 
       {isShowCreateModal && (

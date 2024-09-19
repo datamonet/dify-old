@@ -2,11 +2,14 @@
 import type { FC } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  RiHeartLine,
+  RiShapesLine,
+} from '@remixicon/react'
 import cn from '@/utils/classnames'
 import exploreI18n from '@/i18n/en-US/explore'
 import type { AppCategory } from '@/models/explore'
 import { ThumbsUp } from '@/app/components/base/icons/src/vender/line/alertsAndFeedback'
-
 const categoryI18n = exploreI18n.category
 
 export type ICategoryProps = {
@@ -50,12 +53,14 @@ const Category: FC<ICategoryProps> = ({
         className={itemClassName(value === 'community')}
         onClick={() => onChange('community')}
       >
+        <RiShapesLine className='mr-1 w-3.5 h-3.5'/>
         Community
       </div>
       <div
         className={itemClassName(value === 'favourite')}
         onClick={() => onChange('favourite')}
       >
+        <RiHeartLine className='mr-1 w-3.5 h-3.5'/>
         Favourite
       </div>
       {/* {list.map(name => ( */}

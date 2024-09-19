@@ -78,7 +78,7 @@ const AppCard = ({
           </div>
         </div>
         <div className="flex justify-end space-x-2 mb-5">
-          <div onClick={() => onClickCopy()}>
+          <div onClick={() => onClickCopy()} className="flex justify-center items-center">
             <RiShareLine className='w-4 h-4 mr-1 hover:text-blue-600'/>
           </div>
           <FavouriteBtn app={appBasicInfo}/>

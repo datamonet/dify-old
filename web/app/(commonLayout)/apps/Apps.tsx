@@ -126,13 +126,15 @@ const Apps = () => {
   return (
     <>
       <div className='sticky top-0 flex justify-between items-center pt-4 px-12 pb-2 leading-[56px] bg-gray-100 z-10 flex-wrap gap-y-2'>
-        <TabSliderNew
-          value={activeTab}
-          onChange={setActiveTab}
-          options={options}
-        />
-        <div className='flex items-center gap-2'>
+        <div className='flex  gap-y-2'>
+          <TabSliderNew
+            value={activeTab}
+            onChange={setActiveTab}
+            options={options}
+          />
           <FavouriteTag value={tagFilterValue} onChange={handleTagsChange}/>
+        </div>
+        <div className='flex items-center gap-2'>
           <TagFilter type='app' value={tagFilterValue} onChange={handleTagsChange} />
           <SearchInput className='w-[200px]' value={keywords} onChange={handleKeywordsChange} />
         </div>

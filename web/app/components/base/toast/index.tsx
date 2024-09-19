@@ -39,7 +39,8 @@ const Toast = ({
     className,
     'fixed rounded-md p-4 my-4 mx-8 z-[9999]',
     'top-12',
-    'right-1/2', // takin command: 错误弹窗放在中间
+    'left-1/2', // 将元素的左边缘定位到视口的50%
+    '-translate-x-1/2', // 将元素向左移动自身宽度的50%，实现水平居中 // takin command: 错误弹窗放在中间
     type === 'success' ? 'bg-green-50' : '',
     type === 'error' ? 'bg-red-50' : '',
     type === 'warning' ? 'bg-yellow-50' : '',
@@ -90,7 +91,8 @@ export const ToastProvider = ({
     duration: 6000,
   }
   const [params, setParams] = React.useState<IToastProps>(placeholder)
-  const defaultDuring = (params.type === 'success' || params.type === 'info') ? 3000 : 6000
+  // takin command:停留时间长一点
+  const defaultDuring = 6000
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -118,7 +120,6 @@ Toast.notify = ({
   duration,
   className,
 }: Pick<IToastProps, 'type' | 'message' | 'duration' | 'className'>) => {
-  const defaultDuring = (type === 'success' || type === 'info') ? 3000 : 6000
   if (typeof window === 'object') {
     const holder = document.createElement('div')
     const root = createRoot(holder)
@@ -126,7 +127,8 @@ Toast.notify = ({
     root.render(<Toast type={type} message={message} duration={duration} className={className} />)
     document.body.appendChild(holder)
 
-    const defaultDuring = type === 'success' ? 3000 : 6000
+    // takin command:停留时间长一点
+    const defaultDuring = 6000
 
     setTimeout(() => {
       if (holder)

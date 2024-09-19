@@ -1,10 +1,9 @@
 import type { FC } from 'react'
 import {
-  RiStarFill,
-  RiStarLine,
+  RiAddLine,
+  RiHeartLine,
 } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
-import Button from '@/app/components/base/button'
 import { useStore as useTagStore } from '@/app/components/base/tag-management/store'
 import type { CreateAppModalProps } from '@/app/components/explore/create-app-modal'
 import { fetchAppDetail } from '@/service/explore'
@@ -13,6 +12,7 @@ import Toast from '@/app/components/base/toast'
 import { NEED_REFRESH_APP_LIST_KEY } from '@/config'
 import { bindTag } from '@/service/tag'
 import type { AppBasicInfo } from '@/models/explore'
+import cn from '@/utils/classnames'
 
 // takin command: studio展示所有的喜欢app
 export const FavouriteTag: FC<{
@@ -31,13 +31,13 @@ export const FavouriteTag: FC<{
       onChange([...value, tag.id])
   }
   return (
-    <Button variant="ghost" onClick={selectTag} className="">
-      {
-        value?.filter(v => v === tag.id).length > 0
-          ? <RiStarFill className='w-[16px] h-[16px] text-yellow-400'/>
-          : <RiStarLine className='w-[16px] h-[16px]'/>
-      }
-    </Button>
+    <div className={cn(
+      'mr-1 px-3 py-[7px] h-[32px] flex items-center rounded-lg border-[0.5px] border-transparent text-gray-700 text-[13px] font-medium leading-[18px] cursor-pointer hover:bg-gray-200',
+      value?.filter(v => v === tag.id).length > 0 && 'bg-white border-gray-200 shadow-xs text-primary-600 hover:bg-white',
+    )} onClick={selectTag} >
+      <RiHeartLine className='w-[14px] h-[14px] mr-1'/>
+      Favourite
+    </div>
   )
 }
 
@@ -71,6 +71,7 @@ export const FavouriteBtn: FC<{
       // b0524f83-eb2d-4ede-b654-b1a2b9d5fb00是喜欢的tag id
       await bindTag(['b0524f83-eb2d-4ede-b654-b1a2b9d5fb00'], app.id, 'app')
       localStorage.setItem(NEED_REFRESH_APP_LIST_KEY, '1')
+      Toast.notify({ type: 'success', message: 'Added successfully' })
     }
     catch (e) {
       Toast.notify({ type: 'error', message: t('app.newApp.appCreateFailed') })
@@ -87,8 +88,8 @@ export const FavouriteBtn: FC<{
         description: app.description,
         use_icon_as_answer_icon: app.use_icon_as_answer_icon,
       })
-    }} className="">
-      <RiStarLine className='w-[16px] h-[16px] hover:text-yellow-400'/>
+    }} className="flex justify-center items-center">
+      <RiAddLine className='w-[18px] h-[18px] hover:text-blue-600'/>
     </div>
   )
 }
