@@ -16,7 +16,9 @@ from configs import dify_config
 from core.errors.error import ProviderTokenNotInitError
 from core.llm_generator.llm_generator import LLMGenerator
 from core.model_manager import ModelInstance, ModelManager
-from core.model_runtime.entities.model_entities import ModelType
+from core.model_runtime.entities.model_entities import ModelType, PriceType
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 from core.rag.datasource.keyword.keyword_factory import Keyword
 from core.rag.docstore.dataset_docstore import DatasetDocumentStore
 from core.rag.extractor.entity.extract_setting import ExtractSetting
@@ -251,8 +253,13 @@ class IndexingRunner:
                     tenant_id=tenant_id,
                     model_type=ModelType.TEXT_EMBEDDING,
                 )
+
+                # ------------------------------- takin command:增加token扣费返回 -----------------------------
+        tokens = 0
         preview_texts = []
         total_segments = 0
+        total_price = 0
+        currency = 'USD'
         index_type = doc_form
         index_processor = IndexProcessorFactory(index_type).init_index_processor()
         all_text_docs = []
@@ -261,7 +268,8 @@ class IndexingRunner:
             text_docs = index_processor.extract(extract_setting, process_rule_mode=tmp_processing_rule["mode"])
             all_text_docs.extend(text_docs)
             processing_rule = DatasetProcessRule(
-                mode=tmp_processing_rule["mode"], rules=json.dumps(tmp_processing_rule["rules"])
+                mode=tmp_processing_rule["mode"],
+                rules=json.dumps(tmp_processing_rule["rules"])
             )
 
             # get splitter
@@ -269,24 +277,67 @@ class IndexingRunner:
 
             # split to documents
             documents = self._split_to_documents_for_estimate(
-                text_docs=text_docs, splitter=splitter, processing_rule=processing_rule
+                text_docs=text_docs,
+                splitter=splitter,
+                processing_rule=processing_rule
             )
 
             total_segments += len(documents)
             for document in documents:
                 if len(preview_texts) < 5:
                     preview_texts.append(document.page_content)
+                if indexing_technique == 'high_quality' or embedding_model_instance:
+                    tokens += embedding_model_instance.get_text_embedding_num_tokens(
+                        texts=[self.filter_string(document.page_content)]
+                    )
 
-        if doc_form and doc_form == "qa_model":
+        if doc_form and doc_form == 'qa_model':
+            model_instance = self.model_manager.get_default_model_instance(
+                tenant_id=tenant_id,
+                model_type=ModelType.LLM
+            )
+
+            model_type_instance = model_instance.model_type_instance
+            model_type_instance = cast(LargeLanguageModel, model_type_instance)
+
             if len(preview_texts) > 0:
                 # qa model document
-                response = LLMGenerator.generate_qa_document(
-                    current_user.current_tenant_id, preview_texts[0], doc_language
-                )
+                response = LLMGenerator.generate_qa_document(current_user.current_tenant_id, preview_texts[0],
+                                                             doc_language)
                 document_qa_list = self.format_split_text(response)
+                price_info = model_type_instance.get_price(
+                    model=model_instance.model,
+                    credentials=model_instance.credentials,
+                    price_type=PriceType.INPUT,
+                    tokens=total_segments * 2000,
+                )
+                return {
+                    "total_segments": total_segments * 20,
+                    "tokens": total_segments * 2000,
+                    "total_price": '{:f}'.format(price_info.total_amount),
+                    "currency": price_info.currency,
+                    "qa_preview": document_qa_list,
+                    "preview": preview_texts
+                }
+        if embedding_model_instance:
+            embedding_model_type_instance = cast(TextEmbeddingModel, embedding_model_instance.model_type_instance)
+            embedding_price_info = embedding_model_type_instance.get_price(
+                model=embedding_model_instance.model,
+                credentials=embedding_model_instance.credentials,
+                price_type=PriceType.INPUT,
+                tokens=tokens
+            )
+            total_price = '{:f}'.format(embedding_price_info.total_amount)
+            currency = embedding_price_info.currency
+        return {
+            "total_segments": total_segments,
+            "tokens": tokens,
+            "total_price": total_price,
+            "currency": currency,
+            "preview": preview_texts
+        }
 
-                return {"total_segments": total_segments * 20, "qa_preview": document_qa_list, "preview": preview_texts}
-        return {"total_segments": total_segments, "preview": preview_texts}
+    # ------------------------------- takin command:end -----------------------------
 
     def _extract(
         self, index_processor: BaseIndexProcessor, dataset_document: DatasetDocument, process_rule: dict
