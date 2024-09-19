@@ -10,17 +10,12 @@ import useSWR from 'swr'
 import { RiArrowDownSLine } from '@remixicon/react'
 import type { ModelAndParameter } from '../configuration/debug/types'
 import PublishWithMultipleModel from './publish-with-multiple-model'
-import SuggestedAction from './suggested-action'
 import Button from '@/app/components/base/button'
 import {
   PortalToFollowElem,
   PortalToFollowElemContent,
   PortalToFollowElemTrigger,
 } from '@/app/components/base/portal-to-follow-elem'
-import { PlayCircle } from '@/app/components/base/icons/src/vender/line/mediaAndDevices'
-import { CodeBrowser } from '@/app/components/base/icons/src/vender/line/development'
-import { LeftIndent02 } from '@/app/components/base/icons/src/vender/line/editor'
-import { FileText } from '@/app/components/base/icons/src/vender/line/files'
 import EmbeddedModal from '@/app/components/app/overview/embedded'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import { useGetLanguage } from '@/context/i18n'
@@ -242,52 +237,35 @@ const AppPublisher = ({
                 </Button>
               )
             }
-            <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'>
-              <SuggestedAction disabled={!publishedAt} link={appURL}
-                icon={<PlayCircle/>}>{t('workflow.common.runApp')}</SuggestedAction>
-              {appDetail?.mode === 'workflow'
-                ? (
-                  <SuggestedAction
-                    disabled={!publishedAt}
-                    link={`${appURL}${appURL.includes('?') ? '&' : '?'}mode=batch`}
-                    icon={<LeftIndent02 className='w-4 h-4'/>}
-                  >
-                    {t('workflow.common.batchRunApp')}
-                  </SuggestedAction>
-                )
-                : (
-                  <SuggestedAction
-                    onClick={() => {
-                      setEmbeddingModalOpen(true)
-                      handleTrigger()
-                    }}
-                    disabled={!publishedAt}
-                    icon={<CodeBrowser className='w-4 h-4'/>}
-                  >
-                    {t('workflow.common.embedIntoSite')}
-                  </SuggestedAction>
-                )}
-              <SuggestedAction disabled={!publishedAt} link='./develop' icon={<FileText
-                className='w-4 h-4'/>}>{t('workflow.common.accessAPIReference')}</SuggestedAction>
+            {/* <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'> */}
+            {/* <SuggestedAction disabled={!publishedAt} link={appURL} */}
+            {/*  icon={<PlayCircle/>}>{t('workflow.common.runApp')}</SuggestedAction> */}
+            {/* {appDetail?.mode === 'workflow' */}
+            {/*  ? ( */}
+            {/*    <SuggestedAction */}
+            {/*      disabled={!publishedAt} */}
+            {/*      link={`${appURL}${appURL.includes('?') ? '&' : '?'}mode=batch`} */}
+            {/*      icon={<LeftIndent02 className='w-4 h-4'/>} */}
+            {/*    > */}
+            {/*      {t('workflow.common.batchRunApp')} */}
+            {/*    </SuggestedAction> */}
+            {/*  ) */}
+            {/*  : ( */}
+            {/*    <SuggestedAction */}
+            {/*      onClick={() => { */}
+            {/*        setEmbeddingModalOpen(true) */}
+            {/*        handleTrigger() */}
+            {/*      }} */}
+            {/*      disabled={!publishedAt} */}
+            {/*      icon={<CodeBrowser className='w-4 h-4'/>} */}
+            {/*    > */}
+            {/*      {t('workflow.common.embedIntoSite')} */}
+            {/*    </SuggestedAction> */}
+            {/*  )} */}
+            {/* <SuggestedAction disabled={!publishedAt} link='./develop' icon={<FileText */}
+            {/*  className='w-4 h-4'/>}>{t('workflow.common.accessAPIReference')}</SuggestedAction> */}
 
-              {appDetail?.mode === 'workflow' && (
-                <WorkflowToolConfigureButton
-                  disabled={!publishedAt}
-                  published={!!toolPublished}
-                  detailNeedUpdate={!!toolPublished && published}
-                  workflowAppId={appDetail?.id}
-                  icon={{
-                    content: (appDetail.icon_type === 'image' ? '🤖' : appDetail?.icon) || '🤖',
-                    background: (appDetail.icon_type === 'image' ? appDefaultIconBackground : appDetail?.icon_background) || appDefaultIconBackground,
-                  }}
-                  name={appDetail?.name}
-                  description={appDetail?.description}
-                  inputs={inputs}
-                  handlePublish={handlePublish}
-                  onRefreshData={onRefreshData}
-                />
-              )}
-            </div>
+            {/* </div> */}
 
             <div className="py-2 flex flex-col">
               <div className="flex space-x-1 items-start py-2 text-sm text-gray-500">
@@ -303,8 +281,25 @@ const AppPublisher = ({
                 }
                 }
               />
-            </div>
 
+            </div>
+            {appDetail?.mode === 'workflow' && (
+              <WorkflowToolConfigureButton
+                disabled={!publishedAt}
+                published={!!toolPublished}
+                detailNeedUpdate={!!toolPublished && published}
+                workflowAppId={appDetail?.id}
+                icon={{
+                  content: (appDetail.icon_type === 'image' ? '🤖' : appDetail?.icon) || '🤖',
+                  background: (appDetail.icon_type === 'image' ? appDefaultIconBackground : appDetail?.icon_background) || appDefaultIconBackground,
+                }}
+                name={appDetail?.name}
+                description={appDetail?.description}
+                inputs={inputs}
+                handlePublish={handlePublish}
+                onRefreshData={onRefreshData}
+              />
+            )}
           </div>
 
         </div>
