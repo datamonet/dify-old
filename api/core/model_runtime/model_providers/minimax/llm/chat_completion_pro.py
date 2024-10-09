@@ -43,17 +43,28 @@ class MinimaxChatCompletionPro:
 
         extra_kwargs = {}
 
-        if "max_tokens" in model_parameters and type(model_parameters["max_tokens"]) == int:
+        if (
+            "max_tokens" in model_parameters
+            and type(model_parameters["max_tokens"]) == int
+        ):
             extra_kwargs["tokens_to_generate"] = model_parameters["max_tokens"]
 
-        if "temperature" in model_parameters and type(model_parameters["temperature"]) == float:
+        if (
+            "temperature" in model_parameters
+            and type(model_parameters["temperature"]) == float
+        ):
             extra_kwargs["temperature"] = model_parameters["temperature"]
 
         if "top_p" in model_parameters and type(model_parameters["top_p"]) == float:
             extra_kwargs["top_p"] = model_parameters["top_p"]
 
-        if "mask_sensitive_info" in model_parameters and type(model_parameters["mask_sensitive_info"]) == bool:
-            extra_kwargs["mask_sensitive_info"] = model_parameters["mask_sensitive_info"]
+        if (
+            "mask_sensitive_info" in model_parameters
+            and type(model_parameters["mask_sensitive_info"]) == bool
+        ):
+            extra_kwargs["mask_sensitive_info"] = model_parameters[
+                "mask_sensitive_info"
+            ]
 
         if model_parameters.get("plugin_web_search"):
             extra_kwargs["plugins"] = ["plugin_web_search"]
@@ -77,7 +88,10 @@ class MinimaxChatCompletionPro:
 
         messages = [message.to_dict() for message in prompt_messages]
 
-        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+        headers = {
+            "Authorization": "Bearer " + api_key,
+            "Content-Type": "application/json",
+        }
 
         body = {
             "model": model,
@@ -93,7 +107,13 @@ class MinimaxChatCompletionPro:
             body["function_call"] = {"type": "auto"}
 
         try:
-            response = post(url=url, data=dumps(body), headers=headers, stream=stream, timeout=(10, 300))
+            response = post(
+                url=url,
+                data=dumps(body),
+                headers=headers,
+                stream=stream,
+                timeout=(10, 300),
+            )
         except Exception as e:
             raise InternalServerError(e)
 
@@ -128,7 +148,9 @@ class MinimaxChatCompletionPro:
             msg = response["base_resp"]["status_msg"]
             self._handle_error(code, msg)
 
-        message = MinimaxMessage(content=response["reply"], role=MinimaxMessage.Role.ASSISTANT.value)
+        message = MinimaxMessage(
+            content=response["reply"], role=MinimaxMessage.Role.ASSISTANT.value
+        )
         message.usage = {
             "prompt_tokens": 0,
             "completion_tokens": response["usage"]["total_tokens"],
@@ -137,7 +159,9 @@ class MinimaxChatCompletionPro:
         message.stop_reason = response["choices"][0]["finish_reason"]
         return message
 
-    def _handle_stream_chat_generate_response(self, response: Response) -> Generator[MinimaxMessage, None, None]:
+    def _handle_stream_chat_generate_response(
+        self, response: Response
+    ) -> Generator[MinimaxMessage, None, None]:
         """
         handle stream chat generate response
         """
@@ -157,7 +181,9 @@ class MinimaxChatCompletionPro:
             # final chunk
             if data["reply"] or data.get("usage"):
                 total_tokens = data["usage"]["total_tokens"]
-                minimax_message = MinimaxMessage(role=MinimaxMessage.Role.ASSISTANT.value, content="")
+                minimax_message = MinimaxMessage(
+                    role=MinimaxMessage.Role.ASSISTANT.value, content=""
+                )
                 minimax_message.usage = {
                     "prompt_tokens": 0,
                     "completion_tokens": total_tokens,
@@ -171,8 +197,12 @@ class MinimaxChatCompletionPro:
                         message = choice["messages"][0]
                         # append function_call message
                         if "function_call" in message:
-                            function_call_message = MinimaxMessage(content="", role=MinimaxMessage.Role.ASSISTANT.value)
-                            function_call_message.function_call = message["function_call"]
+                            function_call_message = MinimaxMessage(
+                                content="", role=MinimaxMessage.Role.ASSISTANT.value
+                            )
+                            function_call_message.function_call = message[
+                                "function_call"
+                            ]
                             yield function_call_message
 
                 yield minimax_message
@@ -187,5 +217,8 @@ class MinimaxChatCompletionPro:
                 message = choice["messages"][0]
                 # append text message
                 if "text" in message:
-                    minimax_message = MinimaxMessage(content=message["text"], role=MinimaxMessage.Role.ASSISTANT.value)
+                    minimax_message = MinimaxMessage(
+                        content=message["text"],
+                        role=MinimaxMessage.Role.ASSISTANT.value,
+                    )
                     yield minimax_message

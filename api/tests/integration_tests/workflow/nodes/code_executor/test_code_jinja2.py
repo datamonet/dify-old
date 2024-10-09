@@ -1,7 +1,9 @@
 import base64
 
 from core.helper.code_executor.code_executor import CodeExecutor, CodeLanguage
-from core.helper.code_executor.jinja2.jinja2_transformer import Jinja2TemplateTransformer
+from core.helper.code_executor.jinja2.jinja2_transformer import (
+    Jinja2TemplateTransformer,
+)
 
 CODE_LANGUAGE = CodeLanguage.JINJA2
 
@@ -15,7 +17,9 @@ def test_jinja2():
         .replace(Jinja2TemplateTransformer._inputs_placeholder, inputs)
     )
     result = CodeExecutor.execute_code(
-        language=CODE_LANGUAGE, preload=Jinja2TemplateTransformer.get_preload_script(), code=code
+        language=CODE_LANGUAGE,
+        preload=Jinja2TemplateTransformer.get_preload_script(),
+        code=code,
     )
     assert result == "<<RESULT>>Hello World<<RESULT>>\n"
 

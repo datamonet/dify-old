@@ -11,9 +11,14 @@ def test_validate_credentials():
     model = CohereRerankModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="rerank-english-v2.0", credentials={"api_key": "invalid_key"})
+        model.validate_credentials(
+            model="rerank-english-v2.0", credentials={"api_key": "invalid_key"}
+        )
 
-    model.validate_credentials(model="rerank-english-v2.0", credentials={"api_key": os.environ.get("COHERE_API_KEY")})
+    model.validate_credentials(
+        model="rerank-english-v2.0",
+        credentials={"api_key": os.environ.get("COHERE_API_KEY")},
+    )
 
 
 def test_invoke_model():

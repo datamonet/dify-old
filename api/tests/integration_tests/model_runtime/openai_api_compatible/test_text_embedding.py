@@ -19,7 +19,11 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="text-embedding-ada-002",
-            credentials={"api_key": "invalid_key", "endpoint_url": "https://api.openai.com/v1/", "context_size": 8184},
+            credentials={
+                "api_key": "invalid_key",
+                "endpoint_url": "https://api.openai.com/v1/",
+                "context_size": 8184,
+            },
         )
 
     model.validate_credentials(
@@ -42,7 +46,12 @@ def test_invoke_model():
             "endpoint_url": "https://api.openai.com/v1/",
             "context_size": 8184,
         },
-        texts=["hello", "world", " ".join(["long_text"] * 100), " ".join(["another_long_text"] * 100)],
+        texts=[
+            "hello",
+            "world",
+            " ".join(["long_text"] * 100),
+            " ".join(["another_long_text"] * 100),
+        ],
         user="abc-123",
     )
 

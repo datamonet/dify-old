@@ -8,9 +8,15 @@ from pydantic import BaseModel
 from yarl import URL
 
 from configs import dify_config
-from core.helper.code_executor.javascript.javascript_transformer import NodeJsTemplateTransformer
-from core.helper.code_executor.jinja2.jinja2_transformer import Jinja2TemplateTransformer
-from core.helper.code_executor.python3.python3_transformer import Python3TemplateTransformer
+from core.helper.code_executor.javascript.javascript_transformer import (
+    NodeJsTemplateTransformer,
+)
+from core.helper.code_executor.jinja2.jinja2_transformer import (
+    Jinja2TemplateTransformer,
+)
+from core.helper.code_executor.python3.python3_transformer import (
+    Python3TemplateTransformer,
+)
 from core.helper.code_executor.template_transformer import TemplateTransformer
 
 logger = logging.getLogger(__name__)
@@ -107,7 +113,9 @@ class CodeExecutor:
             raise CodeExecutionError("Failed to parse response")
 
         if (code := response.get("code")) != 0:
-            raise CodeExecutionError(f"Got error code: {code}. Got error msg: {response.get('message')}")
+            raise CodeExecutionError(
+                f"Got error code: {code}. Got error msg: {response.get('message')}"
+            )
 
         response = CodeExecutionResponse(**response)
 
@@ -117,7 +125,9 @@ class CodeExecutor:
         return response.data.stdout or ""
 
     @classmethod
-    def execute_workflow_code_template(cls, language: CodeLanguage, code: str, inputs: dict) -> dict:
+    def execute_workflow_code_template(
+        cls, language: CodeLanguage, code: str, inputs: dict
+    ) -> dict:
         """
         Execute code
         :param language: code language

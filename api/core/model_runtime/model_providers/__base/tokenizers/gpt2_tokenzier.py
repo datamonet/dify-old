@@ -29,6 +29,8 @@ class GPT2Tokenizer:
             if _tokenizer is None:
                 base_path = abspath(__file__)
                 gpt2_tokenizer_path = join(dirname(base_path), "gpt2")
-                _tokenizer = TransformerGPT2Tokenizer.from_pretrained(gpt2_tokenizer_path)
+                _tokenizer = TransformerGPT2Tokenizer.from_pretrained(
+                    gpt2_tokenizer_path
+                )
 
             return _tokenizer

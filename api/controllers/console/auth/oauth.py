@@ -25,7 +25,8 @@ def get_oauth_providers():
             github_oauth = GitHubOAuth(
                 client_id=dify_config.GITHUB_CLIENT_ID,
                 client_secret=dify_config.GITHUB_CLIENT_SECRET,
-                redirect_uri=dify_config.CONSOLE_API_URL + "/console/api/oauth/authorize/github",
+                redirect_uri=dify_config.CONSOLE_API_URL
+                + "/console/api/oauth/authorize/github",
             )
         if not dify_config.GOOGLE_CLIENT_ID or not dify_config.GOOGLE_CLIENT_SECRET:
             google_oauth = None
@@ -33,7 +34,8 @@ def get_oauth_providers():
             google_oauth = GoogleOAuth(
                 client_id=dify_config.GOOGLE_CLIENT_ID,
                 client_secret=dify_config.GOOGLE_CLIENT_SECRET,
-                redirect_uri=dify_config.CONSOLE_API_URL + "/console/api/oauth/authorize/google",
+                redirect_uri=dify_config.CONSOLE_API_URL
+                + "/console/api/oauth/authorize/google",
             )
 
         OAUTH_PROVIDERS = {"github": github_oauth, "google": google_oauth}
@@ -66,7 +68,9 @@ class OAuthCallback(Resource):
             token = oauth_provider.get_access_token(code)
             user_info = oauth_provider.get_user_info(token)
         except requests.exceptions.HTTPError as e:
-            logging.exception(f"An error occurred during the OAuth process with {provider}: {e.response.text}")
+            logging.exception(
+                f"An error occurred during the OAuth process with {provider}: {e.response.text}"
+            )
             return {"error": "OAuth process failed"}, 400
 
         account = _generate_account(provider, user_info)
@@ -86,7 +90,9 @@ class OAuthCallback(Resource):
         return redirect(f"{dify_config.CONSOLE_WEB_URL}?console_token={token}")
 
 
-def _get_account_by_openid_or_email(provider: str, user_info: OAuthUserInfo) -> Optional[Account]:
+def _get_account_by_openid_or_email(
+    provider: str, user_info: OAuthUserInfo
+) -> Optional[Account]:
     account = Account.get_by_openid(provider, user_info.id)
 
     if not account:
@@ -103,7 +109,11 @@ def _generate_account(provider: str, user_info: OAuthUserInfo):
         # Create account
         account_name = user_info.name or "Dify"
         account = RegisterService.register(
-            email=user_info.email, name=account_name, password=None, open_id=user_info.id, provider=provider
+            email=user_info.email,
+            name=account_name,
+            password=None,
+            open_id=user_info.id,
+            provider=provider,
         )
 
         # Set interface language

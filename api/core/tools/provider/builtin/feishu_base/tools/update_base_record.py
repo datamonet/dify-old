@@ -57,4 +57,6 @@ class UpdateBaseRecordTool(BuiltinTool):
                     f"Failed to update base record, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to update base record. {}".format(e))
+            return self.create_text_message(
+                "Failed to update base record. {}".format(e)
+            )

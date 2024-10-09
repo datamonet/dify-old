@@ -9,12 +9,16 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 class SearchStackExQuestionsInput(BaseModel):
     intitle: str = Field(..., description="The search query.")
-    sort: str = Field(..., description="The sort order - relevance, activity, votes, creation.")
+    sort: str = Field(
+        ..., description="The sort order - relevance, activity, votes, creation."
+    )
     order: str = Field(..., description="asc or desc")
     site: str = Field(..., description="The Stack Exchange site.")
     tagged: str = Field(None, description="Semicolon-separated tags to include.")
     nottagged: str = Field(None, description="Semicolon-separated tags to exclude.")
-    accepted: bool = Field(..., description="true for only accepted answers, false otherwise")
+    accepted: bool = Field(
+        ..., description="true for only accepted answers, false otherwise"
+    )
     pagesize: int = Field(..., description="Number of results per page")
 
 
@@ -37,9 +41,15 @@ class SearchStackExQuestionsTool(BuiltinTool):
         if input.nottagged:
             params["nottagged"] = input.nottagged
 
-        response = requests.get("https://api.stackexchange.com/2.3/search", params=params)
+        response = requests.get(
+            "https://api.stackexchange.com/2.3/search", params=params
+        )
 
         if response.status_code == 200:
-            return self.create_text_message(self.summary(user_id=user_id, content=response.text))
+            return self.create_text_message(
+                self.summary(user_id=user_id, content=response.text)
+            )
         else:
-            return self.create_text_message(f"API request failed with status code {response.status_code}")
+            return self.create_text_message(
+                f"API request failed with status code {response.status_code}"
+            )

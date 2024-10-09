@@ -15,7 +15,9 @@ from services.dataset_service import DatasetCollectionBindingService
 
 
 @shared_task(queue="dataset")
-def batch_import_annotations_task(job_id: str, content_list: list[dict], app_id: str, tenant_id: str, user_id: str):
+def batch_import_annotations_task(
+    job_id: str, content_list: list[dict], app_id: str, tenant_id: str, user_id: str
+):
     """
     Add annotation to index.
     :param job_id: job_id
@@ -25,37 +27,50 @@ def batch_import_annotations_task(job_id: str, content_list: list[dict], app_id:
     :param user_id: user_id
 
     """
-    logging.info(click.style("Start batch import annotation: {}".format(job_id), fg="green"))
+    logging.info(
+        click.style("Start batch import annotation: {}".format(job_id), fg="green")
+    )
     start_at = time.perf_counter()
     indexing_cache_key = "app_annotation_batch_import_{}".format(str(job_id))
     # get app info
-    app = db.session.query(App).filter(App.id == app_id, App.tenant_id == tenant_id, App.status == "normal").first()
+    app = (
+        db.session.query(App)
+        .filter(App.id == app_id, App.tenant_id == tenant_id, App.status == "normal")
+        .first()
+    )
 
     if app:
         try:
             documents = []
             for content in content_list:
                 annotation = MessageAnnotation(
-                    app_id=app.id, content=content["answer"], question=content["question"], account_id=user_id
+                    app_id=app.id,
+                    content=content["answer"],
+                    question=content["question"],
+                    account_id=user_id,
                 )
                 db.session.add(annotation)
                 db.session.flush()
 
                 document = Document(
                     page_content=content["question"],
-                    metadata={"annotation_id": annotation.id, "app_id": app_id, "doc_id": annotation.id},
+                    metadata={
+                        "annotation_id": annotation.id,
+                        "app_id": app_id,
+                        "doc_id": annotation.id,
+                    },
                 )
                 documents.append(document)
             # if annotation reply is enabled , batch add annotations' index
             app_annotation_setting = (
-                db.session.query(AppAnnotationSetting).filter(AppAnnotationSetting.app_id == app_id).first()
+                db.session.query(AppAnnotationSetting)
+                .filter(AppAnnotationSetting.app_id == app_id)
+                .first()
             )
 
             if app_annotation_setting:
-                dataset_collection_binding = (
-                    DatasetCollectionBindingService.get_dataset_collection_binding_by_id_and_type(
-                        app_annotation_setting.collection_binding_id, "annotation"
-                    )
+                dataset_collection_binding = DatasetCollectionBindingService.get_dataset_collection_binding_by_id_and_type(
+                    app_annotation_setting.collection_binding_id, "annotation"
                 )
                 if not dataset_collection_binding:
                     raise NotFound("App annotation setting not found")
@@ -68,7 +83,9 @@ def batch_import_annotations_task(job_id: str, content_list: list[dict], app_id:
                     collection_binding_id=dataset_collection_binding.id,
                 )
 
-                vector = Vector(dataset, attributes=["doc_id", "annotation_id", "app_id"])
+                vector = Vector(
+                    dataset, attributes=["doc_id", "annotation_id", "app_id"]
+                )
                 vector.create(documents, duplicate_check=True)
 
             db.session.commit()
@@ -85,6 +102,8 @@ def batch_import_annotations_task(job_id: str, content_list: list[dict], app_id:
         except Exception as e:
             db.session.rollback()
             redis_client.setex(indexing_cache_key, 600, "error")
-            indexing_error_msg_key = "app_annotation_batch_import_error_msg_{}".format(str(job_id))
+            indexing_error_msg_key = "app_annotation_batch_import_error_msg_{}".format(
+                str(job_id)
+            )
             redis_client.setex(indexing_error_msg_key, 600, str(e))
             logging.exception("Build index for batch import annotations failed")

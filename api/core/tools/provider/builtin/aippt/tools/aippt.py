@@ -11,7 +11,11 @@ from requests import get as requests_get
 from yarl import URL
 
 from core.tools.entities.common_entities import I18nObject
-from core.tools.entities.tool_entities import ToolInvokeMessage, ToolParameter, ToolParameterOption
+from core.tools.entities.tool_entities import (
+    ToolInvokeMessage,
+    ToolParameter,
+    ToolParameterOption,
+)
 from core.tools.tool.builtin_tool import BuiltinTool
 
 
@@ -37,7 +41,9 @@ class AIPPTGenerateTool(BuiltinTool):
         self._api_token_cache_lock = Lock()
         self._style_cache_lock = Lock()
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invokes the AIPPT generate tool with the given user ID and tool parameters.
 
@@ -91,7 +97,9 @@ class AIPPTGenerateTool(BuiltinTool):
             self._generate_content(task_id=task_id, model=model, user_id=user_id)
 
         # generate ppt
-        _, ppt_url = self._generate_ppt(task_id=task_id, suit_id=suit_id, user_id=user_id)
+        _, ppt_url = self._generate_ppt(
+            task_id=task_id, suit_id=suit_id, user_id=user_id
+        )
 
         return self.create_text_message(
             """the ppt has been created successfully,"""
@@ -112,12 +120,18 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
+            "x-token": self._get_api_token(
+                credentials=self.runtime.credentials, user_id=user_id
+            ),
         }
         response = post(
             str(self._api_base_url / "ai" / "chat" / "v2" / "task"),
             headers=headers,
-            files={"type": ("", str(type)), "title": ("", title), "content": ("", content)},
+            files={
+                "type": ("", str(type)),
+                "title": ("", title),
+                "content": ("", content),
+            },
         )
 
         if response.status_code != 200:
@@ -140,10 +154,14 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
+            "x-token": self._get_api_token(
+                credentials=self.runtime.credentials, user_id=user_id
+            ),
         }
 
-        response = requests_get(url=api_url, headers=headers, stream=True, timeout=(10, 60))
+        response = requests_get(
+            url=api_url, headers=headers, stream=True, timeout=(10, 60)
+        )
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -164,7 +182,7 @@ class AIPPTGenerateTool(BuiltinTool):
                         try:
                             data = json_loads(data)
                             outline += data.get("content", "")
-                        except Exception as e:
+                        except Exception:
                             pass
                     elif event == "close":
                         break
@@ -184,10 +202,14 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
+            "x-token": self._get_api_token(
+                credentials=self.runtime.credentials, user_id=user_id
+            ),
         }
 
-        response = requests_get(url=api_url, headers=headers, stream=True, timeout=(10, 60))
+        response = requests_get(
+            url=api_url, headers=headers, stream=True, timeout=(10, 60)
+        )
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -209,7 +231,7 @@ class AIPPTGenerateTool(BuiltinTool):
                             try:
                                 data = json_loads(data)
                                 content += data.get("content", "")
-                            except Exception as e:
+                            except Exception:
                                 pass
                         elif event == "close":
                             break
@@ -237,7 +259,9 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
+            "x-token": self._get_api_token(
+                credentials=self.runtime.credentials, user_id=user_id
+            ),
         }
 
         response = post(
@@ -334,7 +358,9 @@ class AIPPTGenerateTool(BuiltinTool):
 
         param = {"uid": user_id, "channel": ""}
 
-        response = get(str(cls._api_base_url / "grant" / "token"), params=param, headers=headers)
+        response = get(
+            str(cls._api_base_url / "grant" / "token"), params=param, headers=headers
+        )
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -354,12 +380,16 @@ class AIPPTGenerateTool(BuiltinTool):
     def _calculate_sign(cls, access_key: str, secret_key: str, timestamp: int) -> str:
         return b64encode(
             hmac_new(
-                key=secret_key.encode("utf-8"), msg=f"GET@/api/grant/token/@{timestamp}".encode(), digestmod=sha1
+                key=secret_key.encode("utf-8"),
+                msg=f"GET@/api/grant/token/@{timestamp}".encode(),
+                digestmod=sha1,
             ).digest()
         ).decode("utf-8")
 
     @classmethod
-    def _get_styles(cls, credentials: dict[str, str], user_id: str) -> tuple[list[dict], list[dict]]:
+    def _get_styles(
+        cls, credentials: dict[str, str], user_id: str
+    ) -> tuple[list[dict], list[dict]]:
         """
         Get styles
         """
@@ -381,7 +411,10 @@ class AIPPTGenerateTool(BuiltinTool):
             "x-api-key": credentials["aippt_access_key"],
             "x-token": cls._get_api_token(credentials=credentials, user_id=user_id),
         }
-        response = get(str(cls._api_base_url / "template_component" / "suit" / "select"), headers=headers)
+        response = get(
+            str(cls._api_base_url / "template_component" / "suit" / "select"),
+            headers=headers,
+        )
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -408,7 +441,11 @@ class AIPPTGenerateTool(BuiltinTool):
         ]
 
         with cls._style_cache_lock:
-            cls._style_cache[key] = {"colors": colors, "styles": styles, "expire": now + 60 * 60}
+            cls._style_cache[key] = {
+                "colors": colors,
+                "styles": styles,
+                "expire": now + 60 * 60,
+            }
 
         return colors, styles
 
@@ -419,7 +456,9 @@ class AIPPTGenerateTool(BuiltinTool):
         :param credentials: the credentials
         :return: Tuple[list[dict[id, color]], list[dict[id, style]]
         """
-        if not self.runtime.credentials.get("aippt_access_key") or not self.runtime.credentials.get("aippt_secret_key"):
+        if not self.runtime.credentials.get(
+            "aippt_access_key"
+        ) or not self.runtime.credentials.get("aippt_secret_key"):
             raise Exception("Please provide aippt credentials")
 
         return self._get_styles(credentials=self.runtime.credentials, user_id=user_id)
@@ -431,12 +470,19 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id="__dify_system__"),
+            "x-token": self._get_api_token(
+                credentials=self.runtime.credentials, user_id="__dify_system__"
+            ),
         }
         response = get(
             str(self._api_base_url / "template_component" / "suit" / "search"),
             headers=headers,
-            params={"style_id": style_id, "colour_id": colour_id, "page": 1, "page_size": 1},
+            params={
+                "style_id": style_id,
+                "colour_id": colour_id,
+                "page": 1,
+                "page_size": 1,
+            },
         )
 
         if response.status_code != 200:
@@ -450,7 +496,9 @@ class AIPPTGenerateTool(BuiltinTool):
         if len(response.get("data", {}).get("list") or []) > 0:
             return response.get("data", {}).get("list")[0].get("id")
 
-        raise Exception("Failed to get suit, the suit does not exist, please check the style and color")
+        raise Exception(
+            "Failed to get suit, the suit does not exist, please check the style and color"
+        )
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
         """
@@ -460,7 +508,7 @@ class AIPPTGenerateTool(BuiltinTool):
         """
         try:
             colors, styles = self.get_styles(user_id="__dify_system__")
-        except Exception as e:
+        except Exception:
             colors, styles = (
                 [{"id": "-1", "name": "__default__", "en_name": "__default__"}],
                 [{"id": "-1", "name": "__default__", "en_name": "__default__"}],
@@ -477,7 +525,8 @@ class AIPPTGenerateTool(BuiltinTool):
                 default=colors[0]["id"],
                 options=[
                     ToolParameterOption(
-                        value=color["id"], label=I18nObject(zh_Hans=color["name"], en_US=color["en_name"])
+                        value=color["id"],
+                        label=I18nObject(zh_Hans=color["name"], en_US=color["en_name"]),
                     )
                     for color in colors
                 ],
@@ -491,7 +540,10 @@ class AIPPTGenerateTool(BuiltinTool):
                 required=False,
                 default=styles[0]["id"],
                 options=[
-                    ToolParameterOption(value=style["id"], label=I18nObject(zh_Hans=style["name"], en_US=style["name"]))
+                    ToolParameterOption(
+                        value=style["id"],
+                        label=I18nObject(zh_Hans=style["name"], en_US=style["name"]),
+                    )
                     for style in styles
                 ],
             ),

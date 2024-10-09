@@ -6,12 +6,23 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from core.helper.module_import_helper import load_single_subclass_from_source
-from core.helper.position_helper import get_provider_position_map, sort_to_dict_by_position_map
+from core.helper.position_helper import (
+    get_provider_position_map,
+    sort_to_dict_by_position_map,
+)
 from core.model_runtime.entities.model_entities import ModelType
-from core.model_runtime.entities.provider_entities import ProviderConfig, ProviderEntity, SimpleProviderEntity
+from core.model_runtime.entities.provider_entities import (
+    ProviderConfig,
+    ProviderEntity,
+    SimpleProviderEntity,
+)
 from core.model_runtime.model_providers.__base.model_provider import ModelProvider
-from core.model_runtime.schema_validators.model_credential_schema_validator import ModelCredentialSchemaValidator
-from core.model_runtime.schema_validators.provider_credential_schema_validator import ProviderCredentialSchemaValidator
+from core.model_runtime.schema_validators.model_credential_schema_validator import (
+    ModelCredentialSchemaValidator,
+)
+from core.model_runtime.schema_validators.provider_credential_schema_validator import (
+    ProviderCredentialSchemaValidator,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +70,9 @@ class ModelProviderFactory:
         # return providers
         return providers
 
-    def provider_credentials_validate(self, *, provider: str, credentials: dict) -> dict:
+    def provider_credentials_validate(
+        self, *, provider: str, credentials: dict
+    ) -> dict:
         """
         Validate provider credentials
 
@@ -77,7 +90,9 @@ class ModelProviderFactory:
         provider_credential_schema = provider_schema.provider_credential_schema
 
         if not provider_credential_schema:
-            raise ValueError(f"Provider {provider} does not have provider_credential_schema")
+            raise ValueError(
+                f"Provider {provider} does not have provider_credential_schema"
+            )
 
         # validate provider credential schema
         validator = ProviderCredentialSchemaValidator(provider_credential_schema)
@@ -110,7 +125,9 @@ class ModelProviderFactory:
         model_credential_schema = provider_schema.model_credential_schema
 
         if not model_credential_schema:
-            raise ValueError(f"Provider {provider} does not have model_credential_schema")
+            raise ValueError(
+                f"Provider {provider} does not have model_credential_schema"
+            )
 
         # validate model credential schema
         validator = ModelCredentialSchemaValidator(model_type, model_credential_schema)
@@ -147,7 +164,9 @@ class ModelProviderFactory:
         # convert provider_configs to dict
         provider_credentials_dict = {}
         for provider_config in provider_configs:
-            provider_credentials_dict[provider_config.provider] = provider_config.credentials
+            provider_credentials_dict[provider_config.provider] = (
+                provider_config.credentials
+            )
 
         # traverse all model_provider_extensions
         providers = []
@@ -245,7 +264,9 @@ class ModelProviderFactory:
             file_names = os.listdir(model_provider_dir_path)
 
             if (model_provider_name + ".py") not in file_names:
-                logger.warning(f"Missing {model_provider_name}.py file in {model_provider_dir_path}, Skip.")
+                logger.warning(
+                    f"Missing {model_provider_name}.py file in {model_provider_dir_path}, Skip."
+                )
                 continue
 
             # Dynamic loading {model_provider_name}.py file and find the subclass of ModelProvider
@@ -257,11 +278,15 @@ class ModelProviderFactory:
             )
 
             if not model_provider_class:
-                logger.warning(f"Missing Model Provider Class that extends ModelProvider in {py_path}, Skip.")
+                logger.warning(
+                    f"Missing Model Provider Class that extends ModelProvider in {py_path}, Skip."
+                )
                 continue
 
             if f"{model_provider_name}.yaml" not in file_names:
-                logger.warning(f"Missing {model_provider_name}.yaml file in {model_provider_dir_path}, Skip.")
+                logger.warning(
+                    f"Missing {model_provider_name}.yaml file in {model_provider_dir_path}, Skip."
+                )
                 continue
 
             model_providers.append(
@@ -272,7 +297,9 @@ class ModelProviderFactory:
                 )
             )
 
-        sorted_extensions = sort_to_dict_by_position_map(position_map, model_providers, lambda x: x.name)
+        sorted_extensions = sort_to_dict_by_position_map(
+            position_map, model_providers, lambda x: x.name
+        )
 
         self.model_provider_extensions = sorted_extensions
 

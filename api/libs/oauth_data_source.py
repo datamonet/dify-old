@@ -37,7 +37,11 @@ class NotionOAuth(OAuthDataSource):
         return f"{self._AUTH_URL}?{urllib.parse.urlencode(params)}"
 
     def get_access_token(self, code: str):
-        data = {"code": code, "grant_type": "authorization_code", "redirect_uri": self.redirect_uri}
+        data = {
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": self.redirect_uri,
+        }
         headers = {"Accept": "application/json"}
         auth = (self.client_id, self.client_secret)
         response = requests.post(self._TOKEN_URL, data=data, auth=auth, headers=headers)
@@ -151,7 +155,10 @@ class NotionOAuth(OAuthDataSource):
             page_id = page_result["id"]
             page_name = "Untitled"
             for key in page_result["properties"]:
-                if "title" in page_result["properties"][key] and page_result["properties"][key]["title"]:
+                if (
+                    "title" in page_result["properties"][key]
+                    and page_result["properties"][key]["title"]
+                ):
                     title_list = page_result["properties"][key]["title"]
                     if len(title_list) > 0 and "plain_text" in title_list[0]:
                         page_name = title_list[0]["plain_text"]
@@ -160,7 +167,12 @@ class NotionOAuth(OAuthDataSource):
                 icon_type = page_icon["type"]
                 if icon_type in {"external", "file"}:
                     url = page_icon[icon_type]["url"]
-                    icon = {"type": "url", "url": url if url.startswith("http") else f"https://www.notion.so{url}"}
+                    icon = {
+                        "type": "url",
+                        "url": url
+                        if url.startswith("http")
+                        else f"https://www.notion.so{url}",
+                    }
                 else:
                     icon = {"type": "emoji", "emoji": page_icon[icon_type]}
             else:
@@ -168,7 +180,9 @@ class NotionOAuth(OAuthDataSource):
             parent = page_result["parent"]
             parent_type = parent["type"]
             if parent_type == "block_id":
-                parent_id = self.notion_block_parent_page_id(access_token, parent[parent_type])
+                parent_id = self.notion_block_parent_page_id(
+                    access_token, parent[parent_type]
+                )
             elif parent_type == "workspace":
                 parent_id = "root"
             else:
@@ -193,7 +207,12 @@ class NotionOAuth(OAuthDataSource):
                 icon_type = page_icon["type"]
                 if icon_type in {"external", "file"}:
                     url = page_icon[icon_type]["url"]
-                    icon = {"type": "url", "url": url if url.startswith("http") else f"https://www.notion.so{url}"}
+                    icon = {
+                        "type": "url",
+                        "url": url
+                        if url.startswith("http")
+                        else f"https://www.notion.so{url}",
+                    }
                 else:
                     icon = {"type": icon_type, icon_type: page_icon[icon_type]}
             else:
@@ -201,7 +220,9 @@ class NotionOAuth(OAuthDataSource):
             parent = database_result["parent"]
             parent_type = parent["type"]
             if parent_type == "block_id":
-                parent_id = self.notion_block_parent_page_id(access_token, parent[parent_type])
+                parent_id = self.notion_block_parent_page_id(
+                    access_token, parent[parent_type]
+                )
             elif parent_type == "workspace":
                 parent_id = "root"
             else:
@@ -223,7 +244,9 @@ class NotionOAuth(OAuthDataSource):
             "Authorization": f"Bearer {access_token}",
             "Notion-Version": "2022-06-28",
         }
-        response = requests.post(url=self._NOTION_PAGE_SEARCH, json=data, headers=headers)
+        response = requests.post(
+            url=self._NOTION_PAGE_SEARCH, json=data, headers=headers
+        )
         response_json = response.json()
         results = response_json.get("results", [])
         return results
@@ -233,7 +256,9 @@ class NotionOAuth(OAuthDataSource):
             "Authorization": f"Bearer {access_token}",
             "Notion-Version": "2022-06-28",
         }
-        response = requests.get(url=f"{self._NOTION_BLOCK_SEARCH}/{block_id}", headers=headers)
+        response = requests.get(
+            url=f"{self._NOTION_BLOCK_SEARCH}/{block_id}", headers=headers
+        )
         response_json = response.json()
         parent = response_json["parent"]
         parent_type = parent["type"]
@@ -262,7 +287,9 @@ class NotionOAuth(OAuthDataSource):
             "Authorization": f"Bearer {access_token}",
             "Notion-Version": "2022-06-28",
         }
-        response = requests.post(url=self._NOTION_PAGE_SEARCH, json=data, headers=headers)
+        response = requests.post(
+            url=self._NOTION_PAGE_SEARCH, json=data, headers=headers
+        )
         response_json = response.json()
         results = response_json.get("results", [])
         return results

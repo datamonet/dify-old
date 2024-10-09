@@ -1,7 +1,9 @@
 from typing import Any
 
 from core.tools.errors import ToolProviderCredentialValidationError
-from core.tools.provider.builtin.maths.tools.eval_expression import EvaluateExpressionTool
+from core.tools.provider.builtin.maths.tools.eval_expression import (
+    EvaluateExpressionTool,
+)
 from core.tools.provider.builtin_tool_provider import BuiltinToolProviderController
 
 

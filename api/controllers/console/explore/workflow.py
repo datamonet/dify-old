@@ -14,7 +14,11 @@ from controllers.console.explore.error import NotWorkflowAppError
 from controllers.console.explore.wraps import InstalledAppResource
 from core.app.apps.base_app_queue_manager import AppQueueManager
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from libs import helper
 from libs.login import current_user
@@ -35,7 +39,9 @@ class InstalledAppWorkflowRunApi(InstalledAppResource):
             raise NotWorkflowAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "inputs", type=dict, required=True, nullable=False, location="json"
+        )
         parser.add_argument("files", type=list, required=False, location="json")
         args = parser.parse_args()
 
@@ -60,7 +66,7 @@ class InstalledAppWorkflowRunApi(InstalledAppResource):
             raise CompletionRequestError(e.description)
         except ValueError as e:
             raise e
-        except Exception as e:
+        except Exception:
             logging.exception("internal server error.")
             raise InternalServerError()
 
@@ -80,7 +86,10 @@ class InstalledAppWorkflowTaskStopApi(InstalledAppResource):
         return {"result": "success"}
 
 
-api.add_resource(InstalledAppWorkflowRunApi, "/installed-apps/<uuid:installed_app_id>/workflows/run")
 api.add_resource(
-    InstalledAppWorkflowTaskStopApi, "/installed-apps/<uuid:installed_app_id>/workflows/tasks/<string:task_id>/stop"
+    InstalledAppWorkflowRunApi, "/installed-apps/<uuid:installed_app_id>/workflows/run"
+)
+api.add_resource(
+    InstalledAppWorkflowTaskStopApi,
+    "/installed-apps/<uuid:installed_app_id>/workflows/tasks/<string:task_id>/stop",
 )

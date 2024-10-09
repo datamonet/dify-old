@@ -180,6 +180,7 @@ export enum DataSourceCategory {
 }
 export enum DataSourceProvider {
   fireCrawl = 'firecrawl',
+  jinaReader = 'jinareader',
 }
 
 export type FirecrawlConfig = {

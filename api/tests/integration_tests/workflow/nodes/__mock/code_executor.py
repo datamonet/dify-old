@@ -1,5 +1,5 @@
 import os
-from typing import Literal, Optional
+from typing import Literal
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
@@ -12,7 +12,12 @@ MOCK = os.getenv("MOCK_SWITCH", "false") == "true"
 
 class MockedCodeExecutor:
     @classmethod
-    def invoke(cls, language: Literal["python3", "javascript", "jinja2"], code: str, inputs: dict) -> dict:
+    def invoke(
+        cls,
+        language: Literal["python3", "javascript", "jinja2"],
+        code: str,
+        inputs: dict,
+    ) -> dict:
         # invoke directly
         match language:
             case CodeLanguage.PYTHON3:
@@ -29,6 +34,8 @@ def setup_code_executor_mock(request, monkeypatch: MonkeyPatch):
         yield
         return
 
-    monkeypatch.setattr(CodeExecutor, "execute_workflow_code_template", MockedCodeExecutor.invoke)
+    monkeypatch.setattr(
+        CodeExecutor, "execute_workflow_code_template", MockedCodeExecutor.invoke
+    )
     yield
     monkeypatch.undo()

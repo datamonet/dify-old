@@ -20,7 +20,10 @@ class APIBasedExtensionRequestor:
         :param params: the request params
         :return: the response json
         """
-        headers = {"Content-Type": "application/json", "Authorization": "Bearer {}".format(self.api_key)}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(self.api_key),
+        }
 
         url = self.api_endpoint
 
@@ -48,7 +51,9 @@ class APIBasedExtensionRequestor:
 
         if response.status_code != 200:
             raise ValueError(
-                "request error, status_code: {}, content: {}".format(response.status_code, response.text[:100])
+                "request error, status_code: {}, content: {}".format(
+                    response.status_code, response.text[:100]
+                )
             )
 
         return response.json()

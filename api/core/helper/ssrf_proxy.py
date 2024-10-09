@@ -33,19 +33,27 @@ def make_request(method, url, max_retries=SSRF_DEFAULT_MAX_RETRIES, **kwargs):
     while retries <= max_retries:
         try:
             if SSRF_PROXY_ALL_URL:
-                response = httpx.request(method=method, url=url, proxy=SSRF_PROXY_ALL_URL, **kwargs)
+                response = httpx.request(
+                    method=method, url=url, proxy=SSRF_PROXY_ALL_URL, **kwargs
+                )
             elif proxies:
-                response = httpx.request(method=method, url=url, proxies=proxies, **kwargs)
+                response = httpx.request(
+                    method=method, url=url, proxies=proxies, **kwargs
+                )
             else:
                 response = httpx.request(method=method, url=url, **kwargs)
 
             if response.status_code not in STATUS_FORCELIST:
                 return response
             else:
-                logging.warning(f"Received status code {response.status_code} for URL {url} which is in the force list")
+                logging.warning(
+                    f"Received status code {response.status_code} for URL {url} which is in the force list"
+                )
 
         except httpx.RequestError as e:
-            logging.warning(f"Request to URL {url} failed on attempt {retries + 1}: {e}")
+            logging.warning(
+                f"Request to URL {url} failed on attempt {retries + 1}: {e}"
+            )
 
         retries += 1
         if retries <= max_retries:

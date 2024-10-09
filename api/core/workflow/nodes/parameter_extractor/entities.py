@@ -23,7 +23,15 @@ class ParameterConfig(BaseModel):
     """
 
     name: str
-    type: Literal["string", "number", "bool", "select", "array[string]", "array[number]", "array[object]"]
+    type: Literal[
+        "string",
+        "number",
+        "bool",
+        "select",
+        "array[string]",
+        "array[number]",
+        "array[object]",
+    ]
     options: Optional[list[str]] = None
     description: str
     required: bool
@@ -34,7 +42,9 @@ class ParameterConfig(BaseModel):
         if not value:
             raise ValueError("Parameter name is required")
         if value in {"__reason", "__is_success"}:
-            raise ValueError("Invalid parameter name, __reason and __is_success are reserved")
+            raise ValueError(
+                "Invalid parameter name, __reason and __is_success are reserved"
+            )
         return value
 
 

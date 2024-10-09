@@ -20,7 +20,10 @@ class SetupApi(Resource):
         if dify_config.EDITION == "SELF_HOSTED":
             setup_status = get_setup_status()
             if setup_status:
-                return {"step": "finished", "setup_at": setup_status.setup_at.isoformat()}
+                return {
+                    "step": "finished",
+                    "setup_at": setup_status.setup_at.isoformat(),
+                }
             return {"step": "not_started"}
         return {"step": "finished"}
 
@@ -41,12 +44,17 @@ class SetupApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("email", type=email, required=True, location="json")
         parser.add_argument("name", type=StrLen(30), required=True, location="json")
-        parser.add_argument("password", type=valid_password, required=True, location="json")
+        parser.add_argument(
+            "password", type=valid_password, required=True, location="json"
+        )
         args = parser.parse_args()
 
         # setup
         RegisterService.setup(
-            email=args["email"], name=args["name"], password=args["password"], ip_address=get_remote_ip(request)
+            email=args["email"],
+            name=args["name"],
+            password=args["password"],
+            ip_address=get_remote_ip(request),
         )
 
         return {"result": "success"}, 201

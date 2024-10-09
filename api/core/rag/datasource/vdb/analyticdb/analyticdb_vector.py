@@ -40,29 +40,19 @@ class AnalyticdbConfig(BaseModel):
 
 
 class AnalyticdbVector(BaseVector):
-    _instance = None
-    _init = False
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     def __init__(self, collection_name: str, config: AnalyticdbConfig):
-        # collection_name must be updated every time
         self._collection_name = collection_name.lower()
-        if AnalyticdbVector._init:
-            return
         try:
             from alibabacloud_gpdb20160503.client import Client
             from alibabacloud_tea_openapi import models as open_api_models
         except:
             raise ImportError(_import_err_msg)
         self.config = config
-        self._client_config = open_api_models.Config(user_agent="dify", **config.to_analyticdb_client_params())
+        self._client_config = open_api_models.Config(
+            user_agent="dify", **config.to_analyticdb_client_params()
+        )
         self._client = Client(self._client_config)
         self._initialize()
-        AnalyticdbVector._init = True
 
     def _initialize(self) -> None:
         cache_key = f"vector_indexing_{self.config.instance_id}"
@@ -111,7 +101,9 @@ class AnalyticdbVector(BaseVector):
                 )
                 self._client.create_namespace(request)
             else:
-                raise ValueError(f"failed to create namespace {self.config.namespace}: {e}")
+                raise ValueError(
+                    f"failed to create namespace {self.config.namespace}: {e}"
+                )
 
     def _create_collection_if_not_exists(self, embedding_dimension: int):
         from alibabacloud_gpdb20160503 import models as gpdb_20160503_models
@@ -150,7 +142,9 @@ class AnalyticdbVector(BaseVector):
                     )
                     self._client.create_collection(request)
                 else:
-                    raise ValueError(f"failed to create collection {self._collection_name}: {e}")
+                    raise ValueError(
+                        f"failed to create collection {self._collection_name}: {e}"
+                    )
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
     def get_type(self) -> str:
@@ -161,7 +155,9 @@ class AnalyticdbVector(BaseVector):
         self._create_collection_if_not_exists(dimension)
         self.add_texts(texts, embeddings)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         from alibabacloud_gpdb20160503 import models as gpdb_20160503_models
 
         rows: list[gpdb_20160503_models.UpsertCollectionDataRequestRows] = []
@@ -236,7 +232,9 @@ class AnalyticdbVector(BaseVector):
         )
         self._client.delete_collection_data(request)
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         from alibabacloud_gpdb20160503 import models as gpdb_20160503_models
 
         score_threshold = kwargs.get("score_threshold") or 0.0
@@ -257,11 +255,14 @@ class AnalyticdbVector(BaseVector):
         documents = []
         for match in response.body.matches.match:
             if match.score > score_threshold:
+                metadata = json.loads(match.metadata.get("metadata_"))
+                metadata["score"] = match.score
                 doc = Document(
                     page_content=match.metadata.get("page_content"),
-                    metadata=json.loads(match.metadata.get("metadata_")),
+                    metadata=metadata,
                 )
                 documents.append(doc)
+        documents = sorted(documents, key=lambda x: x.metadata["score"], reverse=True)
         return documents
 
     def search_by_full_text(self, query: str, **kwargs: Any) -> list[Document]:
@@ -286,12 +287,14 @@ class AnalyticdbVector(BaseVector):
         for match in response.body.matches.match:
             if match.score > score_threshold:
                 metadata = json.loads(match.metadata.get("metadata_"))
+                metadata["score"] = match.score
                 doc = Document(
                     page_content=match.metadata.get("page_content"),
                     vector=match.metadata.get("vector"),
                     metadata=metadata,
                 )
                 documents.append(doc)
+        documents = sorted(documents, key=lambda x: x.metadata["score"], reverse=True)
         return documents
 
     def delete(self) -> None:
@@ -313,12 +316,16 @@ class AnalyticdbVector(BaseVector):
 class AnalyticdbVectorFactory(AbstractVectorFactory):
     def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings):
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id).lower()
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.ANALYTICDB, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.ANALYTICDB, collection_name)
+            )
 
         # handle optional params
         if dify_config.ANALYTICDB_KEY_ID is None:

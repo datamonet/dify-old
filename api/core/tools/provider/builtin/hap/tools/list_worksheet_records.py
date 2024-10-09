@@ -44,22 +44,30 @@ class ListWorksheetRecordsTool(BuiltinTool):
             if res.is_success:
                 if res_json["error_code"] != 1:
                     return self.create_text_message(
-                        "Failed to get the worksheet information. {}".format(res_json["error_msg"])
+                        "Failed to get the worksheet information. {}".format(
+                            res_json["error_msg"]
+                        )
                     )
                 else:
                     worksheet_name = res_json["data"]["name"]
-                    fields, schema, table_header = self.get_schema(res_json["data"]["controls"], field_ids)
+                    fields, schema, table_header = self.get_schema(
+                        res_json["data"]["controls"], field_ids
+                    )
             else:
                 return self.create_text_message(
                     f"Failed to get the worksheet information, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
             return self.create_text_message(
-                "Failed to get the worksheet information, something went wrong: {}".format(e)
+                "Failed to get the worksheet information, something went wrong: {}".format(
+                    e
+                )
             )
 
         if field_ids:
-            payload["controls"] = [v.strip() for v in field_ids.split(",")] if field_ids else []
+            payload["controls"] = (
+                [v.strip() for v in field_ids.split(",")] if field_ids else []
+            )
         filters = tool_parameters.get("filters", "")
         if filters:
             payload["filters"] = json.loads(filters)
@@ -81,7 +89,9 @@ class ListWorksheetRecordsTool(BuiltinTool):
             res_json = res.json()
             if res.is_success:
                 if res_json["error_code"] != 1:
-                    return self.create_text_message("Failed to get the records. {}".format(res_json["error_msg"]))
+                    return self.create_text_message(
+                        "Failed to get the records. {}".format(res_json["error_msg"])
+                    )
                 else:
                     result = {
                         "fields": fields,
@@ -108,7 +118,9 @@ class ListWorksheetRecordsTool(BuiltinTool):
                     if result_type == "json":
                         for row in rows:
                             result["rows"].append(self.get_row_field_value(row, schema))
-                        return self.create_text_message(json.dumps(result, ensure_ascii=False))
+                        return self.create_text_message(
+                            json.dumps(result, ensure_ascii=False)
+                        )
                     else:
                         result_text = f"Found {result['total']} rows in worksheet \"{worksheet_name}\"."
                         if result["total"] > 0:
@@ -120,7 +132,9 @@ class ListWorksheetRecordsTool(BuiltinTool):
                                 result_values = []
                                 for f in fields:
                                     result_values.append(
-                                        self.handle_value_type(row[f["fieldId"]], schema[f["fieldId"]])
+                                        self.handle_value_type(
+                                            row[f["fieldId"]], schema[f["fieldId"]]
+                                        )
                                     )
                                 result_text += "\n|" + "|".join(result_values) + "|"
                         return self.create_text_message(result_text)
@@ -129,7 +143,9 @@ class ListWorksheetRecordsTool(BuiltinTool):
                     f"Failed to get the records, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to get the records, something went wrong: {}".format(e))
+            return self.create_text_message(
+                "Failed to get the records, something went wrong: {}".format(e)
+            )
 
     def get_row_field_value(self, row: dict, schema: dict):
         row_value = {"rowid": row["rowid"]}
@@ -149,8 +165,16 @@ class ListWorksheetRecordsTool(BuiltinTool):
             ):
                 continue
             else:
-                fields.append({"fieldId": control["controlId"], "fieldName": control["controlName"]})
-                schema[control["controlId"]] = {"typeId": control_type_id, "options": self.set_option(control)}
+                fields.append(
+                    {
+                        "fieldId": control["controlId"],
+                        "fieldName": control["controlName"],
+                    }
+                )
+                schema[control["controlId"]] = {
+                    "typeId": control_type_id,
+                    "options": self.set_option(control),
+                }
                 field_names.append(control["controlName"])
         if not allow_fields or ("ctime" in allow_fields):
             fields.append({"fieldId": "ctime", "fieldName": "Created Time"})
@@ -159,10 +183,16 @@ class ListWorksheetRecordsTool(BuiltinTool):
         fields.append({"fieldId": "rowid", "fieldName": "Record Row ID"})
         schema["rowid"] = {"typeId": 2, "options": {}}
         field_names.append("Record Row ID")
-        return fields, schema, "|" + "|".join(field_names) + "|\n|" + "---|" * len(field_names)
+        return (
+            fields,
+            schema,
+            "|" + "|".join(field_names) + "|\n|" + "---|" * len(field_names),
+        )
 
     def get_real_type_id(self, control: dict) -> int:
-        return control["sourceControlType"] if control["type"] == 30 else control["type"]
+        return (
+            control["sourceControlType"] if control["type"] == 30 else control["type"]
+        )
 
     def set_option(self, control: dict) -> dict:
         options = {}
@@ -211,7 +241,9 @@ class ListWorksheetRecordsTool(BuiltinTool):
         return value
 
     def parse_cascade_or_associated(self, field, value):
-        if (field["typeId"] == 35 and value.startswith("[")) or (field["typeId"] == 29 and value.startswith("[{")):
+        if (field["typeId"] == 35 and value.startswith("[")) or (
+            field["typeId"] == 29 and value.startswith("[{")
+        ):
             value = json.loads(value)
             value = value[0]["name"] if len(value) > 0 else ""
         else:

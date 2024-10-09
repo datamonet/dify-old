@@ -7,7 +7,10 @@ from typing import Optional
 from constants import HIDDEN_VALUE
 from core.entities.provider_configuration import ProviderConfiguration
 from core.helper import encrypter
-from core.helper.model_provider_cache import ProviderCredentialsCache, ProviderCredentialsCacheType
+from core.helper.model_provider_cache import (
+    ProviderCredentialsCache,
+    ProviderCredentialsCacheType,
+)
 from core.model_manager import LBModelManager
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.entities.provider_entities import (
@@ -26,7 +29,9 @@ class ModelLoadBalancingService:
     def __init__(self) -> None:
         self.provider_manager = ProviderManager()
 
-    def enable_model_load_balancing(self, tenant_id: str, provider: str, model: str, model_type: str) -> None:
+    def enable_model_load_balancing(
+        self, tenant_id: str, provider: str, model: str, model_type: str
+    ) -> None:
         """
         enable model load balancing.
 
@@ -45,9 +50,13 @@ class ModelLoadBalancingService:
             raise ValueError(f"Provider {provider} does not exist.")
 
         # Enable model load balancing
-        provider_configuration.enable_model_load_balancing(model=model, model_type=ModelType.value_of(model_type))
+        provider_configuration.enable_model_load_balancing(
+            model=model, model_type=ModelType.value_of(model_type)
+        )
 
-    def disable_model_load_balancing(self, tenant_id: str, provider: str, model: str, model_type: str) -> None:
+    def disable_model_load_balancing(
+        self, tenant_id: str, provider: str, model: str, model_type: str
+    ) -> None:
         """
         disable model load balancing.
 
@@ -66,7 +75,9 @@ class ModelLoadBalancingService:
             raise ValueError(f"Provider {provider} does not exist.")
 
         # disable model load balancing
-        provider_configuration.disable_model_load_balancing(model=model, model_type=ModelType.value_of(model_type))
+        provider_configuration.disable_model_load_balancing(
+            model=model, model_type=ModelType.value_of(model_type)
+        )
 
     def get_load_balancing_configs(
         self, tenant_id: str, provider: str, model: str, model_type: str
@@ -105,8 +116,10 @@ class ModelLoadBalancingService:
             db.session.query(LoadBalancingModelConfig)
             .filter(
                 LoadBalancingModelConfig.tenant_id == tenant_id,
-                LoadBalancingModelConfig.provider_name == provider_configuration.provider.provider,
-                LoadBalancingModelConfig.model_type == model_type.to_origin_model_type(),
+                LoadBalancingModelConfig.provider_name
+                == provider_configuration.provider.provider,
+                LoadBalancingModelConfig.model_type
+                == model_type.to_origin_model_type(),
                 LoadBalancingModelConfig.model_name == model,
             )
             .order_by(LoadBalancingModelConfig.created_at)
@@ -124,7 +137,9 @@ class ModelLoadBalancingService:
 
             if not inherit_config_exists:
                 # Initialize the inherit configuration
-                inherit_config = self._init_inherit_config(tenant_id, provider, model, model_type)
+                inherit_config = self._init_inherit_config(
+                    tenant_id, provider, model, model_type
+                )
 
                 # prepend the inherit configuration
                 load_balancing_configs.insert(0, inherit_config)
@@ -139,7 +154,9 @@ class ModelLoadBalancingService:
         credential_schemas = self._get_credential_schema(provider_configuration)
 
         # Get decoding rsa key and cipher for decrypting credentials
-        decoding_rsa_key, decoding_cipher_rsa = encrypter.get_decrypt_decoding(tenant_id)
+        decoding_rsa_key, decoding_cipher_rsa = encrypter.get_decrypt_decoding(
+            tenant_id
+        )
 
         # fetch status and ttl for each config
         datas = []
@@ -161,8 +178,10 @@ class ModelLoadBalancingService:
                 credentials = {}
 
             # Get provider credential secret variables
-            credential_secret_variables = provider_configuration.extract_secret_variables(
-                credential_schemas.credential_form_schemas
+            credential_secret_variables = (
+                provider_configuration.extract_secret_variables(
+                    credential_schemas.credential_form_schemas
+                )
             )
 
             # decrypt credentials
@@ -170,14 +189,17 @@ class ModelLoadBalancingService:
                 if variable in credentials:
                     try:
                         credentials[variable] = encrypter.decrypt_token_with_decoding(
-                            credentials.get(variable), decoding_rsa_key, decoding_cipher_rsa
+                            credentials.get(variable),
+                            decoding_rsa_key,
+                            decoding_cipher_rsa,
                         )
                     except ValueError:
                         pass
 
             # Obfuscate credentials
             credentials = provider_configuration.obfuscated_credentials(
-                credentials=credentials, credential_form_schemas=credential_schemas.credential_form_schemas
+                credentials=credentials,
+                credential_form_schemas=credential_schemas.credential_form_schemas,
             )
 
             datas.append(
@@ -221,8 +243,10 @@ class ModelLoadBalancingService:
             db.session.query(LoadBalancingModelConfig)
             .filter(
                 LoadBalancingModelConfig.tenant_id == tenant_id,
-                LoadBalancingModelConfig.provider_name == provider_configuration.provider.provider,
-                LoadBalancingModelConfig.model_type == model_type.to_origin_model_type(),
+                LoadBalancingModelConfig.provider_name
+                == provider_configuration.provider.provider,
+                LoadBalancingModelConfig.model_type
+                == model_type.to_origin_model_type(),
                 LoadBalancingModelConfig.model_name == model,
                 LoadBalancingModelConfig.id == config_id,
             )
@@ -245,7 +269,8 @@ class ModelLoadBalancingService:
 
         # Obfuscate credentials
         credentials = provider_configuration.obfuscated_credentials(
-            credentials=credentials, credential_form_schemas=credential_schemas.credential_form_schemas
+            credentials=credentials,
+            credential_form_schemas=credential_schemas.credential_form_schemas,
         )
 
         return {
@@ -280,7 +305,12 @@ class ModelLoadBalancingService:
         return inherit_config
 
     def update_load_balancing_configs(
-        self, tenant_id: str, provider: str, model: str, model_type: str, configs: list[dict]
+        self,
+        tenant_id: str,
+        provider: str,
+        model: str,
+        model_type: str,
+        configs: list[dict],
     ) -> None:
         """
         Update load balancing configurations.
@@ -309,15 +339,19 @@ class ModelLoadBalancingService:
             db.session.query(LoadBalancingModelConfig)
             .filter(
                 LoadBalancingModelConfig.tenant_id == tenant_id,
-                LoadBalancingModelConfig.provider_name == provider_configuration.provider.provider,
-                LoadBalancingModelConfig.model_type == model_type.to_origin_model_type(),
+                LoadBalancingModelConfig.provider_name
+                == provider_configuration.provider.provider,
+                LoadBalancingModelConfig.model_type
+                == model_type.to_origin_model_type(),
                 LoadBalancingModelConfig.model_name == model,
             )
             .all()
         )
 
         # id as key, config as value
-        current_load_balancing_configs_dict = {config.id: config for config in current_load_balancing_configs}
+        current_load_balancing_configs_dict = {
+            config.id: config for config in current_load_balancing_configs
+        }
         updated_config_ids = set()
 
         for config in configs:
@@ -340,7 +374,9 @@ class ModelLoadBalancingService:
                 config_id = str(config_id)
 
                 if config_id not in current_load_balancing_configs_dict:
-                    raise ValueError("Invalid load balancing config id: {}".format(config_id))
+                    raise ValueError(
+                        "Invalid load balancing config id: {}".format(config_id)
+                    )
 
                 updated_config_ids.add(config_id)
 
@@ -348,8 +384,13 @@ class ModelLoadBalancingService:
 
                 # check duplicate name
                 for current_load_balancing_config in current_load_balancing_configs:
-                    if current_load_balancing_config.id != config_id and current_load_balancing_config.name == name:
-                        raise ValueError("Load balancing config name {} already exists".format(name))
+                    if (
+                        current_load_balancing_config.id != config_id
+                        and current_load_balancing_config.name == name
+                    ):
+                        raise ValueError(
+                            "Load balancing config name {} already exists".format(name)
+                        )
 
                 if credentials:
                     if not isinstance(credentials, dict):
@@ -371,7 +412,9 @@ class ModelLoadBalancingService:
 
                 load_balancing_config.name = name
                 load_balancing_config.enabled = enabled
-                load_balancing_config.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+                load_balancing_config.updated_at = datetime.datetime.now(
+                    datetime.timezone.utc
+                ).replace(tzinfo=None)
                 db.session.commit()
 
                 self._clear_credentials_cache(tenant_id, config_id)
@@ -383,7 +426,9 @@ class ModelLoadBalancingService:
                 # check duplicate name
                 for current_load_balancing_config in current_load_balancing_configs:
                     if current_load_balancing_config.name == name:
-                        raise ValueError("Load balancing config name {} already exists".format(name))
+                        raise ValueError(
+                            "Load balancing config name {} already exists".format(name)
+                        )
 
                 if not credentials:
                     raise ValueError("Invalid load balancing config credentials")
@@ -415,7 +460,9 @@ class ModelLoadBalancingService:
                 db.session.commit()
 
         # get deleted config ids
-        deleted_config_ids = set(current_load_balancing_configs_dict.keys()) - updated_config_ids
+        deleted_config_ids = (
+            set(current_load_balancing_configs_dict.keys()) - updated_config_ids
+        )
         for config_id in deleted_config_ids:
             db.session.delete(current_load_balancing_configs_dict[config_id])
             db.session.commit()
@@ -460,7 +507,8 @@ class ModelLoadBalancingService:
                 .filter(
                     LoadBalancingModelConfig.tenant_id == tenant_id,
                     LoadBalancingModelConfig.provider_name == provider,
-                    LoadBalancingModelConfig.model_type == model_type.to_origin_model_type(),
+                    LoadBalancingModelConfig.model_type
+                    == model_type.to_origin_model_type(),
                     LoadBalancingModelConfig.model_name == model,
                     LoadBalancingModelConfig.id == config_id,
                 )
@@ -505,15 +553,19 @@ class ModelLoadBalancingService:
         credential_schemas = self._get_credential_schema(provider_configuration)
 
         # Get provider credential secret variables
-        provider_credential_secret_variables = provider_configuration.extract_secret_variables(
-            credential_schemas.credential_form_schemas
+        provider_credential_secret_variables = (
+            provider_configuration.extract_secret_variables(
+                credential_schemas.credential_form_schemas
+            )
         )
 
         if load_balancing_model_config:
             try:
                 # fix origin data
                 if load_balancing_model_config.encrypted_config:
-                    original_credentials = json.loads(load_balancing_model_config.encrypted_config)
+                    original_credentials = json.loads(
+                        load_balancing_model_config.encrypted_config
+                    )
                 else:
                     original_credentials = {}
             except JSONDecodeError:
@@ -524,7 +576,9 @@ class ModelLoadBalancingService:
                 if key in provider_credential_secret_variables:
                     # if send [__HIDDEN__] in secret input, it will be same as original value
                     if value == HIDDEN_VALUE and key in original_credentials:
-                        credentials[key] = encrypter.decrypt_token(tenant_id, original_credentials[key])
+                        credentials[key] = encrypter.decrypt_token(
+                            tenant_id, original_credentials[key]
+                        )
 
         if validate:
             if isinstance(credential_schemas, ModelCredentialSchema):
@@ -536,7 +590,8 @@ class ModelLoadBalancingService:
                 )
             else:
                 credentials = model_provider_factory.provider_credentials_validate(
-                    provider=provider_configuration.provider.provider, credentials=credentials
+                    provider=provider_configuration.provider.provider,
+                    credentials=credentials,
                 )
 
         for key, value in credentials.items():
@@ -557,7 +612,9 @@ class ModelLoadBalancingService:
         if provider_configuration.provider.model_credential_schema:
             credential_schema = provider_configuration.provider.model_credential_schema
         else:
-            credential_schema = provider_configuration.provider.provider_credential_schema
+            credential_schema = (
+                provider_configuration.provider.provider_credential_schema
+            )
 
         return credential_schema
 
@@ -569,7 +626,9 @@ class ModelLoadBalancingService:
         :return:
         """
         provider_model_credentials_cache = ProviderCredentialsCache(
-            tenant_id=tenant_id, identity_id=config_id, cache_type=ProviderCredentialsCacheType.LOAD_BALANCING_MODEL
+            tenant_id=tenant_id,
+            identity_id=config_id,
+            cache_type=ProviderCredentialsCacheType.LOAD_BALANCING_MODEL,
         )
 
         provider_model_credentials_cache.delete()

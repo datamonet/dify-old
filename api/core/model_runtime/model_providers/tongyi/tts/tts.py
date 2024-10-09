@@ -19,7 +19,13 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
     """
 
     def _invoke(
-        self, model: str, tenant_id: str, credentials: dict, content_text: str, voice: str, user: Optional[str] = None
+        self,
+        model: str,
+        tenant_id: str,
+        credentials: dict,
+        content_text: str,
+        voice: str,
+        user: Optional[str] = None,
     ) -> any:
         """
         _invoke text2speech model
@@ -33,13 +39,18 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
         :return: text translated to audio file
         """
         if not voice or voice not in [
-            d["value"] for d in self.get_tts_model_voices(model=model, credentials=credentials)
+            d["value"]
+            for d in self.get_tts_model_voices(model=model, credentials=credentials)
         ]:
             voice = self._get_model_default_voice(model, credentials)
 
-        return self._tts_invoke_streaming(model=model, credentials=credentials, content_text=content_text, voice=voice)
+        return self._tts_invoke_streaming(
+            model=model, credentials=credentials, content_text=content_text, voice=voice
+        )
 
-    def validate_credentials(self, model: str, credentials: dict, user: Optional[str] = None) -> None:
+    def validate_credentials(
+        self, model: str, credentials: dict, user: Optional[str] = None
+    ) -> None:
         """
         validate credentials text2speech model
 
@@ -58,7 +69,9 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _tts_invoke_streaming(self, model: str, credentials: dict, content_text: str, voice: str) -> any:
+    def _tts_invoke_streaming(
+        self, model: str, credentials: dict, content_text: str, voice: str
+    ) -> any:
         """
         _tts_invoke_streaming text2speech model
 
@@ -78,7 +91,9 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
                 if len(content) < word_limit:
                     sentences = [content]
                 else:
-                    sentences = list(self._split_text_into_sentences(org_text=content, max_length=wl))
+                    sentences = list(
+                        self._split_text_into_sentences(org_text=content, max_length=wl)
+                    )
                 for sentence in sentences:
                     SpeechSynthesizer.call(
                         model=v,
@@ -93,7 +108,14 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
 
             threading.Thread(
                 target=invoke_remote,
-                args=(content_text, voice, credentials.get("dashscope_api_key"), callback, audio_type, word_limit),
+                args=(
+                    content_text,
+                    voice,
+                    credentials.get("dashscope_api_key"),
+                    callback,
+                    audio_type,
+                    word_limit,
+                ),
             ).start()
 
             while True:
@@ -106,7 +128,9 @@ class TongyiText2SpeechModel(_CommonTongyi, TTSModel):
             raise InvokeBadRequestError(str(ex))
 
     @staticmethod
-    def _process_sentence(sentence: str, credentials: dict, voice: str, audio_type: str):
+    def _process_sentence(
+        sentence: str, credentials: dict, voice: str, audio_type: str
+    ):
         """
         _tts_invoke Tongyi text2speech model api
 

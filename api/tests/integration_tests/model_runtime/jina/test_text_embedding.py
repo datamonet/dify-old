@@ -4,17 +4,22 @@ import pytest
 
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.jina.text_embedding.text_embedding import JinaTextEmbeddingModel
+from core.model_runtime.model_providers.jina.text_embedding.text_embedding import (
+    JinaTextEmbeddingModel,
+)
 
 
 def test_validate_credentials():
     model = JinaTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="jina-embeddings-v2-base-en", credentials={"api_key": "invalid_key"})
+        model.validate_credentials(
+            model="jina-embeddings-v2-base-en", credentials={"api_key": "invalid_key"}
+        )
 
     model.validate_credentials(
-        model="jina-embeddings-v2-base-en", credentials={"api_key": os.environ.get("JINA_API_KEY")}
+        model="jina-embeddings-v2-base-en",
+        credentials={"api_key": os.environ.get("JINA_API_KEY")},
     )
 
 

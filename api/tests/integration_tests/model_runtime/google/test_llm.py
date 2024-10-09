@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -20,9 +24,14 @@ def test_validate_credentials(setup_google_mock):
     model = GoogleLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="gemini-pro", credentials={"google_api_key": "invalid_key"})
+        model.validate_credentials(
+            model="gemini-pro", credentials={"google_api_key": "invalid_key"}
+        )
 
-    model.validate_credentials(model="gemini-pro", credentials={"google_api_key": os.environ.get("GOOGLE_API_KEY")})
+    model.validate_credentials(
+        model="gemini-pro",
+        credentials={"google_api_key": os.environ.get("GOOGLE_API_KEY")},
+    )
 
 
 @pytest.mark.parametrize("setup_google_mock", [["none"]], indirect=True)
@@ -36,7 +45,9 @@ def test_invoke_model(setup_google_mock):
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",
             ),
-            UserPromptMessage(content="Give me your worst dad joke or i will unplug you"),
+            UserPromptMessage(
+                content="Give me your worst dad joke or i will unplug you"
+            ),
             AssistantPromptMessage(
                 content="Why did the scarecrow win an award? Because he was outstanding in his field!"
             ),
@@ -47,7 +58,11 @@ def test_invoke_model(setup_google_mock):
                 ]
             ),
         ],
-        model_parameters={"temperature": 0.5, "top_p": 1.0, "max_tokens_to_sample": 2048},
+        model_parameters={
+            "temperature": 0.5,
+            "top_p": 1.0,
+            "max_tokens_to_sample": 2048,
+        },
         stop=["How"],
         stream=False,
         user="abc-123",
@@ -68,7 +83,9 @@ def test_invoke_stream_model(setup_google_mock):
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",
             ),
-            UserPromptMessage(content="Give me your worst dad joke or i will unplug you"),
+            UserPromptMessage(
+                content="Give me your worst dad joke or i will unplug you"
+            ),
             AssistantPromptMessage(
                 content="Why did the scarecrow win an award? Because he was outstanding in his field!"
             ),
@@ -90,7 +107,11 @@ def test_invoke_stream_model(setup_google_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 @pytest.mark.parametrize("setup_google_mock", [["none"]], indirect=True)
@@ -113,7 +134,12 @@ def test_invoke_chat_model_with_vision(setup_google_mock):
                 ]
             ),
         ],
-        model_parameters={"temperature": 0.3, "top_p": 0.2, "top_k": 3, "max_tokens": 100},
+        model_parameters={
+            "temperature": 0.3,
+            "top_p": 0.2,
+            "top_k": 3,
+            "max_tokens": 100,
+        },
         stream=False,
         user="abc-123",
     )
@@ -139,7 +165,9 @@ def test_invoke_chat_model_with_vision_multi_pics(setup_google_mock):
                     ),
                 ]
             ),
-            AssistantPromptMessage(content="I see a blue letter 'D' with a gradient from light blue to dark blue."),
+            AssistantPromptMessage(
+                content="I see a blue letter 'D' with a gradient from light blue to dark blue."
+            ),
             UserPromptMessage(
                 content=[
                     TextPromptMessageContent(data="what about now?"),
@@ -149,7 +177,12 @@ def test_invoke_chat_model_with_vision_multi_pics(setup_google_mock):
                 ]
             ),
         ],
-        model_parameters={"temperature": 0.3, "top_p": 0.2, "top_k": 3, "max_tokens": 100},
+        model_parameters={
+            "temperature": 0.3,
+            "top_p": 0.2,
+            "top_k": 3,
+            "max_tokens": 100,
+        },
         stream=False,
         user="abc-123",
     )
@@ -173,4 +206,6 @@ def test_get_num_tokens():
         ],
     )
 
-    assert num_tokens > 0  # The exact number of tokens may vary based on the model's tokenization
+    assert (
+        num_tokens > 0
+    )  # The exact number of tokens may vary based on the model's tokenization

@@ -34,7 +34,13 @@ class SiliconflowRerankModel(RerankModel):
         try:
             response = httpx.post(
                 base_url + "/rerank",
-                json={"model": model, "query": query, "documents": docs, "top_n": top_n, "return_documents": True},
+                json={
+                    "model": model,
+                    "query": query,
+                    "documents": docs,
+                    "top_n": top_n,
+                    "return_documents": True,
+                },
                 headers={"Authorization": f"Bearer {credentials.get('api_key')}"},
             )
             response.raise_for_status()
@@ -47,7 +53,10 @@ class SiliconflowRerankModel(RerankModel):
                     text=result["document"]["text"],
                     score=result["relevance_score"],
                 )
-                if score_threshold is None or result["relevance_score"] >= score_threshold:
+                if (
+                    score_threshold is None
+                    or result["relevance_score"] >= score_threshold
+                ):
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)

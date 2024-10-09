@@ -2,7 +2,12 @@ import io
 import logging
 from typing import Any, Union
 
-from qrcode.constants import ERROR_CORRECT_H, ERROR_CORRECT_L, ERROR_CORRECT_M, ERROR_CORRECT_Q
+from qrcode.constants import (
+    ERROR_CORRECT_H,
+    ERROR_CORRECT_L,
+    ERROR_CORRECT_M,
+    ERROR_CORRECT_Q,
+)
 from qrcode.image.base import BaseImage
 from qrcode.image.pure import PyPNGImage
 from qrcode.main import QRCode
@@ -46,13 +51,17 @@ class QRCodeGeneratorTool(BuiltinTool):
             image = self._generate_qrcode(content, border, error_correction)
             image_bytes = self._image_to_byte_array(image)
             return self.create_blob_message(
-                blob=image_bytes, meta={"mime_type": "image/png"}, save_as=self.VariableKey.IMAGE.value
+                blob=image_bytes,
+                meta={"mime_type": "image/png"},
+                save_as=self.VariableKey.IMAGE.value,
             )
         except Exception:
             logging.exception(f"Failed to generate QR code for content: {content}")
             return self.create_text_message("Failed to generate QR code")
 
-    def _generate_qrcode(self, content: str, border: int, error_correction: str) -> BaseImage:
+    def _generate_qrcode(
+        self, content: str, border: int, error_correction: str
+    ) -> BaseImage:
         qr = QRCode(
             image_factory=PyPNGImage,
             error_correction=self.error_correction_levels.get(error_correction),

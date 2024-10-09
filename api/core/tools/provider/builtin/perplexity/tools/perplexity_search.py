@@ -20,7 +20,11 @@ class PerplexityAITool(BuiltinTool):
                 "citations": response.get("citations", []),
             }
         else:
-            return {"content": "Unable to get a valid response", "role": "assistant", "citations": []}
+            return {
+                "content": "Unable to get a valid response",
+                "role": "assistant",
+                "citations": [],
+            }
 
     def _invoke(
         self,
@@ -53,9 +57,13 @@ class PerplexityAITool(BuiltinTool):
             payload["return_citations"] = tool_parameters["return_citations"]
         if "search_domain_filter" in tool_parameters:
             if isinstance(tool_parameters["search_domain_filter"], str):
-                payload["search_domain_filter"] = [tool_parameters["search_domain_filter"]]
+                payload["search_domain_filter"] = [
+                    tool_parameters["search_domain_filter"]
+                ]
             elif isinstance(tool_parameters["search_domain_filter"], list):
-                payload["search_domain_filter"] = tool_parameters["search_domain_filter"]
+                payload["search_domain_filter"] = tool_parameters[
+                    "search_domain_filter"
+                ]
 
         response = requests.post(url=PERPLEXITY_API_URL, json=payload, headers=headers)
         response.raise_for_status()
@@ -63,5 +71,7 @@ class PerplexityAITool(BuiltinTool):
 
         return [
             self.create_json_message(valuable_res),
-            self.create_text_message(json.dumps(valuable_res, ensure_ascii=False, indent=2)),
+            self.create_text_message(
+                json.dumps(valuable_res, ensure_ascii=False, indent=2)
+            ),
         ]

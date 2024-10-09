@@ -18,7 +18,12 @@ class Text2ImageModel(AIModel):
     model_config = ConfigDict(protected_namespaces=())
 
     def invoke(
-        self, model: str, credentials: dict, prompt: str, model_parameters: dict, user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        prompt: str,
+        model_parameters: dict,
+        user: Optional[str] = None,
     ) -> list[IO[bytes]]:
         """
         Invoke Text2Image model
@@ -38,7 +43,12 @@ class Text2ImageModel(AIModel):
 
     @abstractmethod
     def _invoke(
-        self, model: str, credentials: dict, prompt: str, model_parameters: dict, user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        prompt: str,
+        model_parameters: dict,
+        user: Optional[str] = None,
     ) -> list[IO[bytes]]:
         """
         Invoke Text2Image model

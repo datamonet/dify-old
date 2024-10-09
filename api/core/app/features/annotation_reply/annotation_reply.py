@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 class AnnotationReplyFeature:
     def query(
-        self, app_record: App, message: Message, query: str, user_id: str, invoke_from: InvokeFrom
+        self,
+        app_record: App,
+        message: Message,
+        query: str,
+        user_id: str,
+        invoke_from: InvokeFrom,
     ) -> Optional[MessageAnnotation]:
         """
         Query app annotations to reply
@@ -26,7 +31,9 @@ class AnnotationReplyFeature:
         :return:
         """
         annotation_setting = (
-            db.session.query(AppAnnotationSetting).filter(AppAnnotationSetting.app_id == app_record.id).first()
+            db.session.query(AppAnnotationSetting)
+            .filter(AppAnnotationSetting.app_id == app_record.id)
+            .first()
         )
 
         if not annotation_setting:
@@ -39,8 +46,10 @@ class AnnotationReplyFeature:
             embedding_provider_name = collection_binding_detail.provider_name
             embedding_model_name = collection_binding_detail.model_name
 
-            dataset_collection_binding = DatasetCollectionBindingService.get_dataset_collection_binding(
-                embedding_provider_name, embedding_model_name, "annotation"
+            dataset_collection_binding = (
+                DatasetCollectionBindingService.get_dataset_collection_binding(
+                    embedding_provider_name, embedding_model_name, "annotation"
+                )
             )
 
             dataset = Dataset(
@@ -55,7 +64,10 @@ class AnnotationReplyFeature:
             vector = Vector(dataset, attributes=["doc_id", "annotation_id", "app_id"])
 
             documents = vector.search_by_vector(
-                query=query, top_k=1, score_threshold=score_threshold, filter={"group_id": [dataset.id]}
+                query=query,
+                top_k=1,
+                score_threshold=score_threshold,
+                filter={"group_id": [dataset.id]},
             )
 
             if documents:

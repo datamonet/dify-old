@@ -10,7 +10,9 @@ def test_validate_provider_credentials():
     provider = HunyuanProvider()
 
     with pytest.raises(CredentialsValidateFailedError):
-        provider.validate_provider_credentials(credentials={"secret_id": "invalid_key", "secret_key": "invalid_key"})
+        provider.validate_provider_credentials(
+            credentials={"secret_id": "invalid_key", "secret_key": "invalid_key"}
+        )
 
     provider.validate_provider_credentials(
         credentials={

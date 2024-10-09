@@ -1,7 +1,10 @@
 from unittest.mock import MagicMock
 
 from core.rag.datasource.vdb.tencent.tencent_vector import TencentConfig, TencentVector
-from tests.integration_tests.vdb.test_vector_store import AbstractVectorTest, get_example_text
+from tests.integration_tests.vdb.test_vector_store import (
+    AbstractVectorTest,
+    get_example_text,
+)
 
 mock_client = MagicMock()
 mock_client.list_databases.return_value = [{"name": "test"}]
@@ -24,7 +27,9 @@ class TencentVectorTest(AbstractVectorTest):
         )
 
     def search_by_vector(self):
-        hits_by_vector = self.vector.search_by_vector(query_vector=self.example_embedding)
+        hits_by_vector = self.vector.search_by_vector(
+            query_vector=self.example_embedding
+        )
         assert len(hits_by_vector) == 1
 
     def search_by_full_text(self):

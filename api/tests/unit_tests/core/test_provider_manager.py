@@ -50,13 +50,16 @@ def test__to_model_settings(mocker):
     ]
 
     mocker.patch(
-        "core.helper.model_provider_cache.ProviderCredentialsCache.get", return_value={"openai_api_key": "fake_key"}
+        "core.helper.model_provider_cache.ProviderCredentialsCache.get",
+        return_value={"openai_api_key": "fake_key"},
     )
 
     provider_manager = ProviderManager()
 
     # Running the method
-    result = provider_manager._to_model_settings(provider_entity, provider_model_settings, load_balancing_model_configs)
+    result = provider_manager._to_model_settings(
+        provider_entity, provider_model_settings, load_balancing_model_configs
+    )
 
     # Asserting that the result is as expected
     assert len(result) == 1
@@ -104,13 +107,16 @@ def test__to_model_settings_only_one_lb(mocker):
     ]
 
     mocker.patch(
-        "core.helper.model_provider_cache.ProviderCredentialsCache.get", return_value={"openai_api_key": "fake_key"}
+        "core.helper.model_provider_cache.ProviderCredentialsCache.get",
+        return_value={"openai_api_key": "fake_key"},
     )
 
     provider_manager = ProviderManager()
 
     # Running the method
-    result = provider_manager._to_model_settings(provider_entity, provider_model_settings, load_balancing_model_configs)
+    result = provider_manager._to_model_settings(
+        provider_entity, provider_model_settings, load_balancing_model_configs
+    )
 
     # Asserting that the result is as expected
     assert len(result) == 1
@@ -166,13 +172,16 @@ def test__to_model_settings_lb_disabled(mocker):
     ]
 
     mocker.patch(
-        "core.helper.model_provider_cache.ProviderCredentialsCache.get", return_value={"openai_api_key": "fake_key"}
+        "core.helper.model_provider_cache.ProviderCredentialsCache.get",
+        return_value={"openai_api_key": "fake_key"},
     )
 
     provider_manager = ProviderManager()
 
     # Running the method
-    result = provider_manager._to_model_settings(provider_entity, provider_model_settings, load_balancing_model_configs)
+    result = provider_manager._to_model_settings(
+        provider_entity, provider_model_settings, load_balancing_model_configs
+    )
 
     # Asserting that the result is as expected
     assert len(result) == 1

@@ -69,32 +69,64 @@ class HostingConfiguration:
             }
 
             quotas = []
-            hosted_quota_limit = int(app_config.get("HOSTED_AZURE_OPENAI_QUOTA_LIMIT", "1000"))
+            hosted_quota_limit = int(
+                app_config.get("HOSTED_AZURE_OPENAI_QUOTA_LIMIT", "1000")
+            )
             trial_quota = TrialHostingQuota(
                 quota_limit=hosted_quota_limit,
                 restrict_models=[
-                    RestrictModel(model="gpt-4", base_model_name="gpt-4", model_type=ModelType.LLM),
-                    RestrictModel(model="gpt-4o", base_model_name="gpt-4o", model_type=ModelType.LLM),
-                    RestrictModel(model="gpt-4o-mini", base_model_name="gpt-4o-mini", model_type=ModelType.LLM),
-                    RestrictModel(model="gpt-4-32k", base_model_name="gpt-4-32k", model_type=ModelType.LLM),
                     RestrictModel(
-                        model="gpt-4-1106-preview", base_model_name="gpt-4-1106-preview", model_type=ModelType.LLM
+                        model="gpt-4", base_model_name="gpt-4", model_type=ModelType.LLM
                     ),
                     RestrictModel(
-                        model="gpt-4-vision-preview", base_model_name="gpt-4-vision-preview", model_type=ModelType.LLM
-                    ),
-                    RestrictModel(model="gpt-35-turbo", base_model_name="gpt-35-turbo", model_type=ModelType.LLM),
-                    RestrictModel(
-                        model="gpt-35-turbo-1106", base_model_name="gpt-35-turbo-1106", model_type=ModelType.LLM
+                        model="gpt-4o",
+                        base_model_name="gpt-4o",
+                        model_type=ModelType.LLM,
                     ),
                     RestrictModel(
-                        model="gpt-35-turbo-instruct", base_model_name="gpt-35-turbo-instruct", model_type=ModelType.LLM
+                        model="gpt-4o-mini",
+                        base_model_name="gpt-4o-mini",
+                        model_type=ModelType.LLM,
                     ),
                     RestrictModel(
-                        model="gpt-35-turbo-16k", base_model_name="gpt-35-turbo-16k", model_type=ModelType.LLM
+                        model="gpt-4-32k",
+                        base_model_name="gpt-4-32k",
+                        model_type=ModelType.LLM,
                     ),
                     RestrictModel(
-                        model="text-davinci-003", base_model_name="text-davinci-003", model_type=ModelType.LLM
+                        model="gpt-4-1106-preview",
+                        base_model_name="gpt-4-1106-preview",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="gpt-4-vision-preview",
+                        base_model_name="gpt-4-vision-preview",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="gpt-35-turbo",
+                        base_model_name="gpt-35-turbo",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="gpt-35-turbo-1106",
+                        base_model_name="gpt-35-turbo-1106",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="gpt-35-turbo-instruct",
+                        base_model_name="gpt-35-turbo-instruct",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="gpt-35-turbo-16k",
+                        base_model_name="gpt-35-turbo-16k",
+                        model_type=ModelType.LLM,
+                    ),
+                    RestrictModel(
+                        model="text-davinci-003",
+                        base_model_name="text-davinci-003",
+                        model_type=ModelType.LLM,
                     ),
                     RestrictModel(
                         model="text-embedding-ada-002",
@@ -115,7 +147,12 @@ class HostingConfiguration:
             )
             quotas.append(trial_quota)
 
-            return HostingProvider(enabled=True, credentials=credentials, quota_unit=quota_unit, quotas=quotas)
+            return HostingProvider(
+                enabled=True,
+                credentials=credentials,
+                quota_unit=quota_unit,
+                quotas=quotas,
+            )
 
         return HostingProvider(
             enabled=False,
@@ -128,12 +165,18 @@ class HostingConfiguration:
 
         if app_config.get("HOSTED_OPENAI_TRIAL_ENABLED"):
             hosted_quota_limit = int(app_config.get("HOSTED_OPENAI_QUOTA_LIMIT", "200"))
-            trial_models = self.parse_restrict_models_from_env(app_config, "HOSTED_OPENAI_TRIAL_MODELS")
-            trial_quota = TrialHostingQuota(quota_limit=hosted_quota_limit, restrict_models=trial_models)
+            trial_models = self.parse_restrict_models_from_env(
+                app_config, "HOSTED_OPENAI_TRIAL_MODELS"
+            )
+            trial_quota = TrialHostingQuota(
+                quota_limit=hosted_quota_limit, restrict_models=trial_models
+            )
             quotas.append(trial_quota)
 
         if app_config.get("HOSTED_OPENAI_PAID_ENABLED"):
-            paid_models = self.parse_restrict_models_from_env(app_config, "HOSTED_OPENAI_PAID_MODELS")
+            paid_models = self.parse_restrict_models_from_env(
+                app_config, "HOSTED_OPENAI_PAID_MODELS"
+            )
             paid_quota = PaidHostingQuota(restrict_models=paid_models)
             quotas.append(paid_quota)
 
@@ -143,12 +186,21 @@ class HostingConfiguration:
             }
 
             if app_config.get("HOSTED_OPENAI_API_BASE"):
-                credentials["openai_api_base"] = app_config.get("HOSTED_OPENAI_API_BASE")
+                credentials["openai_api_base"] = app_config.get(
+                    "HOSTED_OPENAI_API_BASE"
+                )
 
             if app_config.get("HOSTED_OPENAI_API_ORGANIZATION"):
-                credentials["openai_organization"] = app_config.get("HOSTED_OPENAI_API_ORGANIZATION")
+                credentials["openai_organization"] = app_config.get(
+                    "HOSTED_OPENAI_API_ORGANIZATION"
+                )
 
-            return HostingProvider(enabled=True, credentials=credentials, quota_unit=quota_unit, quotas=quotas)
+            return HostingProvider(
+                enabled=True,
+                credentials=credentials,
+                quota_unit=quota_unit,
+                quotas=quotas,
+            )
 
         return HostingProvider(
             enabled=False,
@@ -161,7 +213,9 @@ class HostingConfiguration:
         quotas = []
 
         if app_config.get("HOSTED_ANTHROPIC_TRIAL_ENABLED"):
-            hosted_quota_limit = int(app_config.get("HOSTED_ANTHROPIC_QUOTA_LIMIT", "0"))
+            hosted_quota_limit = int(
+                app_config.get("HOSTED_ANTHROPIC_QUOTA_LIMIT", "0")
+            )
             trial_quota = TrialHostingQuota(quota_limit=hosted_quota_limit)
             quotas.append(trial_quota)
 
@@ -175,9 +229,16 @@ class HostingConfiguration:
             }
 
             if app_config.get("HOSTED_ANTHROPIC_API_BASE"):
-                credentials["anthropic_api_url"] = app_config.get("HOSTED_ANTHROPIC_API_BASE")
+                credentials["anthropic_api_url"] = app_config.get(
+                    "HOSTED_ANTHROPIC_API_BASE"
+                )
 
-            return HostingProvider(enabled=True, credentials=credentials, quota_unit=quota_unit, quotas=quotas)
+            return HostingProvider(
+                enabled=True,
+                credentials=credentials,
+                quota_unit=quota_unit,
+                quotas=quotas,
+            )
 
         return HostingProvider(
             enabled=False,
@@ -240,15 +301,20 @@ class HostingConfiguration:
 
     @staticmethod
     def init_moderation_config(app_config: Config) -> HostedModerationConfig:
-        if app_config.get("HOSTED_MODERATION_ENABLED") and app_config.get("HOSTED_MODERATION_PROVIDERS"):
+        if app_config.get("HOSTED_MODERATION_ENABLED") and app_config.get(
+            "HOSTED_MODERATION_PROVIDERS"
+        ):
             return HostedModerationConfig(
-                enabled=True, providers=app_config.get("HOSTED_MODERATION_PROVIDERS").split(",")
+                enabled=True,
+                providers=app_config.get("HOSTED_MODERATION_PROVIDERS").split(","),
             )
 
         return HostedModerationConfig(enabled=False)
 
     @staticmethod
-    def parse_restrict_models_from_env(app_config: Config, env_var: str) -> list[RestrictModel]:
+    def parse_restrict_models_from_env(
+        app_config: Config, env_var: str
+    ) -> list[RestrictModel]:
         models_str = app_config.get(env_var)
         models_list = models_str.split(",") if models_str else []
         return [

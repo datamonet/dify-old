@@ -4,8 +4,16 @@ from time import sleep
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
-from core.model_runtime.entities.message_entities import AssistantPromptMessage, SystemPromptMessage, UserPromptMessage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
+from core.model_runtime.entities.message_entities import (
+    AssistantPromptMessage,
+    SystemPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.entities.model_entities import AIModelEntity
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.baichuan.llm.llm import BaichuanLanguageModel
@@ -24,7 +32,8 @@ def test_validate_credentials_for_chat_model():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="baichuan2-turbo", credentials={"api_key": "invalid_key", "secret_key": "invalid_key"}
+            model="baichuan2-turbo",
+            credentials={"api_key": "invalid_key", "secret_key": "invalid_key"},
         )
 
     model.validate_credentials(
@@ -117,7 +126,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_invoke_with_search():
@@ -148,7 +161,11 @@ def test_invoke_with_search():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if not chunk.delta.finish_reason else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if not chunk.delta.finish_reason
+            else True
+        )
         total_message += chunk.delta.message.content
 
     assert "不" not in total_message

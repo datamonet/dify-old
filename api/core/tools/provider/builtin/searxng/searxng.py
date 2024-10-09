@@ -14,7 +14,11 @@ class SearXNGProvider(BuiltinToolProviderController):
                 }
             ).invoke(
                 user_id="",
-                tool_parameters={"query": "SearXNG", "limit": 1, "search_type": "general"},
+                tool_parameters={
+                    "query": "SearXNG",
+                    "limit": 1,
+                    "search_type": "general",
+                },
             )
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

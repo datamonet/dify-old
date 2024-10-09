@@ -6,7 +6,9 @@ from core.file.file_obj import FileExtraConfig
 
 class FileUploadConfigManager:
     @classmethod
-    def convert(cls, config: Mapping[str, Any], is_vision: bool = True) -> Optional[FileExtraConfig]:
+    def convert(
+        cls, config: Mapping[str, Any], is_vision: bool = True
+    ) -> Optional[FileExtraConfig]:
         """
         Convert model config to model config
 
@@ -16,10 +18,15 @@ class FileUploadConfigManager:
         file_upload_dict = config.get("file_upload")
         if file_upload_dict:
             if file_upload_dict.get("image"):
-                if "enabled" in file_upload_dict["image"] and file_upload_dict["image"]["enabled"]:
+                if (
+                    "enabled" in file_upload_dict["image"]
+                    and file_upload_dict["image"]["enabled"]
+                ):
                     image_config = {
                         "number_limits": file_upload_dict["image"]["number_limits"],
-                        "transfer_methods": file_upload_dict["image"]["transfer_methods"],
+                        "transfer_methods": file_upload_dict["image"][
+                            "transfer_methods"
+                        ],
                     }
 
                     if is_vision:
@@ -30,7 +37,9 @@ class FileUploadConfigManager:
         return None
 
     @classmethod
-    def validate_and_set_defaults(cls, config: dict, is_vision: bool = True) -> tuple[dict, list[str]]:
+    def validate_and_set_defaults(
+        cls, config: dict, is_vision: bool = True
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for file upload feature
 
@@ -62,6 +71,8 @@ class FileUploadConfigManager:
                 raise ValueError("transfer_methods must be of list type")
             for method in transfer_methods:
                 if method not in {"remote_url", "local_file"}:
-                    raise ValueError("transfer_methods must be in ['remote_url', 'local_file']")
+                    raise ValueError(
+                        "transfer_methods must be in ['remote_url', 'local_file']"
+                    )
 
         return config, ["file_upload"]

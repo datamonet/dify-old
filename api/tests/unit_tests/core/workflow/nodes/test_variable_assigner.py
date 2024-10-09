@@ -80,18 +80,25 @@ def test_overwrite_string_variable():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "node_id",
             "data": {
-                "assigned_variable_selector": ["conversation", conversation_variable.name],
+                "assigned_variable_selector": [
+                    "conversation",
+                    conversation_variable.name,
+                ],
                 "write_mode": WriteMode.OVER_WRITE.value,
                 "input_variable_selector": [DEFAULT_NODE_ID, input_variable.name],
             },
         },
     )
 
-    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
+    with mock.patch(
+        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
+    ) as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 
@@ -162,18 +169,25 @@ def test_append_variable_to_array():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "node_id",
             "data": {
-                "assigned_variable_selector": ["conversation", conversation_variable.name],
+                "assigned_variable_selector": [
+                    "conversation",
+                    conversation_variable.name,
+                ],
                 "write_mode": WriteMode.APPEND.value,
                 "input_variable_selector": [DEFAULT_NODE_ID, input_variable.name],
             },
         },
     )
 
-    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
+    with mock.patch(
+        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
+    ) as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 
@@ -233,18 +247,25 @@ def test_clear_array():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "node_id",
             "data": {
-                "assigned_variable_selector": ["conversation", conversation_variable.name],
+                "assigned_variable_selector": [
+                    "conversation",
+                    conversation_variable.name,
+                ],
                 "write_mode": WriteMode.CLEAR.value,
                 "input_variable_selector": [],
             },
         },
     )
 
-    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
+    with mock.patch(
+        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
+    ) as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 

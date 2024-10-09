@@ -16,7 +16,9 @@ class RateLimit:
     _ACTIVE_REQUESTS_KEY = "dify:rate_limit:{}:active_requests"
     _UNLIMITED_REQUEST_ID = "unlimited_request_id"
     _REQUEST_MAX_ALIVE_TIME = 10 * 60  # 10 minutes
-    _ACTIVE_REQUESTS_COUNT_FLUSH_INTERVAL = 5 * 60  # recalculate request_count from request_detail every 5 minutes
+    _ACTIVE_REQUESTS_COUNT_FLUSH_INTERVAL = (
+        5 * 60
+    )  # recalculate request_count from request_detail every 5 minutes
     _instance_dict = {}
 
     def __new__(cls: type["RateLimit"], client_id: str, max_active_requests: int):
@@ -46,7 +48,9 @@ class RateLimit:
                 pipe.execute()
         else:
             with redis_client.pipeline() as pipe:
-                self.max_active_requests = int(redis_client.get(self.max_active_requests_key).decode("utf-8"))
+                self.max_active_requests = int(
+                    redis_client.get(self.max_active_requests_key).decode("utf-8")
+                )
                 redis_client.expire(self.max_active_requests_key, timedelta(days=1))
 
         # flush max active requests (in-transit request list)
@@ -57,13 +61,17 @@ class RateLimit:
         timeout_requests = [
             k
             for k, v in request_details.items()
-            if time.time() - float(v.decode("utf-8")) > RateLimit._REQUEST_MAX_ALIVE_TIME
+            if time.time() - float(v.decode("utf-8"))
+            > RateLimit._REQUEST_MAX_ALIVE_TIME
         ]
         if timeout_requests:
             redis_client.hdel(self.active_requests_key, *timeout_requests)
 
     def enter(self, request_id: Optional[str] = None) -> str:
-        if time.time() - self.last_recalculate_time > RateLimit._ACTIVE_REQUESTS_COUNT_FLUSH_INTERVAL:
+        if (
+            time.time() - self.last_recalculate_time
+            > RateLimit._ACTIVE_REQUESTS_COUNT_FLUSH_INTERVAL
+        ):
             self.flush_cache()
         if self.max_active_requests <= 0:
             return RateLimit._UNLIMITED_REQUEST_ID
@@ -96,7 +104,12 @@ class RateLimit:
 
 
 class RateLimitGenerator:
-    def __init__(self, rate_limit: RateLimit, generator: Union[Generator, callable], request_id: str):
+    def __init__(
+        self,
+        rate_limit: RateLimit,
+        generator: Union[Generator, callable],
+        request_id: str,
+    ):
         self.rate_limit = rate_limit
         if callable(generator):
             self.generator = generator()

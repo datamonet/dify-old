@@ -9,10 +9,17 @@ from yarl import URL
 
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
-from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
+from core.callback_handler.workflow_tool_callback_handler import (
+    DifyWorkflowCallbackHandler,
+)
 from core.file.file_obj import FileTransferMethod
 from core.ops.ops_trace_manager import TraceQueueManager
-from core.tools.entities.tool_entities import ToolInvokeMessage, ToolInvokeMessageBinary, ToolInvokeMeta, ToolParameter
+from core.tools.entities.tool_entities import (
+    ToolInvokeMessage,
+    ToolInvokeMessageBinary,
+    ToolInvokeMeta,
+    ToolParameter,
+)
 from core.tools.errors import (
     ToolEngineInvokeError,
     ToolInvokeError,
@@ -59,23 +66,33 @@ class ToolEngine:
             if parameters and len(parameters) == 1:
                 tool_parameters = {parameters[0].name: tool_parameters}
             else:
-                raise ValueError(f"tool_parameters should be a dict, but got a string: {tool_parameters}")
+                raise ValueError(
+                    f"tool_parameters should be a dict, but got a string: {tool_parameters}"
+                )
 
         # invoke the tool
         try:
             # hit the callback handler
-            agent_tool_callback.on_tool_start(tool_name=tool.identity.name, tool_inputs=tool_parameters)
+            agent_tool_callback.on_tool_start(
+                tool_name=tool.identity.name, tool_inputs=tool_parameters
+            )
 
             meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)
             response = ToolFileMessageTransformer.transform_tool_invoke_messages(
-                messages=response, user_id=user_id, tenant_id=tenant_id, conversation_id=message.conversation_id
+                messages=response,
+                user_id=user_id,
+                tenant_id=tenant_id,
+                conversation_id=message.conversation_id,
             )
 
             # extract binary data from tool invoke message
             binary_files = ToolEngine._extract_tool_response_binary(response)
             # create message file
             message_files = ToolEngine._create_message_files(
-                tool_messages=binary_files, agent_message=message, invoke_from=invoke_from, user_id=user_id
+                tool_messages=binary_files,
+                agent_message=message,
+                invoke_from=invoke_from,
+                user_id=user_id,
             )
 
             plain_text = ToolEngine._convert_tool_response_to_str(response)
@@ -94,7 +111,11 @@ class ToolEngine:
         except ToolProviderCredentialValidationError as e:
             error_response = "Please check your tool provider credentials"
             agent_tool_callback.on_tool_error(e)
-        except (ToolNotFoundError, ToolNotSupportedError, ToolProviderNotFoundError) as e:
+        except (
+            ToolNotFoundError,
+            ToolNotSupportedError,
+            ToolProviderNotFoundError,
+        ) as e:
             error_response = f"there is not a tool named {tool.identity.name}"
             agent_tool_callback.on_tool_error(e)
         except ToolParameterValidationError as e:
@@ -128,7 +149,9 @@ class ToolEngine:
         """
         try:
             # hit the callback handler
-            workflow_tool_callback.on_tool_start(tool_name=tool.identity.name, tool_inputs=tool_parameters)
+            workflow_tool_callback.on_tool_start(
+                tool_name=tool.identity.name, tool_inputs=tool_parameters
+            )
 
             if isinstance(tool, WorkflowTool):
                 tool.workflow_call_depth = workflow_call_depth + 1
@@ -151,7 +174,9 @@ class ToolEngine:
             raise e
 
     @staticmethod
-    def _invoke(tool: Tool, tool_parameters: dict, user_id: str) -> tuple[ToolInvokeMeta, list[ToolInvokeMessage]]:
+    def _invoke(
+        tool: Tool, tool_parameters: dict, user_id: str
+    ) -> tuple[ToolInvokeMeta, list[ToolInvokeMessage]]:
         """
         Invoke the tool with the given arguments.
         """
@@ -188,8 +213,13 @@ class ToolEngine:
             if response.type == ToolInvokeMessage.MessageType.TEXT:
                 result += response.message
             elif response.type == ToolInvokeMessage.MessageType.LINK:
-                result += f"result link: {response.message}. please tell user to check it."
-            elif response.type in {ToolInvokeMessage.MessageType.IMAGE_LINK, ToolInvokeMessage.MessageType.IMAGE}:
+                result += (
+                    f"result link: {response.message}. please tell user to check it."
+                )
+            elif response.type in {
+                ToolInvokeMessage.MessageType.IMAGE_LINK,
+                ToolInvokeMessage.MessageType.IMAGE,
+            }:
                 result += (
                     "image has been created and sent to user already, you do not need to create it,"
                     " just tell the user to check it now."
@@ -202,14 +232,19 @@ class ToolEngine:
         return result
 
     @staticmethod
-    def _extract_tool_response_binary(tool_response: list[ToolInvokeMessage]) -> list[ToolInvokeMessageBinary]:
+    def _extract_tool_response_binary(
+        tool_response: list[ToolInvokeMessage],
+    ) -> list[ToolInvokeMessageBinary]:
         """
         Extract tool response binary
         """
         result = []
 
         for response in tool_response:
-            if response.type in {ToolInvokeMessage.MessageType.IMAGE_LINK, ToolInvokeMessage.MessageType.IMAGE}:
+            if response.type in {
+                ToolInvokeMessage.MessageType.IMAGE_LINK,
+                ToolInvokeMessage.MessageType.IMAGE,
+            }:
                 mimetype = None
                 if response.meta.get("mime_type"):
                     mimetype = response.meta.get("mime_type")
@@ -258,7 +293,10 @@ class ToolEngine:
 
     @staticmethod
     def _create_message_files(
-        tool_messages: list[ToolInvokeMessageBinary], agent_message: Message, invoke_from: InvokeFrom, user_id: str
+        tool_messages: list[ToolInvokeMessageBinary],
+        agent_message: Message,
+        invoke_from: InvokeFrom,
+        user_id: str,
     ) -> list[tuple[Any, str]]:
         """
         Create message file
@@ -291,7 +329,11 @@ class ToolEngine:
                 belongs_to="assistant",
                 url=message.url,
                 upload_file_id=None,
-                created_by_role=("account" if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER} else "end_user"),
+                created_by_role=(
+                    "account"
+                    if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
+                    else "end_user"
+                ),
                 created_by=user_id,
             )
 

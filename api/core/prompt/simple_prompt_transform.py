@@ -107,7 +107,11 @@ class SimplePromptTransform(PromptTransform):
             with_memory_prompt=histories is not None,
         )
 
-        variables = {k: inputs[k] for k in prompt_template_config["custom_variable_keys"] if k in inputs}
+        variables = {
+            k: inputs[k]
+            for k in prompt_template_config["custom_variable_keys"]
+            if k in inputs
+        }
 
         for v in prompt_template_config["special_variable_keys"]:
             # support #context#, #query# and #histories#
@@ -133,7 +137,9 @@ class SimplePromptTransform(PromptTransform):
         query_in_prompt: bool,
         with_memory_prompt: bool = False,
     ) -> dict:
-        prompt_rules = self._get_prompt_rule(app_mode=app_mode, provider=provider, model=model)
+        prompt_rules = self._get_prompt_rule(
+            app_mode=app_mode, provider=provider, model=model
+        )
 
         custom_variable_keys = []
         special_variable_keys = []
@@ -261,7 +267,9 @@ class SimplePromptTransform(PromptTransform):
 
         return [self.get_last_user_message(prompt, files)], stops
 
-    def get_last_user_message(self, prompt: str, files: list["FileVar"]) -> UserPromptMessage:
+    def get_last_user_message(
+        self, prompt: str, files: list["FileVar"]
+    ) -> UserPromptMessage:
         if files:
             prompt_message_contents = [TextPromptMessageContent(data=prompt)]
             for file in files:
@@ -281,14 +289,18 @@ class SimplePromptTransform(PromptTransform):
         :param model: model name
         :return:
         """
-        prompt_file_name = self._prompt_file_name(app_mode=app_mode, provider=provider, model=model)
+        prompt_file_name = self._prompt_file_name(
+            app_mode=app_mode, provider=provider, model=model
+        )
 
         # Check if the prompt file is already loaded
         if prompt_file_name in prompt_file_contents:
             return prompt_file_contents[prompt_file_name]
 
         # Get the absolute path of the subdirectory
-        prompt_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "prompt_templates")
+        prompt_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "prompt_templates"
+        )
         json_file_path = os.path.join(prompt_path, f"{prompt_file_name}.json")
 
         # Open the JSON file and read its content

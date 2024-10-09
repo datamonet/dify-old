@@ -18,7 +18,9 @@ class HttpRequestNodeAuthorization(BaseModel):
 
     @field_validator("config", mode="before")
     @classmethod
-    def check_config(cls, v: HttpRequestNodeAuthorizationConfig, values: ValidationInfo):
+    def check_config(
+        cls, v: HttpRequestNodeAuthorizationConfig, values: ValidationInfo
+    ):
         """
         Check config, if type is no-auth, config should be None, otherwise it should be a dict.
         """

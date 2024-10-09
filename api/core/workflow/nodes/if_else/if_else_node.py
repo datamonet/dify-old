@@ -32,12 +32,19 @@ class IfElseNode(BaseNode):
             # Check if the new cases structure is used
             if node_data.cases:
                 for case in node_data.cases:
-                    input_conditions, group_result = condition_processor.process_conditions(
-                        variable_pool=self.graph_runtime_state.variable_pool, conditions=case.conditions
+                    input_conditions, group_result = (
+                        condition_processor.process_conditions(
+                            variable_pool=self.graph_runtime_state.variable_pool,
+                            conditions=case.conditions,
+                        )
                     )
 
                     # Apply the logical operator for the current case
-                    final_result = all(group_result) if case.logical_operator == "and" else any(group_result)
+                    final_result = (
+                        all(group_result)
+                        if case.logical_operator == "and"
+                        else any(group_result)
+                    )
 
                     process_datas["condition_results"].append(
                         {
@@ -49,28 +56,42 @@ class IfElseNode(BaseNode):
 
                     # Break if a case passes (logical short-circuit)
                     if final_result:
-                        selected_case_id = case.case_id  # Capture the ID of the passing case
+                        selected_case_id = (
+                            case.case_id
+                        )  # Capture the ID of the passing case
                         break
 
             else:
                 # Fallback to old structure if cases are not defined
                 input_conditions, group_result = condition_processor.process_conditions(
-                    variable_pool=self.graph_runtime_state.variable_pool, conditions=node_data.conditions
+                    variable_pool=self.graph_runtime_state.variable_pool,
+                    conditions=node_data.conditions,
                 )
 
-                final_result = all(group_result) if node_data.logical_operator == "and" else any(group_result)
+                final_result = (
+                    all(group_result)
+                    if node_data.logical_operator == "and"
+                    else any(group_result)
+                )
 
                 selected_case_id = "true" if final_result else "false"
 
                 process_datas["condition_results"].append(
-                    {"group": "default", "results": group_result, "final_result": final_result}
+                    {
+                        "group": "default",
+                        "results": group_result,
+                        "final_result": final_result,
+                    }
                 )
 
             node_inputs["conditions"] = input_conditions
 
         except Exception as e:
             return NodeRunResult(
-                status=WorkflowNodeExecutionStatus.FAILED, inputs=node_inputs, process_data=process_datas, error=str(e)
+                status=WorkflowNodeExecutionStatus.FAILED,
+                inputs=node_inputs,
+                process_data=process_datas,
+                error=str(e),
             )
 
         outputs = {"result": final_result, "selected_case_id": selected_case_id}

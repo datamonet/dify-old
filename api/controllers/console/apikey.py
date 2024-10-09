@@ -25,7 +25,9 @@ api_key_list = {"data": fields.List(fields.Nested(api_key_fields), attribute="it
 
 
 def _get_resource(resource_id, tenant_id, resource_model):
-    resource = resource_model.query.filter_by(id=resource_id, tenant_id=tenant_id).first()
+    resource = resource_model.query.filter_by(
+        id=resource_id, tenant_id=tenant_id
+    ).first()
 
     if resource is None:
         flask_restful.abort(404, message=f"{resource_model.__name__} not found.")
@@ -34,7 +36,11 @@ def _get_resource(resource_id, tenant_id, resource_model):
 
 
 class BaseApiKeyListResource(Resource):
-    method_decorators = [account_initialization_required, login_required, setup_required]
+    method_decorators = [
+        account_initialization_required,
+        login_required,
+        setup_required,
+    ]
 
     resource_type = None
     resource_model = None
@@ -48,7 +54,10 @@ class BaseApiKeyListResource(Resource):
         _get_resource(resource_id, current_user.current_tenant_id, self.resource_model)
         keys = (
             db.session.query(ApiToken)
-            .filter(ApiToken.type == self.resource_type, getattr(ApiToken, self.resource_id_field) == resource_id)
+            .filter(
+                ApiToken.type == self.resource_type,
+                getattr(ApiToken, self.resource_id_field) == resource_id,
+            )
             .all()
         )
         return {"items": keys}
@@ -62,7 +71,10 @@ class BaseApiKeyListResource(Resource):
 
         current_key_count = (
             db.session.query(ApiToken)
-            .filter(ApiToken.type == self.resource_type, getattr(ApiToken, self.resource_id_field) == resource_id)
+            .filter(
+                ApiToken.type == self.resource_type,
+                getattr(ApiToken, self.resource_id_field) == resource_id,
+            )
             .count()
         )
 
@@ -85,7 +97,11 @@ class BaseApiKeyListResource(Resource):
 
 
 class BaseApiKeyResource(Resource):
-    method_decorators = [account_initialization_required, login_required, setup_required]
+    method_decorators = [
+        account_initialization_required,
+        login_required,
+        setup_required,
+    ]
 
     resource_type = None
     resource_model = None
@@ -166,6 +182,10 @@ class DatasetApiKeyResource(BaseApiKeyResource):
 
 
 api.add_resource(AppApiKeyListResource, "/apps/<uuid:resource_id>/api-keys")
-api.add_resource(AppApiKeyResource, "/apps/<uuid:resource_id>/api-keys/<uuid:api_key_id>")
+api.add_resource(
+    AppApiKeyResource, "/apps/<uuid:resource_id>/api-keys/<uuid:api_key_id>"
+)
 api.add_resource(DatasetApiKeyListResource, "/datasets/<uuid:resource_id>/api-keys")
-api.add_resource(DatasetApiKeyResource, "/datasets/<uuid:resource_id>/api-keys/<uuid:api_key_id>")
+api.add_resource(
+    DatasetApiKeyResource, "/datasets/<uuid:resource_id>/api-keys/<uuid:api_key_id>"
+)

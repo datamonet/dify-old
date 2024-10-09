@@ -8,7 +8,6 @@ from requests import Response
 from requests.sessions import Session
 from xinference_client.client.restful.restful_client import (
     Client,
-    RESTfulChatglmCppChatModelHandle,
     RESTfulChatModelHandle,
     RESTfulEmbeddingModelHandle,
     RESTfulGenerateModelHandle,
@@ -20,18 +19,26 @@ from xinference_client.types import Embedding, EmbeddingData, EmbeddingUsage
 class MockXinferenceClass:
     def get_chat_model(
         self: Client, model_uid: str
-    ) -> Union[RESTfulChatglmCppChatModelHandle, RESTfulGenerateModelHandle, RESTfulChatModelHandle]:
+    ) -> Union[RESTfulGenerateModelHandle, RESTfulChatModelHandle]:
         if not re.match(r"https?:\/\/[^\s\/$.?#].[^\s]*$", self.base_url):
             raise RuntimeError("404 Not Found")
 
         if "generate" == model_uid:
-            return RESTfulGenerateModelHandle(model_uid, base_url=self.base_url, auth_headers={})
+            return RESTfulGenerateModelHandle(
+                model_uid, base_url=self.base_url, auth_headers={}
+            )
         if "chat" == model_uid:
-            return RESTfulChatModelHandle(model_uid, base_url=self.base_url, auth_headers={})
+            return RESTfulChatModelHandle(
+                model_uid, base_url=self.base_url, auth_headers={}
+            )
         if "embedding" == model_uid:
-            return RESTfulEmbeddingModelHandle(model_uid, base_url=self.base_url, auth_headers={})
+            return RESTfulEmbeddingModelHandle(
+                model_uid, base_url=self.base_url, auth_headers={}
+            )
         if "rerank" == model_uid:
-            return RESTfulRerankModelHandle(model_uid, base_url=self.base_url, auth_headers={})
+            return RESTfulRerankModelHandle(
+                model_uid, base_url=self.base_url, auth_headers={}
+            )
         raise RuntimeError("404 Not Found")
 
     def get(self: Session, url: str, **kwargs):
@@ -40,7 +47,8 @@ class MockXinferenceClass:
             # get model uid
             model_uid = url.split("/")[-1] or ""
             if not re.match(
-                r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", model_uid
+                r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+                model_uid,
             ) and model_uid not in {"generate", "chat", "embedding", "rerank"}:
                 response.status_code = 404
                 response._content = b"{}"
@@ -109,11 +117,18 @@ class MockXinferenceClass:
         self._cluster_authed = True
 
     def rerank(
-        self: RESTfulRerankModelHandle, documents: list[str], query: str, top_n: int, return_documents: bool
+        self: RESTfulRerankModelHandle,
+        documents: list[str],
+        query: str,
+        top_n: int,
+        return_documents: bool,
     ) -> dict:
         # check if self._model_uid is a valid uuid
         if (
-            not re.match(r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", self._model_uid)
+            not re.match(
+                r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+                self._model_uid,
+            )
             and self._model_uid != "rerank"
         ):
             raise RuntimeError("404 Not Found")
@@ -126,14 +141,20 @@ class MockXinferenceClass:
 
         return {
             "results": [
-                {"index": i, "document": doc, "relevance_score": 0.9} for i, doc in enumerate(documents[:top_n])
+                {"index": i, "document": doc, "relevance_score": 0.9}
+                for i, doc in enumerate(documents[:top_n])
             ]
         }
 
-    def create_embedding(self: RESTfulGenerateModelHandle, input: Union[str, list[str]], **kwargs) -> dict:
+    def create_embedding(
+        self: RESTfulGenerateModelHandle, input: Union[str, list[str]], **kwargs
+    ) -> dict:
         # check if self._model_uid is a valid uuid
         if (
-            not re.match(r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}", self._model_uid)
+            not re.match(
+                r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+                self._model_uid,
+            )
             and self._model_uid != "embedding"
         ):
             raise RuntimeError("404 Not Found")
@@ -146,7 +167,11 @@ class MockXinferenceClass:
             object="list",
             model=self._model_uid,
             data=[
-                EmbeddingData(index=i, object="embedding", embedding=[1919.810 for _ in range(768)])
+                EmbeddingData(
+                    index=i,
+                    object="embedding",
+                    embedding=[1919.810 for _ in range(768)],
+                )
                 for i in range(ipt_len)
             ],
             usage=EmbeddingUsage(prompt_tokens=ipt_len, total_tokens=ipt_len),
@@ -162,10 +187,20 @@ MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 def setup_xinference_mock(request, monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(Client, "get_model", MockXinferenceClass.get_chat_model)
-        monkeypatch.setattr(Client, "_check_cluster_authenticated", MockXinferenceClass._check_cluster_authenticated)
+        monkeypatch.setattr(
+            Client,
+            "_check_cluster_authenticated",
+            MockXinferenceClass._check_cluster_authenticated,
+        )
         monkeypatch.setattr(Session, "get", MockXinferenceClass.get)
-        monkeypatch.setattr(RESTfulEmbeddingModelHandle, "create_embedding", MockXinferenceClass.create_embedding)
-        monkeypatch.setattr(RESTfulRerankModelHandle, "rerank", MockXinferenceClass.rerank)
+        monkeypatch.setattr(
+            RESTfulEmbeddingModelHandle,
+            "create_embedding",
+            MockXinferenceClass.create_embedding,
+        )
+        monkeypatch.setattr(
+            RESTfulRerankModelHandle, "rerank", MockXinferenceClass.rerank
+        )
     yield
 
     if MOCK:

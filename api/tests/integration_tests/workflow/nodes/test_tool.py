@@ -40,7 +40,10 @@ def init_tool_node(config: dict):
 
     # construct variable pool
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
         conversation_variables=[],
@@ -50,7 +53,9 @@ def init_tool_node(config: dict):
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config=config,
     )
 

@@ -3,7 +3,10 @@ import os
 from collections.abc import Generator
 
 from core.model_runtime.entities.llm_entities import LLMResultChunk, LLMResultChunkDelta
-from core.model_runtime.entities.message_entities import AssistantPromptMessage, UserPromptMessage
+from core.model_runtime.entities.message_entities import (
+    AssistantPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.model_providers.tongyi.llm.llm import TongyiLargeLanguageModel
 
 
@@ -41,7 +44,9 @@ def invoke_model_with_json_response(model_name="qwen-max-0403"):
         model=model_name,
         credentials={"dashscope_api_key": os.environ.get("TONGYI_DASHSCOPE_API_KEY")},
         prompt_messages=[
-            UserPromptMessage(content='output json data with format `{"data": "test", "code": 200, "msg": "success"}')
+            UserPromptMessage(
+                content='output json data with format `{"data": "test", "code": 200, "msg": "success"}'
+            )
         ],
         model_parameters={
             "temperature": 0.5,

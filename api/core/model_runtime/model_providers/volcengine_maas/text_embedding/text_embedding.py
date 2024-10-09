@@ -2,6 +2,7 @@ import time
 from decimal import Decimal
 from typing import Optional
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
 from core.model_runtime.entities.model_entities import (
     AIModelEntity,
@@ -11,7 +12,10 @@ from core.model_runtime.entities.model_entities import (
     PriceConfig,
     PriceType,
 )
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -21,7 +25,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 from core.model_runtime.model_providers.volcengine_maas.client import ArkClientV3
 from core.model_runtime.model_providers.volcengine_maas.legacy.client import MaaSClient
 from core.model_runtime.model_providers.volcengine_maas.legacy.errors import (
@@ -32,7 +38,9 @@ from core.model_runtime.model_providers.volcengine_maas.legacy.errors import (
     RateLimitErrors,
     ServerUnavailableErrors,
 )
-from core.model_runtime.model_providers.volcengine_maas.text_embedding.models import get_model_config
+from core.model_runtime.model_providers.volcengine_maas.text_embedding.models import (
+    get_model_config,
+)
 
 
 class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
@@ -41,7 +49,12 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
     """
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -50,6 +63,7 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         if ArkClientV3.is_legacy(credentials):
@@ -58,26 +72,42 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
         return self._generate_v3(model, credentials, texts, user)
 
     def _generate_v2(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
     ) -> TextEmbeddingResult:
         client = MaaSClient.from_credential(credentials)
         resp = MaaSClient.wrap_exception(lambda: client.embeddings(texts))
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=resp["usage"]["total_tokens"])
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=resp["usage"]["total_tokens"]
+        )
 
-        result = TextEmbeddingResult(model=model, embeddings=[v["embedding"] for v in resp["data"]], usage=usage)
+        result = TextEmbeddingResult(
+            model=model, embeddings=[v["embedding"] for v in resp["data"]], usage=usage
+        )
 
         return result
 
     def _generate_v3(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
     ) -> TextEmbeddingResult:
         client = ArkClientV3.from_credentials(credentials)
         resp = client.embeddings(texts)
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=resp.usage.total_tokens)
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=resp.usage.total_tokens
+        )
 
-        result = TextEmbeddingResult(model=model, embeddings=[v.embedding for v in resp.data], usage=usage)
+        result = TextEmbeddingResult(
+            model=model, embeddings=[v.embedding for v in resp.data], usage=usage
+        )
 
         return result
 
@@ -138,7 +168,9 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: BadRequestErrors.values(),
         }
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -163,7 +195,9 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
 
         return entity
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -174,7 +208,10 @@ class VolcengineMaaSTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

@@ -27,7 +27,10 @@ class SpeechToTextConfigManager:
         if not isinstance(config["speech_to_text"], dict):
             raise ValueError("speech_to_text must be of dict type")
 
-        if "enabled" not in config["speech_to_text"] or not config["speech_to_text"]["enabled"]:
+        if (
+            "enabled" not in config["speech_to_text"]
+            or not config["speech_to_text"]["enabled"]
+        ):
             config["speech_to_text"]["enabled"] = False
 
         if not isinstance(config["speech_to_text"]["enabled"], bool):

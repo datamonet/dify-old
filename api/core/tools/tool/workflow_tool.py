@@ -4,7 +4,11 @@ from copy import deepcopy
 from typing import Any, Optional, Union
 
 from core.file.file_obj import FileTransferMethod, FileVar
-from core.tools.entities.tool_entities import ToolInvokeMessage, ToolParameter, ToolProviderType
+from core.tools.entities.tool_entities import (
+    ToolInvokeMessage,
+    ToolParameter,
+    ToolProviderType,
+)
 from core.tools.tool.tool import Tool
 from extensions.ext_database import db
 from models.account import Account
@@ -68,10 +72,13 @@ class WorkflowTool(Tool):
 
         result = []
 
-        outputs = data.get("outputs", {})
-        outputs, files = self._extract_files(outputs)
-        for file in files:
-            result.append(self.create_file_var_message(file))
+        outputs = data.get("outputs")
+        if outputs == None:
+            outputs = {}
+        else:
+            outputs, files = self._extract_files(outputs)
+            for file in files:
+                result.append(self.create_file_var_message(file))
 
         result.append(self.create_text_message(json.dumps(outputs, ensure_ascii=False)))
         result.append(self.create_json_message(outputs))
@@ -123,7 +130,11 @@ class WorkflowTool(Tool):
                 .first()
             )
         else:
-            workflow = db.session.query(Workflow).filter(Workflow.app_id == app_id, Workflow.version == version).first()
+            workflow = (
+                db.session.query(Workflow)
+                .filter(Workflow.app_id == app_id, Workflow.version == version)
+                .first()
+            )
 
         if not workflow:
             raise ValueError("workflow not found or not published")
@@ -163,9 +174,15 @@ class WorkflowTool(Tool):
                             }
                             if file_var.transfer_method == FileTransferMethod.TOOL_FILE:
                                 file_dict["tool_file_id"] = file_var.related_id
-                            elif file_var.transfer_method == FileTransferMethod.LOCAL_FILE:
+                            elif (
+                                file_var.transfer_method
+                                == FileTransferMethod.LOCAL_FILE
+                            ):
                                 file_dict["upload_file_id"] = file_var.related_id
-                            elif file_var.transfer_method == FileTransferMethod.REMOTE_URL:
+                            elif (
+                                file_var.transfer_method
+                                == FileTransferMethod.REMOTE_URL
+                            ):
                                 file_dict["url"] = file_var.preview_url
 
                             files.append(file_dict)

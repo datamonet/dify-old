@@ -3,7 +3,9 @@ from typing import Any
 import requests
 
 from core.tools.errors import ToolProviderCredentialValidationError
-from core.tools.provider.builtin.perplexity.tools.perplexity_search import PERPLEXITY_API_URL
+from core.tools.provider.builtin.perplexity.tools.perplexity_search import (
+    PERPLEXITY_API_URL,
+)
 from core.tools.provider.builtin_tool_provider import BuiltinToolProviderController
 
 
@@ -30,7 +32,9 @@ class PerplexityProvider(BuiltinToolProviderController):
             response = requests.post(PERPLEXITY_API_URL, json=payload, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
-            raise ToolProviderCredentialValidationError(f"Failed to validate Perplexity API key: {str(e)}")
+            raise ToolProviderCredentialValidationError(
+                f"Failed to validate Perplexity API key: {str(e)}"
+            )
 
         if response.status_code != 200:
             raise ToolProviderCredentialValidationError(

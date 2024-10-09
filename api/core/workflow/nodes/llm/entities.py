@@ -2,7 +2,11 @@ from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel
 
-from core.prompt.entities.advanced_prompt_entities import ChatModelMessage, CompletionModelPromptTemplate, MemoryConfig
+from core.prompt.entities.advanced_prompt_entities import (
+    ChatModelMessage,
+    CompletionModelPromptTemplate,
+    MemoryConfig,
+)
 from core.workflow.entities.base_node_data_entities import BaseNodeData
 from core.workflow.entities.variable_entities import VariableSelector
 
@@ -73,7 +77,9 @@ class LLMNodeData(BaseNodeData):
     """
 
     model: ModelConfig
-    prompt_template: Union[list[LLMNodeChatModelMessage], LLMNodeCompletionModelPromptTemplate]
+    prompt_template: Union[
+        list[LLMNodeChatModelMessage], LLMNodeCompletionModelPromptTemplate
+    ]
     prompt_config: Optional[PromptConfig] = None
     memory: Optional[MemoryConfig] = None
     context: ContextConfig

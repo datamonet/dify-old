@@ -29,4 +29,6 @@ class RuleConfigGeneratorOutputParser:
                 raise ValueError("Expected 'opening_statement' to be a str.")
             return parsed
         except Exception as e:
-            raise OutputParserError(f"Parsing text\n{text}\n of rule config generator raised following error:\n{e}")
+            raise OutputParserError(
+                f"Parsing text\n{text}\n of rule config generator raised following error:\n{e}"
+            )

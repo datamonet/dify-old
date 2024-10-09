@@ -7,7 +7,9 @@ from core.app.apps.completion.app_config_manager import CompletionAppConfig
 from core.app.entities.app_invoke_entities import (
     CompletionAppGenerateEntity,
 )
-from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.callback_handler.index_tool_callback_handler import (
+    DatasetIndexToolCallbackHandler,
+)
 from core.model_manager import ModelInstance
 from core.moderation.base import ModerationError
 from core.rag.retrieval.dataset_retrieval import DatasetRetrieval
@@ -23,7 +25,10 @@ class CompletionAppRunner(AppRunner):
     """
 
     def run(
-        self, application_generate_entity: CompletionAppGenerateEntity, queue_manager: AppQueueManager, message: Message
+        self,
+        application_generate_entity: CompletionAppGenerateEntity,
+        queue_manager: AppQueueManager,
+        message: Message,
     ) -> None:
         """
         Run application
@@ -153,7 +158,10 @@ class CompletionAppRunner(AppRunner):
             return
 
         # Re-calculate the max tokens if sum(prompt_token +  max_tokens) over model token limit
-        self.recalc_llm_max_tokens(model_config=application_generate_entity.model_conf, prompt_messages=prompt_messages)
+        self.recalc_llm_max_tokens(
+            model_config=application_generate_entity.model_conf,
+            prompt_messages=prompt_messages,
+        )
 
         # Invoke model
         model_instance = ModelInstance(
@@ -173,5 +181,7 @@ class CompletionAppRunner(AppRunner):
 
         # handle invoke result
         self._handle_invoke_result(
-            invoke_result=invoke_result, queue_manager=queue_manager, stream=application_generate_entity.stream
+            invoke_result=invoke_result,
+            queue_manager=queue_manager,
+            stream=application_generate_entity.stream,
         )

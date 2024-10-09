@@ -2,7 +2,11 @@ import threading
 from collections.abc import Generator
 from typing import Optional, Union
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -19,7 +23,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 
 from ._client import SparkLLMClient
 
@@ -50,7 +56,9 @@ class SparkLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         # invoke model
-        return self._generate(model, credentials, prompt_messages, model_parameters, stop, stream, user)
+        return self._generate(
+            model, credentials, prompt_messages, model_parameters, stop, stream, user
+        )
 
     def get_num_tokens(
         self,
@@ -133,7 +141,10 @@ class SparkLargeLanguageModel(LargeLanguageModel):
             target=client.run,
             args=(
                 [
-                    {"role": prompt_message.role.value, "content": prompt_message.content}
+                    {
+                        "role": prompt_message.role.value,
+                        "content": prompt_message.content,
+                    }
                     for prompt_message in prompt_messages
                 ],
                 user,
@@ -144,9 +155,13 @@ class SparkLargeLanguageModel(LargeLanguageModel):
         thread.start()
 
         if stream:
-            return self._handle_generate_stream_response(thread, model, credentials, client, prompt_messages)
+            return self._handle_generate_stream_response(
+                thread, model, credentials, client, prompt_messages
+            )
 
-        return self._handle_generate_response(thread, model, credentials, client, prompt_messages)
+        return self._handle_generate_response(
+            thread, model, credentials, client, prompt_messages
+        )
 
     def _handle_generate_response(
         self,
@@ -180,10 +195,14 @@ class SparkLargeLanguageModel(LargeLanguageModel):
 
         # calculate num tokens
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+        completion_tokens = self.get_num_tokens(
+            model, credentials, [assistant_prompt_message]
+        )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         result = LLMResult(
@@ -213,25 +232,34 @@ class SparkLargeLanguageModel(LargeLanguageModel):
         :param prompt_messages: prompt messages
         :return: llm response chunk generator result
         """
+        completion = ""
         for index, content in enumerate(client.subscribe()):
             if isinstance(content, dict):
                 delta = content["data"]
             else:
                 delta = content
-
+            completion += delta
             assistant_prompt_message = AssistantPromptMessage(
                 content=delta or "",
             )
-
+            temp_assistant_prompt_message = AssistantPromptMessage(
+                content=completion,
+            )
             prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-            completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+            completion_tokens = self.get_num_tokens(
+                model, credentials, [temp_assistant_prompt_message]
+            )
 
             # transform usage
-            usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+            usage = self._calc_response_usage(
+                model, credentials, prompt_tokens, completion_tokens
+            )
             yield LLMResultChunk(
                 model=model,
                 prompt_messages=prompt_messages,
-                delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message, usage=usage),
+                delta=LLMResultChunkDelta(
+                    index=index, message=assistant_prompt_message, usage=usage
+                ),
             )
 
         thread.join()
@@ -282,7 +310,9 @@ class SparkLargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(self._convert_one_message_to_text(message) for message in messages)
+        text = "".join(
+            self._convert_one_message_to_text(message) for message in messages
+        )
 
         # trim off the trailing ' ' that might come from the "Assistant: "
         return text.rstrip()

@@ -3,7 +3,12 @@ from typing import Optional
 import httpx
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+)
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -53,7 +58,12 @@ class JinaRerankModel(RerankModel):
         try:
             response = httpx.post(
                 base_url + "/rerank",
-                json={"model": model, "query": query, "documents": docs, "top_n": top_n},
+                json={
+                    "model": model,
+                    "query": query,
+                    "documents": docs,
+                    "top_n": top_n,
+                },
                 headers={"Authorization": f"Bearer {credentials.get('api_key')}"},
             )
             response.raise_for_status()
@@ -66,7 +76,10 @@ class JinaRerankModel(RerankModel):
                     text=result["document"]["text"],
                     score=result["relevance_score"],
                 )
-                if score_threshold is None or result["relevance_score"] >= score_threshold:
+                if (
+                    score_threshold is None
+                    or result["relevance_score"] >= score_threshold
+                ):
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)
@@ -110,7 +123,9 @@ class JinaRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -119,7 +134,9 @@ class JinaRerankModel(RerankModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.RERANK,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size"))},
+            model_properties={
+                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size"))
+            },
         )
 
         return entity

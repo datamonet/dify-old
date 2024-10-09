@@ -1,6 +1,12 @@
-from core.workflow.graph_engine.condition_handlers.base_handler import RunConditionHandler
-from core.workflow.graph_engine.condition_handlers.branch_identify_handler import BranchIdentifyRunConditionHandler
-from core.workflow.graph_engine.condition_handlers.condition_handler import ConditionRunConditionHandlerHandler
+from core.workflow.graph_engine.condition_handlers.base_handler import (
+    RunConditionHandler,
+)
+from core.workflow.graph_engine.condition_handlers.branch_identify_handler import (
+    BranchIdentifyRunConditionHandler,
+)
+from core.workflow.graph_engine.condition_handlers.condition_handler import (
+    ConditionRunConditionHandlerHandler,
+)
 from core.workflow.graph_engine.entities.graph import Graph
 from core.workflow.graph_engine.entities.graph_init_params import GraphInitParams
 from core.workflow.graph_engine.entities.run_condition import RunCondition
@@ -20,6 +26,10 @@ class ConditionManager:
         :return: condition handler
         """
         if run_condition.type == "branch_identify":
-            return BranchIdentifyRunConditionHandler(init_params=init_params, graph=graph, condition=run_condition)
+            return BranchIdentifyRunConditionHandler(
+                init_params=init_params, graph=graph, condition=run_condition
+            )
         else:
-            return ConditionRunConditionHandlerHandler(init_params=init_params, graph=graph, condition=run_condition)
+            return ConditionRunConditionHandlerHandler(
+                init_params=init_params, graph=graph, condition=run_condition
+            )

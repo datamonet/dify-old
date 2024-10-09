@@ -4,8 +4,9 @@ import pytest
 
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.upstage.text_embedding.text_embedding import UpstageTextEmbeddingModel
-from tests.integration_tests.model_runtime.__mock.openai import setup_openai_mock
+from core.model_runtime.model_providers.upstage.text_embedding.text_embedding import (
+    UpstageTextEmbeddingModel,
+)
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["text_embedding"]], indirect=True)
@@ -14,11 +15,13 @@ def test_validate_credentials(setup_openai_mock):
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="solar-embedding-1-large-passage", credentials={"upstage_api_key": "invalid_key"}
+            model="solar-embedding-1-large-passage",
+            credentials={"upstage_api_key": "invalid_key"},
         )
 
     model.validate_credentials(
-        model="solar-embedding-1-large-passage", credentials={"upstage_api_key": os.environ.get("UPSTAGE_API_KEY")}
+        model="solar-embedding-1-large-passage",
+        credentials={"upstage_api_key": os.environ.get("UPSTAGE_API_KEY")},
     )
 
 
@@ -31,7 +34,12 @@ def test_invoke_model(setup_openai_mock):
         credentials={
             "upstage_api_key": os.environ.get("UPSTAGE_API_KEY"),
         },
-        texts=["hello", "world", " ".join(["long_text"] * 100), " ".join(["another_long_text"] * 100)],
+        texts=[
+            "hello",
+            "world",
+            " ".join(["long_text"] * 100),
+            " ".join(["another_long_text"] * 100),
+        ],
         user="abc-123",
     )
 

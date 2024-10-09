@@ -4,7 +4,9 @@ import pytest
 
 from core.model_runtime.entities.rerank_entities import RerankResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.azure_ai_studio.rerank.rerank import AzureAIStudioRerankModel
+from core.model_runtime.model_providers.azure_ai_studio.rerank.rerank import (
+    AzureAIStudioRerankModel,
+)
 
 
 def test_validate_credentials():
@@ -13,7 +15,10 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="azure-ai-studio-rerank-v1",
-            credentials={"api_key": "invalid_key", "api_base": os.getenv("AZURE_AI_STUDIO_API_BASE")},
+            credentials={
+                "api_key": "invalid_key",
+                "api_base": os.getenv("AZURE_AI_STUDIO_API_BASE"),
+            },
             query="What is the capital of the United States?",
             docs=[
                 "Carson City is the capital city of the American state of Nevada. At the 2010 United States "

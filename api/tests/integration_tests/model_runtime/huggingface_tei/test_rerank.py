@@ -2,13 +2,14 @@ import os
 
 import pytest
 
-from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
-from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
+from core.model_runtime.entities.rerank_entities import RerankResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.huggingface_tei.rerank.rerank import (
     HuggingfaceTeiRerankModel,
 )
-from core.model_runtime.model_providers.huggingface_tei.text_embedding.text_embedding import TeiHelper
+from core.model_runtime.model_providers.huggingface_tei.text_embedding.text_embedding import (
+    TeiHelper,
+)
 from tests.integration_tests.model_runtime.__mock.huggingface_tei import MockTEIClass
 
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
@@ -17,9 +18,13 @@ MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 @pytest.fixture()
 def setup_tei_mock(request, monkeypatch: pytest.MonkeyPatch):
     if MOCK:
-        monkeypatch.setattr(TeiHelper, "get_tei_extra_parameter", MockTEIClass.get_tei_extra_parameter)
+        monkeypatch.setattr(
+            TeiHelper, "get_tei_extra_parameter", MockTEIClass.get_tei_extra_parameter
+        )
         monkeypatch.setattr(TeiHelper, "invoke_tokenize", MockTEIClass.invoke_tokenize)
-        monkeypatch.setattr(TeiHelper, "invoke_embeddings", MockTEIClass.invoke_embeddings)
+        monkeypatch.setattr(
+            TeiHelper, "invoke_embeddings", MockTEIClass.invoke_embeddings
+        )
         monkeypatch.setattr(TeiHelper, "invoke_rerank", MockTEIClass.invoke_rerank)
     yield
 

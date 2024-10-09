@@ -78,7 +78,10 @@ def test_flask_configs(example_env_file):
     # fallback to alias choices value as CONSOLE_API_URL
     assert config["FILES_URL"] == "https://example.com"
 
-    assert config["SQLALCHEMY_DATABASE_URI"] == "postgresql://postgres:@localhost:5432/dify"
+    assert (
+        config["SQLALCHEMY_DATABASE_URI"]
+        == "postgresql://postgres:@localhost:5432/dify"
+    )
     assert config["SQLALCHEMY_ENGINE_OPTIONS"] == {
         "connect_args": {
             "options": "-c timezone=UTC",
@@ -94,4 +97,7 @@ def test_flask_configs(example_env_file):
     assert config["WEB_API_CORS_ALLOW_ORIGINS"] == ["*"]
 
     assert str(config["CODE_EXECUTION_ENDPOINT"]) == "http://sandbox:8194/"
-    assert str(URL(str(config["CODE_EXECUTION_ENDPOINT"])) / "v1") == "http://sandbox:8194/v1"
+    assert (
+        str(URL(str(config["CODE_EXECUTION_ENDPOINT"])) / "v1")
+        == "http://sandbox:8194/v1"
+    )

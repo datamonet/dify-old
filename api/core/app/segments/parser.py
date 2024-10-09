@@ -4,7 +4,9 @@ from core.workflow.entities.variable_pool import VariablePool
 
 from . import SegmentGroup, factory
 
-VARIABLE_PATTERN = re.compile(r"\{\{#([a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10})#\}\}")
+VARIABLE_PATTERN = re.compile(
+    r"\{\{#([a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10})#\}\}"
+)
 
 
 def convert_template(*, template: str, variable_pool: VariablePool):

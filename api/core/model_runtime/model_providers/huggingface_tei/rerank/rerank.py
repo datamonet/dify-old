@@ -3,7 +3,12 @@ from typing import Optional
 import httpx
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+)
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -82,7 +87,9 @@ class HuggingfaceTeiRerankModel(RerankModel):
             server_url = credentials["server_url"]
             extra_args = TeiHelper.get_tei_extra_parameter(server_url, model)
             if extra_args.model_type != "reranker":
-                raise CredentialsValidateFailedError("Current model is not a rerank model")
+                raise CredentialsValidateFailedError(
+                    "Current model is not a rerank model"
+                )
 
             credentials["context_size"] = extra_args.max_input_length
 
@@ -118,7 +125,9 @@ class HuggingfaceTeiRerankModel(RerankModel):
             InvokeBadRequestError: [InvokeBadRequestError, KeyError, ValueError],
         }
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """
@@ -128,7 +137,9 @@ class HuggingfaceTeiRerankModel(RerankModel):
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_type=ModelType.RERANK,
             model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", 512)),
+                ModelPropertyKey.CONTEXT_SIZE: int(
+                    credentials.get("context_size", 512)
+                ),
             },
             parameter_rules=[],
         )

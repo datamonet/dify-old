@@ -5,9 +5,16 @@ from werkzeug.exceptions import NotFound
 import services
 from controllers.service_api import api
 from controllers.service_api.app.error import NotChatAppError
-from controllers.service_api.wraps import FetchUserArg, WhereisUserArg, validate_app_token
+from controllers.service_api.wraps import (
+    FetchUserArg,
+    WhereisUserArg,
+    validate_app_token,
+)
 from core.app.entities.app_invoke_entities import InvokeFrom
-from fields.conversation_fields import conversation_infinite_scroll_pagination_fields, simple_conversation_fields
+from fields.conversation_fields import (
+    conversation_infinite_scroll_pagination_fields,
+    simple_conversation_fields,
+)
 from libs.helper import uuid_value
 from models.model import App, AppMode, EndUser
 from services.conversation_service import ConversationService
@@ -23,7 +30,9 @@ class ConversationApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         parser.add_argument(
             "sort_by",
             type=str,
@@ -76,15 +85,29 @@ class ConversationRenameApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=False, location="json")
-        parser.add_argument("auto_generate", type=bool, required=False, default=False, location="json")
+        parser.add_argument(
+            "auto_generate", type=bool, required=False, default=False, location="json"
+        )
         args = parser.parse_args()
 
         try:
-            return ConversationService.rename(app_model, conversation_id, end_user, args["name"], args["auto_generate"])
+            return ConversationService.rename(
+                app_model,
+                conversation_id,
+                end_user,
+                args["name"],
+                args["auto_generate"],
+            )
         except services.errors.conversation.ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
 
 
-api.add_resource(ConversationRenameApi, "/conversations/<uuid:c_id>/name", endpoint="conversation_name")
+api.add_resource(
+    ConversationRenameApi,
+    "/conversations/<uuid:c_id>/name",
+    endpoint="conversation_name",
+)
 api.add_resource(ConversationApi, "/conversations")
-api.add_resource(ConversationDetailApi, "/conversations/<uuid:c_id>", endpoint="conversation_detail")
+api.add_resource(
+    ConversationDetailApi, "/conversations/<uuid:c_id>", endpoint="conversation_detail"
+)

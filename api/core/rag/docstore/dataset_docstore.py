@@ -42,7 +42,9 @@ class DatasetDocumentStore:
     @property
     def docs(self) -> dict[str, Document]:
         document_segments = (
-            db.session.query(DocumentSegment).filter(DocumentSegment.dataset_id == self._dataset.id).all()
+            db.session.query(DocumentSegment)
+            .filter(DocumentSegment.dataset_id == self._dataset.id)
+            .all()
         )
 
         output = {}
@@ -60,7 +62,9 @@ class DatasetDocumentStore:
 
         return output
 
-    def add_documents(self, docs: Sequence[Document], allow_update: bool = True) -> None:
+    def add_documents(
+        self, docs: Sequence[Document], allow_update: bool = True
+    ) -> None:
         max_position = (
             db.session.query(func.max(DocumentSegment.position))
             .filter(DocumentSegment.document_id == self._document_id)
@@ -93,7 +97,9 @@ class DatasetDocumentStore:
 
             # calc embedding use tokens
             if embedding_model:
-                tokens = embedding_model.get_text_embedding_num_tokens(texts=[doc.page_content])
+                tokens = embedding_model.get_text_embedding_num_tokens(
+                    texts=[doc.page_content]
+                )
             else:
                 tokens = 0
 
@@ -185,7 +191,10 @@ class DatasetDocumentStore:
     def get_document_segment(self, doc_id: str) -> DocumentSegment:
         document_segment = (
             db.session.query(DocumentSegment)
-            .filter(DocumentSegment.dataset_id == self._dataset.id, DocumentSegment.index_node_id == doc_id)
+            .filter(
+                DocumentSegment.dataset_id == self._dataset.id,
+                DocumentSegment.index_node_id == doc_id,
+            )
             .first()
         )
 

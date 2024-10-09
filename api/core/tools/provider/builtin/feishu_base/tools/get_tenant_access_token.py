@@ -36,7 +36,9 @@ class GetTenantAccessTokenTool(BuiltinTool):
         }
         """
         try:
-            res = httpx.post(url, headers=headers, params=params, json=payload, timeout=30)
+            res = httpx.post(
+                url, headers=headers, params=params, json=payload, timeout=30
+            )
             res_json = res.json()
             if res.is_success:
                 return self.create_text_message(text=json.dumps(res_json))
@@ -45,4 +47,6 @@ class GetTenantAccessTokenTool(BuiltinTool):
                     f"Failed to get tenant access token, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to get tenant access token. {}".format(e))
+            return self.create_text_message(
+                "Failed to get tenant access token. {}".format(e)
+            )

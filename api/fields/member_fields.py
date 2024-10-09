@@ -2,7 +2,11 @@ from flask_restful import fields
 
 from libs.helper import TimestampField
 
-simple_account_fields = {"id": fields.String, "name": fields.String, "email": fields.String}
+simple_account_fields = {
+    "id": fields.String,
+    "name": fields.String,
+    "email": fields.String,
+}
 
 account_fields = {
     "id": fields.String,
@@ -30,4 +34,6 @@ account_with_role_fields = {
     "status": fields.String,
 }
 
-account_with_role_list_fields = {"accounts": fields.List(fields.Nested(account_with_role_fields))}
+account_with_role_list_fields = {
+    "accounts": fields.List(fields.Nested(account_with_role_fields))
+}

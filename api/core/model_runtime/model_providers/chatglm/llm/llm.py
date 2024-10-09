@@ -20,7 +20,11 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai.types.chat.chat_completion_message import FunctionCall
 from yarl import URL
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -38,7 +42,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.utils import helper
 
 logger = logging.getLogger(__name__)
@@ -172,7 +178,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
 
-        self._check_chatglm_parameters(model=model, model_parameters=model_parameters, tools=tools)
+        self._check_chatglm_parameters(
+            model=model, model_parameters=model_parameters, tools=tools
+        )
 
         kwargs = self._to_client_kwargs(credentials)
         # init model client
@@ -186,7 +194,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
             extra_model_kwargs["user"] = user
 
         if tools and len(tools) > 0:
-            extra_model_kwargs["functions"] = [helper.dump_model(tool) for tool in tools]
+            extra_model_kwargs["functions"] = [
+                helper.dump_model(tool) for tool in tools
+            ]
 
         result = client.chat.completions.create(
             messages=[self._convert_prompt_message_to_dict(m) for m in prompt_messages],
@@ -198,14 +208,24 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
 
         if stream:
             return self._handle_chat_generate_stream_response(
-                model=model, credentials=credentials, response=result, tools=tools, prompt_messages=prompt_messages
+                model=model,
+                credentials=credentials,
+                response=result,
+                tools=tools,
+                prompt_messages=prompt_messages,
             )
 
         return self._handle_chat_generate_response(
-            model=model, credentials=credentials, response=result, tools=tools, prompt_messages=prompt_messages
+            model=model,
+            credentials=credentials,
+            response=result,
+            tools=tools,
+            prompt_messages=prompt_messages,
         )
 
-    def _check_chatglm_parameters(self, model: str, model_parameters: dict, tools: list[PromptMessageTool]) -> None:
+    def _check_chatglm_parameters(
+        self, model: str, model_parameters: dict, tools: list[PromptMessageTool]
+    ) -> None:
         if model.find("chatglm2") != -1 and tools is not None and len(tools) > 0:
             raise InvokeBadRequestError("ChatGLM2 does not support function calling")
 
@@ -255,7 +275,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
                     name=response_tool_call.name, arguments=response_tool_call.arguments
                 )
 
-                tool_call = AssistantPromptMessage.ToolCall(id=0, type="function", function=function)
+                tool_call = AssistantPromptMessage.ToolCall(
+                    id=0, type="function", function=function
+                )
                 tool_calls.append(tool_call)
 
         return tool_calls
@@ -294,7 +316,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
 
             delta = chunk.choices[0]
 
-            if delta.finish_reason is None and (delta.delta.content is None or delta.delta.content == ""):
+            if delta.finish_reason is None and (
+                delta.delta.content is None or delta.delta.content == ""
+            ):
                 continue
 
             # check if there is a tool call in the response
@@ -302,11 +326,14 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
             if delta.delta.function_call:
                 function_calls = [delta.delta.function_call]
 
-            assistant_message_tool_calls = self._extract_response_tool_calls(function_calls or [])
+            assistant_message_tool_calls = self._extract_response_tool_calls(
+                function_calls or []
+            )
 
             # transform assistant message to prompt message
             assistant_prompt_message = AssistantPromptMessage(
-                content=delta.delta.content or "", tool_calls=assistant_message_tool_calls
+                content=delta.delta.content or "",
+                tool_calls=assistant_message_tool_calls,
             )
 
             if delta.finish_reason is not None:
@@ -315,8 +342,12 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
                     content=full_response, tool_calls=assistant_message_tool_calls
                 )
 
-                prompt_tokens = self._num_tokens_from_messages(messages=prompt_messages, tools=tools)
-                completion_tokens = self._num_tokens_from_messages(messages=[temp_assistant_prompt_message], tools=[])
+                prompt_tokens = self._num_tokens_from_messages(
+                    messages=prompt_messages, tools=tools
+                )
+                completion_tokens = self._num_tokens_from_messages(
+                    messages=[temp_assistant_prompt_message], tools=[]
+                )
 
                 usage = self._calc_response_usage(
                     model=model,
@@ -373,16 +404,27 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
 
         # convert function call to tool call
         function_calls = assistant_message.function_call
-        tool_calls = self._extract_response_tool_calls([function_calls] if function_calls else [])
+        tool_calls = self._extract_response_tool_calls(
+            [function_calls] if function_calls else []
+        )
 
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=assistant_message.content, tool_calls=tool_calls)
+        assistant_prompt_message = AssistantPromptMessage(
+            content=assistant_message.content, tool_calls=tool_calls
+        )
 
-        prompt_tokens = self._num_tokens_from_messages(messages=prompt_messages, tools=tools)
-        completion_tokens = self._num_tokens_from_messages(messages=[assistant_prompt_message], tools=tools)
+        prompt_tokens = self._num_tokens_from_messages(
+            messages=prompt_messages, tools=tools
+        )
+        completion_tokens = self._num_tokens_from_messages(
+            messages=[assistant_prompt_message], tools=tools
+        )
 
         usage = self._calc_response_usage(
-            model=model, credentials=credentials, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens
+            model=model,
+            credentials=credentials,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
         )
 
         response = LLMResult(
@@ -395,7 +437,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
 
         return response
 
-    def _num_tokens_from_string(self, text: str, tools: Optional[list[PromptMessageTool]] = None) -> int:
+    def _num_tokens_from_string(
+        self, text: str, tools: Optional[list[PromptMessageTool]] = None
+    ) -> int:
         """
         Calculate num tokens for text completion model with tiktoken package.
 
@@ -412,7 +456,9 @@ class ChatGLMLargeLanguageModel(LargeLanguageModel):
         return num_tokens
 
     def _num_tokens_from_messages(
-        self, messages: list[PromptMessage], tools: Optional[list[PromptMessageTool]] = None
+        self,
+        messages: list[PromptMessage],
+        tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         """Calculate num tokens for chatglm2 and chatglm3 with GPT2 tokenizer.
 

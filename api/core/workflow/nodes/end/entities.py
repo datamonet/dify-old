@@ -21,5 +21,6 @@ class EndStreamParam(BaseModel):
         ..., description="end dependencies (end node id -> dependent node ids)"
     )
     end_stream_variable_selector_mapping: dict[str, list[list[str]]] = Field(
-        ..., description="end stream variable selector mapping (end node id -> stream variable selectors)"
+        ...,
+        description="end stream variable selector mapping (end node id -> stream variable selectors)",
     )

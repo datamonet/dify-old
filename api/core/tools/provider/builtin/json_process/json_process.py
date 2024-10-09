@@ -10,7 +10,10 @@ class JsonExtractProvider(BuiltinToolProviderController):
         try:
             JSONParseTool().invoke(
                 user_id="",
-                tool_parameters={"content": '{"name": "John", "age": 30, "city": "New York"}', "json_filter": "$.name"},
+                tool_parameters={
+                    "content": '{"name": "John", "age": 30, "city": "New York"}',
+                    "json_filter": "$.name",
+                },
             )
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

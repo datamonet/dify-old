@@ -22,19 +22,31 @@ def parse_app_site_args():
     parser.add_argument("icon", type=str, required=False, location="json")
     parser.add_argument("icon_background", type=str, required=False, location="json")
     parser.add_argument("description", type=str, required=False, location="json")
-    parser.add_argument("default_language", type=supported_language, required=False, location="json")
+    parser.add_argument(
+        "default_language", type=supported_language, required=False, location="json"
+    )
     parser.add_argument("chat_color_theme", type=str, required=False, location="json")
-    parser.add_argument("chat_color_theme_inverted", type=bool, required=False, location="json")
+    parser.add_argument(
+        "chat_color_theme_inverted", type=bool, required=False, location="json"
+    )
     parser.add_argument("customize_domain", type=str, required=False, location="json")
     parser.add_argument("copyright", type=str, required=False, location="json")
     parser.add_argument("privacy_policy", type=str, required=False, location="json")
     parser.add_argument("custom_disclaimer", type=str, required=False, location="json")
     parser.add_argument(
-        "customize_token_strategy", type=str, choices=["must", "allow", "not_allow"], required=False, location="json"
+        "customize_token_strategy",
+        type=str,
+        choices=["must", "allow", "not_allow"],
+        required=False,
+        location="json",
     )
     parser.add_argument("prompt_public", type=bool, required=False, location="json")
-    parser.add_argument("show_workflow_steps", type=bool, required=False, location="json")
-    parser.add_argument("use_icon_as_answer_icon", type=bool, required=False, location="json")
+    parser.add_argument(
+        "show_workflow_steps", type=bool, required=False, location="json"
+    )
+    parser.add_argument(
+        "use_icon_as_answer_icon", type=bool, required=False, location="json"
+    )
     return parser.parse_args()
 
 

@@ -78,7 +78,9 @@ class NvidiaRerankModel(RerankModel):
 
                 rerank_documents.append(rerank_document)
             if rerank_documents:
-                rerank_documents = sorted(rerank_documents, key=lambda x: x.score, reverse=True)
+                rerank_documents = sorted(
+                    rerank_documents, key=lambda x: x.score, reverse=True
+                )
                 if top_n:
                     rerank_documents = rerank_documents[:top_n]
             return RerankResult(model=model, docs=rerank_documents)

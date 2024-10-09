@@ -24,7 +24,9 @@ workflow_run_for_list_fields = {
     "elapsed_time": fields.Float,
     "total_tokens": fields.Integer,
     "total_steps": fields.Integer,
-    "created_by_account": fields.Nested(simple_account_fields, attribute="created_by_account", allow_null=True),
+    "created_by_account": fields.Nested(
+        simple_account_fields, attribute="created_by_account", allow_null=True
+    ),
     "created_at": TimestampField,
     "finished_at": TimestampField,
 }
@@ -39,7 +41,9 @@ advanced_chat_workflow_run_for_list_fields = {
     "elapsed_time": fields.Float,
     "total_tokens": fields.Integer,
     "total_steps": fields.Integer,
-    "created_by_account": fields.Nested(simple_account_fields, attribute="created_by_account", allow_null=True),
+    "created_by_account": fields.Nested(
+        simple_account_fields, attribute="created_by_account", allow_null=True
+    ),
     "created_at": TimestampField,
     "finished_at": TimestampField,
 }
@@ -47,7 +51,9 @@ advanced_chat_workflow_run_for_list_fields = {
 advanced_chat_workflow_run_pagination_fields = {
     "limit": fields.Integer(attribute="limit"),
     "has_more": fields.Boolean(attribute="has_more"),
-    "data": fields.List(fields.Nested(advanced_chat_workflow_run_for_list_fields), attribute="data"),
+    "data": fields.List(
+        fields.Nested(advanced_chat_workflow_run_for_list_fields), attribute="data"
+    ),
 }
 
 workflow_run_pagination_fields = {
@@ -69,8 +75,12 @@ workflow_run_detail_fields = {
     "total_tokens": fields.Integer,
     "total_steps": fields.Integer,
     "created_by_role": fields.String,
-    "created_by_account": fields.Nested(simple_account_fields, attribute="created_by_account", allow_null=True),
-    "created_by_end_user": fields.Nested(simple_end_user_fields, attribute="created_by_end_user", allow_null=True),
+    "created_by_account": fields.Nested(
+        simple_account_fields, attribute="created_by_account", allow_null=True
+    ),
+    "created_by_end_user": fields.Nested(
+        simple_end_user_fields, attribute="created_by_end_user", allow_null=True
+    ),
     "created_at": TimestampField,
     "finished_at": TimestampField,
 }
@@ -92,8 +102,12 @@ workflow_run_node_execution_fields = {
     "extras": fields.Raw,
     "created_at": TimestampField,
     "created_by_role": fields.String,
-    "created_by_account": fields.Nested(simple_account_fields, attribute="created_by_account", allow_null=True),
-    "created_by_end_user": fields.Nested(simple_end_user_fields, attribute="created_by_end_user", allow_null=True),
+    "created_by_account": fields.Nested(
+        simple_account_fields, attribute="created_by_account", allow_null=True
+    ),
+    "created_by_end_user": fields.Nested(
+        simple_end_user_fields, attribute="created_by_end_user", allow_null=True
+    ),
     "finished_at": TimestampField,
 }
 

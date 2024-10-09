@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import logging
+import time
 from collections.abc import Generator
 from typing import Optional, Union, cast
 
@@ -20,9 +21,13 @@ from google.api_core import exceptions
 from google.cloud import aiplatform
 from google.oauth2 import service_account
 from PIL import Image
-from vertexai.generative_models import HarmBlockThreshold, HarmCategory
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta, LLMUsage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+    LLMUsage,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -34,6 +39,7 @@ from core.model_runtime.entities.message_entities import (
     ToolPromptMessage,
     UserPromptMessage,
 )
+from core.model_runtime.entities.model_entities import PriceType
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -43,7 +49,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +83,26 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         """
         # invoke anthropic models via anthropic official SDK
         if "claude" in model:
-            return self._generate_anthropic(model, credentials, prompt_messages, model_parameters, stop, stream, user)
+            return self._generate_anthropic(
+                model,
+                credentials,
+                prompt_messages,
+                model_parameters,
+                stop,
+                stream,
+                user,
+            )
         # invoke Gemini model
-        return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
+        return self._generate(
+            model,
+            credentials,
+            prompt_messages,
+            model_parameters,
+            tools,
+            stop,
+            stream,
+            user,
+        )
 
     def _generate_anthropic(
         self,
@@ -102,14 +127,18 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         """
         # use Anthropic official SDK references
         # - https://github.com/anthropics/anthropic-sdk-python
-        service_account_info = json.loads(base64.b64decode(credentials["vertex_service_account_key"]))
+        service_account_info = json.loads(
+            base64.b64decode(credentials["vertex_service_account_key"])
+        )
         project_id = credentials["vertex_project_id"]
         SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
         token = ""
 
         # get access token from service account credential
         if service_account_info:
-            credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+            credentials = service_account.Credentials.from_service_account_info(
+                service_account_info, scopes=SCOPES
+            )
             request = google.auth.transport.requests.Request()
             credentials.refresh(request)
             token = credentials.token
@@ -123,7 +152,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
 
         # use access token to authenticate
         if token:
-            client = AnthropicVertex(region=location, project_id=project_id, access_token=token)
+            client = AnthropicVertex(
+                region=location, project_id=project_id, access_token=token
+            )
         # When access token is empty, try to use the Google Cloud VM's built-in service account
         # or the GOOGLE_APPLICATION_CREDENTIALS environment variable
         else:
@@ -136,22 +167,36 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         if stop:
             extra_model_kwargs["stop_sequences"] = stop
 
-        system, prompt_message_dicts = self._convert_claude_prompt_messages(prompt_messages)
+        system, prompt_message_dicts = self._convert_claude_prompt_messages(
+            prompt_messages
+        )
 
         if system:
             extra_model_kwargs["system"] = system
 
         response = client.messages.create(
-            model=model, messages=prompt_message_dicts, stream=stream, **model_parameters, **extra_model_kwargs
+            model=model,
+            messages=prompt_message_dicts,
+            stream=stream,
+            **model_parameters,
+            **extra_model_kwargs,
         )
 
         if stream:
-            return self._handle_claude_stream_response(model, credentials, response, prompt_messages)
+            return self._handle_claude_stream_response(
+                model, credentials, response, prompt_messages
+            )
 
-        return self._handle_claude_response(model, credentials, response, prompt_messages)
+        return self._handle_claude_response(
+            model, credentials, response, prompt_messages
+        )
 
     def _handle_claude_response(
-        self, model: str, credentials: dict, response: Message, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: Message,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         Handle llm chat response
@@ -164,7 +209,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         """
 
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=response.content[0].text)
+        assistant_prompt_message = AssistantPromptMessage(
+            content=response.content[0].text
+        )
 
         # calculate num tokens
         if response.usage:
@@ -174,14 +221,21 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         else:
             # calculate num tokens
             prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-            completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+            completion_tokens = self.get_num_tokens(
+                model, credentials, [assistant_prompt_message]
+            )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         response = LLMResult(
-            model=response.model, prompt_messages=prompt_messages, message=assistant_prompt_message, usage=usage
+            model=response.model,
+            prompt_messages=prompt_messages,
+            message=assistant_prompt_message,
+            usage=usage,
         )
 
         return response
@@ -219,7 +273,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                     output_tokens = chunk.usage.output_tokens
                     finish_reason = chunk.delta.stop_reason
                 elif isinstance(chunk, MessageStopEvent):
-                    usage = self._calc_response_usage(model, credentials, input_tokens, output_tokens)
+                    usage = self._calc_response_usage(
+                        model, credentials, input_tokens, output_tokens
+                    )
                     yield LLMResultChunk(
                         model=return_model,
                         prompt_messages=prompt_messages,
@@ -270,7 +326,10 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
 
         # get completion price info
         completion_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.OUTPUT, tokens=completion_tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.OUTPUT,
+            tokens=completion_tokens,
         )
 
         # transform usage
@@ -284,14 +343,17 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
             completion_price_unit=completion_price_info.unit,
             completion_price=completion_price_info.total_amount,
             total_tokens=prompt_tokens + completion_tokens,
-            total_price=prompt_price_info.total_amount + completion_price_info.total_amount,
+            total_price=prompt_price_info.total_amount
+            + completion_price_info.total_amount,
             currency=prompt_price_info.currency,
             latency=time.perf_counter() - self.started_at,
         )
 
         return usage
 
-    def _convert_claude_prompt_messages(self, prompt_messages: list[PromptMessage]) -> tuple[str, list[dict]]:
+    def _convert_claude_prompt_messages(
+        self, prompt_messages: list[PromptMessage]
+    ) -> tuple[str, list[dict]]:
         """
         Convert prompt messages to dict list and system
         """
@@ -311,7 +373,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         prompt_message_dicts = []
         for message in prompt_messages:
             if not isinstance(message, SystemPromptMessage):
-                prompt_message_dicts.append(self._convert_claude_prompt_message_to_dict(message))
+                prompt_message_dicts.append(
+                    self._convert_claude_prompt_message_to_dict(message)
+                )
 
         return system, prompt_message_dicts
 
@@ -327,26 +391,44 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                 sub_messages = []
                 for message_content in message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(TextPromptMessageContent, message_content)
-                        sub_message_dict = {"type": "text", "text": message_content.data}
+                        message_content = cast(
+                            TextPromptMessageContent, message_content
+                        )
+                        sub_message_dict = {
+                            "type": "text",
+                            "text": message_content.data,
+                        }
                         sub_messages.append(sub_message_dict)
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(ImagePromptMessageContent, message_content)
+                        message_content = cast(
+                            ImagePromptMessageContent, message_content
+                        )
                         if not message_content.data.startswith("data:"):
                             # fetch image data from url
                             try:
-                                image_content = requests.get(message_content.data).content
+                                image_content = requests.get(
+                                    message_content.data
+                                ).content
                                 with Image.open(io.BytesIO(image_content)) as img:
                                     mime_type = f"image/{img.format.lower()}"
-                                base64_data = base64.b64encode(image_content).decode("utf-8")
+                                base64_data = base64.b64encode(image_content).decode(
+                                    "utf-8"
+                                )
                             except Exception as ex:
-                                raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
+                                raise ValueError(
+                                    f"Failed to fetch image data from url {message_content.data}, {ex}"
+                                )
                         else:
                             data_split = message_content.data.split(";base64,")
                             mime_type = data_split[0].replace("data:", "")
                             base64_data = data_split[1]
 
-                        if mime_type not in {"image/jpeg", "image/png", "image/gif", "image/webp"}:
+                        if mime_type not in {
+                            "image/jpeg",
+                            "image/png",
+                            "image/gif",
+                            "image/webp",
+                        }:
                             raise ValueError(
                                 f"Unsupported image type {mime_type}, "
                                 f"only support image/jpeg, image/png, image/gif, and image/webp"
@@ -354,7 +436,11 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
 
                         sub_message_dict = {
                             "type": "image",
-                            "source": {"type": "base64", "media_type": mime_type, "data": base64_data},
+                            "source": {
+                                "type": "base64",
+                                "media_type": mime_type,
+                                "data": base64_data,
+                            },
                         }
                         sub_messages.append(sub_message_dict)
 
@@ -399,7 +485,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(self._convert_one_message_to_text(message) for message in messages)
+        text = "".join(
+            self._convert_one_message_to_text(message) for message in messages
+        )
 
         return text.rstrip()
 
@@ -422,7 +510,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                                 "description": value.get("description", ""),
                                 "enum": value.get("enum", []),
                             }
-                            for key, value in tool.parameters.get("properties", {}).items()
+                            for key, value in tool.parameters.get(
+                                "properties", {}
+                            ).items()
                         },
                         required=tool.parameters.get("required", []),
                     ),
@@ -442,7 +532,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
 
         try:
             ping_message = SystemPromptMessage(content="ping")
-            self._generate(model, credentials, [ping_message], {"max_tokens_to_sample": 5})
+            self._generate(
+                model, credentials, [ping_message], {"max_tokens_to_sample": 5}
+            )
 
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
@@ -471,17 +563,25 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         config_kwargs = model_parameters.copy()
-        config_kwargs["max_output_tokens"] = config_kwargs.pop("max_tokens_to_sample", None)
+        config_kwargs["max_output_tokens"] = config_kwargs.pop(
+            "max_tokens_to_sample", None
+        )
 
         if stop:
             config_kwargs["stop_sequences"] = stop
 
-        service_account_info = json.loads(base64.b64decode(credentials["vertex_service_account_key"]))
+        service_account_info = json.loads(
+            base64.b64decode(credentials["vertex_service_account_key"])
+        )
         project_id = credentials["vertex_project_id"]
         location = credentials["vertex_location"]
         if service_account_info:
-            service_accountSA = service_account.Credentials.from_service_account_info(service_account_info)
-            aiplatform.init(credentials=service_accountSA, project=project_id, location=location)
+            service_accountSA = service_account.Credentials.from_service_account_info(
+                service_account_info
+            )
+            aiplatform.init(
+                credentials=service_accountSA, project=project_id, location=location
+            )
         else:
             aiplatform.init(project=project_id, location=location)
 
@@ -503,30 +603,32 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                     else:
                         history.append(content)
 
-        safety_settings = {
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
-
-        google_model = glm.GenerativeModel(model_name=model, system_instruction=system_instruction)
+        google_model = glm.GenerativeModel(
+            model_name=model, system_instruction=system_instruction
+        )
 
         response = google_model.generate_content(
             contents=history,
             generation_config=glm.GenerationConfig(**config_kwargs),
             stream=stream,
-            safety_settings=safety_settings,
             tools=self._convert_tools_to_glm_tool(tools) if tools else None,
         )
 
         if stream:
-            return self._handle_generate_stream_response(model, credentials, response, prompt_messages)
+            return self._handle_generate_stream_response(
+                model, credentials, response, prompt_messages
+            )
 
-        return self._handle_generate_response(model, credentials, response, prompt_messages)
+        return self._handle_generate_response(
+            model, credentials, response, prompt_messages
+        )
 
     def _handle_generate_response(
-        self, model: str, credentials: dict, response: glm.GenerationResponse, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: glm.GenerationResponse,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         Handle llm response
@@ -538,14 +640,20 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         :return: llm response
         """
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=response.candidates[0].content.parts[0].text)
+        assistant_prompt_message = AssistantPromptMessage(
+            content=response.candidates[0].content.parts[0].text
+        )
 
         # calculate num tokens
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+        completion_tokens = self.get_num_tokens(
+            model, credentials, [assistant_prompt_message]
+        )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         result = LLMResult(
@@ -558,7 +666,11 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
         return result
 
     def _handle_generate_stream_response(
-        self, model: str, credentials: dict, response: glm.GenerationResponse, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: glm.GenerationResponse,
+        prompt_messages: list[PromptMessage],
     ) -> Generator:
         """
         Handle llm stream response
@@ -584,7 +696,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                             type="function",
                             function=AssistantPromptMessage.ToolCall.ToolCallFunction(
                                 name=part.function_call.name,
-                                arguments=json.dumps(dict(part.function_call.args.items())),
+                                arguments=json.dumps(
+                                    dict(part.function_call.args.items())
+                                ),
                             ),
                         )
                     ]
@@ -596,15 +710,23 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                     yield LLMResultChunk(
                         model=model,
                         prompt_messages=prompt_messages,
-                        delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message),
+                        delta=LLMResultChunkDelta(
+                            index=index, message=assistant_prompt_message
+                        ),
                     )
                 else:
                     # calculate num tokens
-                    prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-                    completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+                    prompt_tokens = self.get_num_tokens(
+                        model, credentials, prompt_messages
+                    )
+                    completion_tokens = self.get_num_tokens(
+                        model, credentials, [assistant_prompt_message]
+                    )
 
                     # transform usage
-                    usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+                    usage = self._calc_response_usage(
+                        model, credentials, prompt_tokens, completion_tokens
+                    )
 
                     yield LLMResultChunk(
                         model=model,
@@ -629,7 +751,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
 
         content = message.content
         if isinstance(content, list):
-            content = "".join(c.data for c in content if c.type != PromptMessageContentType.IMAGE)
+            content = "".join(
+                c.data for c in content if c.type != PromptMessageContentType.IMAGE
+            )
 
         if isinstance(message, UserPromptMessage):
             message_text = f"{human_prompt} {content}"
@@ -653,7 +777,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
             glm_content = glm.Content(role="user", parts=[])
 
             if isinstance(message.content, str):
-                glm_content = glm.Content(role="user", parts=[glm.Part.from_text(message.content)])
+                glm_content = glm.Content(
+                    role="user", parts=[glm.Part.from_text(message.content)]
+                )
             else:
                 parts = []
                 for c in message.content:
@@ -667,7 +793,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
             return glm_content
         elif isinstance(message, AssistantPromptMessage):
             if message.content:
-                glm_content = glm.Content(role="model", parts=[glm.Part.from_text(message.content)])
+                glm_content = glm.Content(
+                    role="model", parts=[glm.Part.from_text(message.content)]
+                )
             if message.tool_calls:
                 glm_content = glm.Content(
                     role="model",
@@ -675,7 +803,9 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                         glm.Part.from_function_response(
                             glm.FunctionCall(
                                 name=message.tool_calls[0].function.name,
-                                args=json.loads(message.tool_calls[0].function.arguments),
+                                args=json.loads(
+                                    message.tool_calls[0].function.arguments
+                                ),
                             )
                         )
                     ],
@@ -715,7 +845,10 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                 exceptions.GatewayTimeout,
                 exceptions.DeadlineExceeded,
             ],
-            InvokeRateLimitError: [exceptions.ResourceExhausted, exceptions.TooManyRequests],
+            InvokeRateLimitError: [
+                exceptions.ResourceExhausted,
+                exceptions.TooManyRequests,
+            ],
             InvokeAuthorizationError: [
                 exceptions.Unauthenticated,
                 exceptions.PermissionDenied,

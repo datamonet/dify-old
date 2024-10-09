@@ -18,7 +18,10 @@ class AccountStatus(str, enum.Enum):
 
 class Account(UserMixin, db.Model):
     __tablename__ = "accounts"
-    __table_args__ = (db.PrimaryKeyConstraint("id", name="account_pkey"), db.Index("account_email_idx", "email"))
+    __table_args__ = (
+        db.PrimaryKeyConstraint("id", name="account_pkey"),
+        db.Index("account_email_idx", "email"),
+    )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(255), nullable=False)
@@ -31,11 +34,21 @@ class Account(UserMixin, db.Model):
     timezone = db.Column(db.String(255))
     last_login_at = db.Column(db.DateTime)
     last_login_ip = db.Column(db.String(255))
-    last_active_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    status = db.Column(db.String(16), nullable=False, server_default=db.text("'active'::character varying"))
+    last_active_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    status = db.Column(
+        db.String(16),
+        nullable=False,
+        server_default=db.text("'active'::character varying"),
+    )
     initialized_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def is_password_set(self):
@@ -48,7 +61,9 @@ class Account(UserMixin, db.Model):
     @current_tenant.setter
     def current_tenant(self, value: "Tenant"):
         tenant = value
-        ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=self.id).first()
+        ta = TenantAccountJoin.query.filter_by(
+            tenant_id=tenant.id, account_id=self.id
+        ).first()
         if ta:
             tenant.current_role = ta.role
         else:
@@ -92,11 +107,18 @@ class Account(UserMixin, db.Model):
     def get_by_openid(cls, provider: str, open_id: str) -> db.Model:
         account_integrate = (
             db.session.query(AccountIntegrate)
-            .filter(AccountIntegrate.provider == provider, AccountIntegrate.open_id == open_id)
+            .filter(
+                AccountIntegrate.provider == provider,
+                AccountIntegrate.open_id == open_id,
+            )
             .one_or_none()
         )
         if account_integrate:
-            return db.session.query(Account).filter(Account.id == account_integrate.account_id).one_or_none()
+            return (
+                db.session.query(Account)
+                .filter(Account.id == account_integrate.account_id)
+                .one_or_none()
+            )
         return None
 
     def get_integrates(self) -> list[db.Model]:
@@ -158,7 +180,11 @@ class TenantAccountRole(str, enum.Enum):
 
     @staticmethod
     def is_editing_role(role: str) -> bool:
-        return role and role in {TenantAccountRole.OWNER, TenantAccountRole.ADMIN, TenantAccountRole.EDITOR}
+        return role and role in {
+            TenantAccountRole.OWNER,
+            TenantAccountRole.ADMIN,
+            TenantAccountRole.EDITOR,
+        }
 
     @staticmethod
     def is_dataset_edit_role(role: str) -> bool:
@@ -177,16 +203,31 @@ class Tenant(db.Model):
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(255), nullable=False)
     encrypt_public_key = db.Column(db.Text)
-    plan = db.Column(db.String(255), nullable=False, server_default=db.text("'basic'::character varying"))
-    status = db.Column(db.String(255), nullable=False, server_default=db.text("'normal'::character varying"))
+    plan = db.Column(
+        db.String(255),
+        nullable=False,
+        server_default=db.text("'basic'::character varying"),
+    )
+    status = db.Column(
+        db.String(255),
+        nullable=False,
+        server_default=db.text("'normal'::character varying"),
+    )
     custom_config = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     def get_accounts(self) -> list[Account]:
         return (
             db.session.query(Account)
-            .filter(Account.id == TenantAccountJoin.account_id, TenantAccountJoin.tenant_id == self.id)
+            .filter(
+                Account.id == TenantAccountJoin.account_id,
+                TenantAccountJoin.tenant_id == self.id,
+            )
             .all()
         )
 
@@ -212,7 +253,9 @@ class TenantAccountJoin(db.Model):
         db.PrimaryKeyConstraint("id", name="tenant_account_join_pkey"),
         db.Index("tenant_account_join_account_id_idx", "account_id"),
         db.Index("tenant_account_join_tenant_id_idx", "tenant_id"),
-        db.UniqueConstraint("tenant_id", "account_id", name="unique_tenant_account_join"),
+        db.UniqueConstraint(
+            "tenant_id", "account_id", name="unique_tenant_account_join"
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -221,8 +264,12 @@ class TenantAccountJoin(db.Model):
     current = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
     role = db.Column(db.String(16), nullable=False, server_default="normal")
     invited_by = db.Column(StringUUID, nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class AccountIntegrate(db.Model):
@@ -238,8 +285,12 @@ class AccountIntegrate(db.Model):
     provider = db.Column(db.String(16), nullable=False)
     open_id = db.Column(db.String(255), nullable=False)
     encrypted_token = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class InvitationCode(db.Model):
@@ -253,9 +304,15 @@ class InvitationCode(db.Model):
     id = db.Column(db.Integer, nullable=False)
     batch = db.Column(db.String(255), nullable=False)
     code = db.Column(db.String(32), nullable=False)
-    status = db.Column(db.String(16), nullable=False, server_default=db.text("'unused'::character varying"))
+    status = db.Column(
+        db.String(16),
+        nullable=False,
+        server_default=db.text("'unused'::character varying"),
+    )
     used_at = db.Column(db.DateTime)
     used_by_tenant_id = db.Column(StringUUID)
     used_by_account_id = db.Column(StringUUID)
     deprecated_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )

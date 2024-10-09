@@ -4,7 +4,9 @@ import pytest
 
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.minimax.text_embedding.text_embedding import MinimaxTextEmbeddingModel
+from core.model_runtime.model_providers.minimax.text_embedding.text_embedding import (
+    MinimaxTextEmbeddingModel,
+)
 
 
 def test_validate_credentials():
@@ -13,7 +15,10 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="embo-01",
-            credentials={"minimax_api_key": "invalid_key", "minimax_group_id": os.environ.get("MINIMAX_GROUP_ID")},
+            credentials={
+                "minimax_api_key": "invalid_key",
+                "minimax_group_id": os.environ.get("MINIMAX_GROUP_ID"),
+            },
         )
 
     model.validate_credentials(

@@ -22,10 +22,16 @@ class EndNode(BaseNode):
 
         outputs = {}
         for variable_selector in output_variables:
-            value = self.graph_runtime_state.variable_pool.get_any(variable_selector.value_selector)
+            value = self.graph_runtime_state.variable_pool.get_any(
+                variable_selector.value_selector
+            )
             outputs[variable_selector.variable] = value
 
-        return NodeRunResult(status=WorkflowNodeExecutionStatus.SUCCEEDED, inputs=outputs, outputs=outputs)
+        return NodeRunResult(
+            status=WorkflowNodeExecutionStatus.SUCCEEDED,
+            inputs=outputs,
+            outputs=outputs,
+        )
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(

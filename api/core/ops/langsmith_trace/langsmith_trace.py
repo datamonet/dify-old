@@ -42,7 +42,9 @@ class LangSmithDataTrace(BaseTraceInstance):
         self.langsmith_key = langsmith_config.api_key
         self.project_name = langsmith_config.project
         self.project_id = None
-        self.langsmith_client = Client(api_key=langsmith_config.api_key, api_url=langsmith_config.endpoint)
+        self.langsmith_client = Client(
+            api_key=langsmith_config.api_key, api_url=langsmith_config.endpoint
+        )
         self.file_base_url = os.getenv("FILES_URL", "http://127.0.0.1:5001")
 
     def trace(self, trace_info: BaseTraceInfo):
@@ -128,17 +130,25 @@ class LangSmithDataTrace(BaseTraceInstance):
             status = node_execution.status
             if node_type == "llm":
                 inputs = (
-                    json.loads(node_execution.process_data).get("prompts", {}) if node_execution.process_data else {}
+                    json.loads(node_execution.process_data).get("prompts", {})
+                    if node_execution.process_data
+                    else {}
                 )
             else:
-                inputs = json.loads(node_execution.inputs) if node_execution.inputs else {}
-            outputs = json.loads(node_execution.outputs) if node_execution.outputs else {}
+                inputs = (
+                    json.loads(node_execution.inputs) if node_execution.inputs else {}
+                )
+            outputs = (
+                json.loads(node_execution.outputs) if node_execution.outputs else {}
+            )
             created_at = node_execution.created_at or datetime.now()
             elapsed_time = node_execution.elapsed_time
             finished_at = created_at + timedelta(seconds=elapsed_time)
 
             execution_metadata = (
-                json.loads(node_execution.execution_metadata) if node_execution.execution_metadata else {}
+                json.loads(node_execution.execution_metadata)
+                if node_execution.execution_metadata
+                else {}
             )
             node_total_tokens = execution_metadata.get("total_tokens", 0)
             metadata = execution_metadata.copy()
@@ -154,7 +164,11 @@ class LangSmithDataTrace(BaseTraceInstance):
                 }
             )
 
-            process_data = json.loads(node_execution.process_data) if node_execution.process_data else {}
+            process_data = (
+                json.loads(node_execution.process_data)
+                if node_execution.process_data
+                else {}
+            )
             if process_data and process_data.get("model_mode") == "chat":
                 run_type = LangSmithRunType.llm
                 metadata.update(
@@ -180,7 +194,8 @@ class LangSmithDataTrace(BaseTraceInstance):
                 extra={
                     "metadata": metadata,
                 },
-                parent_run_id=trace_info.workflow_app_log_id or trace_info.workflow_run_id,
+                parent_run_id=trace_info.workflow_app_log_id
+                or trace_info.workflow_run_id,
                 tags=["node_execution"],
             )
 
@@ -190,7 +205,9 @@ class LangSmithDataTrace(BaseTraceInstance):
         # get message file data
         file_list = trace_info.file_list
         message_file_data: MessageFile = trace_info.message_file_data
-        file_url = f"{self.file_base_url}/{message_file_data.url}" if message_file_data else ""
+        file_url = (
+            f"{self.file_base_url}/{message_file_data.url}" if message_file_data else ""
+        )
         file_list.append(file_url)
         metadata = trace_info.metadata
         message_data = trace_info.message_data
@@ -201,7 +218,9 @@ class LangSmithDataTrace(BaseTraceInstance):
 
         if message_data.from_end_user_id:
             end_user_data: EndUser = (
-                db.session.query(EndUser).filter(EndUser.id == message_data.from_end_user_id).first()
+                db.session.query(EndUser)
+                .filter(EndUser.id == message_data.from_end_user_id)
+                .first()
             )
             if end_user_data is not None:
                 end_user_id = end_user_data.session_id
@@ -364,7 +383,9 @@ class LangSmithDataTrace(BaseTraceInstance):
 
     def api_check(self):
         try:
-            random_project_name = f"test_project_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            random_project_name = (
+                f"test_project_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            )
             self.langsmith_client.create_project(project_name=random_project_name)
             self.langsmith_client.delete_project(project_name=random_project_name)
             return True

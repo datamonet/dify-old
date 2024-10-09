@@ -28,7 +28,9 @@ class PubMedAPIWrapper(BaseModel):
           if False: the `metadata` gets only the most informative fields.
     """
 
-    base_url_esearch: str = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?"
+    base_url_esearch: str = (
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?"
+    )
     base_url_efetch: str = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
     max_retry: int = 5
     sleep_time: float = 0.2
@@ -56,7 +58,11 @@ class PubMedAPIWrapper(BaseModel):
             ]
 
             # Join the results and limit the character count
-            return "\n\n".join(docs)[: self.doc_content_chars_max] if docs else "No good PubMed Result was found"
+            return (
+                "\n\n".join(docs)[: self.doc_content_chars_max]
+                if docs
+                else "No good PubMed Result was found"
+            )
         except Exception as ex:
             return f"PubMed exception: {ex}"
 
@@ -86,7 +92,13 @@ class PubMedAPIWrapper(BaseModel):
         return articles
 
     def retrieve_article(self, uid: str, webenv: str) -> dict:
-        url = self.base_url_efetch + "db=pubmed&retmode=xml&id=" + uid + "&webenv=" + webenv
+        url = (
+            self.base_url_efetch
+            + "db=pubmed&retmode=xml&id="
+            + uid
+            + "&webenv="
+            + webenv
+        )
 
         retry = 0
         while True:
@@ -97,7 +109,9 @@ class PubMedAPIWrapper(BaseModel):
                 if e.code == 429 and retry < self.max_retry:
                     # Too Many Requests error
                     # wait for an exponentially increasing amount of time
-                    print(f"Too Many Requests, waiting for {self.sleep_time:.2f} seconds...")
+                    print(
+                        f"Too Many Requests, waiting for {self.sleep_time:.2f} seconds..."
+                    )
                     time.sleep(self.sleep_time)
                     self.sleep_time *= 2
                     retry += 1
@@ -111,21 +125,27 @@ class PubMedAPIWrapper(BaseModel):
         if "<ArticleTitle>" in xml_text and "</ArticleTitle>" in xml_text:
             start_tag = "<ArticleTitle>"
             end_tag = "</ArticleTitle>"
-            title = xml_text[xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)]
+            title = xml_text[
+                xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)
+            ]
 
         # Get abstract
         abstract = ""
         if "<AbstractText>" in xml_text and "</AbstractText>" in xml_text:
             start_tag = "<AbstractText>"
             end_tag = "</AbstractText>"
-            abstract = xml_text[xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)]
+            abstract = xml_text[
+                xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)
+            ]
 
         # Get publication date
         pub_date = ""
         if "<PubDate>" in xml_text and "</PubDate>" in xml_text:
             start_tag = "<PubDate>"
             end_tag = "</PubDate>"
-            pub_date = xml_text[xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)]
+            pub_date = xml_text[
+                xml_text.index(start_tag) + len(start_tag) : xml_text.index(end_tag)
+            ]
 
         # Return article as dictionary
         article = {
@@ -168,7 +188,9 @@ class PubMedSearchTool(BuiltinTool):
     Tool for performing a search using PubMed search engine.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invoke the PubMed search tool.
 

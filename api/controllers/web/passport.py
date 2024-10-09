@@ -23,12 +23,18 @@ class PassportResource(Resource):
             raise Unauthorized("X-App-Code header is missing.")
 
         if system_features.sso_enforced_for_web:
-            app_web_sso_enabled = EnterpriseService.get_app_web_sso_enabled(app_code).get("enabled", False)
+            app_web_sso_enabled = EnterpriseService.get_app_web_sso_enabled(
+                app_code
+            ).get("enabled", False)
             if app_web_sso_enabled:
                 raise WebSSOAuthRequiredError()
 
         # get site from db and check if it is normal
-        site = db.session.query(Site).filter(Site.code == app_code, Site.status == "normal").first()
+        site = (
+            db.session.query(Site)
+            .filter(Site.code == app_code, Site.status == "normal")
+            .first()
+        )
         if not site:
             raise NotFound()
         # get app from db and check if it is normal and enable_site
@@ -71,6 +77,8 @@ def generate_session_id():
     """
     while True:
         session_id = str(uuid.uuid4())
-        existing_count = db.session.query(EndUser).filter(EndUser.session_id == session_id).count()
+        existing_count = (
+            db.session.query(EndUser).filter(EndUser.session_id == session_id).count()
+        )
         if existing_count == 0:
             return session_id

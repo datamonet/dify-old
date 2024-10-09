@@ -12,7 +12,11 @@ from services.dataset_service import DatasetCollectionBindingService
 
 @shared_task(queue="dataset")
 def update_annotation_to_index_task(
-    annotation_id: str, question: str, tenant_id: str, app_id: str, collection_binding_id: str
+    annotation_id: str,
+    question: str,
+    tenant_id: str,
+    app_id: str,
+    collection_binding_id: str,
 ):
     """
     Update annotation to index.
@@ -24,7 +28,11 @@ def update_annotation_to_index_task(
 
     Usage: clean_dataset_task.delay(dataset_id, tenant_id, indexing_technique, index_struct)
     """
-    logging.info(click.style("Start update index for annotation: {}".format(annotation_id), fg="green"))
+    logging.info(
+        click.style(
+            "Start update index for annotation: {}".format(annotation_id), fg="green"
+        )
+    )
     start_at = time.perf_counter()
 
     try:
@@ -42,7 +50,12 @@ def update_annotation_to_index_task(
         )
 
         document = Document(
-            page_content=question, metadata={"annotation_id": annotation_id, "app_id": app_id, "doc_id": annotation_id}
+            page_content=question,
+            metadata={
+                "annotation_id": annotation_id,
+                "app_id": app_id,
+                "doc_id": annotation_id,
+            },
         )
         vector = Vector(dataset, attributes=["doc_id", "annotation_id", "app_id"])
         vector.delete_by_metadata_field("annotation_id", annotation_id)
@@ -50,7 +63,9 @@ def update_annotation_to_index_task(
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Build index successful for annotation: {} latency: {}".format(annotation_id, end_at - start_at),
+                "Build index successful for annotation: {} latency: {}".format(
+                    annotation_id, end_at - start_at
+                ),
                 fg="green",
             )
         )

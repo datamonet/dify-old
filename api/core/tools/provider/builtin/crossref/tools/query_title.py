@@ -57,13 +57,20 @@ class CrossRefQueryTitleAPI:
         :param fuzzy_query: whether to return all items that match the query
         """
         url = self.query_url_template.format(
-            query=query, rows=rows, offset=offset, sort=sort, order=order, mailto=self.mailto
+            query=query,
+            rows=rows,
+            offset=offset,
+            sort=sort,
+            order=order,
+            mailto=self.mailto,
         )
         response = requests.get(url)
         response.raise_for_status()
         rate_limit = int(response.headers["x-ratelimit-limit"])
         # convert time string to seconds
-        rate_interval = convert_time_str_to_seconds(response.headers["x-ratelimit-interval"])
+        rate_interval = convert_time_str_to_seconds(
+            response.headers["x-ratelimit-interval"]
+        )
 
         self.rate_limit = rate_limit
         self.rate_interval = rate_interval
@@ -85,7 +92,12 @@ class CrossRefQueryTitleAPI:
         return []
 
     def query(
-        self, query: str, rows: int = 5, sort: str = "relevance", order: str = "desc", fuzzy_query: bool = False
+        self,
+        query: str,
+        rows: int = 5,
+        sort: str = "relevance",
+        order: str = "desc",
+        fuzzy_query: bool = False,
     ) -> list[dict]:
         """
         Query the metadata of a publication using its title.
@@ -120,7 +132,9 @@ class CrossRefQueryTitleAPI:
             return results
         else:
             # query once
-            return self._query(query, rows, sort=sort, order=order, fuzzy_query=fuzzy_query)
+            return self._query(
+                query, rows, sort=sort, order=order, fuzzy_query=fuzzy_query
+            )
 
 
 class CrossRefQueryTitleTool(BuiltinTool):
@@ -138,6 +152,8 @@ class CrossRefQueryTitleTool(BuiltinTool):
         order = tool_parameters.get("order", "desc")
         mailto = self.runtime.credentials["mailto"]
 
-        result = CrossRefQueryTitleAPI(mailto).query(query, rows, sort, order, fuzzy_query)
+        result = CrossRefQueryTitleAPI(mailto).query(
+            query, rows, sort, order, fuzzy_query
+        )
 
         return [self.create_json_message(r) for r in result]

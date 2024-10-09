@@ -7,7 +7,10 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from controllers.console import api
 from controllers.console.explore.wraps import InstalledAppResource
-from controllers.console.wraps import account_initialization_required, cloud_edition_billing_resource_check
+from controllers.console.wraps import (
+    account_initialization_required,
+    cloud_edition_billing_resource_check,
+)
 from extensions.ext_database import db
 from fields.installed_app_fields import installed_app_list_fields
 from libs.login import login_required
@@ -37,7 +40,9 @@ class InstalledAppsListApi(Resource):
             .all()
         )
 
-        current_user.role = TenantService.get_user_role(current_user, current_user.current_tenant)
+        current_user.role = TenantService.get_user_role(
+            current_user, current_user.current_tenant
+        )
         installed_apps = [
             {
                 "id": installed_app.id,
@@ -55,7 +60,9 @@ class InstalledAppsListApi(Resource):
             key=lambda app: (
                 -app["is_pinned"],
                 app["last_used_at"] is None,
-                -app["last_used_at"].timestamp() if app["last_used_at"] is not None else 0,
+                -app["last_used_at"].timestamp()
+                if app["last_used_at"] is not None
+                else 0,
             )
         )
 
@@ -69,7 +76,9 @@ class InstalledAppsListApi(Resource):
         parser.add_argument("app_id", type=str, required=True, help="Invalid app_id")
         args = parser.parse_args()
 
-        recommended_app = RecommendedApp.query.filter(RecommendedApp.app_id == args["app_id"]).first()
+        recommended_app = RecommendedApp.query.filter(
+            RecommendedApp.app_id == args["app_id"]
+        ).first()
         if recommended_app is None:
             raise NotFound("App not found")
 
@@ -83,7 +92,10 @@ class InstalledAppsListApi(Resource):
             raise Forbidden("You can't install a non-public app")
 
         installed_app = InstalledApp.query.filter(
-            and_(InstalledApp.app_id == args["app_id"], InstalledApp.tenant_id == current_tenant_id)
+            and_(
+                InstalledApp.app_id == args["app_id"],
+                InstalledApp.tenant_id == current_tenant_id,
+            )
         ).first()
 
         if installed_app is None:

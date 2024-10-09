@@ -2,13 +2,19 @@ import os
 from collections.abc import Mapping, Sequence
 from typing import Any, Optional, cast
 
-from core.helper.code_executor.code_executor import CodeExecutionError, CodeExecutor, CodeLanguage
+from core.helper.code_executor.code_executor import (
+    CodeExecutionError,
+    CodeExecutor,
+    CodeLanguage,
+)
 from core.workflow.entities.node_entities import NodeRunResult, NodeType
 from core.workflow.nodes.base_node import BaseNode
 from core.workflow.nodes.template_transform.entities import TemplateTransformNodeData
 from models.workflow import WorkflowNodeExecutionStatus
 
-MAX_TEMPLATE_TRANSFORM_OUTPUT_LENGTH = int(os.environ.get("TEMPLATE_TRANSFORM_MAX_LENGTH", "80000"))
+MAX_TEMPLATE_TRANSFORM_OUTPUT_LENGTH = int(
+    os.environ.get("TEMPLATE_TRANSFORM_MAX_LENGTH", "80000")
+)
 
 
 class TemplateTransformNode(BaseNode):
@@ -24,7 +30,10 @@ class TemplateTransformNode(BaseNode):
         """
         return {
             "type": "template-transform",
-            "config": {"variables": [{"variable": "arg1", "value_selector": []}], "template": "{{ arg1 }}"},
+            "config": {
+                "variables": [{"variable": "arg1", "value_selector": []}],
+                "template": "{{ arg1 }}",
+            },
         }
 
     def _run(self) -> NodeRunResult:
@@ -38,7 +47,9 @@ class TemplateTransformNode(BaseNode):
         variables = {}
         for variable_selector in node_data.variables:
             variable_name = variable_selector.variable
-            value = self.graph_runtime_state.variable_pool.get_any(variable_selector.value_selector)
+            value = self.graph_runtime_state.variable_pool.get_any(
+                variable_selector.value_selector
+            )
             variables[variable_name] = value
         # Run code
         try:
@@ -46,7 +57,11 @@ class TemplateTransformNode(BaseNode):
                 language=CodeLanguage.JINJA2, code=node_data.template, inputs=variables
             )
         except CodeExecutionError as e:
-            return NodeRunResult(inputs=variables, status=WorkflowNodeExecutionStatus.FAILED, error=str(e))
+            return NodeRunResult(
+                inputs=variables,
+                status=WorkflowNodeExecutionStatus.FAILED,
+                error=str(e),
+            )
 
         if len(result["result"]) > MAX_TEMPLATE_TRANSFORM_OUTPUT_LENGTH:
             return NodeRunResult(
@@ -56,12 +71,17 @@ class TemplateTransformNode(BaseNode):
             )
 
         return NodeRunResult(
-            status=WorkflowNodeExecutionStatus.SUCCEEDED, inputs=variables, outputs={"output": result["result"]}
+            status=WorkflowNodeExecutionStatus.SUCCEEDED,
+            inputs=variables,
+            outputs={"output": result["result"]},
         )
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
-        cls, graph_config: Mapping[str, Any], node_id: str, node_data: TemplateTransformNodeData
+        cls,
+        graph_config: Mapping[str, Any],
+        node_id: str,
+        node_data: TemplateTransformNodeData,
     ) -> Mapping[str, Sequence[str]]:
         """
         Extract variable selector to variable mapping

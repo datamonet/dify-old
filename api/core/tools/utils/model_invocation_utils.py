@@ -18,7 +18,10 @@ from core.model_runtime.errors.invoke import (
     InvokeRateLimitError,
     InvokeServerUnavailableError,
 )
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel, ModelPropertyKey
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+    ModelPropertyKey,
+)
 from core.model_runtime.utils.encoders import jsonable_encoder
 from extensions.ext_database import db
 from models.tools import ToolModelInvoke
@@ -46,7 +49,9 @@ class ModelInvocationUtils:
             raise InvokeModelError("Model not found")
 
         llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-        schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
+        schema = llm_model.get_model_schema(
+            model_instance.model, model_instance.credentials
+        )
 
         if not schema:
             raise InvokeModelError("No model schema found")
@@ -65,7 +70,9 @@ class ModelInvocationUtils:
 
         # get model instance
         model_manager = ModelManager()
-        model_instance = model_manager.get_default_model_instance(tenant_id=tenant_id, model_type=ModelType.LLM)
+        model_instance = model_manager.get_default_model_instance(
+            tenant_id=tenant_id, model_type=ModelType.LLM
+        )
 
         if not model_instance:
             raise InvokeModelError("Model not found")
@@ -77,7 +84,11 @@ class ModelInvocationUtils:
 
     @staticmethod
     def invoke(
-        user_id: str, tenant_id: str, tool_type: str, tool_name: str, prompt_messages: list[PromptMessage]
+        user_id: str,
+        tenant_id: str,
+        tool_type: str,
+        tool_name: str,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         invoke model with parameters in user's own context
@@ -148,7 +159,7 @@ class ModelInvocationUtils:
             raise InvokeModelError(f"Invoke bad request error: {e}")
         except InvokeConnectionError as e:
             raise InvokeModelError(f"Invoke connection error: {e}")
-        except InvokeAuthorizationError as e:
+        except InvokeAuthorizationError:
             raise InvokeModelError("Invoke authorization error")
         except InvokeServerUnavailableError as e:
             raise InvokeModelError(f"Invoke server unavailable error: {e}")

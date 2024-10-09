@@ -36,6 +36,8 @@ class OpeningStatementConfigManager:
 
         for question in config["suggested_questions"]:
             if not isinstance(question, str):
-                raise ValueError("Elements in suggested_questions list must be of string type")
+                raise ValueError(
+                    "Elements in suggested_questions list must be of string type"
+                )
 
         return config, ["opening_statement", "suggested_questions"]

@@ -12,7 +12,11 @@ from controllers.service_api.app.error import (
     ProviderNotInitializeError,
     ProviderQuotaExceededError,
 )
-from controllers.service_api.wraps import FetchUserArg, WhereisUserArg, validate_app_token
+from controllers.service_api.wraps import (
+    FetchUserArg,
+    WhereisUserArg,
+    validate_app_token,
+)
 from core.app.apps.base_app_queue_manager import AppQueueManager
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.errors.error import (
@@ -58,12 +62,16 @@ class WorkflowRunDetailApi(Resource):
         if app_mode != AppMode.WORKFLOW:
             raise NotWorkflowAppError()
 
-        workflow_run = db.session.query(WorkflowRun).filter(WorkflowRun.id == workflow_id).first()
+        workflow_run = (
+            db.session.query(WorkflowRun).filter(WorkflowRun.id == workflow_id).first()
+        )
         return workflow_run
 
 
 class WorkflowRunApi(Resource):
-    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
+    @validate_app_token(
+        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
+    )
     def post(self, app_model: App, end_user: EndUser):
         """
         Run workflow
@@ -73,16 +81,27 @@ class WorkflowRunApi(Resource):
             raise NotWorkflowAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "inputs", type=dict, required=True, nullable=False, location="json"
+        )
         parser.add_argument("files", type=list, required=False, location="json")
-        parser.add_argument("response_mode", type=str, choices=["blocking", "streaming"], location="json")
+        parser.add_argument(
+            "response_mode",
+            type=str,
+            choices=["blocking", "streaming"],
+            location="json",
+        )
         args = parser.parse_args()
 
         streaming = args.get("response_mode") == "streaming"
 
         try:
             response = AppGenerateService.generate(
-                app_model=app_model, user=end_user, args=args, invoke_from=InvokeFrom.SERVICE_API, streaming=streaming
+                app_model=app_model,
+                user=end_user,
+                args=args,
+                invoke_from=InvokeFrom.SERVICE_API,
+                streaming=streaming,
             )
 
             return helper.compact_generate_response(response)
@@ -102,7 +121,9 @@ class WorkflowRunApi(Resource):
 
 
 class WorkflowTaskStopApi(Resource):
-    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
+    @validate_app_token(
+        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
+    )
     def post(self, app_model: App, end_user: EndUser, task_id: str):
         """
         Stop workflow task
@@ -125,15 +146,26 @@ class WorkflowAppLogApi(Resource):
         """
         parser = reqparse.RequestParser()
         parser.add_argument("keyword", type=str, location="args")
-        parser.add_argument("status", type=str, choices=["succeeded", "failed", "stopped"], location="args")
-        parser.add_argument("page", type=int_range(1, 99999), default=1, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), default=20, location="args")
+        parser.add_argument(
+            "status",
+            type=str,
+            choices=["succeeded", "failed", "stopped"],
+            location="args",
+        )
+        parser.add_argument(
+            "page", type=int_range(1, 99999), default=1, location="args"
+        )
+        parser.add_argument(
+            "limit", type=int_range(1, 100), default=20, location="args"
+        )
         args = parser.parse_args()
 
         # get paginate workflow app logs
         workflow_app_service = WorkflowAppService()
-        workflow_app_log_pagination = workflow_app_service.get_paginate_workflow_app_logs(
-            app_model=app_model, args=args
+        workflow_app_log_pagination = (
+            workflow_app_service.get_paginate_workflow_app_logs(
+                app_model=app_model, args=args
+            )
         )
 
         return workflow_app_log_pagination

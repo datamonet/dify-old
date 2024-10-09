@@ -33,7 +33,11 @@ def test_execute_if_else_result_true():
 
     # construct variable pool
     pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"}, user_inputs={}
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
+        user_inputs={},
     )
     pool.add(["start", "array_contains"], ["ab", "def"])
     pool.add(["start", "array_not_contains"], ["ac", "def"])
@@ -57,7 +61,9 @@ def test_execute_if_else_result_true():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "if-else",
             "data": {
@@ -75,30 +81,84 @@ def test_execute_if_else_result_true():
                         "variable_selector": ["start", "array_not_contains"],
                         "value": "ab",
                     },
-                    {"comparison_operator": "contains", "variable_selector": ["start", "contains"], "value": "ab"},
+                    {
+                        "comparison_operator": "contains",
+                        "variable_selector": ["start", "contains"],
+                        "value": "ab",
+                    },
                     {
                         "comparison_operator": "not contains",
                         "variable_selector": ["start", "not_contains"],
                         "value": "ab",
                     },
-                    {"comparison_operator": "start with", "variable_selector": ["start", "start_with"], "value": "ab"},
-                    {"comparison_operator": "end with", "variable_selector": ["start", "end_with"], "value": "ab"},
-                    {"comparison_operator": "is", "variable_selector": ["start", "is"], "value": "ab"},
-                    {"comparison_operator": "is not", "variable_selector": ["start", "is_not"], "value": "ab"},
-                    {"comparison_operator": "empty", "variable_selector": ["start", "empty"], "value": "ab"},
-                    {"comparison_operator": "not empty", "variable_selector": ["start", "not_empty"], "value": "ab"},
-                    {"comparison_operator": "=", "variable_selector": ["start", "equals"], "value": "22"},
-                    {"comparison_operator": "≠", "variable_selector": ["start", "not_equals"], "value": "22"},
-                    {"comparison_operator": ">", "variable_selector": ["start", "greater_than"], "value": "22"},
-                    {"comparison_operator": "<", "variable_selector": ["start", "less_than"], "value": "22"},
+                    {
+                        "comparison_operator": "start with",
+                        "variable_selector": ["start", "start_with"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "end with",
+                        "variable_selector": ["start", "end_with"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "is",
+                        "variable_selector": ["start", "is"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "is not",
+                        "variable_selector": ["start", "is_not"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "empty",
+                        "variable_selector": ["start", "empty"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "not empty",
+                        "variable_selector": ["start", "not_empty"],
+                        "value": "ab",
+                    },
+                    {
+                        "comparison_operator": "=",
+                        "variable_selector": ["start", "equals"],
+                        "value": "22",
+                    },
+                    {
+                        "comparison_operator": "≠",
+                        "variable_selector": ["start", "not_equals"],
+                        "value": "22",
+                    },
+                    {
+                        "comparison_operator": ">",
+                        "variable_selector": ["start", "greater_than"],
+                        "value": "22",
+                    },
+                    {
+                        "comparison_operator": "<",
+                        "variable_selector": ["start", "less_than"],
+                        "value": "22",
+                    },
                     {
                         "comparison_operator": "≥",
                         "variable_selector": ["start", "greater_than_or_equal"],
                         "value": "22",
                     },
-                    {"comparison_operator": "≤", "variable_selector": ["start", "less_than_or_equal"], "value": "22"},
-                    {"comparison_operator": "null", "variable_selector": ["start", "null"]},
-                    {"comparison_operator": "not null", "variable_selector": ["start", "not_null"]},
+                    {
+                        "comparison_operator": "≤",
+                        "variable_selector": ["start", "less_than_or_equal"],
+                        "value": "22",
+                    },
+                    {
+                        "comparison_operator": "null",
+                        "variable_selector": ["start", "null"],
+                    },
+                    {
+                        "comparison_operator": "not null",
+                        "variable_selector": ["start", "not_null"],
+                    },
                 ],
             },
         },
@@ -150,7 +210,10 @@ def test_execute_if_else_result_false():
 
     # construct variable pool
     pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
     )
@@ -161,7 +224,9 @@ def test_execute_if_else_result_false():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "if-else",
             "data": {

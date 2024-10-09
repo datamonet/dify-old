@@ -25,7 +25,8 @@ def installed_app_required(view=None):
             installed_app = (
                 db.session.query(InstalledApp)
                 .filter(
-                    InstalledApp.id == str(installed_app_id), InstalledApp.tenant_id == current_user.current_tenant_id
+                    InstalledApp.id == str(installed_app_id),
+                    InstalledApp.tenant_id == current_user.current_tenant_id,
                 )
                 .first()
             )
@@ -50,4 +51,8 @@ def installed_app_required(view=None):
 
 class InstalledAppResource(Resource):
     # must be reversed if there are multiple decorators
-    method_decorators = [installed_app_required, account_initialization_required, login_required]
+    method_decorators = [
+        installed_app_required,
+        account_initialization_required,
+        login_required,
+    ]

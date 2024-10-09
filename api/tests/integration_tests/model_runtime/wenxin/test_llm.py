@@ -4,8 +4,16 @@ from time import sleep
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
-from core.model_runtime.entities.message_entities import AssistantPromptMessage, SystemPromptMessage, UserPromptMessage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
+from core.model_runtime.entities.message_entities import (
+    AssistantPromptMessage,
+    SystemPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.entities.model_entities import AIModelEntity
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.wenxin.llm.llm import ErnieBotLargeLanguageModel
@@ -24,12 +32,16 @@ def test_validate_credentials_for_chat_model():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="ernie-bot", credentials={"api_key": "invalid_key", "secret_key": "invalid_key"}
+            model="ernie-bot",
+            credentials={"api_key": "invalid_key", "secret_key": "invalid_key"},
         )
 
     model.validate_credentials(
         model="ernie-bot",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
     )
 
 
@@ -39,7 +51,10 @@ def test_invoke_model_ernie_bot():
 
     response = model.invoke(
         model="ernie-bot",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         model_parameters={
             "temperature": 0.7,
@@ -61,7 +76,10 @@ def test_invoke_model_ernie_bot_turbo():
 
     response = model.invoke(
         model="ernie-bot-turbo",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         model_parameters={
             "temperature": 0.7,
@@ -83,7 +101,10 @@ def test_invoke_model_ernie_8k():
 
     response = model.invoke(
         model="ernie-bot-8k",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         model_parameters={
             "temperature": 0.7,
@@ -105,7 +126,10 @@ def test_invoke_model_ernie_bot_4():
 
     response = model.invoke(
         model="ernie-bot-4",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         model_parameters={
             "temperature": 0.7,
@@ -127,7 +151,10 @@ def test_invoke_stream_model():
 
     response = model.invoke(
         model="ernie-3.5-8k",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         model_parameters={
             "temperature": 0.7,
@@ -143,7 +170,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_invoke_model_with_system():
@@ -152,8 +183,14 @@ def test_invoke_model_with_system():
 
     response = model.invoke(
         model="ernie-bot",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
-        prompt_messages=[SystemPromptMessage(content="你是Kasumi"), UserPromptMessage(content="你是谁？")],
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
+        prompt_messages=[
+            SystemPromptMessage(content="你是Kasumi"),
+            UserPromptMessage(content="你是谁？"),
+        ],
         model_parameters={
             "temperature": 0.7,
             "top_p": 1.0,
@@ -173,7 +210,10 @@ def test_invoke_with_search():
 
     response = model.invoke(
         model="ernie-bot",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="北京今天的天气怎么样")],
         model_parameters={
             "temperature": 0.7,
@@ -193,7 +233,11 @@ def test_invoke_with_search():
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
         total_message += chunk.delta.message.content
         print(chunk.delta.message.content)
-        assert len(chunk.delta.message.content) > 0 if not chunk.delta.finish_reason else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if not chunk.delta.finish_reason
+            else True
+        )
 
     # there should be 对不起、我不能、不支持……
     assert "不" in total_message or "抱歉" in total_message or "无法" in total_message
@@ -205,7 +249,10 @@ def test_get_num_tokens():
 
     response = model.get_num_tokens(
         model="ernie-bot",
-        credentials={"api_key": os.environ.get("WENXIN_API_KEY"), "secret_key": os.environ.get("WENXIN_SECRET_KEY")},
+        credentials={
+            "api_key": os.environ.get("WENXIN_API_KEY"),
+            "secret_key": os.environ.get("WENXIN_SECRET_KEY"),
+        },
         prompt_messages=[UserPromptMessage(content="Hello World!")],
         tools=[],
     )

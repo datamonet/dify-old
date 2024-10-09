@@ -26,7 +26,7 @@ from commands import register_commands
 from configs import dify_config
 
 # DO NOT REMOVE BELOW
-from events import event_handlers
+from events import event_handlers  # noqa: F401
 from extensions import (
     ext_celery,
     ext_code_based_extension,
@@ -45,7 +45,7 @@ from extensions.ext_login import login_manager
 from libs.passport import PassportService
 
 # TODO: Find a way to avoid importing models here
-from models import account, dataset, model, source, task, tool, tools, web
+from models import account, dataset, model, source, task, tool, tools, web  # noqa: F401
 from services.account_service import AccountService
 
 # DO NOT REMOVE ABOVE
@@ -53,11 +53,9 @@ from services.account_service import AccountService
 
 warnings.simplefilter("ignore", ResourceWarning)
 
-# fix windows platform
-if os.name == "nt":
-    os.system('tzutil /s "UTC"')
-else:
-    os.environ["TZ"] = "UTC"
+os.environ["TZ"] = "UTC"
+# windows platform not support tzset
+if hasattr(time, "tzset"):
     time.tzset()
 
 
@@ -174,11 +172,15 @@ def load_user_from_request(request_from_flask_login):
             raise Unauthorized("Invalid Authorization token.")
     else:
         if " " not in auth_header:
-            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+            raise Unauthorized(
+                "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
+            )
         auth_scheme, auth_token = auth_header.split(None, 1)
         auth_scheme = auth_scheme.lower()
         if auth_scheme != "bearer":
-            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+            raise Unauthorized(
+                "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
+            )
 
     decoded = PassportService().verify(auth_token)
     user_id = decoded.get("user_id")
@@ -238,7 +240,11 @@ def register_blueprints(app):
 
     app.register_blueprint(console_app_bp)
 
-    CORS(files_bp, allow_headers=["Content-Type"], methods=["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"])
+    CORS(
+        files_bp,
+        allow_headers=["Content-Type"],
+        methods=["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
+    )
     app.register_blueprint(files_bp)
 
     app.register_blueprint(inner_api_bp)
@@ -264,7 +270,13 @@ def after_request(response):
 @app.route("/health")
 def health():
     return Response(
-        json.dumps({"pid": os.getpid(), "status": "ok", "version": app.config["CURRENT_VERSION"]}),
+        json.dumps(
+            {
+                "pid": os.getpid(),
+                "status": "ok",
+                "version": app.config["CURRENT_VERSION"],
+            }
+        ),
         status=200,
         content_type="application/json",
     )

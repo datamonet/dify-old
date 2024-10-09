@@ -17,5 +17,7 @@ class GraphInitParams(BaseModel):
     graph_config: Mapping[str, Any] = Field(..., description="graph config")
     user_id: str = Field(..., description="user id")
     user_from: UserFrom = Field(..., description="user from, account or end-user")
-    invoke_from: InvokeFrom = Field(..., description="invoke from, service-api, web-app, explore or debugger")
+    invoke_from: InvokeFrom = Field(
+        ..., description="invoke from, service-api, web-app, explore or debugger"
+    )
     call_depth: int = Field(..., description="call depth")

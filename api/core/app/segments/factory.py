@@ -56,7 +56,9 @@ def build_variable_from_mapping(mapping: Mapping[str, Any], /) -> Variable:
         case _:
             raise VariableError(f"not supported value type {value_type}")
     if result.size > dify_config.MAX_VARIABLE_SIZE:
-        raise VariableError(f"variable size {result.size} exceeds limit {dify_config.MAX_VARIABLE_SIZE}")
+        raise VariableError(
+            f"variable size {result.size} exceeds limit {dify_config.MAX_VARIABLE_SIZE}"
+        )
     return result
 
 

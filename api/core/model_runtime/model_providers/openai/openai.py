@@ -21,9 +21,13 @@ class OpenAIProvider(ModelProvider):
 
             # Use `gpt-3.5-turbo` model for validate,
             # no matter what model you pass in, text completion model or chat model
-            model_instance.validate_credentials(model="gpt-3.5-turbo", credentials=credentials)
+            model_instance.validate_credentials(
+                model="gpt-3.5-turbo", credentials=credentials
+            )
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
+            logger.exception(
+                f"{self.get_provider_schema().provider} credentials validate failed"
+            )
             raise ex

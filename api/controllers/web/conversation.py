@@ -6,11 +6,17 @@ from controllers.web import api
 from controllers.web.error import NotChatAppError
 from controllers.web.wraps import WebApiResource
 from core.app.entities.app_invoke_entities import InvokeFrom
-from fields.conversation_fields import conversation_infinite_scroll_pagination_fields, simple_conversation_fields
+from fields.conversation_fields import (
+    conversation_infinite_scroll_pagination_fields,
+    simple_conversation_fields,
+)
 from libs.helper import uuid_value
 from models.model import AppMode
 from services.conversation_service import ConversationService
-from services.errors.conversation import ConversationNotExistsError, LastConversationNotExistsError
+from services.errors.conversation import (
+    ConversationNotExistsError,
+    LastConversationNotExistsError,
+)
 from services.web_conversation_service import WebConversationService
 
 
@@ -23,8 +29,12 @@ class ConversationListApi(WebApiResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
-        parser.add_argument("pinned", type=str, choices=["true", "false", None], location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
+        parser.add_argument(
+            "pinned", type=str, choices=["true", "false", None], location="args"
+        )
         parser.add_argument(
             "sort_by",
             type=str,
@@ -80,11 +90,19 @@ class ConversationRenameApi(WebApiResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=False, location="json")
-        parser.add_argument("auto_generate", type=bool, required=False, default=False, location="json")
+        parser.add_argument(
+            "auto_generate", type=bool, required=False, default=False, location="json"
+        )
         args = parser.parse_args()
 
         try:
-            return ConversationService.rename(app_model, conversation_id, end_user, args["name"], args["auto_generate"])
+            return ConversationService.rename(
+                app_model,
+                conversation_id,
+                end_user,
+                args["name"],
+                args["auto_generate"],
+            )
         except ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
 
@@ -117,7 +135,11 @@ class ConversationUnPinApi(WebApiResource):
         return {"result": "success"}
 
 
-api.add_resource(ConversationRenameApi, "/conversations/<uuid:c_id>/name", endpoint="web_conversation_name")
+api.add_resource(
+    ConversationRenameApi,
+    "/conversations/<uuid:c_id>/name",
+    endpoint="web_conversation_name",
+)
 api.add_resource(ConversationListApi, "/conversations")
 api.add_resource(ConversationApi, "/conversations/<uuid:c_id>")
 api.add_resource(ConversationPinApi, "/conversations/<uuid:c_id>/pin")

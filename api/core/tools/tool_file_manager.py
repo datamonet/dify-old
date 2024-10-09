@@ -45,7 +45,9 @@ class ToolFileManager:
         """
         data_to_sign = f"file-preview|{file_id}|{timestamp}|{nonce}"
         secret_key = dify_config.SECRET_KEY.encode() if dify_config.SECRET_KEY else b""
-        recalculated_sign = hmac.new(secret_key, data_to_sign.encode(), hashlib.sha256).digest()
+        recalculated_sign = hmac.new(
+            secret_key, data_to_sign.encode(), hashlib.sha256
+        ).digest()
         recalculated_encoded_sign = base64.urlsafe_b64encode(recalculated_sign).decode()
 
         # verify signature
@@ -57,7 +59,11 @@ class ToolFileManager:
 
     @staticmethod
     def create_file_by_raw(
-        user_id: str, tenant_id: str, conversation_id: Optional[str], file_binary: bytes, mimetype: str
+        user_id: str,
+        tenant_id: str,
+        conversation_id: Optional[str],
+        file_binary: bytes,
+        mimetype: str,
     ) -> ToolFile:
         """
         create file
@@ -68,7 +74,11 @@ class ToolFileManager:
         storage.save(filename, file_binary)
 
         tool_file = ToolFile(
-            user_id=user_id, tenant_id=tenant_id, conversation_id=conversation_id, file_key=filename, mimetype=mimetype
+            user_id=user_id,
+            tenant_id=tenant_id,
+            conversation_id=conversation_id,
+            file_key=filename,
+            mimetype=mimetype,
         )
 
         db.session.add(tool_file)
@@ -118,7 +128,11 @@ class ToolFileManager:
         create file
         """
         tool_file = ToolFile(
-            user_id=user_id, tenant_id=tenant_id, conversation_id=conversation_id, file_key=file_key, mimetype=mimetype
+            user_id=user_id,
+            tenant_id=tenant_id,
+            conversation_id=conversation_id,
+            file_key=file_key,
+            mimetype=mimetype,
         )
         return tool_file
 
@@ -188,7 +202,9 @@ class ToolFileManager:
         return blob, tool_file.mimetype
 
     @staticmethod
-    def get_file_generator_by_tool_file_id(tool_file_id: str) -> Union[tuple[Generator, str], None]:
+    def get_file_generator_by_tool_file_id(
+        tool_file_id: str,
+    ) -> Union[tuple[Generator, str], None]:
         """
         get file binary
 

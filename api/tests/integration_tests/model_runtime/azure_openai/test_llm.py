@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -13,7 +17,9 @@ from core.model_runtime.entities.message_entities import (
     UserPromptMessage,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.azure_openai.llm.llm import AzureOpenAILargeLanguageModel
+from core.model_runtime.model_providers.azure_openai.llm.llm import (
+    AzureOpenAILargeLanguageModel,
+)
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["chat"]], indirect=True)
@@ -108,7 +114,11 @@ def test_invoke_stream_completion_model(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["chat"]], indirect=True)
@@ -239,7 +249,10 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],
@@ -250,7 +263,9 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 description="Get the current stock price",
                 parameters={
                     "type": "object",
-                    "properties": {"symbol": {"type": "string", "description": "The stock symbol"}},
+                    "properties": {
+                        "symbol": {"type": "string", "description": "The stock symbol"}
+                    },
                     "required": ["symbol"],
                 },
             ),

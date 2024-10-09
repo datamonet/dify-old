@@ -11,13 +11,23 @@ from httpx import get, post
 from yarl import URL
 
 from core.tools.entities.common_entities import I18nObject
-from core.tools.entities.tool_entities import ToolInvokeMessage, ToolParameter, ToolParameterOption
+from core.tools.entities.tool_entities import (
+    ToolInvokeMessage,
+    ToolParameter,
+    ToolParameterOption,
+)
 from core.tools.errors import ToolProviderCredentialValidationError
 from core.tools.tool.builtin_tool import BuiltinTool
 
 SD_TXT2IMG_OPTIONS = {}
 LORA_NODE = {
-    "inputs": {"lora_name": "", "strength_model": 1, "strength_clip": 1, "model": ["11", 0], "clip": ["11", 1]},
+    "inputs": {
+        "lora_name": "",
+        "strength_model": 1,
+        "strength_clip": 1,
+        "model": ["11", 0],
+        "clip": ["11", 1],
+    },
     "class_type": "LoraLoader",
     "_meta": {"title": "Load LoRA"},
 }
@@ -125,7 +135,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                 return []
             else:
                 return response.json()
-        except Exception as e:
+        except Exception:
             return []
 
     def get_loras(self) -> list[str]:
@@ -142,7 +152,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                 return []
             else:
                 return response.json()
-        except Exception as e:
+        except Exception:
             return []
 
     def get_sample_methods(self) -> tuple[list[str], list[str]]:
@@ -160,7 +170,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
             else:
                 data = response.json()["KSampler"]["input"]["required"]
                 return data["sampler_name"][0], data["scheduler"][0]
-        except Exception as e:
+        except Exception:
             return [], []
 
     def validate_models(self) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
@@ -184,7 +194,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                 if len([d for d in models if d == model]) > 0:
                     return self.create_text_message(json.dumps(models))
                 else:
-                    raise ToolProviderCredentialValidationError(f"model {model} does not exist")
+                    raise ToolProviderCredentialValidationError(
+                        f"model {model} does not exist"
+                    )
         except Exception as e:
             raise ToolProviderCredentialValidationError(f"Failed to get models, {e}")
 
@@ -201,7 +213,11 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
         download image
         """
         url = str(URL(base_url) / "view")
-        response = get(url, params={"filename": filename, "subfolder": subfolder, "type": folder_type}, timeout=(2, 10))
+        response = get(
+            url,
+            params={"filename": filename, "subfolder": subfolder, "type": folder_type},
+            timeout=(2, 10),
+        )
         return response.content
 
     def queue_prompt_image(self, base_url, client_id, prompt):
@@ -210,7 +226,11 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
         """
         # initiate task execution
         url = str(URL(base_url) / "prompt")
-        respond = post(url, data=json.dumps({"client_id": client_id, "prompt": prompt}), timeout=(2, 10))
+        respond = post(
+            url,
+            data=json.dumps({"client_id": client_id, "prompt": prompt}),
+            timeout=(2, 10),
+        )
         prompt_id = respond.json()["prompt_id"]
 
         ws = websocket.WebSocket()
@@ -232,7 +252,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         break  # Execution is done
                 elif message["type"] == "status":
                     data = message["data"]
-                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get("sid"):
+                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get(
+                        "sid"
+                    ):
                         break  # Execution is done
             else:
                 continue  # previews are binary data
@@ -245,7 +267,12 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                 if "images" in node_output:
                     images_output = []
                     for image in node_output["images"]:
-                        image_data = self.download_image(base_url, image["filename"], image["subfolder"], image["type"])
+                        image_data = self.download_image(
+                            base_url,
+                            image["filename"],
+                            image["subfolder"],
+                            image["type"],
+                        )
                         images_output.append(image_data)
                     output_images[node_id] = images_output
 
@@ -290,7 +317,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
         draw_options["6"]["inputs"]["text"] = prompt
         draw_options["7"]["inputs"]["text"] = negative_prompt
         # if the model is SD3 or FLUX series, the Latent class should be corresponding to SD3 Latent
-        if model_type in (ModelType.SD3.name, ModelType.FLUX.name):
+        if model_type in {ModelType.SD3.name, ModelType.FLUX.name}:
             draw_options["5"]["class_type"] = "EmptySD3LatentImage"
 
         if lora_list:
@@ -300,7 +327,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
             draw_options["6"]["inputs"]["clip"][0] = "10"
             draw_options["7"]["inputs"]["clip"][0] = "10"
             # every Lora node link to next Lora node, and Checkpoints node link to first Lora node
-            for i, (lora, strength) in enumerate(zip(lora_list, lora_strength_list), 10):
+            for i, (lora, strength) in enumerate(
+                zip(lora_list, lora_strength_list), 10
+            ):
                 if i - 10 == len(lora_list) - 1:
                     next_node_id = "4"
                 else:
@@ -333,7 +362,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         break
 
             return self.create_blob_message(
-                blob=image, meta={"mime_type": "image/png"}, save_as=self.VARIABLE_KEY.IMAGE.value
+                blob=image,
+                meta={"mime_type": "image/png"},
+                save_as=self.VariableKey.IMAGE.value,
             )
 
         except Exception as e:
@@ -376,7 +407,10 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=models[0],
                             options=[
-                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in models
+                                ToolParameterOption(
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
+                                )
+                                for i in models
                             ],
                         )
                     )
@@ -386,7 +420,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         parameters.append(
                             ToolParameter(
                                 name=f"lora_{n}",
-                                label=I18nObject(en_US=f"Lora {n}", zh_Hans=f"Lora {n}"),
+                                label=I18nObject(
+                                    en_US=f"Lora {n}", zh_Hans=f"Lora {n}"
+                                ),
                                 human_description=I18nObject(
                                     en_US="Lora of Stable Diffusion, "
                                     "you can check the official documentation of Stable Diffusion",
@@ -399,7 +435,10 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                                 "Stable Diffusion",
                                 required=False,
                                 options=[
-                                    ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in loras
+                                    ToolParameterOption(
+                                        value=i, label=I18nObject(en_US=i, zh_Hans=i)
+                                    )
+                                    for i in loras
                                 ],
                             )
                         )
@@ -408,7 +447,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                     parameters.append(
                         ToolParameter(
                             name="sampler_name",
-                            label=I18nObject(en_US="Sampling method", zh_Hans="Sampling method"),
+                            label=I18nObject(
+                                en_US="Sampling method", zh_Hans="Sampling method"
+                            ),
                             human_description=I18nObject(
                                 en_US="Sampling method of Stable Diffusion, "
                                 "you can check the official documentation of Stable Diffusion",
@@ -421,7 +462,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=sample_methods[0],
                             options=[
-                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i))
+                                ToolParameterOption(
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
+                                )
                                 for i in sample_methods
                             ],
                         )
@@ -443,7 +486,10 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=schedulers[0],
                             options=[
-                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in schedulers
+                                ToolParameterOption(
+                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
+                                )
+                                for i in schedulers
                             ],
                         )
                     )
@@ -464,7 +510,9 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         required=True,
                         default=ModelType.SD15.name,
                         options=[
-                            ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i))
+                            ToolParameterOption(
+                                value=i, label=I18nObject(en_US=i, zh_Hans=i)
+                            )
                             for i in ModelType.__members__
                         ],
                     )

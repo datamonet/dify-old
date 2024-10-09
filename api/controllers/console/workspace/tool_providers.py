@@ -38,7 +38,9 @@ class ToolProviderListApi(Resource):
         )
         args = req.parse_args()
 
-        return ToolCommonService.list_tool_providers(user_id, tenant_id, args.get("type", None))
+        return ToolCommonService.list_tool_providers(
+            user_id, tenant_id, args.get("type", None)
+        )
 
 
 class ToolBuiltinProviderListToolsApi(Resource):
@@ -88,7 +90,9 @@ class ToolBuiltinProviderUpdateApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "credentials", type=dict, required=True, nullable=False, location="json"
+        )
 
         args = parser.parse_args()
 
@@ -118,9 +122,13 @@ class ToolBuiltinProviderGetCredentialsApi(Resource):
 class ToolBuiltinProviderIconApi(Resource):
     @setup_required
     def get(self, provider):
-        icon_bytes, mimetype = BuiltinToolManageService.get_builtin_tool_provider_icon(provider)
+        icon_bytes, mimetype = BuiltinToolManageService.get_builtin_tool_provider_icon(
+            provider
+        )
         icon_cache_max_age = dify_config.TOOL_ICON_CACHE_MAX_AGE
-        return send_file(io.BytesIO(icon_bytes), mimetype=mimetype, max_age=icon_cache_max_age)
+        return send_file(
+            io.BytesIO(icon_bytes), mimetype=mimetype, max_age=icon_cache_max_age
+        )
 
 
 class ToolApiProviderAddApi(Resource):
@@ -135,14 +143,39 @@ class ToolApiProviderAddApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("schema_type", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("schema", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("provider", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("icon", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("privacy_policy", type=str, required=False, nullable=True, location="json")
-        parser.add_argument("labels", type=list[str], required=False, nullable=True, location="json", default=[])
-        parser.add_argument("custom_disclaimer", type=str, required=False, nullable=True, location="json")
+        parser.add_argument(
+            "credentials", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema_type", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "provider", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "icon", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "privacy_policy", type=str, required=False, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "labels",
+            type=list[str],
+            required=False,
+            nullable=True,
+            location="json",
+            default=[],
+        )
+        parser.add_argument(
+            "custom_disclaimer",
+            type=str,
+            required=False,
+            nullable=True,
+            location="json",
+        )
 
         args = parser.parse_args()
 
@@ -167,7 +200,9 @@ class ToolApiProviderGetRemoteSchemaApi(Resource):
     def get(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("url", type=str, required=True, nullable=False, location="args")
+        parser.add_argument(
+            "url", type=str, required=True, nullable=False, location="args"
+        )
 
         args = parser.parse_args()
 
@@ -188,7 +223,9 @@ class ToolApiProviderListToolsApi(Resource):
 
         parser = reqparse.RequestParser()
 
-        parser.add_argument("provider", type=str, required=True, nullable=False, location="args")
+        parser.add_argument(
+            "provider", type=str, required=True, nullable=False, location="args"
+        )
 
         args = parser.parse_args()
 
@@ -213,16 +250,40 @@ class ToolApiProviderUpdateApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("schema_type", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("schema", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("provider", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("original_provider", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("icon", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("privacy_policy", type=str, required=True, nullable=True, location="json")
-        parser.add_argument("labels", type=list[str], required=False, nullable=True, location="json")
-        parser.add_argument("custom_disclaimer", type=str, required=True, nullable=True, location="json")
-        parser.add_argument("publish", type=bool, required=False, nullable=False, location="json")
+        parser.add_argument(
+            "credentials", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema_type", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "provider", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "original_provider",
+            type=str,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        parser.add_argument(
+            "icon", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "privacy_policy", type=str, required=True, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "labels", type=list[str], required=False, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "custom_disclaimer", type=str, required=True, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "publish", type=bool, required=False, nullable=False, location="json"
+        )
 
         args = parser.parse_args()
 
@@ -255,7 +316,9 @@ class ToolApiProviderDeleteApi(Resource):
 
         parser = reqparse.RequestParser()
 
-        parser.add_argument("provider", type=str, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "provider", type=str, required=True, nullable=False, location="json"
+        )
 
         args = parser.parse_args()
 
@@ -276,7 +339,9 @@ class ToolApiProviderGetApi(Resource):
 
         parser = reqparse.RequestParser()
 
-        parser.add_argument("provider", type=str, required=True, nullable=False, location="args")
+        parser.add_argument(
+            "provider", type=str, required=True, nullable=False, location="args"
+        )
 
         args = parser.parse_args()
 
@@ -292,7 +357,9 @@ class ToolBuiltinProviderCredentialsSchemaApi(Resource):
     @login_required
     @account_initialization_required
     def get(self, provider):
-        return BuiltinToolManageService.list_builtin_provider_credentials_schema(provider)
+        return BuiltinToolManageService.list_builtin_provider_credentials_schema(
+            provider
+        )
 
 
 class ToolApiProviderSchemaApi(Resource):
@@ -302,7 +369,9 @@ class ToolApiProviderSchemaApi(Resource):
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("schema", type=str, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "schema", type=str, required=True, nullable=False, location="json"
+        )
 
         args = parser.parse_args()
 
@@ -318,12 +387,24 @@ class ToolApiProviderPreviousTestApi(Resource):
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument("tool_name", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("provider_name", type=str, required=False, nullable=False, location="json")
-        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("parameters", type=dict, required=True, nullable=False, location="json")
-        parser.add_argument("schema_type", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("schema", type=str, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "tool_name", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "provider_name", type=str, required=False, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "credentials", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "parameters", type=dict, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema_type", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "schema", type=str, required=True, nullable=False, location="json"
+        )
 
         args = parser.parse_args()
 
@@ -350,14 +431,43 @@ class ToolWorkflowProviderCreateApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         reqparser = reqparse.RequestParser()
-        reqparser.add_argument("workflow_app_id", type=uuid_value, required=True, nullable=False, location="json")
-        reqparser.add_argument("name", type=alphanumeric, required=True, nullable=False, location="json")
-        reqparser.add_argument("label", type=str, required=True, nullable=False, location="json")
-        reqparser.add_argument("description", type=str, required=True, nullable=False, location="json")
-        reqparser.add_argument("icon", type=dict, required=True, nullable=False, location="json")
-        reqparser.add_argument("parameters", type=list[dict], required=True, nullable=False, location="json")
-        reqparser.add_argument("privacy_policy", type=str, required=False, nullable=True, location="json", default="")
-        reqparser.add_argument("labels", type=list[str], required=False, nullable=True, location="json")
+        reqparser.add_argument(
+            "workflow_app_id",
+            type=uuid_value,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        reqparser.add_argument(
+            "name", type=alphanumeric, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "label", type=str, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "description", type=str, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "icon", type=dict, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "parameters",
+            type=list[dict],
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        reqparser.add_argument(
+            "privacy_policy",
+            type=str,
+            required=False,
+            nullable=True,
+            location="json",
+            default="",
+        )
+        reqparser.add_argument(
+            "labels", type=list[str], required=False, nullable=True, location="json"
+        )
 
         args = reqparser.parse_args()
 
@@ -387,14 +497,43 @@ class ToolWorkflowProviderUpdateApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         reqparser = reqparse.RequestParser()
-        reqparser.add_argument("workflow_tool_id", type=uuid_value, required=True, nullable=False, location="json")
-        reqparser.add_argument("name", type=alphanumeric, required=True, nullable=False, location="json")
-        reqparser.add_argument("label", type=str, required=True, nullable=False, location="json")
-        reqparser.add_argument("description", type=str, required=True, nullable=False, location="json")
-        reqparser.add_argument("icon", type=dict, required=True, nullable=False, location="json")
-        reqparser.add_argument("parameters", type=list[dict], required=True, nullable=False, location="json")
-        reqparser.add_argument("privacy_policy", type=str, required=False, nullable=True, location="json", default="")
-        reqparser.add_argument("labels", type=list[str], required=False, nullable=True, location="json")
+        reqparser.add_argument(
+            "workflow_tool_id",
+            type=uuid_value,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        reqparser.add_argument(
+            "name", type=alphanumeric, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "label", type=str, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "description", type=str, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "icon", type=dict, required=True, nullable=False, location="json"
+        )
+        reqparser.add_argument(
+            "parameters",
+            type=list[dict],
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        reqparser.add_argument(
+            "privacy_policy",
+            type=str,
+            required=False,
+            nullable=True,
+            location="json",
+            default="",
+        )
+        reqparser.add_argument(
+            "labels", type=list[str], required=False, nullable=True, location="json"
+        )
 
         args = reqparser.parse_args()
 
@@ -427,7 +566,13 @@ class ToolWorkflowProviderDeleteApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         reqparser = reqparse.RequestParser()
-        reqparser.add_argument("workflow_tool_id", type=uuid_value, required=True, nullable=False, location="json")
+        reqparser.add_argument(
+            "workflow_tool_id",
+            type=uuid_value,
+            required=True,
+            nullable=False,
+            location="json",
+        )
 
         args = reqparser.parse_args()
 
@@ -447,8 +592,20 @@ class ToolWorkflowProviderGetApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument("workflow_tool_id", type=uuid_value, required=False, nullable=True, location="args")
-        parser.add_argument("workflow_app_id", type=uuid_value, required=False, nullable=True, location="args")
+        parser.add_argument(
+            "workflow_tool_id",
+            type=uuid_value,
+            required=False,
+            nullable=True,
+            location="args",
+        )
+        parser.add_argument(
+            "workflow_app_id",
+            type=uuid_value,
+            required=False,
+            nullable=True,
+            location="args",
+        )
 
         args = parser.parse_args()
 
@@ -479,7 +636,13 @@ class ToolWorkflowProviderListToolApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument("workflow_tool_id", type=uuid_value, required=True, nullable=False, location="args")
+        parser.add_argument(
+            "workflow_tool_id",
+            type=uuid_value,
+            required=True,
+            nullable=False,
+            location="args",
+        )
 
         args = parser.parse_args()
 
@@ -561,33 +724,69 @@ class ToolLabelsApi(Resource):
 api.add_resource(ToolProviderListApi, "/workspaces/current/tool-providers")
 
 # builtin tool provider
-api.add_resource(ToolBuiltinProviderListToolsApi, "/workspaces/current/tool-provider/builtin/<provider>/tools")
-api.add_resource(ToolBuiltinProviderDeleteApi, "/workspaces/current/tool-provider/builtin/<provider>/delete")
-api.add_resource(ToolBuiltinProviderUpdateApi, "/workspaces/current/tool-provider/builtin/<provider>/update")
 api.add_resource(
-    ToolBuiltinProviderGetCredentialsApi, "/workspaces/current/tool-provider/builtin/<provider>/credentials"
+    ToolBuiltinProviderListToolsApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/tools",
 )
 api.add_resource(
-    ToolBuiltinProviderCredentialsSchemaApi, "/workspaces/current/tool-provider/builtin/<provider>/credentials_schema"
+    ToolBuiltinProviderDeleteApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/delete",
 )
-api.add_resource(ToolBuiltinProviderIconApi, "/workspaces/current/tool-provider/builtin/<provider>/icon")
+api.add_resource(
+    ToolBuiltinProviderUpdateApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/update",
+)
+api.add_resource(
+    ToolBuiltinProviderGetCredentialsApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/credentials",
+)
+api.add_resource(
+    ToolBuiltinProviderCredentialsSchemaApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/credentials_schema",
+)
+api.add_resource(
+    ToolBuiltinProviderIconApi,
+    "/workspaces/current/tool-provider/builtin/<provider>/icon",
+)
 
 # api tool provider
 api.add_resource(ToolApiProviderAddApi, "/workspaces/current/tool-provider/api/add")
-api.add_resource(ToolApiProviderGetRemoteSchemaApi, "/workspaces/current/tool-provider/api/remote")
-api.add_resource(ToolApiProviderListToolsApi, "/workspaces/current/tool-provider/api/tools")
-api.add_resource(ToolApiProviderUpdateApi, "/workspaces/current/tool-provider/api/update")
-api.add_resource(ToolApiProviderDeleteApi, "/workspaces/current/tool-provider/api/delete")
+api.add_resource(
+    ToolApiProviderGetRemoteSchemaApi, "/workspaces/current/tool-provider/api/remote"
+)
+api.add_resource(
+    ToolApiProviderListToolsApi, "/workspaces/current/tool-provider/api/tools"
+)
+api.add_resource(
+    ToolApiProviderUpdateApi, "/workspaces/current/tool-provider/api/update"
+)
+api.add_resource(
+    ToolApiProviderDeleteApi, "/workspaces/current/tool-provider/api/delete"
+)
 api.add_resource(ToolApiProviderGetApi, "/workspaces/current/tool-provider/api/get")
-api.add_resource(ToolApiProviderSchemaApi, "/workspaces/current/tool-provider/api/schema")
-api.add_resource(ToolApiProviderPreviousTestApi, "/workspaces/current/tool-provider/api/test/pre")
+api.add_resource(
+    ToolApiProviderSchemaApi, "/workspaces/current/tool-provider/api/schema"
+)
+api.add_resource(
+    ToolApiProviderPreviousTestApi, "/workspaces/current/tool-provider/api/test/pre"
+)
 
 # workflow tool provider
-api.add_resource(ToolWorkflowProviderCreateApi, "/workspaces/current/tool-provider/workflow/create")
-api.add_resource(ToolWorkflowProviderUpdateApi, "/workspaces/current/tool-provider/workflow/update")
-api.add_resource(ToolWorkflowProviderDeleteApi, "/workspaces/current/tool-provider/workflow/delete")
-api.add_resource(ToolWorkflowProviderGetApi, "/workspaces/current/tool-provider/workflow/get")
-api.add_resource(ToolWorkflowProviderListToolApi, "/workspaces/current/tool-provider/workflow/tools")
+api.add_resource(
+    ToolWorkflowProviderCreateApi, "/workspaces/current/tool-provider/workflow/create"
+)
+api.add_resource(
+    ToolWorkflowProviderUpdateApi, "/workspaces/current/tool-provider/workflow/update"
+)
+api.add_resource(
+    ToolWorkflowProviderDeleteApi, "/workspaces/current/tool-provider/workflow/delete"
+)
+api.add_resource(
+    ToolWorkflowProviderGetApi, "/workspaces/current/tool-provider/workflow/get"
+)
+api.add_resource(
+    ToolWorkflowProviderListToolApi, "/workspaces/current/tool-provider/workflow/tools"
+)
 
 api.add_resource(ToolBuiltinListApi, "/workspaces/current/tools/builtin")
 api.add_resource(ToolApiListApi, "/workspaces/current/tools/api")

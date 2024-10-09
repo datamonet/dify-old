@@ -36,19 +36,35 @@ class CompletionConversationApi(Resource):
             raise Forbidden()
         parser = reqparse.RequestParser()
         parser.add_argument("keyword", type=str, location="args")
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         parser.add_argument(
-            "annotation_status", type=str, choices=["annotated", "not_annotated", "all"], default="all", location="args"
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
         )
-        parser.add_argument("page", type=int_range(1, 99999), default=1, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), default=20, location="args")
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "annotation_status",
+            type=str,
+            choices=["annotated", "not_annotated", "all"],
+            default="all",
+            location="args",
+        )
+        parser.add_argument(
+            "page", type=int_range(1, 99999), default=1, location="args"
+        )
+        parser.add_argument(
+            "limit", type=int_range(1, 100), default=20, location="args"
+        )
         args = parser.parse_args()
 
-        query = db.select(Conversation).where(Conversation.app_id == app_model.id, Conversation.mode == "completion")
+        query = db.select(Conversation).where(
+            Conversation.app_id == app_model.id, Conversation.mode == "completion"
+        )
 
         if args["keyword"]:
-            query = query.join(Message, Message.conversation_id == Conversation.id).filter(
+            query = query.join(
+                Message, Message.conversation_id == Conversation.id
+            ).filter(
                 or_(
                     Message.query.ilike("%{}%".format(args["keyword"])),
                     Message.answer.ilike("%{}%".format(args["keyword"])),
@@ -83,14 +99,19 @@ class CompletionConversationApi(Resource):
             )
         elif args["annotation_status"] == "not_annotated":
             query = (
-                query.outerjoin(MessageAnnotation, MessageAnnotation.conversation_id == Conversation.id)
+                query.outerjoin(
+                    MessageAnnotation,
+                    MessageAnnotation.conversation_id == Conversation.id,
+                )
                 .group_by(Conversation.id)
                 .having(func.count(MessageAnnotation.id) == 0)
             )
 
         query = query.order_by(Conversation.created_at.desc())
 
-        conversations = db.paginate(query, page=args["page"], per_page=args["limit"], error_out=False)
+        conversations = db.paginate(
+            query, page=args["page"], per_page=args["limit"], error_out=False
+        )
 
         return conversations
 
@@ -119,7 +140,9 @@ class CompletionConversationDetailApi(Resource):
 
         conversation = (
             db.session.query(Conversation)
-            .filter(Conversation.id == conversation_id, Conversation.app_id == app_model.id)
+            .filter(
+                Conversation.id == conversation_id, Conversation.app_id == app_model.id
+            )
             .first()
         )
 
@@ -143,14 +166,31 @@ class ChatConversationApi(Resource):
             raise Forbidden()
         parser = reqparse.RequestParser()
         parser.add_argument("keyword", type=str, location="args")
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         parser.add_argument(
-            "annotation_status", type=str, choices=["annotated", "not_annotated", "all"], default="all", location="args"
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
         )
-        parser.add_argument("message_count_gte", type=int_range(1, 99999), required=False, location="args")
-        parser.add_argument("page", type=int_range(1, 99999), required=False, default=1, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "annotation_status",
+            type=str,
+            choices=["annotated", "not_annotated", "all"],
+            default="all",
+            location="args",
+        )
+        parser.add_argument(
+            "message_count_gte",
+            type=int_range(1, 99999),
+            required=False,
+            location="args",
+        )
+        parser.add_argument(
+            "page", type=int_range(1, 99999), required=False, default=1, location="args"
+        )
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         parser.add_argument(
             "sort_by",
             type=str,
@@ -163,7 +203,8 @@ class ChatConversationApi(Resource):
 
         subquery = (
             db.session.query(
-                Conversation.id.label("conversation_id"), EndUser.session_id.label("from_end_user_session_id")
+                Conversation.id.label("conversation_id"),
+                EndUser.session_id.label("from_end_user_session_id"),
             )
             .outerjoin(EndUser, Conversation.from_end_user_id == EndUser.id)
             .subquery()
@@ -188,6 +229,7 @@ class ChatConversationApi(Resource):
                         subquery.c.from_end_user_session_id.ilike(keyword_filter),
                     ),
                 )
+                .group_by(Conversation.id)
             )
 
         account = current_user
@@ -226,7 +268,10 @@ class ChatConversationApi(Resource):
             )
         elif args["annotation_status"] == "not_annotated":
             query = (
-                query.outerjoin(MessageAnnotation, MessageAnnotation.conversation_id == Conversation.id)
+                query.outerjoin(
+                    MessageAnnotation,
+                    MessageAnnotation.conversation_id == Conversation.id,
+                )
                 .group_by(Conversation.id)
                 .having(func.count(MessageAnnotation.id) == 0)
             )
@@ -254,7 +299,9 @@ class ChatConversationApi(Resource):
             case _:
                 query = query.order_by(Conversation.created_at.desc())
 
-        conversations = db.paginate(query, page=args["page"], per_page=args["limit"], error_out=False)
+        conversations = db.paginate(
+            query, page=args["page"], per_page=args["limit"], error_out=False
+        )
 
         return conversations
 
@@ -283,7 +330,9 @@ class ChatConversationDetailApi(Resource):
 
         conversation = (
             db.session.query(Conversation)
-            .filter(Conversation.id == conversation_id, Conversation.app_id == app_model.id)
+            .filter(
+                Conversation.id == conversation_id, Conversation.app_id == app_model.id
+            )
             .first()
         )
 
@@ -296,10 +345,18 @@ class ChatConversationDetailApi(Resource):
         return {"result": "success"}, 204
 
 
-api.add_resource(CompletionConversationApi, "/apps/<uuid:app_id>/completion-conversations")
-api.add_resource(CompletionConversationDetailApi, "/apps/<uuid:app_id>/completion-conversations/<uuid:conversation_id>")
+api.add_resource(
+    CompletionConversationApi, "/apps/<uuid:app_id>/completion-conversations"
+)
+api.add_resource(
+    CompletionConversationDetailApi,
+    "/apps/<uuid:app_id>/completion-conversations/<uuid:conversation_id>",
+)
 api.add_resource(ChatConversationApi, "/apps/<uuid:app_id>/chat-conversations")
-api.add_resource(ChatConversationDetailApi, "/apps/<uuid:app_id>/chat-conversations/<uuid:conversation_id>")
+api.add_resource(
+    ChatConversationDetailApi,
+    "/apps/<uuid:app_id>/chat-conversations/<uuid:conversation_id>",
+)
 
 
 def _get_conversation(app_model, conversation_id):

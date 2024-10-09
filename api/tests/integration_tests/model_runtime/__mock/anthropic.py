@@ -32,7 +32,9 @@ class MockAnthropicClass:
             id="msg-123",
             type="message",
             role="assistant",
-            content=[ContentBlock(text="hello, I'm a chatbot from anthropic", type="text")],
+            content=[
+                ContentBlock(text="hello, I'm a chatbot from anthropic", type="text")
+            ],
             model=model,
             stop_reason="stop_sequence",
             usage=Usage(input_tokens=1, output_tokens=1),
@@ -58,13 +60,17 @@ class MockAnthropicClass:
         index = 0
         for i in range(0, len(full_response_text)):
             yield ContentBlockDeltaEvent(
-                type="content_block_delta", delta=TextDelta(text=full_response_text[i], type="text_delta"), index=index
+                type="content_block_delta",
+                delta=TextDelta(text=full_response_text[i], type="text_delta"),
+                index=index,
             )
 
             index += 1
 
         yield MessageDeltaEvent(
-            type="message_delta", delta=Delta(stop_reason="stop_sequence"), usage=MessageDeltaUsage(output_tokens=1)
+            type="message_delta",
+            delta=Delta(stop_reason="stop_sequence"),
+            usage=MessageDeltaUsage(output_tokens=1),
         )
 
         yield MessageStopEvent(type="message_stop")

@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessageTool,
@@ -18,9 +22,14 @@ def test_validate_credentials():
     model = ZhipuAILargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="chatglm_turbo", credentials={"api_key": "invalid_key"})
+        model.validate_credentials(
+            model="chatglm_turbo", credentials={"api_key": "invalid_key"}
+        )
 
-    model.validate_credentials(model="chatglm_turbo", credentials={"api_key": os.environ.get("ZHIPUAI_API_KEY")})
+    model.validate_credentials(
+        model="chatglm_turbo",
+        credentials={"api_key": os.environ.get("ZHIPUAI_API_KEY")},
+    )
 
 
 def test_invoke_model():
@@ -58,7 +67,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_get_num_tokens():
@@ -91,7 +104,10 @@ def test_get_tools_num_tokens():
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],

@@ -13,7 +13,9 @@ from core.app.features.rate_limiting import RateLimit
 from core.errors.error import LLMBadRequestError, ProviderTokenNotInitError
 from core.model_manager import ModelManager
 from core.model_runtime.entities.model_entities import ModelPropertyKey, ModelType
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.tools.tool_manager import ToolManager
 from core.tools.utils.configuration import ToolParameterConfigurationManager
 from events.app_event import app_was_created
@@ -26,7 +28,9 @@ from tasks.remove_app_and_related_data_task import remove_app_and_related_data_t
 
 
 class AppService:
-    def get_paginate_apps(self, tenant_id: str, user_id: str, args: dict) -> Pagination | None:
+    def get_paginate_apps(
+        self, tenant_id: str, user_id: str, args: dict
+    ) -> Pagination | None:
         """
         Get app list with pagination
         :param tenant_id: tenant id
@@ -34,12 +38,20 @@ class AppService:
         :param args: request args
         :return:
         """
-        filters = [App.tenant_id == tenant_id, App.user_id == user_id, App.is_universal == False]
+        filters = [
+            App.tenant_id == tenant_id,
+            App.user_id == user_id,
+            App.is_universal == False,
+        ]
 
         if args["mode"] == "workflow":
-            filters.append(App.mode.in_([AppMode.WORKFLOW.value, AppMode.COMPLETION.value]))
+            filters.append(
+                App.mode.in_([AppMode.WORKFLOW.value, AppMode.COMPLETION.value])
+            )
         elif args["mode"] == "chat":
-            filters.append(App.mode.in_([AppMode.CHAT.value, AppMode.ADVANCED_CHAT.value]))
+            filters.append(
+                App.mode.in_([AppMode.CHAT.value, AppMode.ADVANCED_CHAT.value])
+            )
         elif args["mode"] == "agent-chat":
             filters.append(App.mode == AppMode.AGENT_CHAT.value)
         elif args["mode"] == "channel":
@@ -49,7 +61,9 @@ class AppService:
             name = args["name"][:30]
             filters.append(App.name.ilike(f"%{name}%"))
         if args.get("tag_ids"):
-            target_ids = TagService.get_target_ids_by_tag_ids("app", tenant_id, args["tag_ids"])
+            target_ids = TagService.get_target_ids_by_tag_ids(
+                "app", tenant_id, args["tag_ids"]
+            )
             if target_ids:
                 filters.append(App.id.in_(target_ids))
             else:
@@ -76,7 +90,9 @@ class AppService:
 
         # get model config
         default_model_config = app_template.get("model_config")
-        default_model_config = default_model_config.copy() if default_model_config else None
+        default_model_config = (
+            default_model_config.copy() if default_model_config else None
+        )
         if default_model_config and "model" in default_model_config:
             # get model provider
             model_manager = ModelManager()
@@ -95,17 +111,24 @@ class AppService:
             if model_instance:
                 if (
                     model_instance.model == default_model_config["model"]["name"]
-                    and model_instance.provider == default_model_config["model"]["provider"]
+                    and model_instance.provider
+                    == default_model_config["model"]["provider"]
                 ):
                     default_model_dict = default_model_config["model"]
                 else:
-                    llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-                    model_schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
+                    llm_model = cast(
+                        LargeLanguageModel, model_instance.model_type_instance
+                    )
+                    model_schema = llm_model.get_model_schema(
+                        model_instance.model, model_instance.credentials
+                    )
 
                     default_model_dict = {
                         "provider": model_instance.provider,
                         "name": model_instance.model,
-                        "mode": model_schema.model_properties.get(ModelPropertyKey.MODE),
+                        "mode": model_schema.model_properties.get(
+                            ModelPropertyKey.MODE
+                        ),
                         "completion_params": {},
                     }
             else:
@@ -181,14 +204,18 @@ class AppService:
 
                     # get decrypted parameters
                     if agent_tool_entity.tool_parameters:
-                        parameters = manager.decrypt_tool_parameters(agent_tool_entity.tool_parameters or {})
-                        masked_parameter = manager.mask_tool_parameters(parameters or {})
+                        parameters = manager.decrypt_tool_parameters(
+                            agent_tool_entity.tool_parameters or {}
+                        )
+                        masked_parameter = manager.mask_tool_parameters(
+                            parameters or {}
+                        )
                     else:
                         masked_parameter = {}
 
                     # override tool parameters
                     tool["tool_parameters"] = masked_parameter
-                except Exception as e:
+                except Exception:
                     pass
 
             # override agent mode
@@ -348,7 +375,10 @@ class AppService:
             # get all tools
             tools = agent_config.get("tools", [])
 
-        url_prefix = dify_config.CONSOLE_API_URL + "/console/api/workspaces/current/tool-provider/builtin/"
+        url_prefix = (
+            dify_config.CONSOLE_API_URL
+            + "/console/api/workspaces/current/tool-provider/builtin/"
+        )
 
         for tool in tools:
             keys = list(tool.keys())
@@ -362,10 +392,15 @@ class AppService:
                 elif provider_type == "api":
                     try:
                         provider: ApiToolProvider = (
-                            db.session.query(ApiToolProvider).filter(ApiToolProvider.id == provider_id).first()
+                            db.session.query(ApiToolProvider)
+                            .filter(ApiToolProvider.id == provider_id)
+                            .first()
                         )
                         meta["tool_icons"][tool_name] = json.loads(provider.icon)
                     except:
-                        meta["tool_icons"][tool_name] = {"background": "#252525", "content": "\ud83d\ude01"}
+                        meta["tool_icons"][tool_name] = {
+                            "background": "#252525",
+                            "content": "\ud83d\ude01",
+                        }
 
         return meta

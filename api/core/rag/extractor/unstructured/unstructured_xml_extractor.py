@@ -25,7 +25,9 @@ class UnstructuredXmlExtractor(BaseExtractor):
         elements = partition_xml(filename=self._file_path, xml_keep_tags=True)
         from unstructured.chunking.title import chunk_by_title
 
-        chunks = chunk_by_title(elements, max_characters=2000, combine_text_under_n_chars=2000)
+        chunks = chunk_by_title(
+            elements, max_characters=2000, combine_text_under_n_chars=2000
+        )
         documents = []
         for chunk in chunks:
             text = chunk.text.strip()

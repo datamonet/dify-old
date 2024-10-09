@@ -42,16 +42,24 @@ class ListWorksheetsTool(BuiltinTool):
             if res.is_success:
                 if res_json["error_code"] != 1:
                     return self.create_text_message(
-                        "Failed to access the application. {}".format(res_json["error_msg"])
+                        "Failed to access the application. {}".format(
+                            res_json["error_msg"]
+                        )
                     )
                 else:
                     if result_type == "json":
                         worksheets = []
                         for section in res_json["data"]["sections"]:
-                            worksheets.extend(self._extract_worksheets(section, result_type))
-                        return self.create_text_message(text=json.dumps(worksheets, ensure_ascii=False))
+                            worksheets.extend(
+                                self._extract_worksheets(section, result_type)
+                            )
+                        return self.create_text_message(
+                            text=json.dumps(worksheets, ensure_ascii=False)
+                        )
                     else:
-                        worksheets = "|worksheetId|worksheetName|description|\n|---|---|---|"
+                        worksheets = (
+                            "|worksheetId|worksheetName|description|\n|---|---|---|"
+                        )
                         for section in res_json["data"]["sections"]:
                             worksheets += self._extract_worksheets(section, result_type)
                         return self.create_text_message(worksheets)
@@ -61,15 +69,23 @@ class ListWorksheetsTool(BuiltinTool):
                     f"Failed to list worksheets, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to list worksheets, something went wrong: {}".format(e))
+            return self.create_text_message(
+                "Failed to list worksheets, something went wrong: {}".format(e)
+            )
 
     def _extract_worksheets(self, section, type):
         items = []
         tables = ""
         for item in section.get("items", []):
-            if item.get("type") == 0 and ("notes" not in item or item.get("notes") != "NO"):
+            if item.get("type") == 0 and (
+                "notes" not in item or item.get("notes") != "NO"
+            ):
                 if type == "json":
-                    filtered_item = {"id": item["id"], "name": item["name"], "notes": item.get("notes", "")}
+                    filtered_item = {
+                        "id": item["id"],
+                        "name": item["name"],
+                        "notes": item.get("notes", ""),
+                    }
                     items.append(filtered_item)
                 else:
                     tables += f"\n|{item['id']}|{item['name']}|{item.get('notes', '')}|"

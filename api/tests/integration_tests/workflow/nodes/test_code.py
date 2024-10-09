@@ -15,7 +15,6 @@ from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntime
 from core.workflow.nodes.code.code_node import CodeNode
 from core.workflow.nodes.code.entities import CodeNodeData
 from models.workflow import WorkflowNodeExecutionStatus, WorkflowType
-from tests.integration_tests.workflow.nodes.__mock.code_executor import setup_code_executor_mock
 
 CODE_MAX_STRING_LENGTH = int(getenv("CODE_MAX_STRING_LENGTH", "10000"))
 
@@ -48,7 +47,10 @@ def init_code_node(code_config: dict):
 
     # construct variable pool
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
         conversation_variables=[],
@@ -60,7 +62,9 @@ def init_code_node(code_config: dict):
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config=code_config,
     )
 

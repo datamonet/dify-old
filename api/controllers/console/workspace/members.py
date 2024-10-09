@@ -5,7 +5,10 @@ import services
 from configs import dify_config
 from controllers.console import api
 from controllers.console.setup import setup_required
-from controllers.console.wraps import account_initialization_required, cloud_edition_billing_resource_check
+from controllers.console.wraps import (
+    account_initialization_required,
+    cloud_edition_billing_resource_check,
+)
 from extensions.ext_database import db
 from fields.member_fields import account_with_role_list_fields
 from libs.login import login_required
@@ -35,8 +38,12 @@ class MemberInviteEmailApi(Resource):
     @cloud_edition_billing_resource_check("members")
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("emails", type=str, required=True, location="json", action="append")
-        parser.add_argument("role", type=str, required=True, default="admin", location="json")
+        parser.add_argument(
+            "emails", type=str, required=True, location="json", action="append"
+        )
+        parser.add_argument(
+            "role", type=str, required=True, default="admin", location="json"
+        )
         parser.add_argument("language", type=str, required=False, location="json")
         args = parser.parse_args()
 
@@ -52,7 +59,11 @@ class MemberInviteEmailApi(Resource):
         for invitee_email in invitee_emails:
             try:
                 token = RegisterService.invite_new_member(
-                    inviter.current_tenant, invitee_email, interface_language, role=invitee_role, inviter=inviter
+                    inviter.current_tenant,
+                    invitee_email,
+                    interface_language,
+                    role=invitee_role,
+                    inviter=inviter,
                 )
                 invitation_results.append(
                     {
@@ -63,11 +74,17 @@ class MemberInviteEmailApi(Resource):
                 )
             except AccountAlreadyInTenantError:
                 invitation_results.append(
-                    {"status": "success", "email": invitee_email, "url": f"{console_web_url}/signin"}
+                    {
+                        "status": "success",
+                        "email": invitee_email,
+                        "url": f"{console_web_url}/signin",
+                    }
                 )
                 break
             except Exception as e:
-                invitation_results.append({"status": "failed", "email": invitee_email, "message": str(e)})
+                invitation_results.append(
+                    {"status": "failed", "email": invitee_email, "message": str(e)}
+                )
 
         return {
             "result": "success",
@@ -87,7 +104,9 @@ class MemberCancelInviteApi(Resource):
             abort(404)
 
         try:
-            TenantService.remove_member_from_tenant(current_user.current_tenant, member, current_user)
+            TenantService.remove_member_from_tenant(
+                current_user.current_tenant, member, current_user
+            )
         except services.errors.account.CannotOperateSelfError as e:
             return {"code": "cannot-operate-self", "message": str(e)}, 400
         except services.errors.account.NoPermissionError as e:
@@ -120,7 +139,9 @@ class MemberUpdateRoleApi(Resource):
             abort(404)
 
         try:
-            TenantService.update_member_role(current_user.current_tenant, member, new_role, current_user)
+            TenantService.update_member_role(
+                current_user.current_tenant, member, new_role, current_user
+            )
         except Exception as e:
             raise ValueError(str(e))
 
@@ -137,12 +158,16 @@ class DatasetOperatorMemberListApi(Resource):
     @account_initialization_required
     @marshal_with(account_with_role_list_fields)
     def get(self):
-        members = TenantService.get_dataset_operator_members(current_user.current_tenant)
+        members = TenantService.get_dataset_operator_members(
+            current_user.current_tenant
+        )
         return {"result": "success", "accounts": members}, 200
 
 
 api.add_resource(MemberListApi, "/workspaces/current/members")
 api.add_resource(MemberInviteEmailApi, "/workspaces/current/members/invite-email")
 api.add_resource(MemberCancelInviteApi, "/workspaces/current/members/<uuid:member_id>")
-api.add_resource(MemberUpdateRoleApi, "/workspaces/current/members/<uuid:member_id>/update-role")
+api.add_resource(
+    MemberUpdateRoleApi, "/workspaces/current/members/<uuid:member_id>/update-role"
+)
 api.add_resource(DatasetOperatorMemberListApi, "/workspaces/current/dataset-operators")

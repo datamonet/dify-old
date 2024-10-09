@@ -1,4 +1,8 @@
-from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
+from core.app.apps.base_app_queue_manager import (
+    AppQueueManager,
+    GenerateTaskStoppedError,
+    PublishFrom,
+)
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.app.entities.queue_entities import (
     AppQueueEvent,
@@ -13,7 +17,13 @@ from core.app.entities.queue_entities import (
 
 class MessageBasedAppQueueManager(AppQueueManager):
     def __init__(
-        self, task_id: str, user_id: str, invoke_from: InvokeFrom, conversation_id: str, app_mode: str, message_id: str
+        self,
+        task_id: str,
+        user_id: str,
+        invoke_from: InvokeFrom,
+        conversation_id: str,
+        app_mode: str,
+        message_id: str,
     ) -> None:
         super().__init__(task_id, user_id, invoke_from)
 
@@ -48,7 +58,11 @@ class MessageBasedAppQueueManager(AppQueueManager):
         self._q.put(message)
 
         if isinstance(
-            event, QueueStopEvent | QueueErrorEvent | QueueMessageEndEvent | QueueAdvancedChatMessageEndEvent
+            event,
+            QueueStopEvent
+            | QueueErrorEvent
+            | QueueMessageEndEvent
+            | QueueAdvancedChatMessageEndEvent,
         ):
             self.stop_listen()
 

@@ -53,7 +53,9 @@ class BasedGenerateTaskPipeline:
         self._output_moderation_handler = self._init_output_moderation()
         self._stream = stream
 
-    def _handle_error(self, event: QueueErrorEvent, message: Optional[Message] = None) -> Exception:
+    def _handle_error(
+        self, event: QueueErrorEvent, message: Optional[Message] = None
+    ) -> Exception:
         """
         Handle error event.
         :param event: event
@@ -68,10 +70,14 @@ class BasedGenerateTaskPipeline:
         elif isinstance(e, InvokeError | ValueError):
             err = e
         else:
-            err = Exception(e.description if getattr(e, "description", None) is not None else str(e))
+            err = Exception(
+                e.description if getattr(e, "description", None) is not None else str(e)
+            )
 
         if message:
-            refetch_message = db.session.query(Message).filter(Message.id == message.id).first()
+            refetch_message = (
+                db.session.query(Message).filter(Message.id == message.id).first()
+            )
 
             if refetch_message:
                 err_desc = self._error_to_desc(err)
@@ -106,7 +112,9 @@ class BasedGenerateTaskPipeline:
         :param e: exception
         :return:
         """
-        return ErrorStreamResponse(task_id=self._application_generate_entity.task_id, err=e)
+        return ErrorStreamResponse(
+            task_id=self._application_generate_entity.task_id, err=e
+        )
 
     def _ping_stream_response(self) -> PingStreamResponse:
         """
@@ -127,11 +135,16 @@ class BasedGenerateTaskPipeline:
             return OutputModeration(
                 tenant_id=app_config.tenant_id,
                 app_id=app_config.app_id,
-                rule=ModerationRule(type=sensitive_word_avoidance.type, config=sensitive_word_avoidance.config),
+                rule=ModerationRule(
+                    type=sensitive_word_avoidance.type,
+                    config=sensitive_word_avoidance.config,
+                ),
                 queue_manager=self._queue_manager,
             )
 
-    def _handle_output_moderation_when_task_finished(self, completion: str) -> Optional[str]:
+    def _handle_output_moderation_when_task_finished(
+        self, completion: str
+    ) -> Optional[str]:
         """
         Handle output moderation when task finished.
         :param completion: completion

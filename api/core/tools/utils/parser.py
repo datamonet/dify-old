@@ -10,7 +10,11 @@ from yaml import YAMLError, safe_load
 from core.tools.entities.common_entities import I18nObject
 from core.tools.entities.tool_bundle import ApiToolBundle
 from core.tools.entities.tool_entities import ApiProviderSchemaType, ToolParameter
-from core.tools.errors import ToolApiSchemaError, ToolNotSupportedError, ToolProviderNotFoundError
+from core.tools.errors import (
+    ToolApiSchemaError,
+    ToolNotSupportedError,
+    ToolProviderNotFoundError,
+)
 
 
 class ApiBasedToolSchemaParser:
@@ -32,7 +36,16 @@ class ApiBasedToolSchemaParser:
         # list all interfaces
         interfaces = []
         for path, path_item in openapi["paths"].items():
-            methods = ["get", "post", "put", "delete", "patch", "head", "options", "trace"]
+            methods = [
+                "get",
+                "post",
+                "put",
+                "delete",
+                "patch",
+                "head",
+                "options",
+                "trace",
+            ]
             for method in methods:
                 if method in path_item:
                     interfaces.append(
@@ -52,9 +65,12 @@ class ApiBasedToolSchemaParser:
                 for parameter in interface["operation"]["parameters"]:
                     tool_parameter = ToolParameter(
                         name=parameter["name"],
-                        label=I18nObject(en_US=parameter["name"], zh_Hans=parameter["name"]),
+                        label=I18nObject(
+                            en_US=parameter["name"], zh_Hans=parameter["name"]
+                        ),
                         human_description=I18nObject(
-                            en_US=parameter.get("description", ""), zh_Hans=parameter.get("description", "")
+                            en_US=parameter.get("description", ""),
+                            zh_Hans=parameter.get("description", ""),
                         ),
                         type=ToolParameter.ToolParameterType.STRING,
                         required=parameter.get("required", False),
@@ -88,11 +104,20 @@ class ApiBasedToolSchemaParser:
                             for ref in reference:
                                 root = root[ref]
                             # overwrite the content
-                            interface["operation"]["requestBody"]["content"][content_type]["schema"] = root
+                            interface["operation"]["requestBody"]["content"][
+                                content_type
+                            ]["schema"] = root
 
                     # parse body parameters
-                    if "schema" in interface["operation"]["requestBody"]["content"][content_type]:
-                        body_schema = interface["operation"]["requestBody"]["content"][content_type]["schema"]
+                    if (
+                        "schema"
+                        in interface["operation"]["requestBody"]["content"][
+                            content_type
+                        ]
+                    ):
+                        body_schema = interface["operation"]["requestBody"]["content"][
+                            content_type
+                        ]["schema"]
                         required = body_schema.get("required", [])
                         properties = body_schema.get("properties", {})
                         for name, property in properties.items():
@@ -100,7 +125,8 @@ class ApiBasedToolSchemaParser:
                                 name=name,
                                 label=I18nObject(en_US=name, zh_Hans=name),
                                 human_description=I18nObject(
-                                    en_US=property.get("description", ""), zh_Hans=property.get("description", "")
+                                    en_US=property.get("description", ""),
+                                    zh_Hans=property.get("description", ""),
                                 ),
                                 type=ToolParameter.ToolParameterType.STRING,
                                 required=name in required,
@@ -110,7 +136,9 @@ class ApiBasedToolSchemaParser:
                             )
 
                             # check if there is a type
-                            typ = ApiBasedToolSchemaParser._get_tool_parameter_type(property)
+                            typ = ApiBasedToolSchemaParser._get_tool_parameter_type(
+                                property
+                            )
                             if typ:
                                 tool.type = typ
 
@@ -188,10 +216,14 @@ class ApiBasedToolSchemaParser:
         openapi: dict = safe_load(yaml)
         if openapi is None:
             raise ToolApiSchemaError("Invalid openapi yaml.")
-        return ApiBasedToolSchemaParser.parse_openapi_to_tool_bundle(openapi, extra_info=extra_info, warning=warning)
+        return ApiBasedToolSchemaParser.parse_openapi_to_tool_bundle(
+            openapi, extra_info=extra_info, warning=warning
+        )
 
     @staticmethod
-    def parse_swagger_to_openapi(swagger: dict, extra_info: dict = None, warning: dict = None) -> dict:
+    def parse_swagger_to_openapi(
+        swagger: dict, extra_info: dict = None, warning: dict = None
+    ) -> dict:
         """
         parse swagger to openapi
 
@@ -199,7 +231,9 @@ class ApiBasedToolSchemaParser:
         :return: the openapi dict
         """
         # convert swagger to openapi
-        info = swagger.get("info", {"title": "Swagger", "description": "Swagger", "version": "1.0.0"})
+        info = swagger.get(
+            "info", {"title": "Swagger", "description": "Swagger", "version": "1.0.0"}
+        )
 
         servers = swagger.get("servers", [])
 
@@ -227,12 +261,16 @@ class ApiBasedToolSchemaParser:
             openapi["paths"][path] = {}
             for method, operation in path_item.items():
                 if "operationId" not in operation:
-                    raise ToolApiSchemaError(f"No operationId found in operation {method} {path}.")
+                    raise ToolApiSchemaError(
+                        f"No operationId found in operation {method} {path}."
+                    )
 
                 if ("summary" not in operation or len(operation["summary"]) == 0) and (
                     "description" not in operation or len(operation["description"]) == 0
                 ):
-                    warning["missing_summary"] = f"No summary or description found in operation {method} {path}."
+                    warning["missing_summary"] = (
+                        f"No summary or description found in operation {method} {path}."
+                    )
 
                 openapi["paths"][path][method] = {
                     "operationId": operation["operationId"],
@@ -243,7 +281,9 @@ class ApiBasedToolSchemaParser:
                 }
 
                 if "requestBody" in operation:
-                    openapi["paths"][path][method]["requestBody"] = operation["requestBody"]
+                    openapi["paths"][path][method]["requestBody"] = operation[
+                        "requestBody"
+                    ]
 
         # convert definitions
         for name, definition in swagger["definitions"].items():
@@ -276,7 +316,11 @@ class ApiBasedToolSchemaParser:
             raise ToolNotSupportedError("Only openapi is supported now.")
 
         # get openapi yaml
-        response = get(api_url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "}, timeout=5)
+        response = get(
+            api_url,
+            headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "},
+            timeout=5,
+        )
 
         if response.status_code != 200:
             raise ToolProviderNotFoundError("cannot get openapi yaml from url.")
@@ -347,8 +391,10 @@ class ApiBasedToolSchemaParser:
 
         # swagger parse error, fallback to openai plugin
         try:
-            openapi_plugin = ApiBasedToolSchemaParser.parse_openai_plugin_json_to_tool_bundle(
-                json_dumps(loaded_content), extra_info=extra_info, warning=warning
+            openapi_plugin = (
+                ApiBasedToolSchemaParser.parse_openai_plugin_json_to_tool_bundle(
+                    json_dumps(loaded_content), extra_info=extra_info, warning=warning
+                )
             )
             return openapi_plugin, ApiProviderSchemaType.OPENAI_PLUGIN.value
         except ToolNotSupportedError as e:

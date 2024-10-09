@@ -14,7 +14,11 @@ class DALLEProvider(BuiltinToolProviderController):
                 }
             ).invoke(
                 user_id="",
-                tool_parameters={"prompt": "cute girl, blue eyes, white hair, anime style", "size": "small", "n": 1},
+                tool_parameters={
+                    "prompt": "cute girl, blue eyes, white hair, anime style",
+                    "size": "small",
+                    "n": 1,
+                },
             )
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

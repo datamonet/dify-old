@@ -35,7 +35,9 @@ class ExecuteCodeTool(BuiltinTool):
             "additional_files": tool_parameters.get("additional_files", ""),
         }
 
-        response = post(url, data=json.dumps(payload), headers=headers, params=querystring)
+        response = post(
+            url, data=json.dumps(payload), headers=headers, params=querystring
+        )
 
         if response.status_code != 201:
             raise Exception(response.text)
@@ -58,4 +60,6 @@ class ExecuteCodeTool(BuiltinTool):
                 f"memory: {result.get('memory', '')} bytes"
             )
         else:
-            return self.create_text_message(text=f"Error retrieving submission details: {response.text}")
+            return self.create_text_message(
+                text=f"Error retrieving submission details: {response.text}"
+            )

@@ -1,12 +1,18 @@
 import re
 
-from core.app.app_config.entities import ExternalDataVariableEntity, VariableEntity, VariableEntityType
+from core.app.app_config.entities import (
+    ExternalDataVariableEntity,
+    VariableEntity,
+    VariableEntityType,
+)
 from core.external_data_tool.factory import ExternalDataToolFactory
 
 
 class BasicVariablesConfigManager:
     @classmethod
-    def convert(cls, config: dict) -> tuple[list[VariableEntity], list[ExternalDataVariableEntity]]:
+    def convert(
+        cls, config: dict
+    ) -> tuple[list[VariableEntity], list[ExternalDataVariableEntity]]:
         """
         Convert model config to model config
 
@@ -39,7 +45,9 @@ class BasicVariablesConfigManager:
 
                 external_data_variables.append(
                     ExternalDataVariableEntity(
-                        variable=variable["variable"], type=variable["type"], config=variable["config"]
+                        variable=variable["variable"],
+                        type=variable["type"],
+                        config=variable["config"],
                     )
                 )
             elif variable_type in {
@@ -65,7 +73,9 @@ class BasicVariablesConfigManager:
         return variable_entities, external_data_variables
 
     @classmethod
-    def validate_and_set_defaults(cls, tenant_id: str, config: dict) -> tuple[dict, list[str]]:
+    def validate_and_set_defaults(
+        cls, tenant_id: str, config: dict
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for user input form
 
@@ -73,16 +83,22 @@ class BasicVariablesConfigManager:
         :param config: app model config args
         """
         related_config_keys = []
-        config, current_related_config_keys = cls.validate_variables_and_set_defaults(config)
+        config, current_related_config_keys = cls.validate_variables_and_set_defaults(
+            config
+        )
         related_config_keys.extend(current_related_config_keys)
 
-        config, current_related_config_keys = cls.validate_external_data_tools_and_set_defaults(tenant_id, config)
+        config, current_related_config_keys = (
+            cls.validate_external_data_tools_and_set_defaults(tenant_id, config)
+        )
         related_config_keys.extend(current_related_config_keys)
 
         return config, related_config_keys
 
     @classmethod
-    def validate_variables_and_set_defaults(cls, config: dict) -> tuple[dict, list[str]]:
+    def validate_variables_and_set_defaults(
+        cls, config: dict
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for user input form
 
@@ -97,8 +113,16 @@ class BasicVariablesConfigManager:
         variables = []
         for item in config["user_input_form"]:
             key = list(item.keys())[0]
-            if key not in {"text-input", "select", "paragraph", "number", "external_data_tool"}:
-                raise ValueError("Keys in user_input_form list can only be 'text-input', 'paragraph'  or 'select'")
+            if key not in {
+                "text-input",
+                "select",
+                "paragraph",
+                "number",
+                "external_data_tool",
+            }:
+                raise ValueError(
+                    "Keys in user_input_form list can only be 'text-input', 'paragraph'  or 'select'"
+                )
 
             form_item = item[key]
             if "label" not in form_item:
@@ -113,9 +137,13 @@ class BasicVariablesConfigManager:
             if not isinstance(form_item["variable"], str):
                 raise ValueError("variable in user_input_form must be of string type")
 
-            pattern = re.compile(r"^(?!\d)[\u4e00-\u9fa5A-Za-z0-9_\U0001F300-\U0001F64F\U0001F680-\U0001F6FF]{1,100}$")
+            pattern = re.compile(
+                r"^(?!\d)[\u4e00-\u9fa5A-Za-z0-9_\U0001F300-\U0001F64F\U0001F680-\U0001F6FF]{1,100}$"
+            )
             if pattern.match(form_item["variable"]) is None:
-                raise ValueError("variable in user_input_form must be a string, and cannot start with a number")
+                raise ValueError(
+                    "variable in user_input_form must be a string, and cannot start with a number"
+                )
 
             variables.append(form_item["variable"])
 
@@ -130,15 +158,25 @@ class BasicVariablesConfigManager:
                     form_item["options"] = []
 
                 if not isinstance(form_item["options"], list):
-                    raise ValueError("options in user_input_form must be a list of strings")
+                    raise ValueError(
+                        "options in user_input_form must be a list of strings"
+                    )
 
-                if "default" in form_item and form_item["default"] and form_item["default"] not in form_item["options"]:
-                    raise ValueError("default value in user_input_form must be in the options list")
+                if (
+                    "default" in form_item
+                    and form_item["default"]
+                    and form_item["default"] not in form_item["options"]
+                ):
+                    raise ValueError(
+                        "default value in user_input_form must be in the options list"
+                    )
 
         return config, ["user_input_form"]
 
     @classmethod
-    def validate_external_data_tools_and_set_defaults(cls, tenant_id: str, config: dict) -> tuple[dict, list[str]]:
+    def validate_external_data_tools_and_set_defaults(
+        cls, tenant_id: str, config: dict
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for external data fetch feature
 
@@ -164,6 +202,8 @@ class BasicVariablesConfigManager:
             typ = tool["type"]
             config = tool["config"]
 
-            ExternalDataToolFactory.validate_config(name=typ, tenant_id=tenant_id, config=config)
+            ExternalDataToolFactory.validate_config(
+                name=typ, tenant_id=tenant_id, config=config
+            )
 
         return config, ["external_data_tools"]

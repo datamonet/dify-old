@@ -18,8 +18,12 @@ class ScrapeTool(BuiltinTool):
         options = {
             "limit": tool_parameters.get("limit", 0),
             "depth": tool_parameters.get("depth", 0),
-            "blacklist": tool_parameters.get("blacklist", "").split(",") if tool_parameters.get("blacklist") else [],
-            "whitelist": tool_parameters.get("whitelist", "").split(",") if tool_parameters.get("whitelist") else [],
+            "blacklist": tool_parameters.get("blacklist", "").split(",")
+            if tool_parameters.get("blacklist")
+            else [],
+            "whitelist": tool_parameters.get("whitelist", "").split(",")
+            if tool_parameters.get("whitelist")
+            else [],
             "readability": tool_parameters.get("readability", False),
         }
 

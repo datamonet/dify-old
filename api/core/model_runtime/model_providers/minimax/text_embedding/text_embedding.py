@@ -4,8 +4,12 @@ from typing import Optional
 
 from requests import post
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -15,7 +19,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 from core.model_runtime.model_providers.minimax.llm.errors import (
     BadRequestError,
     InsufficientAccountBalanceError,
@@ -34,7 +40,12 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
     api_base: str = "https://api.minimax.chat/v1/embeddings"
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -43,6 +54,7 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         api_key = credentials["minimax_api_key"]
@@ -52,7 +64,10 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
         if not api_key:
             raise CredentialsValidateFailedError("api_key is required")
         url = f"{self.api_base}?GroupId={group_id}"
-        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+        headers = {
+            "Authorization": "Bearer " + api_key,
+            "Content-Type": "application/json",
+        }
 
         data = {"model": "embo-01", "texts": texts, "type": "db"}
 
@@ -77,9 +92,13 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
         except InvalidAuthenticationError:
             raise InvalidAPIKeyError("Invalid api key")
         except KeyError as e:
-            raise InternalServerError(f"Failed to convert response to json: {e} with text: {response.text}")
+            raise InternalServerError(
+                f"Failed to convert response to json: {e} with text: {response.text}"
+            )
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=total_tokens)
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=total_tokens
+        )
 
         result = TextEmbeddingResult(model=model, embeddings=embeddings, usage=usage)
 
@@ -149,7 +168,9 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [BadRequestError, KeyError],
         }
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -160,7 +181,10 @@ class MinimaxTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

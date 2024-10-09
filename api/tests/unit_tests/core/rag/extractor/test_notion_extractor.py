@@ -8,7 +8,11 @@ page_id = "page1"
 
 
 extractor = notion_extractor.NotionExtractor(
-    notion_workspace_id="x", notion_obj_id="x", notion_page_type="page", tenant_id="x", notion_access_token="x"
+    notion_workspace_id="x",
+    notion_obj_id="x",
+    notion_page_type="page",
+    tenant_id="x",
+    notion_access_token="x",
 )
 
 
@@ -19,7 +23,13 @@ def _generate_page(page_title: str):
         "properties": {
             "Page": {
                 "type": "title",
-                "title": [{"type": "text", "text": {"content": page_title}, "plain_text": page_title}],
+                "title": [
+                    {
+                        "type": "text",
+                        "text": {"content": page_title},
+                        "plain_text": page_title,
+                    }
+                ],
             }
         },
     }

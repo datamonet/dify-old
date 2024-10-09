@@ -43,13 +43,28 @@ class JSONParseTool(BuiltinTool):
 
         ensure_ascii = tool_parameters.get("ensure_ascii", True)
         try:
-            result = self._insert(content, query, new_value, ensure_ascii, value_decode, index, create_path)
+            result = self._insert(
+                content,
+                query,
+                new_value,
+                ensure_ascii,
+                value_decode,
+                index,
+                create_path,
+            )
             return self.create_text_message(str(result))
         except Exception:
             return self.create_text_message("Failed to insert JSON content")
 
     def _insert(
-        self, origin_json, query, new_value, ensure_ascii: bool, value_decode: bool, index=None, create_path=False
+        self,
+        origin_json,
+        query,
+        new_value,
+        ensure_ascii: bool,
+        value_decode: bool,
+        index=None,
+        create_path=False,
     ):
         try:
             input_data = json.loads(origin_json)

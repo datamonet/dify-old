@@ -56,7 +56,9 @@ class UploadFileParser:
         return f"{image_preview_url}?timestamp={timestamp}&nonce={nonce}&sign={encoded_sign}"
 
     @classmethod
-    def verify_image_file_signature(cls, upload_file_id: str, timestamp: str, nonce: str, sign: str) -> bool:
+    def verify_image_file_signature(
+        cls, upload_file_id: str, timestamp: str, nonce: str, sign: str
+    ) -> bool:
         """
         verify signature
 
@@ -68,7 +70,9 @@ class UploadFileParser:
         """
         data_to_sign = f"image-preview|{upload_file_id}|{timestamp}|{nonce}"
         secret_key = dify_config.SECRET_KEY.encode()
-        recalculated_sign = hmac.new(secret_key, data_to_sign.encode(), hashlib.sha256).digest()
+        recalculated_sign = hmac.new(
+            secret_key, data_to_sign.encode(), hashlib.sha256
+        ).digest()
         recalculated_encoded_sign = base64.urlsafe_b64encode(recalculated_sign).decode()
 
         # verify signature

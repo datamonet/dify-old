@@ -6,13 +6,16 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class MapTool(BuiltinTool):
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage:
         """
         the api doc:
         https://docs.firecrawl.dev/api-reference/endpoint/map
         """
         app = FirecrawlApp(
-            api_key=self.runtime.credentials["firecrawl_api_key"], base_url=self.runtime.credentials["base_url"]
+            api_key=self.runtime.credentials["firecrawl_api_key"],
+            base_url=self.runtime.credentials["base_url"],
         )
         payload = {}
         payload["search"] = tool_parameters.get("search")

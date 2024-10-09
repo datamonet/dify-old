@@ -94,7 +94,13 @@ class GoogleJobsTool(BuiltinTool):
 
         api_key = self.runtime.credentials["searchapi_api_key"]
         result = SearchAPI(api_key).run(
-            query, result_type=result_type, google_domain=google_domain, gl=gl, hl=hl, location=location, ltype=ltype
+            query,
+            result_type=result_type,
+            google_domain=google_domain,
+            gl=gl,
+            hl=hl,
+            location=location,
+            ltype=ltype,
         )
 
         if result_type == "text":

@@ -4,8 +4,15 @@ from time import sleep
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
-from core.model_runtime.entities.message_entities import AssistantPromptMessage, UserPromptMessage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
+from core.model_runtime.entities.message_entities import (
+    AssistantPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.entities.model_entities import AIModelEntity
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.minimax.llm.llm import MinimaxLargeLanguageModel
@@ -24,7 +31,11 @@ def test_validate_credentials_for_chat_model():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="abab5.5-chat", credentials={"minimax_api_key": "invalid_key", "minimax_group_id": "invalid_key"}
+            model="abab5.5-chat",
+            credentials={
+                "minimax_api_key": "invalid_key",
+                "minimax_group_id": "invalid_key",
+            },
         )
 
     model.validate_credentials(
@@ -88,7 +99,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_invoke_with_search():
@@ -120,7 +135,11 @@ def test_invoke_with_search():
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
         total_message += chunk.delta.message.content
-        assert len(chunk.delta.message.content) > 0 if not chunk.delta.finish_reason else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if not chunk.delta.finish_reason
+            else True
+        )
 
     assert "参考资料" in total_message
 

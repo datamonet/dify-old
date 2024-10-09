@@ -23,7 +23,9 @@ class VectorizerTool(BuiltinTool):
             mode = "preview"
 
         if not api_key_name or not api_key_value:
-            raise ToolProviderCredentialValidationError("Please input api key name and value")
+            raise ToolProviderCredentialValidationError(
+                "Please input api key name and value"
+            )
 
         image_id = tool_parameters.get("image_id", "")
         if not image_id:
@@ -34,7 +36,9 @@ class VectorizerTool(BuiltinTool):
         else:
             image_binary = self.get_variable_file(self.VariableKey.IMAGE)
             if not image_binary:
-                return self.create_text_message("Image not found, please request user to generate image firstly.")
+                return self.create_text_message(
+                    "Image not found, please request user to generate image firstly."
+                )
 
         response = post(
             "https://vectorizer.ai/api/v1/vectorize",
@@ -49,7 +53,9 @@ class VectorizerTool(BuiltinTool):
 
         return [
             self.create_text_message("the vectorized svg is saved as an image."),
-            self.create_blob_message(blob=response.content, meta={"mime_type": "image/svg+xml"}),
+            self.create_blob_message(
+                blob=response.content, meta={"mime_type": "image/svg+xml"}
+            ),
         ]
 
     def get_runtime_parameters(self) -> list[ToolParameter]:

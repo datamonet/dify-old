@@ -27,12 +27,20 @@ class GoogleTranslate(BuiltinTool):
             result = self._translate(content, dest)
             return self.create_text_message(str(result))
         except Exception:
-            return self.create_text_message("Translation service error, please check the network")
+            return self.create_text_message(
+                "Translation service error, please check the network"
+            )
 
     def _translate(self, content: str, dest: str) -> str:
         try:
             url = "https://translate.googleapis.com/translate_a/single"
-            params = {"client": "gtx", "sl": "auto", "tl": dest, "dt": "t", "q": content}
+            params = {
+                "client": "gtx",
+                "sl": "auto",
+                "tl": dest,
+                "dt": "t",
+                "q": content,
+            }
 
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"

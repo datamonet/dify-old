@@ -30,7 +30,9 @@ class ConversationVariablesApi(Resource):
             .order_by(ConversationVariable.created_at)
         )
         if args["conversation_id"]:
-            stmt = stmt.where(ConversationVariable.conversation_id == args["conversation_id"])
+            stmt = stmt.where(
+                ConversationVariable.conversation_id == args["conversation_id"]
+            )
         else:
             raise ValueError("conversation_id is required")
 

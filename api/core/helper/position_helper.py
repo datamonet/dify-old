@@ -7,7 +7,9 @@ from configs import dify_config
 from core.tools.utils.yaml_utils import load_yaml_file
 
 
-def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> dict[str, int]:
+def get_position_map(
+    folder_path: str, *, file_name: str = "_position.yaml"
+) -> dict[str, int]:
     """
     Get the mapping from name to index from a YAML file
     :param folder_path:
@@ -16,11 +18,17 @@ def get_position_map(folder_path: str, *, file_name: str = "_position.yaml") -> 
     """
     position_file_path = os.path.join(folder_path, file_name)
     yaml_content = load_yaml_file(file_path=position_file_path, default_value=[])
-    positions = [item.strip() for item in yaml_content if item and isinstance(item, str) and item.strip()]
+    positions = [
+        item.strip()
+        for item in yaml_content
+        if item and isinstance(item, str) and item.strip()
+    ]
     return {name: index for index, name in enumerate(positions)}
 
 
-def get_tool_position_map(folder_path: str, file_name: str = "_position.yaml") -> dict[str, int]:
+def get_tool_position_map(
+    folder_path: str, file_name: str = "_position.yaml"
+) -> dict[str, int]:
     """
     Get the mapping for tools from name to index from a YAML file.
     :param folder_path:
@@ -35,7 +43,9 @@ def get_tool_position_map(folder_path: str, file_name: str = "_position.yaml") -
     )
 
 
-def get_provider_position_map(folder_path: str, file_name: str = "_position.yaml") -> dict[str, int]:
+def get_provider_position_map(
+    folder_path: str, file_name: str = "_position.yaml"
+) -> dict[str, int]:
     """
     Get the mapping for providers from name to index from a YAML file.
     :param folder_path:
@@ -49,7 +59,9 @@ def get_provider_position_map(folder_path: str, file_name: str = "_position.yaml
     )
 
 
-def pin_position_map(original_position_map: dict[str, int], pin_list: list[str]) -> dict[str, int]:
+def pin_position_map(
+    original_position_map: dict[str, int], pin_list: list[str]
+) -> dict[str, int]:
     """
     Pin the items in the pin list to the beginning of the position map.
     Overall logic: exclude > include > pin
@@ -57,7 +69,9 @@ def pin_position_map(original_position_map: dict[str, int], pin_list: list[str])
     :param pin_list: the list of pins to be put at the beginning
     :return: the sorted position map
     """
-    positions = sorted(original_position_map.keys(), key=lambda x: original_position_map[x])
+    positions = sorted(
+        original_position_map.keys(), key=lambda x: original_position_map[x]
+    )
 
     # Add pins to position map
     position_map = {name: idx for idx, name in enumerate(pin_list)}
@@ -96,7 +110,9 @@ def is_filtered(
 
     if name in exclude_set:  # exclude_set is prioritized
         return True
-    if include_set and name not in include_set:  # filter out only if include_set is not empty
+    if (
+        include_set and name not in include_set
+    ):  # filter out only if include_set is not empty
         return True
     return False
 

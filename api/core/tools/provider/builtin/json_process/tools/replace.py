@@ -48,19 +48,32 @@ class JSONReplaceTool(BuiltinTool):
                 if not replace_pattern:
                     return self.create_text_message("Invalid parameter replace_pattern")
                 result = self._replace_pattern(
-                    content, query, replace_pattern, replace_value, ensure_ascii, value_decode
+                    content,
+                    query,
+                    replace_pattern,
+                    replace_value,
+                    ensure_ascii,
+                    value_decode,
                 )
             elif replace_model == "key":
                 result = self._replace_key(content, query, replace_value, ensure_ascii)
             elif replace_model == "value":
-                result = self._replace_value(content, query, replace_value, ensure_ascii, value_decode)
+                result = self._replace_value(
+                    content, query, replace_value, ensure_ascii, value_decode
+                )
             return self.create_text_message(str(result))
         except Exception:
             return self.create_text_message("Failed to replace JSON content")
 
     # Replace pattern
     def _replace_pattern(
-        self, content: str, query: str, replace_pattern: str, replace_value: str, ensure_ascii: bool, value_decode: bool
+        self,
+        content: str,
+        query: str,
+        replace_pattern: str,
+        replace_value: str,
+        ensure_ascii: bool,
+        value_decode: bool,
     ) -> str:
         try:
             input_data = json.loads(content)
@@ -83,7 +96,9 @@ class JSONReplaceTool(BuiltinTool):
             return str(e)
 
     # Replace key
-    def _replace_key(self, content: str, query: str, replace_value: str, ensure_ascii: bool) -> str:
+    def _replace_key(
+        self, content: str, query: str, replace_value: str, ensure_ascii: bool
+    ) -> str:
         try:
             input_data = json.loads(content)
             expr = parse(query)
@@ -108,7 +123,12 @@ class JSONReplaceTool(BuiltinTool):
 
     # Replace value
     def _replace_value(
-        self, content: str, query: str, replace_value: str, ensure_ascii: bool, value_decode: bool
+        self,
+        content: str,
+        query: str,
+        replace_value: str,
+        ensure_ascii: bool,
+        value_decode: bool,
     ) -> str:
         try:
             input_data = json.loads(content)

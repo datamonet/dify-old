@@ -20,9 +20,13 @@ class JinaProvider(ModelProvider):
 
             # Use `jina-embeddings-v3` model for validate,
             # no matter what model you pass in, text completion model or chat model
-            model_instance.validate_credentials(model="jina-embeddings-v3", credentials=credentials)
+            model_instance.validate_credentials(
+                model="jina-embeddings-v3", credentials=credentials
+            )
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
+            logger.exception(
+                f"{self.get_provider_schema().provider} credentials validate failed"
+            )
             raise ex

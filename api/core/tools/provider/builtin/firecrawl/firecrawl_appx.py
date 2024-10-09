@@ -18,7 +18,10 @@ class FirecrawlApp:
             raise ValueError("API key is required")
 
     def _prepare_headers(self, idempotency_key: str | None = None):
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
         if idempotency_key:
             headers["Idempotency-Key"] = idempotency_key
         return headers
@@ -64,7 +67,12 @@ class FirecrawlApp:
         return response
 
     def crawl_url(
-        self, url: str, wait: bool = True, poll_interval: int = 5, idempotency_key: str | None = None, **kwargs
+        self,
+        url: str,
+        wait: bool = True,
+        poll_interval: int = 5,
+        idempotency_key: str | None = None,
+        **kwargs,
     ):
         endpoint = f"{self.base_url}/v1/crawl"
         headers = self._prepare_headers(idempotency_key)
@@ -84,7 +92,9 @@ class FirecrawlApp:
         endpoint = f"{self.base_url}/v1/crawl/{job_id}"
         response = self._request("GET", endpoint)
         if response is None:
-            raise HTTPError(f"Failed to check status for job {job_id} after multiple retries")
+            raise HTTPError(
+                f"Failed to check status for job {job_id} after multiple retries"
+            )
         return response
 
     def cancel_crawl_job(self, job_id: str):

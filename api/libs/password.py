@@ -23,4 +23,6 @@ def hash_password(password_str, salt_byte):
 
 def compare_password(password_str, password_hashed_base64, salt_base64):
     # compare password for login
-    return hash_password(password_str, base64.b64decode(salt_base64)) == base64.b64decode(password_hashed_base64)
+    return hash_password(
+        password_str, base64.b64decode(salt_base64)
+    ) == base64.b64decode(password_hashed_base64)

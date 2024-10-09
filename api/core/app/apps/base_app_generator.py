@@ -5,12 +5,19 @@ from core.app.app_config.entities import AppConfig, VariableEntity, VariableEnti
 
 
 class BaseAppGenerator:
-    def _get_cleaned_inputs(self, user_inputs: Optional[Mapping[str, Any]], app_config: AppConfig) -> Mapping[str, Any]:
+    def _get_cleaned_inputs(
+        self, user_inputs: Optional[Mapping[str, Any]], app_config: AppConfig
+    ) -> Mapping[str, Any]:
         user_inputs = user_inputs or {}
         # Filter input variables from form configuration, handle required fields, default values, and option values
         variables = app_config.variables
-        filtered_inputs = {var.variable: self._validate_input(inputs=user_inputs, var=var) for var in variables}
-        filtered_inputs = {k: self._sanitize_value(v) for k, v in filtered_inputs.items()}
+        filtered_inputs = {
+            var.variable: self._validate_input(inputs=user_inputs, var=var)
+            for var in variables
+        }
+        filtered_inputs = {
+            k: self._sanitize_value(v) for k, v in filtered_inputs.items()
+        }
         return filtered_inputs
 
     def _validate_input(self, *, inputs: Mapping[str, Any], var: VariableEntity):
@@ -30,7 +37,9 @@ class BaseAppGenerator:
             and user_input_value
             and not isinstance(user_input_value, str)
         ):
-            raise ValueError(f"(type '{var.type}') {var.variable} in input form must be a string")
+            raise ValueError(
+                f"(type '{var.type}') {var.variable} in input form must be a string"
+            )
         if var.type == VariableEntityType.NUMBER and isinstance(user_input_value, str):
             # may raise ValueError if user_input_value is not a valid number
             try:
@@ -43,10 +52,18 @@ class BaseAppGenerator:
         if var.type == VariableEntityType.SELECT:
             options = var.options or []
             if user_input_value not in options:
-                raise ValueError(f"{var.variable} in input form must be one of the following: {options}")
+                raise ValueError(
+                    f"{var.variable} in input form must be one of the following: {options}"
+                )
         elif var.type in {VariableEntityType.TEXT_INPUT, VariableEntityType.PARAGRAPH}:
-            if var.max_length and user_input_value and len(user_input_value) > var.max_length:
-                raise ValueError(f"{var.variable} in input form must be less than {var.max_length} characters")
+            if (
+                var.max_length
+                and user_input_value
+                and len(user_input_value) > var.max_length
+            ):
+                raise ValueError(
+                    f"{var.variable} in input form must be less than {var.max_length} characters"
+                )
 
         return user_input_value
 

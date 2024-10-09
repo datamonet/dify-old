@@ -3,20 +3,22 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessageTool,
     SystemPromptMessage,
     UserPromptMessage,
 )
-from core.model_runtime.entities.model_entities import AIModelEntity, ModelType
+from core.model_runtime.entities.model_entities import AIModelEntity
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 from core.model_runtime.model_providers.upstage.llm.llm import UpstageLargeLanguageModel
 
 """FOR MOCK FIXTURES, DO NOT REMOVE"""
-from tests.integration_tests.model_runtime.__mock.openai import setup_openai_mock
 
 
 def test_predefined_models():
@@ -33,10 +35,13 @@ def test_validate_credentials_for_chat_model(setup_openai_mock):
 
     with pytest.raises(CredentialsValidateFailedError):
         # model name to gpt-3.5-turbo because of mocking
-        model.validate_credentials(model="gpt-3.5-turbo", credentials={"upstage_api_key": "invalid_key"})
+        model.validate_credentials(
+            model="gpt-3.5-turbo", credentials={"upstage_api_key": "invalid_key"}
+        )
 
     model.validate_credentials(
-        model="solar-1-mini-chat", credentials={"upstage_api_key": os.environ.get("UPSTAGE_API_KEY")}
+        model="solar-1-mini-chat",
+        credentials={"upstage_api_key": os.environ.get("UPSTAGE_API_KEY")},
     )
 
 
@@ -92,7 +97,10 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],
@@ -103,7 +111,9 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 description="Get the current stock price",
                 parameters={
                     "type": "object",
-                    "properties": {"symbol": {"type": "string", "description": "The stock symbol"}},
+                    "properties": {
+                        "symbol": {"type": "string", "description": "The stock symbol"}
+                    },
                     "required": ["symbol"],
                 },
             ),
@@ -141,7 +151,11 @@ def test_invoke_stream_chat_model(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
         if chunk.delta.finish_reason is not None:
             assert chunk.delta.usage is not None
             assert chunk.delta.usage.completion_tokens > 0
@@ -174,7 +188,10 @@ def test_get_num_tokens():
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],

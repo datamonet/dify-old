@@ -13,7 +13,10 @@ from core.indexing_runner import IndexingRunner
 from core.rag.extractor.entity.extract_setting import ExtractSetting
 from core.rag.extractor.notion_extractor import NotionExtractor
 from extensions.ext_database import db
-from fields.data_source_fields import integrate_list_fields, integrate_notion_info_list_fields
+from fields.data_source_fields import (
+    integrate_list_fields,
+    integrate_notion_info_list_fields,
+)
 from libs.login import login_required
 from models.dataset import Document
 from models.source import DataSourceOauthBinding
@@ -44,7 +47,9 @@ class DataSourceApi(Resource):
         integrate_data = []
         for provider in providers:
             # existing_integrate = next((ai for ai in data_source_integrates if ai.provider == provider), None)
-            existing_integrates = filter(lambda item: item.provider == provider, data_source_integrates)
+            existing_integrates = filter(
+                lambda item: item.provider == provider, data_source_integrates
+            )
             if existing_integrates:
                 for existing_integrate in list(existing_integrates):
                     integrate_data.append(
@@ -78,14 +83,18 @@ class DataSourceApi(Resource):
     def patch(self, binding_id, action):
         binding_id = str(binding_id)
         action = str(action)
-        data_source_binding = DataSourceOauthBinding.query.filter_by(id=binding_id).first()
+        data_source_binding = DataSourceOauthBinding.query.filter_by(
+            id=binding_id
+        ).first()
         if data_source_binding is None:
             raise NotFound("Data source binding not found.")
         # enable binding
         if action == "enable":
             if data_source_binding.disabled:
                 data_source_binding.disabled = False
-                data_source_binding.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+                data_source_binding.updated_at = datetime.datetime.now(
+                    datetime.timezone.utc
+                ).replace(tzinfo=None)
                 db.session.add(data_source_binding)
                 db.session.commit()
             else:
@@ -94,7 +103,9 @@ class DataSourceApi(Resource):
         if action == "disable":
             if not data_source_binding.disabled:
                 data_source_binding.disabled = True
-                data_source_binding.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+                data_source_binding.updated_at = datetime.datetime.now(
+                    datetime.timezone.utc
+                ).replace(tzinfo=None)
                 db.session.add(data_source_binding)
                 db.session.commit()
             else:
@@ -165,7 +176,8 @@ class DataSourceNotionApi(Resource):
                 DataSourceOauthBinding.tenant_id == current_user.current_tenant_id,
                 DataSourceOauthBinding.provider == "notion",
                 DataSourceOauthBinding.disabled == False,
-                DataSourceOauthBinding.source_info["workspace_id"] == f'"{workspace_id}"',
+                DataSourceOauthBinding.source_info["workspace_id"]
+                == f'"{workspace_id}"',
             )
         ).first()
         if not data_source_binding:
@@ -187,11 +199,27 @@ class DataSourceNotionApi(Resource):
     @account_initialization_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("notion_info_list", type=list, required=True, nullable=True, location="json")
-        parser.add_argument("process_rule", type=dict, required=True, nullable=True, location="json")
-        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
+            "notion_info_list", type=list, required=True, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "process_rule", type=dict, required=True, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "doc_form",
+            type=str,
+            default="text_model",
+            required=False,
+            nullable=False,
+            location="json",
+        )
+        parser.add_argument(
+            "doc_language",
+            type=str,
+            default="English",
+            required=False,
+            nullable=False,
+            location="json",
         )
         args = parser.parse_args()
         # validate args
@@ -257,14 +285,21 @@ class DataSourceNotionDocumentSyncApi(Resource):
         return 200
 
 
-api.add_resource(DataSourceApi, "/data-source/integrates", "/data-source/integrates/<uuid:binding_id>/<string:action>")
+api.add_resource(
+    DataSourceApi,
+    "/data-source/integrates",
+    "/data-source/integrates/<uuid:binding_id>/<string:action>",
+)
 api.add_resource(DataSourceNotionListApi, "/notion/pre-import/pages")
 api.add_resource(
     DataSourceNotionApi,
     "/notion/workspaces/<uuid:workspace_id>/pages/<uuid:page_id>/<string:page_type>/preview",
     "/datasets/notion-indexing-estimate",
 )
-api.add_resource(DataSourceNotionDatasetSyncApi, "/datasets/<uuid:dataset_id>/notion/sync")
 api.add_resource(
-    DataSourceNotionDocumentSyncApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/notion/sync"
+    DataSourceNotionDatasetSyncApi, "/datasets/<uuid:dataset_id>/notion/sync"
+)
+api.add_resource(
+    DataSourceNotionDocumentSyncApi,
+    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/notion/sync",
 )

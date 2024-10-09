@@ -19,7 +19,12 @@ class SerplyApi:
 
     def run(self, query: str, **kwargs: typing.Any) -> str:
         """Run query through Serply and parse result."""
-        params = {"q": query, "hl": kwargs.get("hl", "en"), "gl": kwargs.get("gl", "US"), "num": kwargs.get("num", 10)}
+        params = {
+            "q": query,
+            "hl": kwargs.get("hl", "en"),
+            "gl": kwargs.get("gl", "US"),
+            "num": kwargs.get("num", 10),
+        }
         location = kwargs.get("location", "US")
 
         headers = {
@@ -86,5 +91,7 @@ class WebSearchTool(BuiltinTool):
         location = tool_parameters.get("location", "None")
 
         api_key = self.runtime.credentials["serply_api_key"]
-        result = SerplyApi(api_key).run(query=query, num=num, gl=gl, hl=hl, location=location)
+        result = SerplyApi(api_key).run(
+            query=query, num=num, gl=gl, hl=hl, location=location
+        )
         return self.create_text_message(text=result)

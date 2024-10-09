@@ -99,7 +99,9 @@ class TavilySearchTool(BuiltinTool):
     A tool for searching Tavily using a given query.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invokes the Tavily search tool with the given user ID and tool parameters.
 

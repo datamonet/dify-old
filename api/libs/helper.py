@@ -149,7 +149,9 @@ def timezone(timezone_string):
     if timezone_string and timezone_string in available_timezones():
         return timezone_string
 
-    error = "{timezone_string} is not a valid timezone.".format(timezone_string=timezone_string)
+    error = "{timezone_string} is not a valid timezone.".format(
+        timezone_string=timezone_string
+    )
     raise ValueError(error)
 
 
@@ -178,18 +180,24 @@ def generate_text_hash(text: str) -> str:
 
 def compact_generate_response(response: Union[dict, RateLimitGenerator]) -> Response:
     if isinstance(response, dict):
-        return Response(response=json.dumps(response), status=200, mimetype="application/json")
+        return Response(
+            response=json.dumps(response), status=200, mimetype="application/json"
+        )
     else:
 
         def generate() -> Generator:
             yield from response
 
-        return Response(stream_with_context(generate()), status=200, mimetype="text/event-stream")
+        return Response(
+            stream_with_context(generate()), status=200, mimetype="text/event-stream"
+        )
 
 
 class TokenManager:
     @classmethod
-    def generate_token(cls, account: Account, token_type: str, additional_data: dict = None) -> str:
+    def generate_token(
+        cls, account: Account, token_type: str, additional_data: dict = None
+    ) -> str:
         old_token = cls._get_current_token_for_account(account.id, token_type)
         if old_token:
             if isinstance(old_token, bytes):
@@ -197,7 +205,11 @@ class TokenManager:
             cls.revoke_token(old_token, token_type)
 
         token = str(uuid.uuid4())
-        token_data = {"account_id": account.id, "email": account.email, "token_type": token_type}
+        token_data = {
+            "account_id": account.id,
+            "email": account.email,
+            "token_type": token_type,
+        }
         if additional_data:
             token_data.update(additional_data)
 
@@ -228,13 +240,17 @@ class TokenManager:
         return token_data
 
     @classmethod
-    def _get_current_token_for_account(cls, account_id: str, token_type: str) -> Optional[str]:
+    def _get_current_token_for_account(
+        cls, account_id: str, token_type: str
+    ) -> Optional[str]:
         key = cls._get_account_token_key(account_id, token_type)
         current_token = redis_client.get(key)
         return current_token
 
     @classmethod
-    def _set_current_token_for_account(cls, account_id: str, token: str, token_type: str, expiry_hours: int):
+    def _set_current_token_for_account(
+        cls, account_id: str, token: str, token_type: str, expiry_hours: int
+    ):
         key = cls._get_account_token_key(account_id, token_type)
         redis_client.setex(key, expiry_hours * 60 * 60, token)
 

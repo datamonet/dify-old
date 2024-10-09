@@ -11,7 +11,8 @@ class Text2ImageTool(BuiltinTool):
         self, user_id: str, tool_parameters: dict[str, Any]
     ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
         app = GetImgAIApp(
-            api_key=self.runtime.credentials["getimg_api_key"], base_url=self.runtime.credentials["base_url"]
+            api_key=self.runtime.credentials["getimg_api_key"],
+            base_url=self.runtime.credentials["base_url"],
         )
 
         options = {
@@ -28,10 +29,14 @@ class Text2ImageTool(BuiltinTool):
         }
         options = {k: v for k, v in options.items() if v}
 
-        text2image_result = app.text2image(mode=tool_parameters.get("mode", "essential-v2"), params=options, wait=True)
+        text2image_result = app.text2image(
+            mode=tool_parameters.get("mode", "essential-v2"), params=options, wait=True
+        )
 
         if not isinstance(text2image_result, str):
-            text2image_result = json.dumps(text2image_result, ensure_ascii=False, indent=4)
+            text2image_result = json.dumps(
+                text2image_result, ensure_ascii=False, indent=4
+            )
 
         if not text2image_result:
             return self.create_text_message("getimg.ai request failed.")

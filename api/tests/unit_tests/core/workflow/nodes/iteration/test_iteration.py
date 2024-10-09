@@ -11,7 +11,9 @@ from core.workflow.graph_engine.entities.graph_init_params import GraphInitParam
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
 from core.workflow.nodes.event import RunCompletedEvent
 from core.workflow.nodes.iteration.iteration_node import IterationNode
-from core.workflow.nodes.template_transform.template_transform_node import TemplateTransformNode
+from core.workflow.nodes.template_transform.template_transform_node import (
+    TemplateTransformNode,
+)
 from models.workflow import WorkflowNodeExecutionStatus, WorkflowType
 
 
@@ -52,7 +54,10 @@ def test_run():
             },
         ],
         "nodes": [
-            {"data": {"title": "Start", "type": "start", "variables": []}, "id": "start"},
+            {
+                "data": {"title": "Start", "type": "start", "variables": []},
+                "id": "start",
+            },
             {
                 "data": {
                     "iterator_selector": ["pe", "list_output"],
@@ -80,12 +85,18 @@ def test_run():
                     "template": "{{ arg1 }} 123",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
+                    "variables": [
+                        {"value_selector": ["sys", "query"], "variable": "arg1"}
+                    ],
                 },
                 "id": "tt",
             },
             {
-                "data": {"answer": "{{#iteration-1.output#}}88888", "title": "answer 3", "type": "answer"},
+                "data": {
+                    "answer": "{{#iteration-1.output#}}88888",
+                    "title": "answer 3",
+                    "type": "answer",
+                },
                 "id": "answer-3",
             },
             {
@@ -106,7 +117,12 @@ def test_run():
                 "id": "if-else",
             },
             {
-                "data": {"answer": "no hi", "iteration_id": "iteration-1", "title": "answer 4", "type": "answer"},
+                "data": {
+                    "answer": "no hi",
+                    "iteration_id": "iteration-1",
+                    "title": "answer 4",
+                    "type": "answer",
+                },
                 "id": "answer-4",
             },
             {
@@ -119,7 +135,12 @@ def test_run():
                         "provider": "openai",
                     },
                     "parameters": [
-                        {"description": "test", "name": "list_output", "required": False, "type": "array[string]"}
+                        {
+                            "description": "test",
+                            "name": "list_output",
+                            "required": False,
+                            "type": "array[string]",
+                        }
                     ],
                     "query": ["sys", "query"],
                     "reasoning_mode": "prompt",
@@ -162,7 +183,9 @@ def test_run():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=pool, start_at=time.perf_counter()
+        ),
         config={
             "data": {
                 "iterator_selector": ["pe", "list_output"],
@@ -253,7 +276,10 @@ def test_run_parallel():
             },
         ],
         "nodes": [
-            {"data": {"title": "Start", "type": "start", "variables": []}, "id": "start"},
+            {
+                "data": {"title": "Start", "type": "start", "variables": []},
+                "id": "start",
+            },
             {
                 "data": {
                     "iterator_selector": ["pe", "list_output"],
@@ -289,7 +315,9 @@ def test_run_parallel():
                     "template": "{{ arg1 }} 123",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
+                    "variables": [
+                        {"value_selector": ["sys", "query"], "variable": "arg1"}
+                    ],
                 },
                 "id": "tt",
             },
@@ -299,12 +327,18 @@ def test_run_parallel():
                     "template": "{{ arg1 }} 321",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
+                    "variables": [
+                        {"value_selector": ["sys", "query"], "variable": "arg1"}
+                    ],
                 },
                 "id": "tt-2",
             },
             {
-                "data": {"answer": "{{#iteration-1.output#}}88888", "title": "answer 3", "type": "answer"},
+                "data": {
+                    "answer": "{{#iteration-1.output#}}88888",
+                    "title": "answer 3",
+                    "type": "answer",
+                },
                 "id": "answer-3",
             },
             {
@@ -325,7 +359,12 @@ def test_run_parallel():
                 "id": "if-else",
             },
             {
-                "data": {"answer": "no hi", "iteration_id": "iteration-1", "title": "answer 4", "type": "answer"},
+                "data": {
+                    "answer": "no hi",
+                    "iteration_id": "iteration-1",
+                    "title": "answer 4",
+                    "type": "answer",
+                },
                 "id": "answer-4",
             },
             {
@@ -338,7 +377,12 @@ def test_run_parallel():
                         "provider": "openai",
                     },
                     "parameters": [
-                        {"description": "test", "name": "list_output", "required": False, "type": "array[string]"}
+                        {
+                            "description": "test",
+                            "name": "list_output",
+                            "required": False,
+                            "type": "array[string]",
+                        }
                     ],
                     "query": ["sys", "query"],
                     "reasoning_mode": "prompt",
@@ -381,7 +425,9 @@ def test_run_parallel():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=pool, start_at=time.perf_counter()
+        ),
         config={
             "data": {
                 "iterator_selector": ["pe", "list_output"],

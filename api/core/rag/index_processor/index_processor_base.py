@@ -27,10 +27,17 @@ class BaseIndexProcessor(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def load(self, dataset: Dataset, documents: list[Document], with_keywords: bool = True):
+    def load(
+        self, dataset: Dataset, documents: list[Document], with_keywords: bool = True
+    ):
         raise NotImplementedError
 
-    def clean(self, dataset: Dataset, node_ids: Optional[list[str]], with_keywords: bool = True):
+    def clean(
+        self,
+        dataset: Dataset,
+        node_ids: Optional[list[str]],
+        with_keywords: bool = True,
+    ):
         raise NotImplementedError
 
     @abstractmethod
@@ -45,7 +52,9 @@ class BaseIndexProcessor(ABC):
     ) -> list[Document]:
         raise NotImplementedError
 
-    def _get_splitter(self, processing_rule: dict, embedding_model_instance: Optional[ModelInstance]) -> TextSplitter:
+    def _get_splitter(
+        self, processing_rule: dict, embedding_model_instance: Optional[ModelInstance]
+    ) -> TextSplitter:
         """
         Get the NodeParser object according to the processing rule.
         """
@@ -53,9 +62,16 @@ class BaseIndexProcessor(ABC):
             # The user-defined segmentation rule
             rules = processing_rule["rules"]
             segmentation = rules["segmentation"]
-            max_segmentation_tokens_length = dify_config.INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH
-            if segmentation["max_tokens"] < 50 or segmentation["max_tokens"] > max_segmentation_tokens_length:
-                raise ValueError(f"Custom segment length should be between 50 and {max_segmentation_tokens_length}.")
+            max_segmentation_tokens_length = (
+                dify_config.INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH
+            )
+            if (
+                segmentation["max_tokens"] < 50
+                or segmentation["max_tokens"] > max_segmentation_tokens_length
+            ):
+                raise ValueError(
+                    f"Custom segment length should be between 50 and {max_segmentation_tokens_length}."
+                )
 
             separator = segmentation["separator"]
             if separator:
@@ -71,8 +87,12 @@ class BaseIndexProcessor(ABC):
         else:
             # Automatic segmentation
             character_splitter = EnhanceRecursiveCharacterTextSplitter.from_encoder(
-                chunk_size=DatasetProcessRule.AUTOMATIC_RULES["segmentation"]["max_tokens"],
-                chunk_overlap=DatasetProcessRule.AUTOMATIC_RULES["segmentation"]["chunk_overlap"],
+                chunk_size=DatasetProcessRule.AUTOMATIC_RULES["segmentation"][
+                    "max_tokens"
+                ],
+                chunk_overlap=DatasetProcessRule.AUTOMATIC_RULES["segmentation"][
+                    "chunk_overlap"
+                ],
                 separators=["\n\n", "。", ". ", " ", ""],
                 embedding_model_instance=embedding_model_instance,
             )

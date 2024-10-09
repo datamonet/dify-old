@@ -6,14 +6,24 @@ from core.workflow.nodes.http_request.http_request_node import HttpRequestNode
 from core.workflow.nodes.if_else.if_else_node import IfElseNode
 from core.workflow.nodes.iteration.iteration_node import IterationNode
 from core.workflow.nodes.iteration.iteration_start_node import IterationStartNode
-from core.workflow.nodes.knowledge_retrieval.knowledge_retrieval_node import KnowledgeRetrievalNode
+from core.workflow.nodes.knowledge_retrieval.knowledge_retrieval_node import (
+    KnowledgeRetrievalNode,
+)
 from core.workflow.nodes.llm.llm_node import LLMNode
-from core.workflow.nodes.parameter_extractor.parameter_extractor_node import ParameterExtractorNode
-from core.workflow.nodes.question_classifier.question_classifier_node import QuestionClassifierNode
+from core.workflow.nodes.parameter_extractor.parameter_extractor_node import (
+    ParameterExtractorNode,
+)
+from core.workflow.nodes.question_classifier.question_classifier_node import (
+    QuestionClassifierNode,
+)
 from core.workflow.nodes.start.start_node import StartNode
-from core.workflow.nodes.template_transform.template_transform_node import TemplateTransformNode
+from core.workflow.nodes.template_transform.template_transform_node import (
+    TemplateTransformNode,
+)
 from core.workflow.nodes.tool.tool_node import ToolNode
-from core.workflow.nodes.variable_aggregator.variable_aggregator_node import VariableAggregatorNode
+from core.workflow.nodes.variable_aggregator.variable_aggregator_node import (
+    VariableAggregatorNode,
+)
 from core.workflow.nodes.variable_assigner import VariableAssignerNode
 
 node_classes = {

@@ -4,7 +4,10 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from configs import dify_config
-from core.entities.model_entities import ModelWithProviderEntity, ProviderModelWithStatusEntity
+from core.entities.model_entities import (
+    ModelWithProviderEntity,
+    ProviderModelWithStatusEntity,
+)
 from core.entities.provider_entities import QuotaConfiguration
 from core.model_runtime.entities.common_entities import I18nObject
 from core.model_runtime.entities.model_entities import ModelType
@@ -71,15 +74,20 @@ class ProviderResponse(BaseModel):
     def __init__(self, **data) -> None:
         super().__init__(**data)
 
-        url_prefix = dify_config.CONSOLE_API_URL + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        url_prefix = (
+            dify_config.CONSOLE_API_URL
+            + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        )
         if self.icon_small is not None:
             self.icon_small = I18nObject(
-                en_US=f"{url_prefix}/icon_small/en_US", zh_Hans=f"{url_prefix}/icon_small/zh_Hans"
+                en_US=f"{url_prefix}/icon_small/en_US",
+                zh_Hans=f"{url_prefix}/icon_small/zh_Hans",
             )
 
         if self.icon_large is not None:
             self.icon_large = I18nObject(
-                en_US=f"{url_prefix}/icon_large/en_US", zh_Hans=f"{url_prefix}/icon_large/zh_Hans"
+                en_US=f"{url_prefix}/icon_large/en_US",
+                zh_Hans=f"{url_prefix}/icon_large/zh_Hans",
             )
 
 
@@ -98,15 +106,20 @@ class ProviderWithModelsResponse(BaseModel):
     def __init__(self, **data) -> None:
         super().__init__(**data)
 
-        url_prefix = dify_config.CONSOLE_API_URL + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        url_prefix = (
+            dify_config.CONSOLE_API_URL
+            + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        )
         if self.icon_small is not None:
             self.icon_small = I18nObject(
-                en_US=f"{url_prefix}/icon_small/en_US", zh_Hans=f"{url_prefix}/icon_small/zh_Hans"
+                en_US=f"{url_prefix}/icon_small/en_US",
+                zh_Hans=f"{url_prefix}/icon_small/zh_Hans",
             )
 
         if self.icon_large is not None:
             self.icon_large = I18nObject(
-                en_US=f"{url_prefix}/icon_large/en_US", zh_Hans=f"{url_prefix}/icon_large/zh_Hans"
+                en_US=f"{url_prefix}/icon_large/en_US",
+                zh_Hans=f"{url_prefix}/icon_large/zh_Hans",
             )
 
 
@@ -118,15 +131,20 @@ class SimpleProviderEntityResponse(SimpleProviderEntity):
     def __init__(self, **data) -> None:
         super().__init__(**data)
 
-        url_prefix = dify_config.CONSOLE_API_URL + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        url_prefix = (
+            dify_config.CONSOLE_API_URL
+            + f"/console/api/workspaces/current/model-providers/{self.provider}"
+        )
         if self.icon_small is not None:
             self.icon_small = I18nObject(
-                en_US=f"{url_prefix}/icon_small/en_US", zh_Hans=f"{url_prefix}/icon_small/zh_Hans"
+                en_US=f"{url_prefix}/icon_small/en_US",
+                zh_Hans=f"{url_prefix}/icon_small/zh_Hans",
             )
 
         if self.icon_large is not None:
             self.icon_large = I18nObject(
-                en_US=f"{url_prefix}/icon_large/en_US", zh_Hans=f"{url_prefix}/icon_large/zh_Hans"
+                en_US=f"{url_prefix}/icon_large/en_US",
+                zh_Hans=f"{url_prefix}/icon_large/zh_Hans",
             )
 
 

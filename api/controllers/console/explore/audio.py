@@ -17,7 +17,11 @@ from controllers.console.app.error import (
     UnsupportedAudioTypeError,
 )
 from controllers.console.explore.wraps import InstalledAppResource
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from models.model import AppMode
 from services.audio_service import AudioService
@@ -36,7 +40,9 @@ class ChatAudioApi(InstalledAppResource):
         file = request.files["file"]
 
         try:
-            response = AudioService.transcript_asr(app_model=app_model, file=file, end_user=None)
+            response = AudioService.transcript_asr(
+                app_model=app_model, file=file, end_user=None
+            )
 
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
@@ -89,10 +95,14 @@ class ChatTextApi(InstalledAppResource):
                 voice = args.get("voice") or text_to_speech.get("voice")
             else:
                 try:
-                    voice = args.get("voice") or app_model.app_model_config.text_to_speech_dict.get("voice")
+                    voice = args.get(
+                        "voice"
+                    ) or app_model.app_model_config.text_to_speech_dict.get("voice")
                 except Exception:
                     voice = None
-            response = AudioService.transcript_tts(app_model=app_model, message_id=message_id, voice=voice, text=text)
+            response = AudioService.transcript_tts(
+                app_model=app_model, message_id=message_id, voice=voice, text=text
+            )
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
             logging.exception("App model config broken.")
@@ -120,7 +130,15 @@ class ChatTextApi(InstalledAppResource):
             raise InternalServerError()
 
 
-api.add_resource(ChatAudioApi, "/installed-apps/<uuid:installed_app_id>/audio-to-text", endpoint="installed_app_audio")
-api.add_resource(ChatTextApi, "/installed-apps/<uuid:installed_app_id>/text-to-audio", endpoint="installed_app_text")
+api.add_resource(
+    ChatAudioApi,
+    "/installed-apps/<uuid:installed_app_id>/audio-to-text",
+    endpoint="installed_app_audio",
+)
+api.add_resource(
+    ChatTextApi,
+    "/installed-apps/<uuid:installed_app_id>/text-to-audio",
+    endpoint="installed_app_text",
+)
 # api.add_resource(ChatTextApiWithMessageId, '/installed-apps/<uuid:installed_app_id>/text-to-audio/message-id',
 #                  endpoint='installed_app_text_with_message_id')

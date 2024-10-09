@@ -1,7 +1,11 @@
 from unittest.mock import patch
 
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult, UserFrom
+from core.workflow.entities.node_entities import (
+    NodeRunMetadataKey,
+    NodeRunResult,
+    UserFrom,
+)
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.event import (
@@ -156,7 +160,11 @@ def test_run_parallel_in_workflow(mock_close, mock_remove):
     graph = Graph.init(graph_config=graph_config)
 
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"}, user_inputs={"query": "hi"}
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
+        user_inputs={"query": "hi"},
     )
 
     graph_engine = GraphEngine(
@@ -179,7 +187,8 @@ def test_run_parallel_in_workflow(mock_close, mock_remove):
         contents = ["hi", "bye", "good morning"]
 
         yield RunStreamChunkEvent(
-            chunk_content=contents[int(self.node_id[-1]) - 1], from_variable_selector=[self.node_id, "text"]
+            chunk_content=contents[int(self.node_id[-1]) - 1],
+            from_variable_selector=[self.node_id, "text"],
         )
 
         yield RunCompletedEvent(
@@ -210,7 +219,12 @@ def test_run_parallel_in_workflow(mock_close, mock_remove):
             assert not isinstance(item, NodeRunFailedEvent)
             assert not isinstance(item, GraphRunFailedEvent)
 
-            if isinstance(item, BaseNodeEvent) and item.route_node_state.node_id in {"llm2", "llm3", "end1", "end2"}:
+            if isinstance(item, BaseNodeEvent) and item.route_node_state.node_id in {
+                "llm2",
+                "llm3",
+                "end1",
+                "end2",
+            }:
                 assert item.parallel_id is not None
 
         assert len(items) == 18
@@ -254,7 +268,10 @@ def test_run_parallel_in_chatflow(mock_close, mock_remove):
         ],
         "nodes": [
             {"data": {"type": "start", "title": "start"}, "id": "start"},
-            {"data": {"type": "answer", "title": "answer1", "answer": "1"}, "id": "answer1"},
+            {
+                "data": {"type": "answer", "title": "answer1", "answer": "1"},
+                "id": "answer1",
+            },
             {
                 "data": {"type": "answer", "title": "answer2", "answer": "2"},
                 "id": "answer2",
@@ -385,7 +402,12 @@ def test_run_branch(mock_close, mock_remove):
                 "id": "start",
             },
             {
-                "data": {"answer": "1 {{#start.uid#}}", "title": "Answer", "type": "answer", "variables": []},
+                "data": {
+                    "answer": "1 {{#start.uid#}}",
+                    "title": "Answer",
+                    "type": "answer",
+                    "variables": [],
+                },
                 "id": "answer-1",
             },
             {

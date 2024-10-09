@@ -8,13 +8,18 @@ from core.agent.fc_agent_runner import FunctionCallAgentRunner
 from core.app.apps.agent_chat.app_config_manager import AgentChatAppConfig
 from core.app.apps.base_app_queue_manager import AppQueueManager, PublishFrom
 from core.app.apps.base_app_runner import AppRunner
-from core.app.entities.app_invoke_entities import AgentChatAppGenerateEntity, ModelConfigWithCredentialsEntity
+from core.app.entities.app_invoke_entities import (
+    AgentChatAppGenerateEntity,
+    ModelConfigWithCredentialsEntity,
+)
 from core.app.entities.queue_entities import QueueAnnotationReplyEvent
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.llm_entities import LLMMode, LLMUsage
 from core.model_runtime.entities.model_entities import ModelFeature, ModelPropertyKey
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.moderation.base import ModerationError
 from core.tools.entities.tool_entities import ToolRuntimeVariablePool
 from extensions.ext_database import db
@@ -77,7 +82,9 @@ class AgentChatAppRunner(AppRunner):
                 model=application_generate_entity.model_conf.model,
             )
 
-            memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
+            memory = TokenBufferMemory(
+                conversation=conversation, model_instance=model_instance
+            )
 
         # organize all inputs and template to prompt messages
         # Include: prompt template, inputs, query(optional), files(optional)
@@ -125,7 +132,9 @@ class AgentChatAppRunner(AppRunner):
 
             if annotation_reply:
                 queue_manager.publish(
-                    QueueAnnotationReplyEvent(message_annotation_id=annotation_reply.id),
+                    QueueAnnotationReplyEvent(
+                        message_annotation_id=annotation_reply.id
+                    ),
                     PublishFrom.APPLICATION_MANAGER,
                 )
 
@@ -176,11 +185,15 @@ class AgentChatAppRunner(AppRunner):
 
         # load tool variables
         tool_conversation_variables = self._load_tool_variables(
-            conversation_id=conversation.id, user_id=application_generate_entity.user_id, tenant_id=app_config.tenant_id
+            conversation_id=conversation.id,
+            user_id=application_generate_entity.user_id,
+            tenant_id=app_config.tenant_id,
         )
 
         # convert db variables to tool variables
-        tool_variables = self._convert_db_variables_to_tool_variables(tool_conversation_variables)
+        tool_variables = self._convert_db_variables_to_tool_variables(
+            tool_conversation_variables
+        )
 
         # init model instance
         model_instance = ModelInstance(
@@ -199,24 +212,40 @@ class AgentChatAppRunner(AppRunner):
 
         # change function call strategy based on LLM model
         llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-        model_schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
+        model_schema = llm_model.get_model_schema(
+            model_instance.model, model_instance.credentials
+        )
 
-        if {ModelFeature.MULTI_TOOL_CALL, ModelFeature.TOOL_CALL}.intersection(model_schema.features or []):
+        if {ModelFeature.MULTI_TOOL_CALL, ModelFeature.TOOL_CALL}.intersection(
+            model_schema.features or []
+        ):
             agent_entity.strategy = AgentEntity.Strategy.FUNCTION_CALLING
 
-        conversation = db.session.query(Conversation).filter(Conversation.id == conversation.id).first()
+        conversation = (
+            db.session.query(Conversation)
+            .filter(Conversation.id == conversation.id)
+            .first()
+        )
         message = db.session.query(Message).filter(Message.id == message.id).first()
         db.session.close()
 
         # start agent runner
         if agent_entity.strategy == AgentEntity.Strategy.CHAIN_OF_THOUGHT:
             # check LLM mode
-            if model_schema.model_properties.get(ModelPropertyKey.MODE) == LLMMode.CHAT.value:
+            if (
+                model_schema.model_properties.get(ModelPropertyKey.MODE)
+                == LLMMode.CHAT.value
+            ):
                 runner_cls = CotChatAgentRunner
-            elif model_schema.model_properties.get(ModelPropertyKey.MODE) == LLMMode.COMPLETION.value:
+            elif (
+                model_schema.model_properties.get(ModelPropertyKey.MODE)
+                == LLMMode.COMPLETION.value
+            ):
                 runner_cls = CotCompletionAgentRunner
             else:
-                raise ValueError(f"Invalid LLM mode: {model_schema.model_properties.get(ModelPropertyKey.MODE)}")
+                raise ValueError(
+                    f"Invalid LLM mode: {model_schema.model_properties.get(ModelPropertyKey.MODE)}"
+                )
         elif agent_entity.strategy == AgentEntity.Strategy.FUNCTION_CALLING:
             runner_cls = FunctionCallAgentRunner
         else:
@@ -253,7 +282,9 @@ class AgentChatAppRunner(AppRunner):
             agent=True,
         )
 
-    def _load_tool_variables(self, conversation_id: str, user_id: str, tenant_id: str) -> ToolConversationVariables:
+    def _load_tool_variables(
+        self, conversation_id: str, user_id: str, tenant_id: str
+    ) -> ToolConversationVariables:
         """
         load tool variables from database
         """
@@ -307,7 +338,9 @@ class AgentChatAppRunner(AppRunner):
         :return:
         """
         agent_thoughts = (
-            db.session.query(MessageAgentThought).filter(MessageAgentThought.message_id == message.id).all()
+            db.session.query(MessageAgentThought)
+            .filter(MessageAgentThought.message_id == message.id)
+            .all()
         )
 
         all_message_tokens = 0
@@ -320,5 +353,8 @@ class AgentChatAppRunner(AppRunner):
         model_type_instance = cast(LargeLanguageModel, model_type_instance)
 
         return model_type_instance._calc_response_usage(
-            model_config.model, model_config.credentials, all_message_tokens, all_answer_tokens
+            model_config.model,
+            model_config.credentials,
+            all_message_tokens,
+            all_answer_tokens,
         )

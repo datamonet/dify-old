@@ -13,7 +13,6 @@ from core.workflow.graph_engine.entities.graph_init_params import GraphInitParam
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
 from core.workflow.nodes.http_request.http_request_node import HttpRequestNode
 from models.workflow import WorkflowType
-from tests.integration_tests.workflow.nodes.__mock.http import setup_http_mock
 
 
 def init_http_node(config: dict):
@@ -44,7 +43,10 @@ def init_http_node(config: dict):
 
     # construct variable pool
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
         conversation_variables=[],
@@ -56,7 +58,9 @@ def init_http_node(config: dict):
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config=config,
     )
 
@@ -243,7 +247,10 @@ def test_x_www_form_urlencoded(setup_http_mock):
                 },
                 "headers": "X-Header:123",
                 "params": "A:b",
-                "body": {"type": "x-www-form-urlencoded", "data": "a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}"},
+                "body": {
+                    "type": "x-www-form-urlencoded",
+                    "data": "a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}",
+                },
             },
         }
     )
@@ -275,7 +282,10 @@ def test_form_data(setup_http_mock):
                 },
                 "headers": "X-Header:123",
                 "params": "A:b",
-                "body": {"type": "form-data", "data": "a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}"},
+                "body": {
+                    "type": "form-data",
+                    "data": "a:{{#a.b123.args1#}}\nb:{{#a.b123.args2#}}",
+                },
             },
         }
     )
@@ -366,7 +376,10 @@ def test_multi_colons_parse(setup_http_mock):
                 },
                 "params": "Referer:http://example1.com\nRedirect:http://example2.com",
                 "headers": "Referer:http://example3.com\nRedirect:http://example4.com",
-                "body": {"type": "form-data", "data": "Referer:http://example5.com\nRedirect:http://example6.com"},
+                "body": {
+                    "type": "form-data",
+                    "data": "Referer:http://example5.com\nRedirect:http://example6.com",
+                },
             },
         }
     )
@@ -376,6 +389,11 @@ def test_multi_colons_parse(setup_http_mock):
     assert result.outputs is not None
     resp = result.outputs
 
-    assert urlencode({"Redirect": "http://example2.com"}) in result.process_data.get("request", "")
-    assert 'form-data; name="Redirect"\n\nhttp://example6.com' in result.process_data.get("request", "")
+    assert urlencode({"Redirect": "http://example2.com"}) in result.process_data.get(
+        "request", ""
+    )
+    assert (
+        'form-data; name="Redirect"\n\nhttp://example6.com'
+        in result.process_data.get("request", "")
+    )
     assert "http://example3.com" == resp.get("headers", {}).get("referer")

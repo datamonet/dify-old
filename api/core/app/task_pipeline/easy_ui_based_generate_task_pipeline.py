@@ -4,8 +4,14 @@ import time
 from collections.abc import Generator
 from typing import Optional, Union, cast
 
-from constants.tts_auto_play_timeout import TTS_AUTO_PLAY_TIMEOUT, TTS_AUTO_PLAY_YIELD_CPU_TIME
-from core.app.apps.advanced_chat.app_generator_tts_publisher import AppGeneratorTTSPublisher, AudioTrunk
+from constants.tts_auto_play_timeout import (
+    TTS_AUTO_PLAY_TIMEOUT,
+    TTS_AUTO_PLAY_YIELD_CPU_TIME,
+)
+from core.app.apps.advanced_chat.app_generator_tts_publisher import (
+    AppGeneratorTTSPublisher,
+    AudioTrunk,
+)
 from core.app.apps.base_app_queue_manager import AppQueueManager, PublishFrom
 from core.app.entities.app_invoke_entities import (
     AgentChatAppGenerateEntity,
@@ -39,14 +45,23 @@ from core.app.entities.task_entities import (
     MessageEndStreamResponse,
     StreamResponse,
 )
-from core.app.task_pipeline.based_generate_task_pipeline import BasedGenerateTaskPipeline
+from core.app.task_pipeline.based_generate_task_pipeline import (
+    BasedGenerateTaskPipeline,
+)
 from core.app.task_pipeline.message_cycle_manage import MessageCycleManage
 from core.model_manager import ModelInstance
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta, LLMUsage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+    LLMUsage,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
 )
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.utils.encoders import jsonable_encoder
 from core.ops.entities.trace_entity import TraceTaskName
 from core.ops.ops_trace_manager import TraceQueueManager, TraceTask
@@ -66,12 +81,16 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
     """
 
     _task_state: EasyUITaskState
-    _application_generate_entity: Union[ChatAppGenerateEntity, CompletionAppGenerateEntity, AgentChatAppGenerateEntity]
+    _application_generate_entity: Union[
+        ChatAppGenerateEntity, CompletionAppGenerateEntity, AgentChatAppGenerateEntity
+    ]
 
     def __init__(
         self,
         application_generate_entity: Union[
-            ChatAppGenerateEntity, CompletionAppGenerateEntity, AgentChatAppGenerateEntity
+            ChatAppGenerateEntity,
+            CompletionAppGenerateEntity,
+            AgentChatAppGenerateEntity,
         ],
         queue_manager: AppQueueManager,
         conversation: Conversation,
@@ -110,7 +129,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
     ) -> Union[
         ChatbotAppBlockingResponse,
         CompletionAppBlockingResponse,
-        Generator[Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None],
+        Generator[
+            Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None
+        ],
     ]:
         """
         Process generate task pipeline.
@@ -126,7 +147,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
                 self._conversation, self._application_generate_entity.query
             )
 
-        generator = self._wrapper_process_stream_response(trace_manager=self._application_generate_entity.trace_manager)
+        generator = self._wrapper_process_stream_response(
+            trace_manager=self._application_generate_entity.trace_manager
+        )
         if self._stream:
             return self._to_stream_response(generator)
         else:
@@ -181,13 +204,17 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
 
     def _to_stream_response(
         self, generator: Generator[StreamResponse, None, None]
-    ) -> Generator[Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None]:
+    ) -> Generator[
+        Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None
+    ]:
         """
         To stream response.
         :return:
         """
         for stream_response in generator:
-            if isinstance(self._application_generate_entity, CompletionAppGenerateEntity):
+            if isinstance(
+                self._application_generate_entity, CompletionAppGenerateEntity
+            ):
                 yield CompletionAppStreamResponse(
                     message_id=self._message.id,
                     created_at=int(self._message.created_at.timestamp()),
@@ -216,14 +243,20 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         tenant_id = self._application_generate_entity.app_config.tenant_id
         task_id = self._application_generate_entity.task_id
         publisher = None
-        text_to_speech_dict = self._app_config.app_model_config_dict.get("text_to_speech")
+        text_to_speech_dict = self._app_config.app_model_config_dict.get(
+            "text_to_speech"
+        )
         if (
             text_to_speech_dict
             and text_to_speech_dict.get("autoPlay") == "enabled"
             and text_to_speech_dict.get("enabled")
         ):
-            publisher = AppGeneratorTTSPublisher(tenant_id, text_to_speech_dict.get("voice", None))
-        for response in self._process_stream_response(publisher=publisher, trace_manager=trace_manager):
+            publisher = AppGeneratorTTSPublisher(
+                tenant_id, text_to_speech_dict.get("voice", None)
+            )
+        for response in self._process_stream_response(
+            publisher=publisher, trace_manager=trace_manager
+        ):
             while True:
                 audio_response = self._listen_audio_msg(publisher, task_id)
                 if audio_response:
@@ -248,10 +281,13 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
             else:
                 start_listener_time = time.time()
                 yield MessageAudioStreamResponse(audio=audio.audio, task_id=task_id)
-        yield MessageAudioEndStreamResponse(audio="", task_id=task_id)
+        if publisher:
+            yield MessageAudioEndStreamResponse(audio="", task_id=task_id)
 
     def _process_stream_response(
-        self, publisher: AppGeneratorTTSPublisher, trace_manager: Optional[TraceQueueManager] = None
+        self,
+        publisher: AppGeneratorTTSPublisher,
+        trace_manager: Optional[TraceQueueManager] = None,
     ) -> Generator[StreamResponse, None, None]:
         """
         Process stream response.
@@ -273,12 +309,18 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
                     self._handle_stop(event)
 
                 # handle output moderation
-                output_moderation_answer = self._handle_output_moderation_when_task_finished(
-                    self._task_state.llm_result.message.content
+                output_moderation_answer = (
+                    self._handle_output_moderation_when_task_finished(
+                        self._task_state.llm_result.message.content
+                    )
                 )
                 if output_moderation_answer:
-                    self._task_state.llm_result.message.content = output_moderation_answer
-                    yield self._message_replace_to_stream_response(answer=output_moderation_answer)
+                    self._task_state.llm_result.message.content = (
+                        output_moderation_answer
+                    )
+                    yield self._message_replace_to_stream_response(
+                        answer=output_moderation_answer
+                    )
 
                 # Save message
                 self._save_message(trace_manager)
@@ -315,7 +357,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
                 if isinstance(event, QueueLLMChunkEvent):
                     yield self._message_to_stream_response(delta_text, self._message.id)
                 else:
-                    yield self._agent_message_to_stream_response(delta_text, self._message.id)
+                    yield self._agent_message_to_stream_response(
+                        delta_text, self._message.id
+                    )
             elif isinstance(event, QueueMessageReplaceEvent):
                 yield self._message_replace_to_stream_response(answer=event.text)
             elif isinstance(event, QueuePingEvent):
@@ -335,8 +379,14 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         llm_result = self._task_state.llm_result
         usage = llm_result.usage
 
-        self._message = db.session.query(Message).filter(Message.id == self._message.id).first()
-        self._conversation = db.session.query(Conversation).filter(Conversation.id == self._conversation.id).first()
+        self._message = (
+            db.session.query(Message).filter(Message.id == self._message.id).first()
+        )
+        self._conversation = (
+            db.session.query(Conversation)
+            .filter(Conversation.id == self._conversation.id)
+            .first()
+        )
 
         self._message.message = PromptMessageUtil.prompt_messages_to_prompt_for_saving(
             self._model_config.mode, self._task_state.llm_result.prompt_messages
@@ -345,7 +395,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         self._message.message_unit_price = usage.prompt_unit_price
         self._message.message_price_unit = usage.prompt_price_unit
         self._message.answer = (
-            PromptTemplateParser.remove_template_variables(llm_result.message.content.strip())
+            PromptTemplateParser.remove_template_variables(
+                llm_result.message.content.strip()
+            )
             if llm_result.message.content
             else ""
         )
@@ -356,7 +408,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         self._message.total_price = usage.total_price
         self._message.currency = usage.currency
         self._message.message_metadata = (
-            json.dumps(jsonable_encoder(self._task_state.metadata)) if self._task_state.metadata else None
+            json.dumps(jsonable_encoder(self._task_state.metadata))
+            if self._task_state.metadata
+            else None
         )
 
         db.session.commit()
@@ -364,7 +418,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         if trace_manager:
             trace_manager.add_trace_task(
                 TraceTask(
-                    TraceTaskName.MESSAGE_TRACE, conversation_id=self._conversation.id, message_id=self._message.id
+                    TraceTaskName.MESSAGE_TRACE,
+                    conversation_id=self._conversation.id,
+                    message_id=self._message.id,
                 )
             )
 
@@ -372,7 +428,8 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
             self._message,
             application_generate_entity=self._application_generate_entity,
             conversation=self._conversation,
-            is_first_message=self._application_generate_entity.app_config.app_mode in {AppMode.AGENT_CHAT, AppMode.CHAT}
+            is_first_message=self._application_generate_entity.app_config.app_mode
+            in {AppMode.AGENT_CHAT, AppMode.CHAT}
             and self._application_generate_entity.conversation_id is None,
             extras=self._application_generate_entity.extras,
         )
@@ -386,17 +443,22 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         model = model_config.model
 
         model_instance = ModelInstance(
-            provider_model_bundle=model_config.provider_model_bundle, model=model_config.model
+            provider_model_bundle=model_config.provider_model_bundle,
+            model=model_config.model,
         )
 
         # calculate num tokens
         prompt_tokens = 0
         if event.stopped_by != QueueStopEvent.StopBy.ANNOTATION_REPLY:
-            prompt_tokens = model_instance.get_llm_num_tokens(self._task_state.llm_result.prompt_messages)
+            prompt_tokens = model_instance.get_llm_num_tokens(
+                self._task_state.llm_result.prompt_messages
+            )
 
         completion_tokens = 0
         if event.stopped_by == QueueStopEvent.StopBy.USER_MANUAL:
-            completion_tokens = model_instance.get_llm_num_tokens([self._task_state.llm_result.message])
+            completion_tokens = model_instance.get_llm_num_tokens(
+                [self._task_state.llm_result.message]
+            )
 
         credentials = model_config.credentials
 
@@ -412,17 +474,23 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         Message end to stream response.
         :return:
         """
-        self._task_state.metadata["usage"] = jsonable_encoder(self._task_state.llm_result.usage)
+        self._task_state.metadata["usage"] = jsonable_encoder(
+            self._task_state.llm_result.usage
+        )
 
         extras = {}
         if self._task_state.metadata:
             extras["metadata"] = self._task_state.metadata
 
         return MessageEndStreamResponse(
-            task_id=self._application_generate_entity.task_id, id=self._message.id, **extras
+            task_id=self._application_generate_entity.task_id,
+            id=self._message.id,
+            **extras,
         )
 
-    def _agent_message_to_stream_response(self, answer: str, message_id: str) -> AgentMessageStreamResponse:
+    def _agent_message_to_stream_response(
+        self, answer: str, message_id: str
+    ) -> AgentMessageStreamResponse:
         """
         Agent message to stream response.
         :param answer: answer
@@ -430,17 +498,23 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         :return:
         """
         return AgentMessageStreamResponse(
-            task_id=self._application_generate_entity.task_id, id=message_id, answer=answer
+            task_id=self._application_generate_entity.task_id,
+            id=message_id,
+            answer=answer,
         )
 
-    def _agent_thought_to_stream_response(self, event: QueueAgentThoughtEvent) -> Optional[AgentThoughtStreamResponse]:
+    def _agent_thought_to_stream_response(
+        self, event: QueueAgentThoughtEvent
+    ) -> Optional[AgentThoughtStreamResponse]:
         """
         Agent thought to stream response.
         :param event: agent thought event
         :return:
         """
         agent_thought: MessageAgentThought = (
-            db.session.query(MessageAgentThought).filter(MessageAgentThought.id == event.agent_thought_id).first()
+            db.session.query(MessageAgentThought)
+            .filter(MessageAgentThought.id == event.agent_thought_id)
+            .first()
         )
         db.session.refresh(agent_thought)
         db.session.close()
@@ -469,7 +543,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
         if self._output_moderation_handler:
             if self._output_moderation_handler.should_direct_output():
                 # stop subscribe new token when output moderation should direct output
-                self._task_state.llm_result.message.content = self._output_moderation_handler.get_final_output()
+                self._task_state.llm_result.message.content = (
+                    self._output_moderation_handler.get_final_output()
+                )
                 self._queue_manager.publish(
                     QueueLLMChunkEvent(
                         chunk=LLMResultChunk(
@@ -477,7 +553,9 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
                             prompt_messages=self._task_state.llm_result.prompt_messages,
                             delta=LLMResultChunkDelta(
                                 index=0,
-                                message=AssistantPromptMessage(content=self._task_state.llm_result.message.content),
+                                message=AssistantPromptMessage(
+                                    content=self._task_state.llm_result.message.content
+                                ),
                             ),
                         )
                     ),
@@ -485,7 +563,8 @@ class EasyUIBasedGenerateTaskPipeline(BasedGenerateTaskPipeline, MessageCycleMan
                 )
 
                 self._queue_manager.publish(
-                    QueueStopEvent(stopped_by=QueueStopEvent.StopBy.OUTPUT_MODERATION), PublishFrom.TASK_PIPELINE
+                    QueueStopEvent(stopped_by=QueueStopEvent.StopBy.OUTPUT_MODERATION),
+                    PublishFrom.TASK_PIPELINE,
                 )
                 return True
             else:

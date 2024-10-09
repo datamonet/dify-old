@@ -16,7 +16,10 @@ from controllers.console.datasets.error import (
 )
 from controllers.console.error import AccountNotLinkTenantError
 from controllers.console.setup import setup_required
-from controllers.console.wraps import account_initialization_required, cloud_edition_billing_resource_check
+from controllers.console.wraps import (
+    account_initialization_required,
+    cloud_edition_billing_resource_check,
+)
 from extensions.ext_database import db
 from libs.helper import TimestampField
 from libs.login import login_required
@@ -53,7 +56,12 @@ tenants_fields = {
     "current": fields.Boolean,
 }
 
-workspace_fields = {"id": fields.String, "name": fields.String, "status": fields.String, "created_at": TimestampField}
+workspace_fields = {
+    "id": fields.String,
+    "name": fields.String,
+    "status": fields.String,
+    "created_at": TimestampField,
+}
 
 
 class TenantListApi(Resource):
@@ -74,8 +82,20 @@ class WorkspaceListApi(Resource):
     @admin_required
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("page", type=inputs.int_range(1, 99999), required=False, default=1, location="args")
-        parser.add_argument("limit", type=inputs.int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "page",
+            type=inputs.int_range(1, 99999),
+            required=False,
+            default=1,
+            location="args",
+        )
+        parser.add_argument(
+            "limit",
+            type=inputs.int_range(1, 100),
+            required=False,
+            default=20,
+            location="args",
+        )
         args = parser.parse_args()
 
         tenants = (
@@ -90,7 +110,8 @@ class WorkspaceListApi(Resource):
             rest_count = (
                 db.session.query(Tenant)
                 .filter(
-                    Tenant.created_at < current_page_first_tenant.created_at, Tenant.id != current_page_first_tenant.id
+                    Tenant.created_at < current_page_first_tenant.created_at,
+                    Tenant.id != current_page_first_tenant.id,
                 )
                 .count()
             )
@@ -148,7 +169,12 @@ class SwitchWorkspaceApi(Resource):
 
         new_tenant = db.session.query(Tenant).get(args["tenant_id"])  # Get new tenant
 
-        return {"result": "success", "new_tenant": marshal(WorkspaceService.get_tenant_info(new_tenant), tenant_fields)}
+        return {
+            "result": "success",
+            "new_tenant": marshal(
+                WorkspaceService.get_tenant_info(new_tenant), tenant_fields
+            ),
+        }
 
 
 class CustomConfigWorkspaceApi(Resource):
@@ -162,7 +188,11 @@ class CustomConfigWorkspaceApi(Resource):
         parser.add_argument("replace_webapp_logo", type=str, location="json")
         args = parser.parse_args()
 
-        tenant = db.session.query(Tenant).filter(Tenant.id == current_user.current_tenant_id).one_or_404()
+        tenant = (
+            db.session.query(Tenant)
+            .filter(Tenant.id == current_user.current_tenant_id)
+            .one_or_404()
+        )
 
         custom_config_dict = {
             "remove_webapp_brand": args["remove_webapp_brand"],
@@ -174,7 +204,10 @@ class CustomConfigWorkspaceApi(Resource):
         tenant.custom_config_dict = custom_config_dict
         db.session.commit()
 
-        return {"result": "success", "tenant": marshal(WorkspaceService.get_tenant_info(tenant), tenant_fields)}
+        return {
+            "result": "success",
+            "tenant": marshal(WorkspaceService.get_tenant_info(tenant), tenant_fields),
+        }
 
 
 class WebappLogoWorkspaceApi(Resource):
@@ -210,7 +243,9 @@ class WebappLogoWorkspaceApi(Resource):
 
 api.add_resource(TenantListApi, "/workspaces")  # GET for getting all tenants
 api.add_resource(WorkspaceListApi, "/all-workspaces")  # GET for getting all tenants
-api.add_resource(TenantApi, "/workspaces/current", endpoint="workspaces_current")  # GET for getting current tenant info
+api.add_resource(
+    TenantApi, "/workspaces/current", endpoint="workspaces_current"
+)  # GET for getting current tenant info
 api.add_resource(TenantApi, "/info", endpoint="info")  # Deprecated
 api.add_resource(SwitchWorkspaceApi, "/workspaces/switch")  # POST for switching tenant
 api.add_resource(CustomConfigWorkspaceApi, "/workspaces/custom-config")

@@ -31,7 +31,9 @@ class RecommendedAppService:
             try:
                 result = cls._fetch_recommended_apps_from_dify_official(language)
             except Exception as e:
-                logger.warning(f"fetch recommended apps from dify official failed: {e}, switch to built-in.")
+                logger.warning(
+                    f"fetch recommended apps from dify official failed: {e}, switch to built-in."
+                )
                 result = cls._fetch_recommended_apps_from_builtin(language)
         elif mode == "db":
             result = cls._fetch_recommended_apps_from_db(language)
@@ -54,7 +56,9 @@ class RecommendedAppService:
         """
         recommended_apps = (
             db.session.query(RecommendedApp)
-            .filter(RecommendedApp.is_listed == True, RecommendedApp.language == language)
+            .filter(
+                RecommendedApp.is_listed == True, RecommendedApp.language == language
+            )
             .order_by(RecommendedApp.created_at.desc())  # takin command:添加排序
             .all()
         )
@@ -62,7 +66,10 @@ class RecommendedAppService:
         if len(recommended_apps) == 0:
             recommended_apps = (
                 db.session.query(RecommendedApp)
-                .filter(RecommendedApp.is_listed == True, RecommendedApp.language == languages[0])
+                .filter(
+                    RecommendedApp.is_listed == True,
+                    RecommendedApp.language == languages[0],
+                )
                 .order_by(RecommendedApp.created_at.desc())  # takin command:添加排序
                 .all()
             )
@@ -126,7 +133,9 @@ class RecommendedAppService:
         url = f"{domain}/apps?language={language}"
         response = requests.get(url, timeout=(3, 10))
         if response.status_code != 200:
-            raise ValueError(f"fetch recommended apps failed, status code: {response.status_code}")
+            raise ValueError(
+                f"fetch recommended apps failed, status code: {response.status_code}"
+            )
 
         result = response.json()
 
@@ -157,7 +166,9 @@ class RecommendedAppService:
             try:
                 result = cls._fetch_recommended_app_detail_from_dify_official(app_id)
             except Exception as e:
-                logger.warning(f"fetch recommended app detail from dify official failed: {e}, switch to built-in.")
+                logger.warning(
+                    f"fetch recommended app detail from dify official failed: {e}, switch to built-in."
+                )
                 result = cls._fetch_recommended_app_detail_from_builtin(app_id)
         elif mode == "db":
             result = cls._fetch_recommended_app_detail_from_db(app_id)
@@ -169,7 +180,9 @@ class RecommendedAppService:
         return result
 
     @classmethod
-    def _fetch_recommended_app_detail_from_dify_official(cls, app_id: str) -> Optional[dict]:
+    def _fetch_recommended_app_detail_from_dify_official(
+        cls, app_id: str
+    ) -> Optional[dict]:
         """
         Fetch recommended app detail from dify official.
         :param app_id: App ID
@@ -235,7 +248,9 @@ class RecommendedAppService:
 
         root_path = current_app.root_path
         cls.builtin_data = json.loads(
-            Path(path.join(root_path, "constants", "recommended_apps.json")).read_text(encoding="utf-8")
+            Path(path.join(root_path, "constants", "recommended_apps.json")).read_text(
+                encoding="utf-8"
+            )
         )
 
         return cls.builtin_data
@@ -251,7 +266,9 @@ class RecommendedAppService:
             try:
                 result = cls._fetch_recommended_apps_from_dify_official(language)
             except Exception as e:
-                logger.warning(f"fetch recommended apps from dify official failed: {e}, skip.")
+                logger.warning(
+                    f"fetch recommended apps from dify official failed: {e}, skip."
+                )
                 continue
 
             templates["recommended_apps"][language] = result
@@ -260,7 +277,9 @@ class RecommendedAppService:
                 app_id = recommended_app.get("app_id")
 
                 # get app detail
-                app_detail = cls._fetch_recommended_app_detail_from_dify_official(app_id)
+                app_detail = cls._fetch_recommended_app_detail_from_dify_official(
+                    app_id
+                )
                 if not app_detail:
                     continue
 

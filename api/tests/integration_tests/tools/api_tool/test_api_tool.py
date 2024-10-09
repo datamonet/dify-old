@@ -13,7 +13,11 @@ tool_bundle = {
             {"in": "header", "name": "header_param"},
         ],
         "requestBody": {
-            "content": {"application/json": {"schema": {"properties": {"body_param": {"type": "string"}}}}}
+            "content": {
+                "application/json": {
+                    "schema": {"properties": {"body_param": {"type": "string"}}}
+                }
+            }
         },
     },
     "parameters": [],
@@ -28,9 +32,13 @@ parameters = {
 
 
 def test_api_tool(setup_http_mock):
-    tool = ApiTool(api_bundle=tool_bundle, runtime=Tool.Runtime(credentials={"auth_type": "none"}))
+    tool = ApiTool(
+        api_bundle=tool_bundle, runtime=Tool.Runtime(credentials={"auth_type": "none"})
+    )
     headers = tool.assembling_request(parameters)
-    response = tool.do_http_request(tool.api_bundle.server_url, tool.api_bundle.method, headers, parameters)
+    response = tool.do_http_request(
+        tool.api_bundle.server_url, tool.api_bundle.method, headers, parameters
+    )
 
     assert response.status_code == 200
     assert "/p_param" == response.request.url.path

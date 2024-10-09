@@ -21,7 +21,11 @@ from controllers.console.explore.error import (
 )
 from controllers.console.explore.wraps import InstalledAppResource
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from fields.message_fields import message_infinite_scroll_pagination_fields
 from libs import helper
@@ -30,7 +34,10 @@ from models.model import AppMode
 from services.app_generate_service import AppGenerateService
 from services.errors.app import MoreLikeThisDisabledError
 from services.errors.conversation import ConversationNotExistsError
-from services.errors.message import MessageNotExistsError, SuggestedQuestionsAfterAnswerDisabledError
+from services.errors.message import (
+    MessageNotExistsError,
+    SuggestedQuestionsAfterAnswerDisabledError,
+)
 from services.message_service import MessageService
 
 
@@ -44,14 +51,23 @@ class MessageListApi(InstalledAppResource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
+        parser.add_argument(
+            "conversation_id", required=True, type=uuid_value, location="args"
+        )
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         args = parser.parse_args()
 
         try:
             return MessageService.pagination_by_first_id(
-                app_model, current_user, args["conversation_id"], args["first_id"], args["limit"]
+                app_model,
+                current_user,
+                args["conversation_id"],
+                args["first_id"],
+                args["limit"],
+                "desc",
             )
         except services.errors.conversation.ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
@@ -66,11 +82,15 @@ class MessageFeedbackApi(InstalledAppResource):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
+        parser.add_argument(
+            "rating", type=str, choices=["like", "dislike", None], location="json"
+        )
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(app_model, message_id, current_user, args["rating"])
+            MessageService.create_feedback(
+                app_model, message_id, current_user, args["rating"]
+            )
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 
@@ -87,7 +107,11 @@ class MessageMoreLikeThisApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "response_mode", type=str, required=True, choices=["blocking", "streaming"], location="args"
+            "response_mode",
+            type=str,
+            required=True,
+            choices=["blocking", "streaming"],
+            location="args",
         )
         args = parser.parse_args()
 
@@ -132,7 +156,10 @@ class MessageSuggestedQuestionApi(InstalledAppResource):
 
         try:
             questions = MessageService.get_suggested_questions_after_answer(
-                app_model=app_model, user=current_user, message_id=message_id, invoke_from=InvokeFrom.EXPLORE
+                app_model=app_model,
+                user=current_user,
+                message_id=message_id,
+                invoke_from=InvokeFrom.EXPLORE,
             )
         except MessageNotExistsError:
             raise NotFound("Message not found")
@@ -155,7 +182,11 @@ class MessageSuggestedQuestionApi(InstalledAppResource):
         return {"data": questions}
 
 
-api.add_resource(MessageListApi, "/installed-apps/<uuid:installed_app_id>/messages", endpoint="installed_app_messages")
+api.add_resource(
+    MessageListApi,
+    "/installed-apps/<uuid:installed_app_id>/messages",
+    endpoint="installed_app_messages",
+)
 api.add_resource(
     MessageFeedbackApi,
     "/installed-apps/<uuid:installed_app_id>/messages/<uuid:message_id>/feedbacks",

@@ -24,8 +24,12 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
-from core.model_runtime.model_providers.baichuan.llm.baichuan_tokenizer import BaichuanTokenizer
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
+from core.model_runtime.model_providers.baichuan.llm.baichuan_tokenizer import (
+    BaichuanTokenizer,
+)
 from core.model_runtime.model_providers.baichuan.llm.baichuan_turbo import BaichuanModel
 from core.model_runtime.model_providers.baichuan.llm.baichuan_turbo_errors import (
     BadRequestError,
@@ -110,13 +114,19 @@ class BaichuanLanguageModel(LargeLanguageModel):
             message = cast(AssistantPromptMessage, message)
             message_dict = {"role": "assistant", "content": message.content}
             if message.tool_calls:
-                message_dict["tool_calls"] = [tool_call.dict() for tool_call in message.tool_calls]
+                message_dict["tool_calls"] = [
+                    tool_call.dict() for tool_call in message.tool_calls
+                ]
         elif isinstance(message, SystemPromptMessage):
             message = cast(SystemPromptMessage, message)
             message_dict = {"role": "system", "content": message.content}
         elif isinstance(message, ToolPromptMessage):
             message = cast(ToolPromptMessage, message)
-            message_dict = {"role": "tool", "content": message.content, "tool_call_id": message.tool_call_id}
+            message_dict = {
+                "role": "tool",
+                "content": message.content,
+                "tool_call_id": message.tool_call_id,
+            }
         else:
             raise ValueError(f"Unknown message type {type(message)}")
 
@@ -162,9 +172,13 @@ class BaichuanLanguageModel(LargeLanguageModel):
         )
 
         if stream:
-            return self._handle_chat_generate_stream_response(model, prompt_messages, credentials, response)
+            return self._handle_chat_generate_stream_response(
+                model, prompt_messages, credentials, response
+            )
 
-        return self._handle_chat_generate_response(model, prompt_messages, credentials, response)
+        return self._handle_chat_generate_response(
+            model, prompt_messages, credentials, response
+        )
 
     def _handle_chat_generate_response(
         self,
@@ -183,7 +197,9 @@ class BaichuanLanguageModel(LargeLanguageModel):
                         type=tool_call.get("type", ""),
                         function=AssistantPromptMessage.ToolCall.ToolCallFunction(
                             name=tool_call.get("function", {}).get("name", ""),
-                            arguments=tool_call.get("function", {}).get("arguments", ""),
+                            arguments=tool_call.get("function", {}).get(
+                                "arguments", ""
+                            ),
                         ),
                     )
                     assistant_message.tool_calls.append(tool)
@@ -232,7 +248,7 @@ class BaichuanLanguageModel(LargeLanguageModel):
                 line = line[5:].strip()
             try:
                 data = json.loads(line)
-            except Exception as e:
+            except Exception:
                 if line.strip() == "[DONE]":
                     return
             choices = data.get("choices", [])
@@ -249,7 +265,9 @@ class BaichuanLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=0,
-                        message=AssistantPromptMessage(content=choice["delta"]["content"], tool_calls=[]),
+                        message=AssistantPromptMessage(
+                            content=choice["delta"]["content"], tool_calls=[]
+                        ),
                         finish_reason=stop_reason,
                     ),
                 )

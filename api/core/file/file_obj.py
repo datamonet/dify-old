@@ -130,11 +130,16 @@ class FileVar(BaseModel):
             elif self.transfer_method == FileTransferMethod.LOCAL_FILE:
                 upload_file = (
                     db.session.query(UploadFile)
-                    .filter(UploadFile.id == self.related_id, UploadFile.tenant_id == self.tenant_id)
+                    .filter(
+                        UploadFile.id == self.related_id,
+                        UploadFile.tenant_id == self.tenant_id,
+                    )
                     .first()
                 )
 
-                return UploadFileParser.get_image_data(upload_file=upload_file, force_url=force_url)
+                return UploadFileParser.get_image_data(
+                    upload_file=upload_file, force_url=force_url
+                )
             elif self.transfer_method == FileTransferMethod.TOOL_FILE:
                 extension = self.extension
                 # add sign url

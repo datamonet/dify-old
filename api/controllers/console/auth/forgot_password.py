@@ -42,7 +42,9 @@ class ForgotPasswordSendEmailApi(Resource):
                 raise PasswordResetRateLimitExceededError()
         else:
             # Return success to avoid revealing email registration status
-            logging.warning(f"Attempt to reset password for unregistered email: {email}")
+            logging.warning(
+                f"Attempt to reset password for unregistered email: {email}"
+            )
 
         return {"result": "success"}
 
@@ -51,7 +53,9 @@ class ForgotPasswordCheckApi(Resource):
     @setup_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("token", type=str, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "token", type=str, required=True, nullable=False, location="json"
+        )
         args = parser.parse_args()
         token = args["token"]
 
@@ -66,9 +70,23 @@ class ForgotPasswordResetApi(Resource):
     @setup_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("token", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("new_password", type=valid_password, required=True, nullable=False, location="json")
-        parser.add_argument("password_confirm", type=valid_password, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "token", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "new_password",
+            type=valid_password,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        parser.add_argument(
+            "password_confirm",
+            type=valid_password,
+            required=True,
+            nullable=False,
+            location="json",
+        )
         args = parser.parse_args()
 
         new_password = args["new_password"]

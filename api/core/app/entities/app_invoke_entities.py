@@ -4,7 +4,11 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from core.app.app_config.entities import AppConfig, EasyUIBasedAppConfig, WorkflowUIBasedAppConfig
+from core.app.app_config.entities import (
+    AppConfig,
+    EasyUIBasedAppConfig,
+    WorkflowUIBasedAppConfig,
+)
 from core.entities.provider_configuration import ProviderModelBundle
 from core.file.file_obj import FileVar
 from core.model_runtime.entities.model_entities import AIModelEntity
@@ -122,6 +126,7 @@ class ChatAppGenerateEntity(EasyUIBasedAppGenerateEntity):
     """
 
     conversation_id: Optional[str] = None
+    parent_message_id: Optional[str] = None
 
 
 class CompletionAppGenerateEntity(EasyUIBasedAppGenerateEntity):
@@ -138,6 +143,7 @@ class AgentChatAppGenerateEntity(EasyUIBasedAppGenerateEntity):
     """
 
     conversation_id: Optional[str] = None
+    parent_message_id: Optional[str] = None
 
 
 class AdvancedChatAppGenerateEntity(AppGenerateEntity):
@@ -149,6 +155,7 @@ class AdvancedChatAppGenerateEntity(AppGenerateEntity):
     app_config: WorkflowUIBasedAppConfig
 
     conversation_id: Optional[str] = None
+    parent_message_id: Optional[str] = None
     query: str
 
     class SingleIterationRunEntity(BaseModel):

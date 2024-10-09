@@ -2,7 +2,6 @@ import pytest
 from pydantic import ValidationError
 
 from core.app.segments import (
-    ArrayAnyVariable,
     FloatVariable,
     IntegerVariable,
     ObjectVariable,
@@ -35,11 +34,15 @@ def test_variable_value_type_immutable():
         StringVariable(value_type=SegmentType.ARRAY_ANY, name="text", value="text")
 
     with pytest.raises(ValidationError):
-        StringVariable.model_validate({"value_type": "not text", "name": "text", "value": "text"})
+        StringVariable.model_validate(
+            {"value_type": "not text", "name": "text", "value": "text"}
+        )
 
     var = IntegerVariable(name="integer", value=42)
     with pytest.raises(ValidationError):
-        IntegerVariable(value_type=SegmentType.ARRAY_ANY, name=var.name, value=var.value)
+        IntegerVariable(
+            value_type=SegmentType.ARRAY_ANY, name=var.name, value=var.value
+        )
 
     var = FloatVariable(name="float", value=3.14)
     with pytest.raises(ValidationError):

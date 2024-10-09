@@ -40,15 +40,29 @@ class TagListApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "name", nullable=False, required=True, help="Name must be between 1 to 50 characters.", type=_validate_name
+            "name",
+            nullable=False,
+            required=True,
+            help="Name must be between 1 to 50 characters.",
+            type=_validate_name,
         )
         parser.add_argument(
-            "type", type=str, location="json", choices=Tag.TAG_TYPE_LIST, nullable=True, help="Invalid tag type."
+            "type",
+            type=str,
+            location="json",
+            choices=Tag.TAG_TYPE_LIST,
+            nullable=True,
+            help="Invalid tag type.",
         )
         args = parser.parse_args()
         tag = TagService.save_tags(args)
 
-        response = {"id": tag.id, "name": tag.name, "type": tag.type, "binding_count": 0}
+        response = {
+            "id": tag.id,
+            "name": tag.name,
+            "type": tag.type,
+            "binding_count": 0,
+        }
 
         return response, 200
 
@@ -65,14 +79,23 @@ class TagUpdateDeleteApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "name", nullable=False, required=True, help="Name must be between 1 to 50 characters.", type=_validate_name
+            "name",
+            nullable=False,
+            required=True,
+            help="Name must be between 1 to 50 characters.",
+            type=_validate_name,
         )
         args = parser.parse_args()
         tag = TagService.update_tags(args, tag_id)
 
         binding_count = TagService.get_tag_binding_count(tag_id)
 
-        response = {"id": tag.id, "name": tag.name, "type": tag.type, "binding_count": binding_count}
+        response = {
+            "id": tag.id,
+            "name": tag.name,
+            "type": tag.type,
+            "binding_count": binding_count,
+        }
 
         return response, 200
 
@@ -101,13 +124,28 @@ class TagBindingCreateApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "tag_ids", type=list, nullable=False, required=True, location="json", help="Tag IDs is required."
+            "tag_ids",
+            type=list,
+            nullable=False,
+            required=True,
+            location="json",
+            help="Tag IDs is required.",
         )
         parser.add_argument(
-            "target_id", type=str, nullable=False, required=True, location="json", help="Target ID is required."
+            "target_id",
+            type=str,
+            nullable=False,
+            required=True,
+            location="json",
+            help="Target ID is required.",
         )
         parser.add_argument(
-            "type", type=str, location="json", choices=Tag.TAG_TYPE_LIST, nullable=True, help="Invalid tag type."
+            "type",
+            type=str,
+            location="json",
+            choices=Tag.TAG_TYPE_LIST,
+            nullable=True,
+            help="Invalid tag type.",
         )
         args = parser.parse_args()
         TagService.save_tag_binding(args)
@@ -125,10 +163,27 @@ class TagBindingDeleteApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("tag_id", type=str, nullable=False, required=True, help="Tag ID is required.")
-        parser.add_argument("target_id", type=str, nullable=False, required=True, help="Target ID is required.")
         parser.add_argument(
-            "type", type=str, location="json", choices=Tag.TAG_TYPE_LIST, nullable=True, help="Invalid tag type."
+            "tag_id",
+            type=str,
+            nullable=False,
+            required=True,
+            help="Tag ID is required.",
+        )
+        parser.add_argument(
+            "target_id",
+            type=str,
+            nullable=False,
+            required=True,
+            help="Target ID is required.",
+        )
+        parser.add_argument(
+            "type",
+            type=str,
+            location="json",
+            choices=Tag.TAG_TYPE_LIST,
+            nullable=True,
+            help="Invalid tag type.",
         )
         args = parser.parse_args()
         TagService.delete_tag_binding(args)

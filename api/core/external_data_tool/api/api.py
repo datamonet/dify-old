@@ -32,7 +32,10 @@ class ApiExternalDataTool(ExternalDataTool):
         # get api_based_extension
         api_based_extension = (
             db.session.query(APIBasedExtension)
-            .filter(APIBasedExtension.tenant_id == tenant_id, APIBasedExtension.id == api_based_extension_id)
+            .filter(
+                APIBasedExtension.tenant_id == tenant_id,
+                APIBasedExtension.id == api_based_extension_id,
+            )
             .first()
         )
 
@@ -53,7 +56,10 @@ class ApiExternalDataTool(ExternalDataTool):
         # get api_based_extension
         api_based_extension = (
             db.session.query(APIBasedExtension)
-            .filter(APIBasedExtension.tenant_id == self.tenant_id, APIBasedExtension.id == api_based_extension_id)
+            .filter(
+                APIBasedExtension.tenant_id == self.tenant_id,
+                APIBasedExtension.id == api_based_extension_id,
+            )
             .first()
         )
 
@@ -64,17 +70,30 @@ class ApiExternalDataTool(ExternalDataTool):
             )
 
         # decrypt api_key
-        api_key = encrypter.decrypt_token(tenant_id=self.tenant_id, token=api_based_extension.api_key)
+        api_key = encrypter.decrypt_token(
+            tenant_id=self.tenant_id, token=api_based_extension.api_key
+        )
 
         try:
             # request api
-            requestor = APIBasedExtensionRequestor(api_endpoint=api_based_extension.api_endpoint, api_key=api_key)
+            requestor = APIBasedExtensionRequestor(
+                api_endpoint=api_based_extension.api_endpoint, api_key=api_key
+            )
         except Exception as e:
-            raise ValueError("[External data tool] API query failed, variable: {}, error: {}".format(self.variable, e))
+            raise ValueError(
+                "[External data tool] API query failed, variable: {}, error: {}".format(
+                    self.variable, e
+                )
+            )
 
         response_json = requestor.request(
             point=APIBasedExtensionPoint.APP_EXTERNAL_DATA_TOOL_QUERY,
-            params={"app_id": self.app_id, "tool_variable": self.variable, "inputs": inputs, "query": query},
+            params={
+                "app_id": self.app_id,
+                "tool_variable": self.variable,
+                "inputs": inputs,
+                "query": query,
+            },
         )
 
         if "result" not in response_json:
@@ -86,7 +105,9 @@ class ApiExternalDataTool(ExternalDataTool):
 
         if not isinstance(response_json["result"], str):
             raise ValueError(
-                "[External data tool] API query failed, variable: {}, error: result is not string".format(self.variable)
+                "[External data tool] API query failed, variable: {}, error: result is not string".format(
+                    self.variable
+                )
             )
 
         return response_json["result"]

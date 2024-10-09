@@ -15,12 +15,17 @@ from models.dataset import Dataset
 
 class AbstractVectorFactory(ABC):
     @abstractmethod
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> BaseVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> BaseVector:
         raise NotImplementedError
 
     @staticmethod
     def gen_index_struct_dict(vector_type: VectorType, collection_name: str) -> dict:
-        index_struct_dict = {"type": vector_type, "vector_store": {"class_prefix": collection_name}}
+        index_struct_dict = {
+            "type": vector_type,
+            "vector_store": {"class_prefix": collection_name},
+        }
         return index_struct_dict
 
 
@@ -42,21 +47,29 @@ class Vector:
             raise ValueError("Vector store must be specified.")
 
         vector_factory_cls = self.get_vector_factory(vector_type)
-        return vector_factory_cls().init_vector(self._dataset, self._attributes, self._embeddings)
+        return vector_factory_cls().init_vector(
+            self._dataset, self._attributes, self._embeddings
+        )
 
     @staticmethod
     def get_vector_factory(vector_type: str) -> type[AbstractVectorFactory]:
         match vector_type:
             case VectorType.CHROMA:
-                from core.rag.datasource.vdb.chroma.chroma_vector import ChromaVectorFactory
+                from core.rag.datasource.vdb.chroma.chroma_vector import (
+                    ChromaVectorFactory,
+                )
 
                 return ChromaVectorFactory
             case VectorType.MILVUS:
-                from core.rag.datasource.vdb.milvus.milvus_vector import MilvusVectorFactory
+                from core.rag.datasource.vdb.milvus.milvus_vector import (
+                    MilvusVectorFactory,
+                )
 
                 return MilvusVectorFactory
             case VectorType.MYSCALE:
-                from core.rag.datasource.vdb.myscale.myscale_vector import MyScaleVectorFactory
+                from core.rag.datasource.vdb.myscale.myscale_vector import (
+                    MyScaleVectorFactory,
+                )
 
                 return MyScaleVectorFactory
             case VectorType.PGVECTOR:
@@ -64,43 +77,63 @@ class Vector:
 
                 return PGVectorFactory
             case VectorType.PGVECTO_RS:
-                from core.rag.datasource.vdb.pgvecto_rs.pgvecto_rs import PGVectoRSFactory
+                from core.rag.datasource.vdb.pgvecto_rs.pgvecto_rs import (
+                    PGVectoRSFactory,
+                )
 
                 return PGVectoRSFactory
             case VectorType.QDRANT:
-                from core.rag.datasource.vdb.qdrant.qdrant_vector import QdrantVectorFactory
+                from core.rag.datasource.vdb.qdrant.qdrant_vector import (
+                    QdrantVectorFactory,
+                )
 
                 return QdrantVectorFactory
             case VectorType.RELYT:
-                from core.rag.datasource.vdb.relyt.relyt_vector import RelytVectorFactory
+                from core.rag.datasource.vdb.relyt.relyt_vector import (
+                    RelytVectorFactory,
+                )
 
                 return RelytVectorFactory
             case VectorType.ELASTICSEARCH:
-                from core.rag.datasource.vdb.elasticsearch.elasticsearch_vector import ElasticSearchVectorFactory
+                from core.rag.datasource.vdb.elasticsearch.elasticsearch_vector import (
+                    ElasticSearchVectorFactory,
+                )
 
                 return ElasticSearchVectorFactory
             case VectorType.TIDB_VECTOR:
-                from core.rag.datasource.vdb.tidb_vector.tidb_vector import TiDBVectorFactory
+                from core.rag.datasource.vdb.tidb_vector.tidb_vector import (
+                    TiDBVectorFactory,
+                )
 
                 return TiDBVectorFactory
             case VectorType.WEAVIATE:
-                from core.rag.datasource.vdb.weaviate.weaviate_vector import WeaviateVectorFactory
+                from core.rag.datasource.vdb.weaviate.weaviate_vector import (
+                    WeaviateVectorFactory,
+                )
 
                 return WeaviateVectorFactory
             case VectorType.TENCENT:
-                from core.rag.datasource.vdb.tencent.tencent_vector import TencentVectorFactory
+                from core.rag.datasource.vdb.tencent.tencent_vector import (
+                    TencentVectorFactory,
+                )
 
                 return TencentVectorFactory
             case VectorType.ORACLE:
-                from core.rag.datasource.vdb.oracle.oraclevector import OracleVectorFactory
+                from core.rag.datasource.vdb.oracle.oraclevector import (
+                    OracleVectorFactory,
+                )
 
                 return OracleVectorFactory
             case VectorType.OPENSEARCH:
-                from core.rag.datasource.vdb.opensearch.opensearch_vector import OpenSearchVectorFactory
+                from core.rag.datasource.vdb.opensearch.opensearch_vector import (
+                    OpenSearchVectorFactory,
+                )
 
                 return OpenSearchVectorFactory
             case VectorType.ANALYTICDB:
-                from core.rag.datasource.vdb.analyticdb.analyticdb_vector import AnalyticdbVectorFactory
+                from core.rag.datasource.vdb.analyticdb.analyticdb_vector import (
+                    AnalyticdbVectorFactory,
+                )
 
                 return AnalyticdbVectorFactory
             case _:
@@ -108,14 +141,18 @@ class Vector:
 
     def create(self, texts: list = None, **kwargs):
         if texts:
-            embeddings = self._embeddings.embed_documents([document.page_content for document in texts])
+            embeddings = self._embeddings.embed_documents(
+                [document.page_content for document in texts]
+            )
             self._vector_processor.create(texts=texts, embeddings=embeddings, **kwargs)
 
     def add_texts(self, documents: list[Document], **kwargs):
         if kwargs.get("duplicate_check", False):
             documents = self._filter_duplicate_texts(documents)
 
-        embeddings = self._embeddings.embed_documents([document.page_content for document in documents])
+        embeddings = self._embeddings.embed_documents(
+            [document.page_content for document in documents]
+        )
         self._vector_processor.create(texts=documents, embeddings=embeddings, **kwargs)
 
     def text_exists(self, id: str) -> bool:
@@ -138,7 +175,9 @@ class Vector:
         self._vector_processor.delete()
         # delete collection redis cache
         if self._vector_processor.collection_name:
-            collection_exist_cache_key = "vector_indexing_{}".format(self._vector_processor.collection_name)
+            collection_exist_cache_key = "vector_indexing_{}".format(
+                self._vector_processor.collection_name
+            )
             redis_client.delete(collection_exist_cache_key)
 
     def _get_embeddings(self) -> Embeddings:

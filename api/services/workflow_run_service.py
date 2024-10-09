@@ -10,7 +10,9 @@ from models.workflow import (
 
 
 class WorkflowRunService:
-    def get_paginate_advanced_chat_workflow_runs(self, app_model: App, args: dict) -> InfiniteScrollPagination:
+    def get_paginate_advanced_chat_workflow_runs(
+        self, app_model: App, args: dict
+    ) -> InfiniteScrollPagination:
         """
         Get advanced chat app workflow run list
         Only return triggered_from == advanced_chat
@@ -44,7 +46,9 @@ class WorkflowRunService:
         pagination.data = with_message_workflow_runs
         return pagination
 
-    def get_paginate_workflow_runs(self, app_model: App, args: dict) -> InfiniteScrollPagination:
+    def get_paginate_workflow_runs(
+        self, app_model: App, args: dict
+    ) -> InfiniteScrollPagination:
         """
         Get debug workflow run list
         Only return triggered_from == debugging
@@ -70,14 +74,17 @@ class WorkflowRunService:
 
             workflow_runs = (
                 base_query.filter(
-                    WorkflowRun.created_at < last_workflow_run.created_at, WorkflowRun.id != last_workflow_run.id
+                    WorkflowRun.created_at < last_workflow_run.created_at,
+                    WorkflowRun.id != last_workflow_run.id,
                 )
                 .order_by(WorkflowRun.created_at.desc())
                 .limit(limit)
                 .all()
             )
         else:
-            workflow_runs = base_query.order_by(WorkflowRun.created_at.desc()).limit(limit).all()
+            workflow_runs = (
+                base_query.order_by(WorkflowRun.created_at.desc()).limit(limit).all()
+            )
 
         has_more = False
         if len(workflow_runs) == limit:
@@ -90,7 +97,9 @@ class WorkflowRunService:
             if rest_count > 0:
                 has_more = True
 
-        return InfiniteScrollPagination(data=workflow_runs, limit=limit, has_more=has_more)
+        return InfiniteScrollPagination(
+            data=workflow_runs, limit=limit, has_more=has_more
+        )
 
     def get_workflow_run(self, app_model: App, run_id: str) -> WorkflowRun:
         """
@@ -111,7 +120,9 @@ class WorkflowRunService:
 
         return workflow_run
 
-    def get_workflow_run_node_executions(self, app_model: App, run_id: str) -> list[WorkflowNodeExecution]:
+    def get_workflow_run_node_executions(
+        self, app_model: App, run_id: str
+    ) -> list[WorkflowNodeExecution]:
         """
         Get workflow run node execution list
         """
@@ -126,7 +137,8 @@ class WorkflowRunService:
                 WorkflowNodeExecution.tenant_id == app_model.tenant_id,
                 WorkflowNodeExecution.app_id == app_model.id,
                 WorkflowNodeExecution.workflow_id == workflow_run.workflow_id,
-                WorkflowNodeExecution.triggered_from == WorkflowNodeExecutionTriggeredFrom.WORKFLOW_RUN.value,
+                WorkflowNodeExecution.triggered_from
+                == WorkflowNodeExecutionTriggeredFrom.WORKFLOW_RUN.value,
                 WorkflowNodeExecution.workflow_run_id == run_id,
             )
             .order_by(WorkflowNodeExecution.index.desc())

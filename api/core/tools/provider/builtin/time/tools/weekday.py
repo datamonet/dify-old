@@ -21,7 +21,9 @@ class WeekdayTool(BuiltinTool):
 
         date_obj = self.convert_datetime(year, month, day)
         if not date_obj:
-            return self.create_text_message(f"Invalid date: Year {year}, Month {month}, Day {day}.")
+            return self.create_text_message(
+                f"Invalid date: Year {year}, Month {month}, Day {day}."
+            )
 
         weekday_name = calendar.day_name[date_obj.weekday()]
         month_name = calendar.month_name[month]

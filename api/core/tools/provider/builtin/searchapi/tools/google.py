@@ -57,7 +57,14 @@ class SearchAPI:
                 toret += res["knowledge_graph"]["description"] + "\n"
             if "organic_results" in res and "snippet" in res["organic_results"][0]:
                 for item in res["organic_results"]:
-                    toret += "content: " + item["snippet"] + "\n" + "link: " + item["link"] + "\n"
+                    toret += (
+                        "content: "
+                        + item["snippet"]
+                        + "\n"
+                        + "link: "
+                        + item["link"]
+                        + "\n"
+                    )
             if toret == "":
                 toret = "No good search result found"
 
@@ -104,7 +111,13 @@ class GoogleTool(BuiltinTool):
 
         api_key = self.runtime.credentials["searchapi_api_key"]
         result = SearchAPI(api_key).run(
-            query, result_type=result_type, num=num, google_domain=google_domain, gl=gl, hl=hl, location=location
+            query,
+            result_type=result_type,
+            num=num,
+            google_domain=google_domain,
+            gl=gl,
+            hl=hl,
+            location=location,
         )
 
         if result_type == "text":

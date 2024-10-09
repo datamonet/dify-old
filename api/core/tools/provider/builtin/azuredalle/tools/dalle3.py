@@ -72,7 +72,9 @@ class DallE3Tool(BuiltinTool):
                     save_as=self.VariableKey.IMAGE.value,
                 )
             )
-        result.append(self.create_text_message(f"\nGenerate image source to Seed ID: {seed_id}"))
+        result.append(
+            self.create_text_message(f"\nGenerate image source to Seed ID: {seed_id}")
+        )
 
         return result
 

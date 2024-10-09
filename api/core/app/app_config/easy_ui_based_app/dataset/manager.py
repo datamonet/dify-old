@@ -16,7 +16,9 @@ class DatasetConfigManager:
         """
         dataset_ids = []
         if "datasets" in config.get("dataset_configs", {}):
-            datasets = config.get("dataset_configs", {}).get("datasets", {"strategy": "router", "datasets": []})
+            datasets = config.get("dataset_configs", {}).get(
+                "datasets", {"strategy": "router", "datasets": []}
+            )
 
             for dataset in datasets.get("datasets", []):
                 keys = list(dataset.keys())
@@ -90,12 +92,16 @@ class DatasetConfigManager:
                     reranking_model=dataset_configs.get("reranking_model"),
                     weights=dataset_configs.get("weights"),
                     reranking_enabled=dataset_configs.get("reranking_enabled", True),
-                    rerank_mode=dataset_configs.get("reranking_mode", "reranking_model"),
+                    rerank_mode=dataset_configs.get(
+                        "reranking_mode", "reranking_model"
+                    ),
                 ),
             )
 
     @classmethod
-    def validate_and_set_defaults(cls, tenant_id: str, app_mode: AppMode, config: dict) -> tuple[dict, list[str]]:
+    def validate_and_set_defaults(
+        cls, tenant_id: str, app_mode: AppMode, config: dict
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for dataset feature
 
@@ -104,14 +110,19 @@ class DatasetConfigManager:
         :param config: app model config args
         """
         # Extract dataset config for legacy compatibility
-        config = cls.extract_dataset_config_for_legacy_compatibility(tenant_id, app_mode, config)
+        config = cls.extract_dataset_config_for_legacy_compatibility(
+            tenant_id, app_mode, config
+        )
 
         # dataset_configs
         if not config.get("dataset_configs"):
             config["dataset_configs"] = {"retrieval_model": "single"}
 
         if not config["dataset_configs"].get("datasets"):
-            config["dataset_configs"]["datasets"] = {"strategy": "router", "datasets": []}
+            config["dataset_configs"]["datasets"] = {
+                "strategy": "router",
+                "datasets": [],
+            }
 
         if not isinstance(config["dataset_configs"], dict):
             raise ValueError("dataset_configs must be of object type")
@@ -119,21 +130,25 @@ class DatasetConfigManager:
         if not isinstance(config["dataset_configs"], dict):
             raise ValueError("dataset_configs must be of object type")
 
-        need_manual_query_datasets = config.get("dataset_configs") and config["dataset_configs"].get(
-            "datasets", {}
-        ).get("datasets")
+        need_manual_query_datasets = config.get("dataset_configs") and config[
+            "dataset_configs"
+        ].get("datasets", {}).get("datasets")
 
         if need_manual_query_datasets and app_mode == AppMode.COMPLETION:
             # Only check when mode is completion
             dataset_query_variable = config.get("dataset_query_variable")
 
             if not dataset_query_variable:
-                raise ValueError("Dataset query variable is required when dataset is exist")
+                raise ValueError(
+                    "Dataset query variable is required when dataset is exist"
+                )
 
         return config, ["agent_mode", "dataset_configs", "dataset_query_variable"]
 
     @classmethod
-    def extract_dataset_config_for_legacy_compatibility(cls, tenant_id: str, app_mode: AppMode, config: dict) -> dict:
+    def extract_dataset_config_for_legacy_compatibility(
+        cls, tenant_id: str, app_mode: AppMode, config: dict
+    ) -> dict:
         """
         Extract dataset config for legacy compatibility
 
@@ -167,7 +182,10 @@ class DatasetConfigManager:
             config["agent_mode"]["strategy"] = PlanningStrategy.ROUTER.value
 
         has_datasets = False
-        if config["agent_mode"]["strategy"] in {PlanningStrategy.ROUTER.value, PlanningStrategy.REACT_ROUTER.value}:
+        if config["agent_mode"]["strategy"] in {
+            PlanningStrategy.ROUTER.value,
+            PlanningStrategy.REACT_ROUTER.value,
+        }:
             for tool in config["agent_mode"]["tools"]:
                 key = list(tool.keys())[0]
                 if key == "dataset":
@@ -178,7 +196,9 @@ class DatasetConfigManager:
                         tool_item["enabled"] = False
 
                     if not isinstance(tool_item["enabled"], bool):
-                        raise ValueError("enabled in agent_mode.tools must be of boolean type")
+                        raise ValueError(
+                            "enabled in agent_mode.tools must be of boolean type"
+                        )
 
                     if "id" not in tool_item:
                         raise ValueError("id is required in dataset")
@@ -189,7 +209,9 @@ class DatasetConfigManager:
                         raise ValueError("id in dataset must be of UUID type")
 
                     if not cls.is_dataset_exists(tenant_id, tool_item["id"]):
-                        raise ValueError("Dataset ID does not exist, please check your permission.")
+                        raise ValueError(
+                            "Dataset ID does not exist, please check your permission."
+                        )
 
                     has_datasets = True
 
@@ -200,7 +222,9 @@ class DatasetConfigManager:
             dataset_query_variable = config.get("dataset_query_variable")
 
             if not dataset_query_variable:
-                raise ValueError("Dataset query variable is required when dataset is exist")
+                raise ValueError(
+                    "Dataset query variable is required when dataset is exist"
+                )
 
         return config
 

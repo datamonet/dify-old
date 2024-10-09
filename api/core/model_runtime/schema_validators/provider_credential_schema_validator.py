@@ -14,6 +14,10 @@ class ProviderCredentialSchemaValidator(CommonValidator):
         :return: validated provider credentials
         """
         # get the credential_form_schemas in provider_credential_schema
-        credential_form_schemas = self.provider_credential_schema.credential_form_schemas
+        credential_form_schemas = (
+            self.provider_credential_schema.credential_form_schemas
+        )
 
-        return self._validate_and_filter_credential_form_schemas(credential_form_schemas, credentials)
+        return self._validate_and_filter_credential_form_schemas(
+            credential_form_schemas, credentials
+        )

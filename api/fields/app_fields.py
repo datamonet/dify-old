@@ -22,7 +22,9 @@ related_app_list = {
 model_config_fields = {
     "opening_statement": fields.String,
     "suggested_questions": fields.Raw(attribute="suggested_questions_list"),
-    "suggested_questions_after_answer": fields.Raw(attribute="suggested_questions_after_answer_dict"),
+    "suggested_questions_after_answer": fields.Raw(
+        attribute="suggested_questions_after_answer_dict"
+    ),
     "speech_to_text": fields.Raw(attribute="speech_to_text_dict"),
     "text_to_speech": fields.Raw(attribute="text_to_speech_dict"),
     "retriever_resource": fields.Raw(attribute="retriever_resource_dict"),
@@ -55,7 +57,9 @@ app_detail_fields = {
     "icon_background": fields.String,
     "enable_site": fields.Boolean,
     "enable_api": fields.Boolean,
-    "model_config": fields.Nested(model_config_fields, attribute="app_model_config", allow_null=True),
+    "model_config": fields.Nested(
+        model_config_fields, attribute="app_model_config", allow_null=True
+    ),
     "workflow": fields.Nested(workflow_partial_fields, allow_null=True),
     "tracing": fields.Raw,
     "use_icon_as_answer_icon": fields.Boolean,
@@ -90,7 +94,9 @@ app_partial_fields = {
     "icon": fields.String,
     "icon_background": fields.String,
     "icon_url": AppIconUrlField,
-    "model_config": fields.Nested(model_config_partial_fields, attribute="app_model_config", allow_null=True),
+    "model_config": fields.Nested(
+        model_config_partial_fields, attribute="app_model_config", allow_null=True
+    ),
     "workflow": fields.Nested(workflow_partial_fields, allow_null=True),
     "use_icon_as_answer_icon": fields.Boolean,
     "created_by": fields.String,
@@ -160,7 +166,9 @@ app_detail_fields_with_site = {
     "icon_url": AppIconUrlField,
     "enable_site": fields.Boolean,
     "enable_api": fields.Boolean,
-    "model_config": fields.Nested(model_config_fields, attribute="app_model_config", allow_null=True),
+    "model_config": fields.Nested(
+        model_config_fields, attribute="app_model_config", allow_null=True
+    ),
     "workflow": fields.Nested(workflow_partial_fields, allow_null=True),
     "site": fields.Nested(site_fields),
     "api_base_url": fields.String,

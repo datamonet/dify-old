@@ -11,7 +11,9 @@ class CreateBoardTool(BuiltinTool):
     Tool for creating a new Trello board.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]) -> ToolInvokeMessage:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]
+    ) -> ToolInvokeMessage:
         """
         Invoke the tool to create a new Trello board.
 
@@ -27,7 +29,9 @@ class CreateBoardTool(BuiltinTool):
         board_name = tool_parameters.get("name")
 
         if not (api_key and token and board_name):
-            return self.create_text_message("Missing required parameters: API key, token, or board name.")
+            return self.create_text_message(
+                "Missing required parameters: API key, token, or board name."
+            )
 
         url = "https://api.trello.com/1/boards/"
         query_params = {"name": board_name, "key": api_key, "token": token}

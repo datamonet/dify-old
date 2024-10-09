@@ -57,7 +57,10 @@ FUNCTION_CALLING_EXTRACTOR_EXAMPLE = [
         "assistant": {
             "text": "I need always call the function with the correct parameters."
             " in this case, I need to call the function with the location parameter.",
-            "function_call": {"name": FUNCTION_CALLING_EXTRACTOR_NAME, "parameters": {"location": "San Francisco"}},
+            "function_call": {
+                "name": FUNCTION_CALLING_EXTRACTOR_NAME,
+                "parameters": {"location": "San Francisco"},
+            },
         },
     },
     {
@@ -67,7 +70,13 @@ FUNCTION_CALLING_EXTRACTOR_EXAMPLE = [
                 "name": FUNCTION_CALLING_EXTRACTOR_NAME,
                 "parameters": {
                     "type": "object",
-                    "properties": {"food": {"type": "string", "description": "The food to eat", "required": True}},
+                    "properties": {
+                        "food": {
+                            "type": "string",
+                            "description": "The food to eat",
+                            "required": True,
+                        }
+                    },
                     "required": ["food"],
                 },
             },
@@ -75,7 +84,10 @@ FUNCTION_CALLING_EXTRACTOR_EXAMPLE = [
         "assistant": {
             "text": "I need always call the function with the correct parameters."
             " in this case, I need to call the function with the food parameter.",
-            "function_call": {"name": FUNCTION_CALLING_EXTRACTOR_NAME, "parameters": {"food": "apple pie"}},
+            "function_call": {
+                "name": FUNCTION_CALLING_EXTRACTOR_NAME,
+                "parameters": {"food": "apple pie"},
+            },
         },
     },
 ]
@@ -166,17 +178,29 @@ CHAT_EXAMPLE = [
                 "required": ["location"],
             },
         },
-        "assistant": {"text": "I need to output a valid JSON object.", "json": {"location": "San Francisco"}},
+        "assistant": {
+            "text": "I need to output a valid JSON object.",
+            "json": {"location": "San Francisco"},
+        },
     },
     {
         "user": {
             "query": "I want to eat some apple pie.",
             "json": {
                 "type": "object",
-                "properties": {"food": {"type": "string", "description": "The food to eat", "required": True}},
+                "properties": {
+                    "food": {
+                        "type": "string",
+                        "description": "The food to eat",
+                        "required": True,
+                    }
+                },
                 "required": ["food"],
             },
         },
-        "assistant": {"text": "I need to output a valid JSON object.", "json": {"result": "apple pie"}},
+        "assistant": {
+            "text": "I need to output a valid JSON object.",
+            "json": {"result": "apple pie"},
+        },
     },
 ]

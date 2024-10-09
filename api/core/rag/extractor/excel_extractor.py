@@ -18,7 +18,12 @@ class ExcelExtractor(BaseExtractor):
         file_path: Path to the file to load.
     """
 
-    def __init__(self, file_path: str, encoding: Optional[str] = None, autodetect_encoding: bool = False):
+    def __init__(
+        self,
+        file_path: str,
+        encoding: Optional[str] = None,
+        autodetect_encoding: bool = False,
+    ):
         """Initialize with file path."""
         self._file_path = file_path
         self._encoding = encoding
@@ -55,7 +60,10 @@ class ExcelExtractor(BaseExtractor):
                             else:
                                 page_content.append(f'"{k}":"{v}"')
                     documents.append(
-                        Document(page_content=";".join(page_content), metadata={"source": self._file_path})
+                        Document(
+                            page_content=";".join(page_content),
+                            metadata={"source": self._file_path},
+                        )
                     )
 
         elif file_extension == ".xls":
@@ -70,7 +78,10 @@ class ExcelExtractor(BaseExtractor):
                         if pd.notna(v):
                             page_content.append(f'"{k}":"{v}"')
                     documents.append(
-                        Document(page_content=";".join(page_content), metadata={"source": self._file_path})
+                        Document(
+                            page_content=";".join(page_content),
+                            metadata={"source": self._file_path},
+                        )
                     )
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}")

@@ -20,7 +20,12 @@ class SerplyApi:
 
     def run(self, query: str, **kwargs: Any) -> str:
         """Run query through SerplyAPI and parse result."""
-        params = {"q": query, "hl": kwargs.get("hl", "en"), "gl": kwargs.get("gl", "US"), "num": kwargs.get("num", 10)}
+        params = {
+            "q": query,
+            "hl": kwargs.get("hl", "en"),
+            "gl": kwargs.get("gl", "US"),
+            "num": kwargs.get("num", 10),
+        }
         location = kwargs.get("location", "US")
 
         headers = {

@@ -29,7 +29,12 @@ class TencentConfig(BaseModel):
     replicas: int = (2,)
 
     def to_tencent_params(self):
-        return {"url": self.url, "username": self.username, "key": self.api_key, "timeout": self.timeout}
+        return {
+            "url": self.url,
+            "username": self.username,
+            "key": self.api_key,
+            "timeout": self.timeout,
+        }
 
 
 class TencentVector(BaseVector):
@@ -53,22 +58,32 @@ class TencentVector(BaseVector):
         if exists:
             return self._client.database(self._client_config.database)
         else:
-            return self._client.create_database(database_name=self._client_config.database)
+            return self._client.create_database(
+                database_name=self._client_config.database
+            )
 
     def get_type(self) -> str:
-        return "tencent"
+        return VectorType.TENCENT
 
     def to_index_struct(self) -> dict:
-        return {"type": self.get_type(), "vector_store": {"class_prefix": self._collection_name}}
+        return {
+            "type": self.get_type(),
+            "vector_store": {"class_prefix": self._collection_name},
+        }
 
     def _has_collection(self) -> bool:
         collections = self._db.list_collections()
-        return any(collection.collection_name == self._collection_name for collection in collections)
+        return any(
+            collection.collection_name == self._collection_name
+            for collection in collections
+        )
 
     def _create_collection(self, dimension: int) -> None:
         lock_name = "vector_indexing_lock_{}".format(self._collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
+            collection_exist_cache_key = "vector_indexing_{}".format(
+                self._collection_name
+            )
             if redis_client.get(collection_exist_cache_key):
                 return
 
@@ -90,7 +105,9 @@ class TencentVector(BaseVector):
                 raise ValueError("unsupported metric_type")
             params = vdb_index.HNSWParams(m=16, efconstruction=200)
             index = vdb_index.Index(
-                vdb_index.FilterIndex(self.field_id, enum.FieldType.String, enum.IndexType.PRIMARY_KEY),
+                vdb_index.FilterIndex(
+                    self.field_id, enum.FieldType.String, enum.IndexType.PRIMARY_KEY
+                ),
                 vdb_index.VectorIndex(
                     self.field_vector,
                     dimension,
@@ -98,8 +115,12 @@ class TencentVector(BaseVector):
                     metric_type,
                     params,
                 ),
-                vdb_index.FilterIndex(self.field_text, enum.FieldType.String, enum.IndexType.FILTER),
-                vdb_index.FilterIndex(self.field_metadata, enum.FieldType.String, enum.IndexType.FILTER),
+                vdb_index.FilterIndex(
+                    self.field_text, enum.FieldType.String, enum.IndexType.FILTER
+                ),
+                vdb_index.FilterIndex(
+                    self.field_metadata, enum.FieldType.String, enum.IndexType.FILTER
+                ),
             )
 
             self._db.create_collection(
@@ -115,7 +136,9 @@ class TencentVector(BaseVector):
         self._create_collection(len(embeddings[0]))
         self.add_texts(texts, embeddings)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         texts = [doc.page_content for doc in documents]
         metadatas = [doc.metadata for doc in documents]
         total_count = len(embeddings)
@@ -131,7 +154,9 @@ class TencentVector(BaseVector):
                 metadata=metadata,
             )
             docs.append(doc)
-        self._db.collection(self._collection_name).upsert(docs, self._client_config.timeout)
+        self._db.collection(self._collection_name).upsert(
+            docs, self._client_config.timeout
+        )
 
     def text_exists(self, id: str) -> bool:
         docs = self._db.collection(self._collection_name).query(document_ids=[id])
@@ -143,9 +168,13 @@ class TencentVector(BaseVector):
         self._db.collection(self._collection_name).delete(document_ids=ids)
 
     def delete_by_metadata_field(self, key: str, value: str) -> None:
-        self._db.collection(self._collection_name).delete(filter=Filter(Filter.In(key, [value])))
+        self._db.collection(self._collection_name).delete(
+            filter=Filter(Filter.In(key, [value]))
+        )
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         res = self._db.collection(self._collection_name).search(
             vectors=[query_vector],
             params=document.HNSWSearchParams(ef=kwargs.get("ef", 10)),
@@ -181,14 +210,20 @@ class TencentVector(BaseVector):
 
 
 class TencentVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> TencentVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> TencentVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id).lower()
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.TENCENT, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.TENCENT, collection_name)
+            )
 
         return TencentVector(
             collection_name=collection_name,

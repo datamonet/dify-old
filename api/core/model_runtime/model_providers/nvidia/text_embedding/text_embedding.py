@@ -4,8 +4,12 @@ from typing import Optional
 
 from requests import post
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -15,7 +19,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 
 
 class NvidiaTextEmbeddingModel(TextEmbeddingModel):
@@ -27,7 +33,12 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
     models: list[str] = ["NV-Embed-QA"]
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -36,6 +47,7 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         api_key = credentials["api_key"]
@@ -44,7 +56,10 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
         if not api_key:
             raise CredentialsValidateFailedError("api_key is required")
         url = self.api_base
-        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+        headers = {
+            "Authorization": "Bearer " + api_key,
+            "Content-Type": "application/json",
+        }
 
         data = {"model": model, "input": texts[0], "input_type": "query"}
 
@@ -75,12 +90,18 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
             embeddings = resp["data"]
             usage = resp["usage"]
         except Exception as e:
-            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
+            raise InvokeServerUnavailableError(
+                f"Failed to convert response to json: {e} with text: {response.text}"
+            )
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=usage["total_tokens"]
+        )
 
         result = TextEmbeddingResult(
-            model=model, embeddings=[[float(data) for data in x["embedding"]] for x in embeddings], usage=usage
+            model=model,
+            embeddings=[[float(data) for data in x["embedding"]] for x in embeddings],
+            usage=usage,
         )
 
         return result
@@ -123,7 +144,9 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError],
         }
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -134,7 +157,10 @@ class NvidiaTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

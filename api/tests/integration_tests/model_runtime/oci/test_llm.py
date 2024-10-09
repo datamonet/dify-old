@@ -3,12 +3,15 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessageTool,
     SystemPromptMessage,
-    TextPromptMessageContent,
     UserPromptMessage,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
@@ -21,7 +24,10 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="cohere.command-r-plus",
-            credentials={"oci_config_content": "invalid_key", "oci_key_content": "invalid_key"},
+            credentials={
+                "oci_config_content": "invalid_key",
+                "oci_key_content": "invalid_key",
+            },
         )
 
     model.validate_credentials(
@@ -74,7 +80,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_invoke_model_with_function():
@@ -97,7 +107,10 @@ def test_invoke_model_with_function():
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
                     },
                     "required": ["location"],

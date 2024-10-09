@@ -13,8 +13,12 @@ from botocore.exceptions import (
     UnknownServiceError,
 )
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -23,14 +27,21 @@ from core.model_runtime.errors.invoke import (
     InvokeRateLimitError,
     InvokeServerUnavailableError,
 )
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class BedrockTextEmbeddingModel(TextEmbeddingModel):
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -39,6 +50,7 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         client_config = Config(region_name=credentials["aws_region"])
@@ -60,14 +72,18 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
                 body = {
                     "inputText": text,
                 }
-                response_body = self._invoke_bedrock_embedding(model, bedrock_runtime, body)
+                response_body = self._invoke_bedrock_embedding(
+                    model, bedrock_runtime, body
+                )
                 embeddings.extend([response_body.get("embedding")])
                 token_usage += response_body.get("inputTextTokenCount")
             logger.warning(f"Total Tokens: {token_usage}")
             result = TextEmbeddingResult(
                 model=model,
                 embeddings=embeddings,
-                usage=self._calc_response_usage(model=model, credentials=credentials, tokens=token_usage),
+                usage=self._calc_response_usage(
+                    model=model, credentials=credentials, tokens=token_usage
+                ),
             )
             return result
 
@@ -78,18 +94,24 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
                     "texts": [text],
                     "input_type": input_type,
                 }
-                response_body = self._invoke_bedrock_embedding(model, bedrock_runtime, body)
+                response_body = self._invoke_bedrock_embedding(
+                    model, bedrock_runtime, body
+                )
                 embeddings.extend(response_body.get("embeddings"))
                 token_usage += len(text)
             result = TextEmbeddingResult(
                 model=model,
                 embeddings=embeddings,
-                usage=self._calc_response_usage(model=model, credentials=credentials, tokens=token_usage),
+                usage=self._calc_response_usage(
+                    model=model, credentials=credentials, tokens=token_usage
+                ),
             )
             return result
 
         # others
-        raise ValueError(f"Got unknown model prefix {model_prefix} when handling block response")
+        raise ValueError(
+            f"Got unknown model prefix {model_prefix} when handling block response"
+        )
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
@@ -148,7 +170,9 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
         if model_prefix == "amazon":
             payload["inputText"] = texts
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -159,7 +183,10 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage
@@ -175,7 +202,9 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
 
         return usage
 
-    def _map_client_to_invoke_error(self, error_code: str, error_msg: str) -> type[InvokeError]:
+    def _map_client_to_invoke_error(
+        self, error_code: str, error_msg: str
+    ) -> type[InvokeError]:
         """
         Map client error to invoke error
 
@@ -212,7 +241,10 @@ class BedrockTextEmbeddingModel(TextEmbeddingModel):
         content_type = "application/json"
         try:
             response = bedrock_runtime.invoke_model(
-                body=json.dumps(body), modelId=model, accept=accept, contentType=content_type
+                body=json.dumps(body),
+                modelId=model,
+                accept=accept,
+                contentType=content_type,
             )
             response_body = json.loads(response.get("body").read().decode("utf-8"))
             return response_body

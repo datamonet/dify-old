@@ -122,7 +122,9 @@ class FlashRecognizer:
         return header
 
     def _sign(self, signstr, secret_key):
-        hmacstr = hmac.new(secret_key.encode("utf-8"), signstr.encode("utf-8"), hashlib.sha1).digest()
+        hmacstr = hmac.new(
+            secret_key.encode("utf-8"), signstr.encode("utf-8"), hashlib.sha1
+        ).digest()
         s = base64.b64encode(hmacstr)
         s = s.decode("utf-8")
         return s
@@ -159,6 +161,8 @@ class FlashRecognizer:
     def recognize(self, req, data):
         header = self._build_header()
         query_arr = self._create_query_arr(req)
-        req_url = self._build_req_with_signature(self.credential.secret_key, query_arr, header)
+        req_url = self._build_req_with_signature(
+            self.credential.secret_key, query_arr, header
+        )
         r = requests.post(req_url, headers=header, data=data)
         return r.text

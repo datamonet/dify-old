@@ -25,7 +25,9 @@ class HttpExecutorResponse:
 
     def __init__(self, response: httpx.Response):
         self.response = response
-        self.headers = dict(response.headers) if isinstance(self.response, httpx.Response) else {}
+        self.headers = (
+            dict(response.headers) if isinstance(self.response, httpx.Response) else {}
+        )
 
     @property
     def is_file(self) -> bool:
@@ -148,16 +150,26 @@ class HttpExecutor:
             result[k.strip()] = v
         return result
 
-    def _init_template(self, node_data: HttpRequestNodeData, variable_pool: Optional[VariablePool] = None):
+    def _init_template(
+        self,
+        node_data: HttpRequestNodeData,
+        variable_pool: Optional[VariablePool] = None,
+    ):
         # extract all template in url
-        self.server_url, server_url_variable_selectors = self._format_template(node_data.url, variable_pool)
+        self.server_url, server_url_variable_selectors = self._format_template(
+            node_data.url, variable_pool
+        )
 
         # extract all template in params
-        params, params_variable_selectors = self._format_template(node_data.params, variable_pool)
+        params, params_variable_selectors = self._format_template(
+            node_data.params, variable_pool
+        )
         self.params = self._to_dict(params)
 
         # extract all template in headers
-        headers, headers_variable_selectors = self._format_template(node_data.headers, variable_pool)
+        headers, headers_variable_selectors = self._format_template(
+            node_data.headers, variable_pool
+        )
         self.headers = self._to_dict(headers)
 
         # extract all template in body
@@ -168,12 +180,19 @@ class HttpExecutor:
 
             body_data = node_data.body.data or ""
             if body_data:
-                body_data, body_data_variable_selectors = self._format_template(body_data, variable_pool, is_valid_json)
+                body_data, body_data_variable_selectors = self._format_template(
+                    body_data, variable_pool, is_valid_json
+                )
 
-            content_type_is_set = any(key.lower() == "content-type" for key in self.headers)
+            content_type_is_set = any(
+                key.lower() == "content-type" for key in self.headers
+            )
             if node_data.body.type == "json" and not content_type_is_set:
                 self.headers["Content-Type"] = "application/json"
-            elif node_data.body.type == "x-www-form-urlencoded" and not content_type_is_set:
+            elif (
+                node_data.body.type == "x-www-form-urlencoded"
+                and not content_type_is_set
+            ):
                 self.headers["Content-Type"] = "application/x-www-form-urlencoded"
 
             if node_data.body.type in {"form-data", "x-www-form-urlencoded"}:
@@ -181,10 +200,14 @@ class HttpExecutor:
 
                 if node_data.body.type == "form-data":
                     self.files = {k: ("", v) for k, v in body.items()}
-                    random_str = lambda n: "".join([chr(randint(97, 122)) for _ in range(n)])
+                    random_str = lambda n: "".join(
+                        [chr(randint(97, 122)) for _ in range(n)]
+                    )
                     self.boundary = f"----WebKitFormBoundary{random_str(16)}"
 
-                    self.headers["Content-Type"] = f"multipart/form-data; boundary={self.boundary}"
+                    self.headers["Content-Type"] = (
+                        f"multipart/form-data; boundary={self.boundary}"
+                    )
                 else:
                     self.body = urlencode(body)
             elif node_data.body.type in {"json", "raw-text"}:
@@ -215,15 +238,21 @@ class HttpExecutor:
                 authorization.config.header = "Authorization"
 
             if self.authorization.config.type == "bearer":
-                headers[authorization.config.header] = f"Bearer {authorization.config.api_key}"
+                headers[authorization.config.header] = (
+                    f"Bearer {authorization.config.api_key}"
+                )
             elif self.authorization.config.type == "basic":
-                headers[authorization.config.header] = f"Basic {authorization.config.api_key}"
+                headers[authorization.config.header] = (
+                    f"Basic {authorization.config.api_key}"
+                )
             elif self.authorization.config.type == "custom":
                 headers[authorization.config.header] = authorization.config.api_key
 
         return headers
 
-    def _validate_and_parse_response(self, response: httpx.Response) -> HttpExecutorResponse:
+    def _validate_and_parse_response(
+        self, response: httpx.Response
+    ) -> HttpExecutorResponse:
         """
         validate the response
         """
@@ -259,7 +288,9 @@ class HttpExecutor:
         }
 
         if self.method in {"get", "head", "post", "put", "delete", "patch"}:
-            response = getattr(ssrf_proxy, self.method)(data=self.body, files=self.files, **kwargs)
+            response = getattr(ssrf_proxy, self.method)(
+                data=self.body, files=self.files, **kwargs
+            )
         else:
             raise ValueError(f"Invalid http method {self.method}")
         return response
@@ -318,7 +349,10 @@ class HttpExecutor:
         return raw_request
 
     def _format_template(
-        self, template: str, variable_pool: Optional[VariablePool], escape_quotes: bool = False
+        self,
+        template: str,
+        variable_pool: Optional[VariablePool],
+        escape_quotes: bool = False,
     ) -> tuple[str, list[VariableSelector]]:
         """
         format template
@@ -338,6 +372,8 @@ class HttpExecutor:
                     value = variable
                 variable_value_mapping[variable_selector.variable] = value
 
-            return variable_template_parser.format(variable_value_mapping), variable_selectors
+            return variable_template_parser.format(
+                variable_value_mapping
+            ), variable_selectors
         else:
             return template, variable_selectors

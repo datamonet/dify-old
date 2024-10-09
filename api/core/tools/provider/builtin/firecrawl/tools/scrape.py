@@ -1,18 +1,25 @@
 from typing import Any
 
 from core.tools.entities.tool_entities import ToolInvokeMessage
-from core.tools.provider.builtin.firecrawl.firecrawl_appx import FirecrawlApp, get_array_params, get_json_params
+from core.tools.provider.builtin.firecrawl.firecrawl_appx import (
+    FirecrawlApp,
+    get_array_params,
+    get_json_params,
+)
 from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class ScrapeTool(BuiltinTool):
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> list[ToolInvokeMessage]:
         """
         the api doc:
         https://docs.firecrawl.dev/api-reference/endpoint/scrape
         """
         app = FirecrawlApp(
-            api_key=self.runtime.credentials["firecrawl_api_key"], base_url=self.runtime.credentials["base_url"]
+            api_key=self.runtime.credentials["firecrawl_api_key"],
+            base_url=self.runtime.credentials["base_url"],
         )
 
         payload = {}
@@ -29,11 +36,14 @@ class ScrapeTool(BuiltinTool):
         extract["schema"] = get_json_params(tool_parameters, "schema")
         extract["systemPrompt"] = tool_parameters.get("systemPrompt")
         extract["prompt"] = tool_parameters.get("prompt")
-        extract = {k: v for k, v in extract.items() if v not in {None, ""}}
+        extract = {k: v for k, v in extract.items() if v not in (None, "")}
         payload["extract"] = extract or None
 
-        payload = {k: v for k, v in payload.items() if v not in {None, ""}}
+        payload = {k: v for k, v in payload.items() if v not in (None, "")}
 
         crawl_result = app.scrape_url(url=tool_parameters["url"], **payload)
         markdown_result = crawl_result.get("data", {}).get("markdown", "")
-        return [self.create_text_message(markdown_result), self.create_json_message(crawl_result)]
+        return [
+            self.create_text_message(markdown_result),
+            self.create_json_message(crawl_result),
+        ]

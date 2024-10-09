@@ -7,7 +7,12 @@ from huggingface_hub.utils import BadRequestError
 
 from core.model_runtime.entities.common_entities import I18nObject
 from core.model_runtime.entities.defaults import PARAMETER_RULE_TEMPLATE
-from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMMode,
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -24,8 +29,12 @@ from core.model_runtime.entities.model_entities import (
     ParameterRule,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
-from core.model_runtime.model_providers.huggingface_hub._common import _CommonHuggingfaceHub
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
+from core.model_runtime.model_providers.huggingface_hub._common import (
+    _CommonHuggingfaceHub,
+)
 
 
 class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel):
@@ -58,9 +67,13 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
         )
 
         if stream:
-            return self._handle_generate_stream_response(model, credentials, prompt_messages, response)
+            return self._handle_generate_stream_response(
+                model, credentials, prompt_messages, response
+            )
 
-        return self._handle_generate_response(model, credentials, prompt_messages, response)
+        return self._handle_generate_response(
+            model, credentials, prompt_messages, response
+        )
 
     def get_num_tokens(
         self,
@@ -75,26 +88,42 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
     def validate_credentials(self, model: str, credentials: dict) -> None:
         try:
             if "huggingfacehub_api_type" not in credentials:
-                raise CredentialsValidateFailedError("Huggingface Hub Endpoint Type must be provided.")
+                raise CredentialsValidateFailedError(
+                    "Huggingface Hub Endpoint Type must be provided."
+                )
 
-            if credentials["huggingfacehub_api_type"] not in {"inference_endpoints", "hosted_inference_api"}:
-                raise CredentialsValidateFailedError("Huggingface Hub Endpoint Type is invalid.")
+            if credentials["huggingfacehub_api_type"] not in {
+                "inference_endpoints",
+                "hosted_inference_api",
+            }:
+                raise CredentialsValidateFailedError(
+                    "Huggingface Hub Endpoint Type is invalid."
+                )
 
             if "huggingfacehub_api_token" not in credentials:
-                raise CredentialsValidateFailedError("Huggingface Hub Access Token must be provided.")
+                raise CredentialsValidateFailedError(
+                    "Huggingface Hub Access Token must be provided."
+                )
 
             if credentials["huggingfacehub_api_type"] == "inference_endpoints":
                 if "huggingfacehub_endpoint_url" not in credentials:
-                    raise CredentialsValidateFailedError("Huggingface Hub Endpoint URL must be provided.")
+                    raise CredentialsValidateFailedError(
+                        "Huggingface Hub Endpoint URL must be provided."
+                    )
 
                 if "task_type" not in credentials:
-                    raise CredentialsValidateFailedError("Huggingface Hub Task Type must be provided.")
+                    raise CredentialsValidateFailedError(
+                        "Huggingface Hub Task Type must be provided."
+                    )
             elif credentials["huggingfacehub_api_type"] == "hosted_inference_api":
                 credentials["task_type"] = self._get_hosted_model_task_type(
                     credentials["huggingfacehub_api_token"], model
                 )
 
-            if credentials["task_type"] not in {"text2text-generation", "text-generation"}:
+            if credentials["task_type"] not in {
+                "text2text-generation",
+                "text-generation",
+            }:
                 raise CredentialsValidateFailedError(
                     "Huggingface Hub Task Type must be one of text2text-generation, text-generation."
                 )
@@ -106,7 +135,7 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
 
             try:
                 client.text_generation(prompt="Who are you?", stream=True, model=model)
-            except BadRequestError as e:
+            except BadRequestError:
                 raise CredentialsValidateFailedError(
                     "Only available for models running on with the `text-generation-inference`. "
                     "To learn more about the TGI project, please refer to https://github.com/huggingface/text-generation-inference."
@@ -114,7 +143,9 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> Optional[AIModelEntity]:
         entity = AIModelEntity(
             model=model,
             label=I18nObject(en_US=model),
@@ -128,7 +159,9 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
 
     @staticmethod
     def _get_customizable_model_parameter_rules() -> list[ParameterRule]:
-        temperature_rule_dict = PARAMETER_RULE_TEMPLATE.get(DefaultParameterName.TEMPERATURE).copy()
+        temperature_rule_dict = PARAMETER_RULE_TEMPLATE.get(
+            DefaultParameterName.TEMPERATURE
+        ).copy()
         temperature_rule_dict["name"] = "temperature"
         temperature_rule = ParameterRule(**temperature_rule_dict)
         temperature_rule.default = 0.5
@@ -204,10 +237,21 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
             precision=1,
         )
 
-        return [temperature_rule, top_k_rule, top_p_rule, max_new_tokens, seed, repetition_penalty]
+        return [
+            temperature_rule,
+            top_k_rule,
+            top_p_rule,
+            max_new_tokens,
+            seed,
+            repetition_penalty,
+        ]
 
     def _handle_generate_stream_response(
-        self, model: str, credentials: dict, prompt_messages: list[PromptMessage], response: Generator
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        response: Generator,
     ) -> Generator:
         index = -1
         for chunk in response:
@@ -221,9 +265,13 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
 
             if chunk.details:
                 prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-                completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+                completion_tokens = self.get_num_tokens(
+                    model, credentials, [assistant_prompt_message]
+                )
 
-                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+                usage = self._calc_response_usage(
+                    model, credentials, prompt_tokens, completion_tokens
+                )
 
                 yield LLMResultChunk(
                     model=model,
@@ -246,7 +294,11 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
                 )
 
     def _handle_generate_response(
-        self, model: str, credentials: dict, prompt_messages: list[PromptMessage], response: any
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        response: any,
     ) -> LLMResult:
         if isinstance(response, str):
             content = response
@@ -256,9 +308,13 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
         assistant_prompt_message = AssistantPromptMessage(content=content)
 
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+        completion_tokens = self.get_num_tokens(
+            model, credentials, [assistant_prompt_message]
+        )
 
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         result = LLMResult(
             model=model,
@@ -277,12 +333,19 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
             if not model_info:
                 raise ValueError(f"Model {model_name} not found.")
 
-            if "inference" in model_info.cardData and not model_info.cardData["inference"]:
-                raise ValueError(f"Inference API has been turned off for this model {model_name}.")
+            if (
+                "inference" in model_info.cardData
+                and not model_info.cardData["inference"]
+            ):
+                raise ValueError(
+                    f"Inference API has been turned off for this model {model_name}."
+                )
 
             valid_tasks = ("text2text-generation", "text-generation")
             if model_info.pipeline_tag not in valid_tasks:
-                raise ValueError(f"Model {model_name} is not a valid task, must be one of {valid_tasks}.")
+                raise ValueError(
+                    f"Model {model_name} is not a valid task, must be one of {valid_tasks}."
+                )
         except Exception as e:
             raise CredentialsValidateFailedError(f"{str(e)}")
 
@@ -291,7 +354,9 @@ class HuggingfaceHubLargeLanguageModel(_CommonHuggingfaceHub, LargeLanguageModel
     def _convert_messages_to_prompt(self, messages: list[PromptMessage]) -> str:
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(self._convert_one_message_to_text(message) for message in messages)
+        text = "".join(
+            self._convert_one_message_to_text(message) for message in messages
+        )
 
         return text.rstrip()
 

@@ -14,12 +14,18 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="whisper-1",
-            credentials={"api_key": "invalid_key", "endpoint_url": "https://api.openai.com/v1/"},
+            credentials={
+                "api_key": "invalid_key",
+                "endpoint_url": "https://api.openai.com/v1/",
+            },
         )
 
     model.validate_credentials(
         model="whisper-1",
-        credentials={"api_key": os.environ.get("OPENAI_API_KEY"), "endpoint_url": "https://api.openai.com/v1/"},
+        credentials={
+            "api_key": os.environ.get("OPENAI_API_KEY"),
+            "endpoint_url": "https://api.openai.com/v1/",
+        },
     )
 
 
@@ -41,7 +47,10 @@ def test_invoke_model():
 
         result = model.invoke(
             model="whisper-1",
-            credentials={"api_key": os.environ.get("OPENAI_API_KEY"), "endpoint_url": "https://api.openai.com/v1/"},
+            credentials={
+                "api_key": os.environ.get("OPENAI_API_KEY"),
+                "endpoint_url": "https://api.openai.com/v1/",
+            },
             file=file,
             user="abc-123",
         )

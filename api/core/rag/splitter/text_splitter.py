@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 TS = TypeVar("TS", bound="TextSplitter")
 
 
-def _split_text_with_regex(text: str, separator: str, keep_separator: bool) -> list[str]:
+def _split_text_with_regex(
+    text: str, separator: str, keep_separator: bool
+) -> list[str]:
     # Now that we have the separator, split the text
     if separator:
         if keep_separator:
@@ -72,7 +74,9 @@ class TextSplitter(BaseDocumentTransformer, ABC):
     def split_text(self, text: str) -> list[str]:
         """Split text into multiple components."""
 
-    def create_documents(self, texts: list[str], metadatas: Optional[list[dict]] = None) -> list[Document]:
+    def create_documents(
+        self, texts: list[str], metadatas: Optional[list[dict]] = None
+    ) -> list[Document]:
         """Create documents from a list of texts."""
         _metadatas = metadatas or [{}] * len(texts)
         documents = []
@@ -103,7 +107,9 @@ class TextSplitter(BaseDocumentTransformer, ABC):
         else:
             return text
 
-    def _merge_splits(self, splits: Iterable[str], separator: str, lengths: list[int]) -> list[str]:
+    def _merge_splits(
+        self, splits: Iterable[str], separator: str, lengths: list[int]
+    ) -> list[str]:
         # We now want to combine these smaller pieces into medium size
         # chunks to send to the LLM.
         separator_len = self._length_function(separator)
@@ -114,7 +120,10 @@ class TextSplitter(BaseDocumentTransformer, ABC):
         index = 0
         for d in splits:
             _len = lengths[index]
-            if total + _len + (separator_len if len(current_doc) > 0 else 0) > self._chunk_size:
+            if (
+                total + _len + (separator_len if len(current_doc) > 0 else 0)
+                > self._chunk_size
+            ):
                 if total > self._chunk_size:
                     logger.warning(
                         f"Created a chunk of size {total}, which is longer than the specified {self._chunk_size}"
@@ -127,9 +136,13 @@ class TextSplitter(BaseDocumentTransformer, ABC):
                     # - we have a larger chunk than in the chunk overlap
                     # - or if we still have any chunks and the length is long
                     while total > self._chunk_overlap or (
-                        total + _len + (separator_len if len(current_doc) > 0 else 0) > self._chunk_size and total > 0
+                        total + _len + (separator_len if len(current_doc) > 0 else 0)
+                        > self._chunk_size
+                        and total > 0
                     ):
-                        total -= self._length_function(current_doc[0]) + (separator_len if len(current_doc) > 1 else 0)
+                        total -= self._length_function(current_doc[0]) + (
+                            separator_len if len(current_doc) > 1 else 0
+                        )
                         current_doc = current_doc[1:]
             current_doc.append(d)
             total += _len + (separator_len if len(current_doc) > 1 else 0)
@@ -146,7 +159,9 @@ class TextSplitter(BaseDocumentTransformer, ABC):
             from transformers import PreTrainedTokenizerBase
 
             if not isinstance(tokenizer, PreTrainedTokenizerBase):
-                raise ValueError("Tokenizer received was not an instance of PreTrainedTokenizerBase")
+                raise ValueError(
+                    "Tokenizer received was not an instance of PreTrainedTokenizerBase"
+                )
 
             def _huggingface_tokenizer_length(text: str) -> int:
                 return len(tokenizer.encode(text))
@@ -201,11 +216,15 @@ class TextSplitter(BaseDocumentTransformer, ABC):
 
         return cls(length_function=_tiktoken_encoder, **kwargs)
 
-    def transform_documents(self, documents: Sequence[Document], **kwargs: Any) -> Sequence[Document]:
+    def transform_documents(
+        self, documents: Sequence[Document], **kwargs: Any
+    ) -> Sequence[Document]:
         """Transform sequence of documents by splitting them."""
         return self.split_documents(list(documents))
 
-    async def atransform_documents(self, documents: Sequence[Document], **kwargs: Any) -> Sequence[Document]:
+    async def atransform_documents(
+        self, documents: Sequence[Document], **kwargs: Any
+    ) -> Sequence[Document]:
         """Asynchronously transform a sequence of documents by splitting them."""
         raise NotImplementedError
 
@@ -247,7 +266,9 @@ class HeaderType(TypedDict):
 class MarkdownHeaderTextSplitter:
     """Splitting markdown files based on specified headers."""
 
-    def __init__(self, headers_to_split_on: list[tuple[str, str]], return_each_line: bool = False):
+    def __init__(
+        self, headers_to_split_on: list[tuple[str, str]], return_each_line: bool = False
+    ):
         """Create a new MarkdownHeaderTextSplitter.
 
         Args:
@@ -258,7 +279,9 @@ class MarkdownHeaderTextSplitter:
         self.return_each_line = return_each_line
         # Given the headers we want to split on,
         # (e.g., "#, ##, etc") order by length
-        self.headers_to_split_on = sorted(headers_to_split_on, key=lambda split: len(split[0]), reverse=True)
+        self.headers_to_split_on = sorted(
+            headers_to_split_on, key=lambda split: len(split[0]), reverse=True
+        )
 
     def aggregate_lines_to_chunks(self, lines: list[LineType]) -> list[Document]:
         """Combine lines with common metadata into chunks
@@ -268,7 +291,10 @@ class MarkdownHeaderTextSplitter:
         aggregated_chunks: list[LineType] = []
 
         for line in lines:
-            if aggregated_chunks and aggregated_chunks[-1]["metadata"] == line["metadata"]:
+            if (
+                aggregated_chunks
+                and aggregated_chunks[-1]["metadata"] == line["metadata"]
+            ):
                 # If the last line in the aggregated list
                 # has the same metadata as the current line,
                 # append the current content to the last lines's content
@@ -277,7 +303,10 @@ class MarkdownHeaderTextSplitter:
                 # Otherwise, append the current line to the aggregated list
                 aggregated_chunks.append(line)
 
-        return [Document(page_content=chunk["content"], metadata=chunk["metadata"]) for chunk in aggregated_chunks]
+        return [
+            Document(page_content=chunk["content"], metadata=chunk["metadata"])
+            for chunk in aggregated_chunks
+        ]
 
     def split_text(self, text: str) -> list[Document]:
         """Split markdown file
@@ -312,7 +341,10 @@ class MarkdownHeaderTextSplitter:
                         current_header_level = sep.count("#")
 
                         # Pop out headers of lower or same level from the stack
-                        while header_stack and header_stack[-1]["level"] >= current_header_level:
+                        while (
+                            header_stack
+                            and header_stack[-1]["level"] >= current_header_level
+                        ):
                             # We have encountered a new header
                             # at the same or higher level
                             popped_header = header_stack.pop()
@@ -358,7 +390,9 @@ class MarkdownHeaderTextSplitter:
             current_metadata = initial_metadata.copy()
 
         if current_content:
-            lines_with_metadata.append({"content": "\n".join(current_content), "metadata": current_metadata})
+            lines_with_metadata.append(
+                {"content": "\n".join(current_content), "metadata": current_metadata}
+            )
 
         # lines_with_metadata has each line with associated header metadata
         # aggregate these into chunks based on common metadata
@@ -366,7 +400,8 @@ class MarkdownHeaderTextSplitter:
             return self.aggregate_lines_to_chunks(lines_with_metadata)
         else:
             return [
-                Document(page_content=chunk["content"], metadata=chunk["metadata"]) for chunk in lines_with_metadata
+                Document(page_content=chunk["content"], metadata=chunk["metadata"])
+                for chunk in lines_with_metadata
             ]
 
 
@@ -486,7 +521,9 @@ class RecursiveCharacterTextSplitter(TextSplitter):
                 _good_splits_lengths.append(s_len)
             else:
                 if _good_splits:
-                    merged_text = self._merge_splits(_good_splits, _separator, _good_splits_lengths)
+                    merged_text = self._merge_splits(
+                        _good_splits, _separator, _good_splits_lengths
+                    )
                     final_chunks.extend(merged_text)
                     _good_splits = []
                     _good_splits_lengths = []
@@ -497,7 +534,9 @@ class RecursiveCharacterTextSplitter(TextSplitter):
                     final_chunks.extend(other_info)
 
         if _good_splits:
-            merged_text = self._merge_splits(_good_splits, _separator, _good_splits_lengths)
+            merged_text = self._merge_splits(
+                _good_splits, _separator, _good_splits_lengths
+            )
             final_chunks.extend(merged_text)
 
         return final_chunks

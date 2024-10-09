@@ -84,7 +84,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -184,7 +185,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -249,7 +251,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -314,7 +317,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -379,7 +383,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -444,7 +449,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -510,7 +516,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -576,7 +583,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object", "json_schema"],
@@ -652,7 +660,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -718,7 +727,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -784,7 +794,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object", "json_schema"],
@@ -860,7 +871,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -926,7 +938,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -987,7 +1000,8 @@ LLM_BASE_MODELS = [
                     label=I18nObject(zh_Hans="回复格式", en_US="response_format"),
                     type="string",
                     help=I18nObject(
-                        zh_Hans="指定模型必须输出的格式", en_US="specifying the format that the model must output"
+                        zh_Hans="指定模型必须输出的格式",
+                        en_US="specifying the format that the model must output",
                     ),
                     required=False,
                     options=["text", "json_object"],
@@ -1168,32 +1182,86 @@ TTS_BASE_MODELS = [
                     {
                         "mode": "alloy",
                         "name": "Alloy",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "echo",
                         "name": "Echo",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "fable",
                         "name": "Fable",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "onyx",
                         "name": "Onyx",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "nova",
                         "name": "Nova",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "shimmer",
                         "name": "Shimmer",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                 ],
                 ModelPropertyKey.WORD_LIMIT: 120,
@@ -1220,32 +1288,86 @@ TTS_BASE_MODELS = [
                     {
                         "mode": "alloy",
                         "name": "Alloy",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "echo",
                         "name": "Echo",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "fable",
                         "name": "Fable",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "onyx",
                         "name": "Onyx",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "nova",
                         "name": "Nova",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                     {
                         "mode": "shimmer",
                         "name": "Shimmer",
-                        "language": ["zh-Hans", "en-US", "de-DE", "fr-FR", "es-ES", "it-IT", "th-TH", "id-ID"],
+                        "language": [
+                            "zh-Hans",
+                            "en-US",
+                            "de-DE",
+                            "fr-FR",
+                            "es-ES",
+                            "it-IT",
+                            "th-TH",
+                            "id-ID",
+                        ],
                     },
                 ],
                 ModelPropertyKey.WORD_LIMIT: 120,

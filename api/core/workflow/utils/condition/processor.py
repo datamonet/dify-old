@@ -8,7 +8,9 @@ from core.workflow.utils.variable_template_parser import VariableTemplateParser
 
 
 class ConditionProcessor:
-    def process_conditions(self, variable_pool: VariablePool, conditions: Sequence[Condition]):
+    def process_conditions(
+        self, variable_pool: VariablePool, conditions: Sequence[Condition]
+    ):
         input_conditions = []
         group_result = []
 
@@ -19,12 +21,18 @@ class ConditionProcessor:
 
             expected_value = None
             if condition.value is not None:
-                variable_template_parser = VariableTemplateParser(template=condition.value)
-                variable_selectors = variable_template_parser.extract_variable_selectors()
+                variable_template_parser = VariableTemplateParser(
+                    template=condition.value
+                )
+                variable_selectors = (
+                    variable_template_parser.extract_variable_selectors()
+                )
                 if variable_selectors:
                     for variable_selector in variable_selectors:
                         value = variable_pool.get_any(variable_selector.value_selector)
-                        expected_value = variable_template_parser.format({variable_selector.variable: value})
+                        expected_value = variable_template_parser.format(
+                            {variable_selector.variable: value}
+                        )
 
                     if expected_value is None:
                         expected_value = condition.value
@@ -40,14 +48,18 @@ class ConditionProcessor:
                 }
             )
 
-            result = self.evaluate_condition(actual_value, comparison_operator, expected_value)
+            result = self.evaluate_condition(
+                actual_value, comparison_operator, expected_value
+            )
             group_result.append(result)
 
         return input_conditions, group_result
 
     def evaluate_condition(
         self,
-        actual_value: Optional[str | int | float | dict[Any, Any] | list[Any] | FileVar | None],
+        actual_value: Optional[
+            str | int | float | dict[Any, Any] | list[Any] | FileVar | None
+        ],
         comparison_operator: str,
         expected_value: Optional[str] = None,
     ) -> bool:
@@ -94,7 +106,9 @@ class ConditionProcessor:
         else:
             raise ValueError(f"Invalid comparison operator: {comparison_operator}")
 
-    def _assert_contains(self, actual_value: Optional[str | list], expected_value: str) -> bool:
+    def _assert_contains(
+        self, actual_value: Optional[str | list], expected_value: str
+    ) -> bool:
         """
         Assert contains
         :param actual_value: actual value
@@ -111,7 +125,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_not_contains(self, actual_value: Optional[str | list], expected_value: str) -> bool:
+    def _assert_not_contains(
+        self, actual_value: Optional[str | list], expected_value: str
+    ) -> bool:
         """
         Assert not contains
         :param actual_value: actual value
@@ -128,7 +144,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_start_with(self, actual_value: Optional[str], expected_value: str) -> bool:
+    def _assert_start_with(
+        self, actual_value: Optional[str], expected_value: str
+    ) -> bool:
         """
         Assert start with
         :param actual_value: actual value
@@ -145,7 +163,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_end_with(self, actual_value: Optional[str], expected_value: str) -> bool:
+    def _assert_end_with(
+        self, actual_value: Optional[str], expected_value: str
+    ) -> bool:
         """
         Assert end with
         :param actual_value: actual value
@@ -216,7 +236,9 @@ class ConditionProcessor:
             return True
         return False
 
-    def _assert_equal(self, actual_value: Optional[int | float], expected_value: str | int | float) -> bool:
+    def _assert_equal(
+        self, actual_value: Optional[int | float], expected_value: str | int | float
+    ) -> bool:
         """
         Assert equal
         :param actual_value: actual value
@@ -238,7 +260,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_not_equal(self, actual_value: Optional[int | float], expected_value: str | int | float) -> bool:
+    def _assert_not_equal(
+        self, actual_value: Optional[int | float], expected_value: str | int | float
+    ) -> bool:
         """
         Assert not equal
         :param actual_value: actual value
@@ -260,7 +284,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_greater_than(self, actual_value: Optional[int | float], expected_value: str | int | float) -> bool:
+    def _assert_greater_than(
+        self, actual_value: Optional[int | float], expected_value: str | int | float
+    ) -> bool:
         """
         Assert greater than
         :param actual_value: actual value
@@ -282,7 +308,9 @@ class ConditionProcessor:
             return False
         return True
 
-    def _assert_less_than(self, actual_value: Optional[int | float], expected_value: str | int | float) -> bool:
+    def _assert_less_than(
+        self, actual_value: Optional[int | float], expected_value: str | int | float
+    ) -> bool:
         """
         Assert less than
         :param actual_value: actual value
@@ -374,7 +402,12 @@ class ConditionProcessor:
 
 
 class ConditionAssertionError(Exception):
-    def __init__(self, message: str, conditions: list[dict], sub_condition_compare_results: list[dict]) -> None:
+    def __init__(
+        self,
+        message: str,
+        conditions: list[dict],
+        sub_condition_compare_results: list[dict],
+    ) -> None:
         self.message = message
         self.conditions = conditions
         self.sub_condition_compare_results = sub_condition_compare_results

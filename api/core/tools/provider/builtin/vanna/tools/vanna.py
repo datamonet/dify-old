@@ -52,19 +52,43 @@ class VannaTool(BuiltinTool):
                 schema_sql = "SELECT type, sql FROM sqlite_master WHERE sql is not null"
                 vn.connect_to_sqlite(url)
             case "Postgres":
-                vn.connect_to_postgres(host=url, dbname=db_name, user=username, password=password, port=port)
+                vn.connect_to_postgres(
+                    host=url,
+                    dbname=db_name,
+                    user=username,
+                    password=password,
+                    port=port,
+                )
             case "DuckDB":
                 vn.connect_to_duckdb(url=url)
             case "SQLServer":
                 vn.connect_to_mssql(url)
             case "MySQL":
-                vn.connect_to_mysql(host=url, dbname=db_name, user=username, password=password, port=port)
+                vn.connect_to_mysql(
+                    host=url,
+                    dbname=db_name,
+                    user=username,
+                    password=password,
+                    port=port,
+                )
             case "Oracle":
                 vn.connect_to_oracle(user=username, password=password, dsn=url)
             case "Hive":
-                vn.connect_to_hive(host=url, dbname=db_name, user=username, password=password, port=port)
+                vn.connect_to_hive(
+                    host=url,
+                    dbname=db_name,
+                    user=username,
+                    password=password,
+                    port=port,
+                )
             case "ClickHouse":
-                vn.connect_to_clickhouse(host=url, dbname=db_name, user=username, password=password, port=port)
+                vn.connect_to_clickhouse(
+                    host=url,
+                    dbname=db_name,
+                    user=username,
+                    password=password,
+                    port=port,
+                )
 
         enable_training = tool_parameters.get("enable_training", False)
         reset_training_data = tool_parameters.get("reset_training_data", False)
@@ -123,7 +147,10 @@ class VannaTool(BuiltinTool):
                 result.append(self.create_text_message(res[1].to_markdown()))
             if len(res) > 2 and res[2] is not None:
                 result.append(
-                    self.create_blob_message(blob=res[2].to_image(format="svg"), meta={"mime_type": "image/svg+xml"})
+                    self.create_blob_message(
+                        blob=res[2].to_image(format="svg"),
+                        meta={"mime_type": "image/svg+xml"},
+                    )
                 )
 
         return result

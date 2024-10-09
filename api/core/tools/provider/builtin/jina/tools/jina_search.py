@@ -19,8 +19,12 @@ class JinaSearchTool(BuiltinTool):
 
         headers = {"Accept": "application/json"}
 
-        if "api_key" in self.runtime.credentials and self.runtime.credentials.get("api_key"):
-            headers["Authorization"] = "Bearer " + self.runtime.credentials.get("api_key")
+        if "api_key" in self.runtime.credentials and self.runtime.credentials.get(
+            "api_key"
+        ):
+            headers["Authorization"] = "Bearer " + self.runtime.credentials.get(
+                "api_key"
+            )
 
         if tool_parameters.get("image_caption", False):
             headers["X-With-Generated-Alt"] = "true"
@@ -40,7 +44,10 @@ class JinaSearchTool(BuiltinTool):
 
         max_retries = tool_parameters.get("max_retries", 3)
         response = ssrf_proxy.get(
-            str(URL(self._jina_search_endpoint + query)), headers=headers, timeout=(10, 60), max_retries=max_retries
+            str(URL(self._jina_search_endpoint + query)),
+            headers=headers,
+            timeout=(10, 60),
+            max_retries=max_retries,
         )
 
         return self.create_text_message(response.text)

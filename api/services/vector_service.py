@@ -9,7 +9,10 @@ from models.dataset import Dataset, DocumentSegment
 class VectorService:
     @classmethod
     def create_segments_vector(
-        cls, keywords_list: Optional[list[list[str]]], segments: list[DocumentSegment], dataset: Dataset
+        cls,
+        keywords_list: Optional[list[list[str]]],
+        segments: list[DocumentSegment],
+        dataset: Dataset,
     ):
         documents = []
         for segment in segments:
@@ -37,7 +40,9 @@ class VectorService:
             keyword.add_texts(documents)
 
     @classmethod
-    def update_segment_vector(cls, keywords: Optional[list[str]], segment: DocumentSegment, dataset: Dataset):
+    def update_segment_vector(
+        cls, keywords: Optional[list[str]], segment: DocumentSegment, dataset: Dataset
+    ):
         # update segment index task
 
         # format new index

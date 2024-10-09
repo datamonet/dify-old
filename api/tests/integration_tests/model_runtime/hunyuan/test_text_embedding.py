@@ -4,7 +4,9 @@ import pytest
 
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.hunyuan.text_embedding.text_embedding import HunyuanTextEmbeddingModel
+from core.model_runtime.model_providers.hunyuan.text_embedding.text_embedding import (
+    HunyuanTextEmbeddingModel,
+)
 
 
 def test_validate_credentials():
@@ -12,7 +14,8 @@ def test_validate_credentials():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="hunyuan-embedding", credentials={"secret_id": "invalid_key", "secret_key": "invalid_key"}
+            model="hunyuan-embedding",
+            credentials={"secret_id": "invalid_key", "secret_key": "invalid_key"},
         )
 
     model.validate_credentials(

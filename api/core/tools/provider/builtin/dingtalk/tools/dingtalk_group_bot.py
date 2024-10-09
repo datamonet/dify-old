@@ -70,7 +70,9 @@ class DingTalkGroupBotTool(BuiltinTool):
                     f"Failed to send the text message, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to send message to group chat bot. {}".format(e))
+            return self.create_text_message(
+                "Failed to send message to group chat bot. {}".format(e)
+            )
 
     @staticmethod
     def _apply_security_mechanism(params: dict[str, Any], sign_secret: str):
@@ -79,7 +81,9 @@ class DingTalkGroupBotTool(BuiltinTool):
             secret_enc = sign_secret.encode("utf-8")
             string_to_sign = f"{timestamp}\n{sign_secret}"
             string_to_sign_enc = string_to_sign.encode("utf-8")
-            hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
+            hmac_code = hmac.new(
+                secret_enc, string_to_sign_enc, digestmod=hashlib.sha256
+            ).digest()
             sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
 
             params["timestamp"] = timestamp

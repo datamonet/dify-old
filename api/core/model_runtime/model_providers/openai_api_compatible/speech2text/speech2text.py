@@ -3,10 +3,18 @@ from urllib.parse import urljoin
 
 import requests
 
+from core.model_runtime.entities.common_entities import I18nObject
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+)
 from core.model_runtime.errors.invoke import InvokeBadRequestError
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.speech2text_model import Speech2TextModel
-from core.model_runtime.model_providers.openai_api_compatible._common import _CommonOaiApiCompat
+from core.model_runtime.model_providers.openai_api_compatible._common import (
+    _CommonOaiApiCompat,
+)
 
 
 class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
@@ -14,7 +22,9 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
     Model class for OpenAI Compatible Speech to text model.
     """
 
-    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
+    def _invoke(
+        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
+    ) -> str:
         """
         Invoke speech2text model
 
@@ -37,7 +47,9 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
 
         payload = {"model": model}
         files = [("file", file)]
-        response = requests.post(endpoint_url, headers=headers, data=payload, files=files)
+        response = requests.post(
+            endpoint_url, headers=headers, data=payload, files=files
+        )
 
         if response.status_code != 200:
             raise InvokeBadRequestError(response.text)
@@ -59,3 +71,20 @@ class OAICompatSpeech2TextModel(_CommonOaiApiCompat, Speech2TextModel):
                 self._invoke(model, credentials, audio_file)
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
+
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
+        """
+        used to define customizable model schema
+        """
+        entity = AIModelEntity(
+            model=model,
+            label=I18nObject(en_US=model),
+            fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
+            model_type=ModelType.SPEECH2TEXT,
+            model_properties={},
+            parameter_rules=[],
+        )
+
+        return entity

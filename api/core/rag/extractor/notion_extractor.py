@@ -45,7 +45,9 @@ class NotionExtractor(BaseExtractor):
         if notion_access_token:
             self._notion_access_token = notion_access_token
         else:
-            self._notion_access_token = self._get_access_token(tenant_id, self._notion_workspace_id)
+            self._notion_access_token = self._get_access_token(
+                tenant_id, self._notion_workspace_id
+            )
             if not self._notion_access_token:
                 integration_token = dify_config.NOTION_INTEGRATION_TOKEN
                 if integration_token is None:
@@ -58,11 +60,15 @@ class NotionExtractor(BaseExtractor):
     def extract(self) -> list[Document]:
         self.update_last_edited_time(self._document_model)
 
-        text_docs = self._load_data_as_documents(self._notion_obj_id, self._notion_page_type)
+        text_docs = self._load_data_as_documents(
+            self._notion_obj_id, self._notion_page_type
+        )
 
         return text_docs
 
-    def _load_data_as_documents(self, notion_obj_id: str, notion_page_type: str) -> list[Document]:
+    def _load_data_as_documents(
+        self, notion_obj_id: str, notion_page_type: str
+    ) -> list[Document]:
         docs = []
         if notion_page_type == "database":
             # get all the pages in the database
@@ -76,7 +82,9 @@ class NotionExtractor(BaseExtractor):
 
         return docs
 
-    def _get_notion_database_data(self, database_id: str, query_dict: dict[str, Any] = {}) -> list[Document]:
+    def _get_notion_database_data(
+        self, database_id: str, query_dict: dict[str, Any] = {}
+    ) -> list[Document]:
         """Get all the pages from a Notion database."""
         res = requests.post(
             DATABASE_URL_TMPL.format(database_id=database_id),
@@ -134,7 +142,9 @@ class NotionExtractor(BaseExtractor):
         start_cursor = None
         block_url = BLOCK_CHILD_URL_TMPL.format(block_id=page_id)
         while True:
-            query_dict: dict[str, Any] = {} if not start_cursor else {"start_cursor": start_cursor}
+            query_dict: dict[str, Any] = (
+                {} if not start_cursor else {"start_cursor": start_cursor}
+            )
             res = requests.request(
                 "GET",
                 block_url,
@@ -172,7 +182,9 @@ class NotionExtractor(BaseExtractor):
 
                     cur_result_text = "\n".join(cur_result_text_arr)
                     if result_type in HEADING_SPLITTER:
-                        result_lines_arr.append(f"{HEADING_SPLITTER[result_type]}{cur_result_text}")
+                        result_lines_arr.append(
+                            f"{HEADING_SPLITTER[result_type]}{cur_result_text}"
+                        )
                     else:
                         result_lines_arr.append(cur_result_text + "\n\n")
 
@@ -188,7 +200,9 @@ class NotionExtractor(BaseExtractor):
         start_cursor = None
         block_url = BLOCK_CHILD_URL_TMPL.format(block_id=block_id)
         while True:
-            query_dict: dict[str, Any] = {} if not start_cursor else {"start_cursor": start_cursor}
+            query_dict: dict[str, Any] = (
+                {} if not start_cursor else {"start_cursor": start_cursor}
+            )
 
             res = requests.request(
                 "GET",
@@ -223,12 +237,16 @@ class NotionExtractor(BaseExtractor):
                     has_children = result["has_children"]
                     block_type = result["type"]
                     if has_children and block_type != "child_page":
-                        children_text = self._read_block(result_block_id, num_tabs=num_tabs + 1)
+                        children_text = self._read_block(
+                            result_block_id, num_tabs=num_tabs + 1
+                        )
                         cur_result_text_arr.append(children_text)
 
                     cur_result_text = "\n".join(cur_result_text_arr)
                     if result_type in HEADING_SPLITTER:
-                        result_lines_arr.append(f"{HEADING_SPLITTER[result_type]}{cur_result_text}")
+                        result_lines_arr.append(
+                            f"{HEADING_SPLITTER[result_type]}{cur_result_text}"
+                        )
                     else:
                         result_lines_arr.append(cur_result_text + "\n\n")
 
@@ -247,7 +265,9 @@ class NotionExtractor(BaseExtractor):
         start_cursor = None
         block_url = BLOCK_CHILD_URL_TMPL.format(block_id=block_id)
         while not done:
-            query_dict: dict[str, Any] = {} if not start_cursor else {"start_cursor": start_cursor}
+            query_dict: dict[str, Any] = (
+                {} if not start_cursor else {"start_cursor": start_cursor}
+            )
 
             res = requests.request(
                 "GET",
@@ -272,7 +292,9 @@ class NotionExtractor(BaseExtractor):
                     table_header_cell_texts.append("")
             # Initialize Markdown table with headers
             markdown_table = "| " + " | ".join(table_header_cell_texts) + " |\n"
-            markdown_table += "| " + " | ".join(["---"] * len(table_header_cell_texts)) + " |\n"
+            markdown_table += (
+                "| " + " | ".join(["---"] * len(table_header_cell_texts)) + " |\n"
+            )
 
             # Process data to format each row in Markdown table format
             results = data["results"]
@@ -339,7 +361,8 @@ class NotionExtractor(BaseExtractor):
                 DataSourceOauthBinding.tenant_id == tenant_id,
                 DataSourceOauthBinding.provider == "notion",
                 DataSourceOauthBinding.disabled == False,
-                DataSourceOauthBinding.source_info["workspace_id"] == f'"{notion_workspace_id}"',
+                DataSourceOauthBinding.source_info["workspace_id"]
+                == f'"{notion_workspace_id}"',
             )
         ).first()
 

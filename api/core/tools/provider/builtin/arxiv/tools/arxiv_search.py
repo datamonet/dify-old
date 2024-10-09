@@ -47,7 +47,11 @@ class ArxivAPIWrapper(BaseModel):
     """
 
     arxiv_search: type[arxiv.Search] = arxiv.Search  #: :meta private:
-    arxiv_http_error: tuple[type[Exception]] = (arxiv.ArxivError, arxiv.UnexpectedEmptyPageError, arxiv.HTTPError)
+    arxiv_http_error: tuple[type[Exception]] = (
+        arxiv.ArxivError,
+        arxiv.UnexpectedEmptyPageError,
+        arxiv.HTTPError,
+    )
     top_k_results: int = 3
     ARXIV_MAX_QUERY_LENGTH: int = 300
     load_max_docs: int = 100
@@ -95,7 +99,9 @@ class ArxivSearchTool(BuiltinTool):
     A tool for searching articles on Arxiv.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invokes the Arxiv search tool with the given user ID and tool parameters.
 

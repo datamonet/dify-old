@@ -25,7 +25,9 @@ class UnstructuredMsgExtractor(BaseExtractor):
         elements = partition_msg(filename=self._file_path)
         from unstructured.chunking.title import chunk_by_title
 
-        chunks = chunk_by_title(elements, max_characters=2000, combine_text_under_n_chars=2000)
+        chunks = chunk_by_title(
+            elements, max_characters=2000, combine_text_under_n_chars=2000
+        )
         documents = []
         for chunk in chunks:
             text = chunk.text.strip()

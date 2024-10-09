@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import numpy as np
 import requests
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
 from core.model_runtime.entities.model_entities import (
     AIModelEntity,
@@ -17,7 +18,10 @@ from core.model_runtime.entities.model_entities import (
     PriceConfig,
     PriceType,
 )
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -27,7 +31,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +44,12 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
     """
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -47,6 +58,7 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
 
@@ -80,7 +92,9 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         payload = {"input": inputs, "model": model, "options": {"use_mmap": True}}
 
         # Make the request to the Ollama API
-        response = requests.post(endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300))
+        response = requests.post(
+            endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300)
+        )
 
         response.raise_for_status()  # Raise an exception for HTTP errors
         response_data = response.json()
@@ -92,7 +106,9 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         used_tokens += embedding_used_tokens
 
         # calc usage
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=used_tokens
+        )
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
@@ -118,11 +134,17 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         try:
             self._invoke(model=model, credentials=credentials, texts=["ping"])
         except InvokeError as ex:
-            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {ex.description}")
+            raise CredentialsValidateFailedError(
+                f"An error occurred during credentials validation: {ex.description}"
+            )
         except Exception as ex:
-            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}")
+            raise CredentialsValidateFailedError(
+                f"An error occurred during credentials validation: {str(ex)}"
+            )
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -145,7 +167,9 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
 
         return entity
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -156,7 +180,10 @@ class OllamaEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

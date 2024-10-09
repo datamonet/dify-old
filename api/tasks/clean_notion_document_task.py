@@ -19,7 +19,12 @@ def clean_notion_document_task(document_ids: list[str], dataset_id: str):
     Usage: clean_notion_document_task.delay(document_ids, dataset_id)
     """
     logging.info(
-        click.style("Start clean document when import form notion document deleted: {}".format(dataset_id), fg="green")
+        click.style(
+            "Start clean document when import form notion document deleted: {}".format(
+                dataset_id
+            ),
+            fg="green",
+        )
     )
     start_at = time.perf_counter()
 
@@ -31,10 +36,16 @@ def clean_notion_document_task(document_ids: list[str], dataset_id: str):
         index_type = dataset.doc_form
         index_processor = IndexProcessorFactory(index_type).init_index_processor()
         for document_id in document_ids:
-            document = db.session.query(Document).filter(Document.id == document_id).first()
+            document = (
+                db.session.query(Document).filter(Document.id == document_id).first()
+            )
             db.session.delete(document)
 
-            segments = db.session.query(DocumentSegment).filter(DocumentSegment.document_id == document_id).all()
+            segments = (
+                db.session.query(DocumentSegment)
+                .filter(DocumentSegment.document_id == document_id)
+                .all()
+            )
             index_node_ids = [segment.index_node_id for segment in segments]
 
             index_processor.clean(dataset, index_node_ids)
@@ -52,4 +63,6 @@ def clean_notion_document_task(document_ids: list[str], dataset_id: str):
             )
         )
     except Exception:
-        logging.exception("Cleaned document when import form notion document deleted  failed")
+        logging.exception(
+            "Cleaned document when import form notion document deleted  failed"
+        )

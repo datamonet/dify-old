@@ -7,12 +7,21 @@ from typing import Any, Optional
 import numpy as np
 from requests import Response, post
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
-from core.model_runtime.model_providers.wenxin._common import BaiduAccessToken, _CommonWenxin
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
+from core.model_runtime.model_providers.wenxin._common import (
+    BaiduAccessToken,
+    _CommonWenxin,
+)
 from core.model_runtime.model_providers.wenxin.wenxin_errors import (
     BadRequestError,
     InternalServerError,
@@ -22,12 +31,16 @@ from core.model_runtime.model_providers.wenxin.wenxin_errors import (
 
 class TextEmbedding:
     @abstractmethod
-    def embed_documents(self, model: str, texts: list[str], user: str) -> (list[list[float]], int, int):
+    def embed_documents(
+        self, model: str, texts: list[str], user: str
+    ) -> (list[list[float]], int, int):
         raise NotImplementedError
 
 
 class WenxinTextEmbedding(_CommonWenxin, TextEmbedding):
-    def embed_documents(self, model: str, texts: list[str], user: str) -> (list[list[float]], int, int):
+    def embed_documents(
+        self, model: str, texts: list[str], user: str
+    ) -> (list[list[float]], int, int):
         access_token = self._get_access_token()
         url = f"{self.api_bases[model]}?access_token={access_token}"
         body = self._build_embed_request_body(model, texts, user)
@@ -40,7 +53,9 @@ class WenxinTextEmbedding(_CommonWenxin, TextEmbedding):
             raise InternalServerError(f"Failed to invoke ernie bot: {resp.text}")
         return self._handle_embed_response(model, resp)
 
-    def _build_embed_request_body(self, model: str, texts: list[str], user: str) -> dict[str, Any]:
+    def _build_embed_request_body(
+        self, model: str, texts: list[str], user: str
+    ) -> dict[str, Any]:
         if len(texts) == 0:
             raise BadRequestError("The number of texts should not be zero.")
         body = {
@@ -49,7 +64,9 @@ class WenxinTextEmbedding(_CommonWenxin, TextEmbedding):
         }
         return body
 
-    def _handle_embed_response(self, model: str, response: Response) -> (list[list[float]], int, int):
+    def _handle_embed_response(
+        self, model: str, response: Response
+    ) -> (list[list[float]], int, int):
         data = response.json()
         if "error_code" in data:
             code = data["error_code"]
@@ -70,7 +87,12 @@ class WenxinTextEmbeddingModel(TextEmbeddingModel):
         return WenxinTextEmbedding(api_key, secret_key)
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -79,6 +101,7 @@ class WenxinTextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
 
@@ -109,14 +132,16 @@ class WenxinTextEmbeddingModel(TextEmbeddingModel):
         batched_embeddings = []
         _iter = range(0, len(inputs), max_chunks)
         for i in _iter:
-            embeddings_batch, _used_tokens, _total_used_tokens = embedding.embed_documents(
-                model, inputs[i : i + max_chunks], user
+            embeddings_batch, _used_tokens, _total_used_tokens = (
+                embedding.embed_documents(model, inputs[i : i + max_chunks], user)
             )
             used_tokens += _used_tokens
             used_total_tokens += _total_used_tokens
             batched_embeddings += embeddings_batch
 
-        usage = self._calc_response_usage(model, credentials, used_tokens, used_total_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, used_tokens, used_total_tokens
+        )
         return TextEmbeddingResult(
             model=model,
             embeddings=batched_embeddings,
@@ -152,7 +177,9 @@ class WenxinTextEmbeddingModel(TextEmbeddingModel):
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:
         return invoke_error_mapping()
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int, total_tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int, total_tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -163,7 +190,10 @@ class WenxinTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

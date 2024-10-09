@@ -1,7 +1,9 @@
 from typing import Any
 
 from core.tools.errors import ToolProviderCredentialValidationError
-from core.tools.provider.builtin.novitaai.tools.novitaai_txt2img import NovitaAiTxt2ImgTool
+from core.tools.provider.builtin.novitaai.tools.novitaai_txt2img import (
+    NovitaAiTxt2ImgTool,
+)
 from core.tools.provider.builtin_tool_provider import BuiltinToolProviderController
 
 

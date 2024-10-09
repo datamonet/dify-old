@@ -13,7 +13,11 @@ from core.model_runtime.entities.message_entities import (
     UserPromptMessage,
 )
 from core.model_runtime.model_providers.volcengine_maas.legacy.errors import wrap_error
-from core.model_runtime.model_providers.volcengine_maas.legacy.volc_sdk import ChatRole, MaasError, MaasService
+from core.model_runtime.model_providers.volcengine_maas.legacy.volc_sdk import (
+    ChatRole,
+    MaasError,
+    MaasService,
+)
 
 
 class MaaSClient(MaasService):
@@ -38,10 +42,19 @@ class MaaSClient(MaasService):
         client.set_sk(sk)
         return client
 
-    def chat(self, params: dict, messages: list[PromptMessage], stream=False, **extra_model_kwargs) -> Generator | dict:
+    def chat(
+        self,
+        params: dict,
+        messages: list[PromptMessage],
+        stream=False,
+        **extra_model_kwargs,
+    ) -> Generator | dict:
         req = {
             "parameters": params,
-            "messages": [self.convert_prompt_message_to_maas_message(prompt) for prompt in messages],
+            "messages": [
+                self.convert_prompt_message_to_maas_message(prompt)
+                for prompt in messages
+            ],
             **extra_model_kwargs,
         }
         if not stream:
@@ -70,8 +83,12 @@ class MaaSClient(MaasService):
                     if message_content.type == PromptMessageContentType.TEXT:
                         raise ValueError("Content object type only support image_url")
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(ImagePromptMessageContent, message_content)
-                        image_data = re.sub(r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data)
+                        message_content = cast(
+                            ImagePromptMessageContent, message_content
+                        )
+                        image_data = re.sub(
+                            r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data
+                        )
                         content.append(
                             {
                                 "type": "image_url",
@@ -89,14 +106,19 @@ class MaaSClient(MaasService):
             message_dict = {"role": ChatRole.ASSISTANT, "content": message.content}
             if message.tool_calls:
                 message_dict["tool_calls"] = [
-                    {"name": call.function.name, "arguments": call.function.arguments} for call in message.tool_calls
+                    {"name": call.function.name, "arguments": call.function.arguments}
+                    for call in message.tool_calls
                 ]
         elif isinstance(message, SystemPromptMessage):
             message = cast(SystemPromptMessage, message)
             message_dict = {"role": ChatRole.SYSTEM, "content": message.content}
         elif isinstance(message, ToolPromptMessage):
             message = cast(ToolPromptMessage, message)
-            message_dict = {"role": ChatRole.FUNCTION, "content": message.content, "name": message.tool_call_id}
+            message_dict = {
+                "role": ChatRole.FUNCTION,
+                "content": message.content,
+                "name": message.tool_call_id,
+            }
         else:
             raise ValueError(f"Got unknown PromptMessage type {message}")
 

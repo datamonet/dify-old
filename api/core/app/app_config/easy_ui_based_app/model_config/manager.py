@@ -36,7 +36,9 @@ class ModelConfigManager:
         )
 
     @classmethod
-    def validate_and_set_defaults(cls, tenant_id: str, config: dict) -> tuple[dict, list[str]]:
+    def validate_and_set_defaults(
+        cls, tenant_id: str, config: dict
+    ) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for model config
 
@@ -52,8 +54,13 @@ class ModelConfigManager:
         # model.provider
         provider_entities = model_provider_factory.get_providers()
         model_provider_names = [provider.provider for provider in provider_entities]
-        if "provider" not in config["model"] or config["model"]["provider"] not in model_provider_names:
-            raise ValueError(f"model.provider is required and must be in {str(model_provider_names)}")
+        if (
+            "provider" not in config["model"]
+            or config["model"]["provider"] not in model_provider_names
+        ):
+            raise ValueError(
+                f"model.provider is required and must be in {str(model_provider_names)}"
+            )
 
         # model.name
         if "name" not in config["model"]:

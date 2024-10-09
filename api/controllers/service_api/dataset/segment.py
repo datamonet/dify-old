@@ -28,7 +28,11 @@ class SegmentApi(DatasetApiResource):
         # check dataset
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
+        dataset = (
+            db.session.query(Dataset)
+            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
+            .first()
+        )
         if not dataset:
             raise NotFound("Dataset not found.")
         # check document
@@ -59,13 +63,20 @@ class SegmentApi(DatasetApiResource):
                 raise ProviderNotInitializeError(ex.description)
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument("segments", type=list, required=False, nullable=True, location="json")
+        parser.add_argument(
+            "segments", type=list, required=False, nullable=True, location="json"
+        )
         args = parser.parse_args()
         if args["segments"] is not None:
             for args_item in args["segments"]:
                 SegmentService.segment_create_args_validate(args_item, document)
-            segments = SegmentService.multi_create_segment(args["segments"], document, dataset)
-            return {"data": marshal(segments, segment_fields), "doc_form": document.doc_form}, 200
+            segments = SegmentService.multi_create_segment(
+                args["segments"], document, dataset
+            )
+            return {
+                "data": marshal(segments, segment_fields),
+                "doc_form": document.doc_form,
+            }, 200
         else:
             return {"error": "Segments is required"}, 400
 
@@ -74,7 +85,11 @@ class SegmentApi(DatasetApiResource):
         # check dataset
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
+        dataset = (
+            db.session.query(Dataset)
+            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
+            .first()
+        )
         if not dataset:
             raise NotFound("Dataset not found.")
         # check document
@@ -101,7 +116,9 @@ class SegmentApi(DatasetApiResource):
                 raise ProviderNotInitializeError(ex.description)
 
         parser = reqparse.RequestParser()
-        parser.add_argument("status", type=str, action="append", default=[], location="args")
+        parser.add_argument(
+            "status", type=str, action="append", default=[], location="args"
+        )
         parser.add_argument("keyword", type=str, default=None, location="args")
         args = parser.parse_args()
 
@@ -109,7 +126,8 @@ class SegmentApi(DatasetApiResource):
         keyword = args["keyword"]
 
         query = DocumentSegment.query.filter(
-            DocumentSegment.document_id == str(document_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.document_id == str(document_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         )
 
         if status_list:
@@ -120,7 +138,11 @@ class SegmentApi(DatasetApiResource):
 
         total = query.count()
         segments = query.order_by(DocumentSegment.position).all()
-        return {"data": marshal(segments, segment_fields), "doc_form": document.doc_form, "total": total}, 200
+        return {
+            "data": marshal(segments, segment_fields),
+            "doc_form": document.doc_form,
+            "total": total,
+        }, 200
 
 
 class DatasetSegmentApi(DatasetApiResource):
@@ -128,7 +150,11 @@ class DatasetSegmentApi(DatasetApiResource):
         # check dataset
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
+        dataset = (
+            db.session.query(Dataset)
+            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
+            .first()
+        )
         if not dataset:
             raise NotFound("Dataset not found.")
         # check user's model setting
@@ -140,7 +166,8 @@ class DatasetSegmentApi(DatasetApiResource):
             raise NotFound("Document not found.")
         # check segment
         segment = DocumentSegment.query.filter(
-            DocumentSegment.id == str(segment_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.id == str(segment_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         ).first()
         if not segment:
             raise NotFound("Segment not found.")
@@ -152,7 +179,11 @@ class DatasetSegmentApi(DatasetApiResource):
         # check dataset
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
+        dataset = (
+            db.session.query(Dataset)
+            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
+            .first()
+        )
         if not dataset:
             raise NotFound("Dataset not found.")
         # check user's model setting
@@ -182,22 +213,33 @@ class DatasetSegmentApi(DatasetApiResource):
             # check segment
         segment_id = str(segment_id)
         segment = DocumentSegment.query.filter(
-            DocumentSegment.id == str(segment_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.id == str(segment_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         ).first()
         if not segment:
             raise NotFound("Segment not found.")
 
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument("segment", type=dict, required=False, nullable=True, location="json")
+        parser.add_argument(
+            "segment", type=dict, required=False, nullable=True, location="json"
+        )
         args = parser.parse_args()
 
         SegmentService.segment_create_args_validate(args["segment"], document)
-        segment = SegmentService.update_segment(args["segment"], segment, document, dataset)
-        return {"data": marshal(segment, segment_fields), "doc_form": document.doc_form}, 200
+        segment = SegmentService.update_segment(
+            args["segment"], segment, document, dataset
+        )
+        return {
+            "data": marshal(segment, segment_fields),
+            "doc_form": document.doc_form,
+        }, 200
 
 
-api.add_resource(SegmentApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments")
 api.add_resource(
-    DatasetSegmentApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments/<uuid:segment_id>"
+    SegmentApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments"
+)
+api.add_resource(
+    DatasetSegmentApi,
+    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments/<uuid:segment_id>",
 )

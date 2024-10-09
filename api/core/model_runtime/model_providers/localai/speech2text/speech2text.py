@@ -4,7 +4,11 @@ from requests import Request, Session
 from yarl import URL
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -22,7 +26,9 @@ class LocalAISpeech2text(Speech2TextModel):
     Model class for Local AI Text to speech model.
     """
 
-    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
+    def _invoke(
+        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
+    ) -> str:
         """
         Invoke large language model
 
@@ -73,7 +79,9 @@ class LocalAISpeech2text(Speech2TextModel):
             InvokeBadRequestError: [InvokeBadRequestError],
         }
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """

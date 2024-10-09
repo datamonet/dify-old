@@ -27,16 +27,23 @@ def send_reset_password_mail_task(language: str, to: str, token: str):
     try:
         url = f"{dify_config.CONSOLE_WEB_URL}/forgot-password?token={token}"
         if language == "zh-Hans":
-            html_content = render_template("reset_password_mail_template_zh-CN.html", to=to, url=url)
+            html_content = render_template(
+                "reset_password_mail_template_zh-CN.html", to=to, url=url
+            )
             mail.send(to=to, subject="重置您的 Dify 密码", html=html_content)
         else:
-            html_content = render_template("reset_password_mail_template_en-US.html", to=to, url=url)
+            html_content = render_template(
+                "reset_password_mail_template_en-US.html", to=to, url=url
+            )
             mail.send(to=to, subject="Reset Your Dify Password", html=html_content)
 
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Send password reset mail to {} succeeded: latency: {}".format(to, end_at - start_at), fg="green"
+                "Send password reset mail to {} succeeded: latency: {}".format(
+                    to, end_at - start_at
+                ),
+                fg="green",
             )
         )
     except Exception:

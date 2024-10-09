@@ -5,7 +5,9 @@ from core.tools.entities.tool_entities import ToolParameter
 
 class ToolParameterConverter:
     @staticmethod
-    def get_parameter_type(parameter_type: str | ToolParameter.ToolParameterType) -> str:
+    def get_parameter_type(
+        parameter_type: str | ToolParameter.ToolParameterType,
+    ) -> str:
         match parameter_type:
             case (
                 ToolParameter.ToolParameterType.STRING
@@ -68,4 +70,6 @@ class ToolParameterConverter:
                     return str(value)
 
         except Exception:
-            raise ValueError(f"The tool parameter value {value} is not in correct type of {parameter_type}.")
+            raise ValueError(
+                f"The tool parameter value {value} is not in correct type of {parameter_type}."
+            )

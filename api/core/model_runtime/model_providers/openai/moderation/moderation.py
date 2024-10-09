@@ -14,7 +14,9 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
     Model class for OpenAI text moderation model.
     """
 
-    def _invoke(self, model: str, credentials: dict, text: str, user: Optional[str] = None) -> bool:
+    def _invoke(
+        self, model: str, credentials: dict, text: str, user: Optional[str] = None
+    ) -> bool:
         """
         Invoke moderation model
 
@@ -35,10 +37,15 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
         text_chunks = [text[i : i + length] for i in range(0, len(text), length)]
 
         max_text_chunks = self._get_max_chunks(model, credentials)
-        chunks = [text_chunks[i : i + max_text_chunks] for i in range(0, len(text_chunks), max_text_chunks)]
+        chunks = [
+            text_chunks[i : i + max_text_chunks]
+            for i in range(0, len(text_chunks), max_text_chunks)
+        ]
 
         for text_chunk in chunks:
-            moderation_result = self._moderation_invoke(model=model, client=client, texts=text_chunk)
+            moderation_result = self._moderation_invoke(
+                model=model, client=client, texts=text_chunk
+            )
 
             for result in moderation_result.results:
                 if result.flagged is True:
@@ -68,7 +75,9 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _moderation_invoke(self, model: str, client: OpenAI, texts: list[str]) -> ModerationCreateResponse:
+    def _moderation_invoke(
+        self, model: str, client: OpenAI, texts: list[str]
+    ) -> ModerationCreateResponse:
         """
         Invoke moderation model
 
@@ -92,8 +101,14 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.MAX_CHARACTERS_PER_CHUNK in model_schema.model_properties:
-            return model_schema.model_properties[ModelPropertyKey.MAX_CHARACTERS_PER_CHUNK]
+        if (
+            model_schema
+            and ModelPropertyKey.MAX_CHARACTERS_PER_CHUNK
+            in model_schema.model_properties
+        ):
+            return model_schema.model_properties[
+                ModelPropertyKey.MAX_CHARACTERS_PER_CHUNK
+            ]
 
         return 2000
 
@@ -107,7 +122,10 @@ class OpenAIModerationModel(_CommonOpenAI, ModerationModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties:
+        if (
+            model_schema
+            and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties
+        ):
             return model_schema.model_properties[ModelPropertyKey.MAX_CHUNKS]
 
         return 1

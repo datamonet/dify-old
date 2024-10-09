@@ -4,9 +4,16 @@ from typing import Union
 from core.app.entities.app_invoke_entities import ModelConfigWithCredentialsEntity
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.llm_entities import LLMUsage
-from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageRole, PromptMessageTool
+from core.model_runtime.entities.message_entities import (
+    PromptMessage,
+    PromptMessageRole,
+    PromptMessageTool,
+)
 from core.prompt.advanced_prompt_transform import AdvancedPromptTransform
-from core.prompt.entities.advanced_prompt_entities import ChatModelMessage, CompletionModelPromptTemplate
+from core.prompt.entities.advanced_prompt_entities import (
+    ChatModelMessage,
+    CompletionModelPromptTemplate,
+)
 from core.rag.retrieval.output_parser.react_output import ReactAction
 from core.rag.retrieval.output_parser.structured_chat import StructuredChatOutputParser
 from core.workflow.nodes.llm.llm_node import LLMNode
@@ -77,7 +84,7 @@ class ReactMultiDatasetRouter:
                 user_id=user_id,
                 tenant_id=tenant_id,
             )
-        except Exception as e:
+        except Exception:
             return None
 
     def _react_invoke(
@@ -161,7 +168,9 @@ class ReactMultiDatasetRouter:
         text, usage = self._handle_invoke_result(invoke_result=invoke_result)
 
         # deduct quota
-        LLMNode.deduct_llm_quota(tenant_id=tenant_id, model_instance=model_instance, usage=usage)
+        LLMNode.deduct_llm_quota(
+            tenant_id=tenant_id, model_instance=model_instance, usage=usage
+        )
 
         return text, usage
 
@@ -213,7 +222,9 @@ class ReactMultiDatasetRouter:
         format_instructions = format_instructions.format(tool_names=tool_names)
         template = "\n\n".join([prefix, formatted_tools, format_instructions, suffix])
         prompt_messages = []
-        system_prompt_messages = ChatModelMessage(role=PromptMessageRole.SYSTEM, text=template)
+        system_prompt_messages = ChatModelMessage(
+            role=PromptMessageRole.SYSTEM, text=template
+        )
         prompt_messages.append(system_prompt_messages)
         user_prompt_message = ChatModelMessage(role=PromptMessageRole.USER, text=query)
         prompt_messages.append(user_prompt_message)

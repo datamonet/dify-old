@@ -6,7 +6,9 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class SimpleCode(BuiltinTool):
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         invoke simple code
         """
@@ -15,7 +17,9 @@ class SimpleCode(BuiltinTool):
         code = tool_parameters.get("code", "")
 
         if language not in {CodeLanguage.PYTHON3, CodeLanguage.JAVASCRIPT}:
-            raise ValueError(f"Only python3 and javascript are supported, not {language}")
+            raise ValueError(
+                f"Only python3 and javascript are supported, not {language}"
+            )
 
         result = CodeExecutor.execute_code(language, "", code)
 

@@ -11,7 +11,9 @@ class ModelConfig(BaseModel):
 
 
 ModelConfigs = {
-    "Doubao-embedding": ModelConfig(properties=ModelProperties(context_size=4096, max_chunks=32)),
+    "Doubao-embedding": ModelConfig(
+        properties=ModelProperties(context_size=4096, max_chunks=32)
+    ),
 }
 
 

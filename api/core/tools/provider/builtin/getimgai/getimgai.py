@@ -7,7 +7,9 @@ class GetImgAIProvider(BuiltinToolProviderController):
     def _validate_credentials(self, credentials: dict) -> None:
         try:
             # Example validation using the text2image tool
-            Text2ImageTool().fork_tool_runtime(runtime={"credentials": credentials}).invoke(
+            Text2ImageTool().fork_tool_runtime(
+                runtime={"credentials": credentials}
+            ).invoke(
                 user_id="",
                 tool_parameters={
                     "prompt": "A fire egg",

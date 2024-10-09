@@ -45,24 +45,38 @@ class Provider(db.Model):
         db.PrimaryKeyConstraint("id", name="provider_pkey"),
         db.Index("provider_tenant_id_provider_idx", "tenant_id", "provider_name"),
         db.UniqueConstraint(
-            "tenant_id", "provider_name", "provider_type", "quota_type", name="unique_provider_name_type_quota"
+            "tenant_id",
+            "provider_name",
+            "provider_type",
+            "quota_type",
+            name="unique_provider_name_type_quota",
         ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
     tenant_id = db.Column(StringUUID, nullable=False)
     provider_name = db.Column(db.String(255), nullable=False)
-    provider_type = db.Column(db.String(40), nullable=False, server_default=db.text("'custom'::character varying"))
+    provider_type = db.Column(
+        db.String(40),
+        nullable=False,
+        server_default=db.text("'custom'::character varying"),
+    )
     encrypted_config = db.Column(db.Text, nullable=True)
     is_valid = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
     last_used = db.Column(db.DateTime, nullable=True)
 
-    quota_type = db.Column(db.String(40), nullable=True, server_default=db.text("''::character varying"))
+    quota_type = db.Column(
+        db.String(40), nullable=True, server_default=db.text("''::character varying")
+    )
     quota_limit = db.Column(db.BigInteger, nullable=True)
     quota_used = db.Column(db.BigInteger, default=0)
 
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     def __repr__(self):
         return (
@@ -98,7 +112,11 @@ class ProviderModel(db.Model):
         db.PrimaryKeyConstraint("id", name="provider_model_pkey"),
         db.Index("provider_model_tenant_id_provider_idx", "tenant_id", "provider_name"),
         db.UniqueConstraint(
-            "tenant_id", "provider_name", "model_name", "model_type", name="unique_provider_model_name"
+            "tenant_id",
+            "provider_name",
+            "model_name",
+            "model_type",
+            name="unique_provider_model_name",
         ),
     )
 
@@ -109,15 +127,24 @@ class ProviderModel(db.Model):
     model_type = db.Column(db.String(40), nullable=False)
     encrypted_config = db.Column(db.Text, nullable=True)
     is_valid = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class TenantDefaultModel(db.Model):
     __tablename__ = "tenant_default_models"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="tenant_default_model_pkey"),
-        db.Index("tenant_default_model_tenant_id_provider_type_idx", "tenant_id", "provider_name", "model_type"),
+        db.Index(
+            "tenant_default_model_tenant_id_provider_type_idx",
+            "tenant_id",
+            "provider_name",
+            "model_type",
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -125,23 +152,35 @@ class TenantDefaultModel(db.Model):
     provider_name = db.Column(db.String(255), nullable=False)
     model_name = db.Column(db.String(255), nullable=False)
     model_type = db.Column(db.String(40), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class TenantPreferredModelProvider(db.Model):
     __tablename__ = "tenant_preferred_model_providers"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="tenant_preferred_model_provider_pkey"),
-        db.Index("tenant_preferred_model_provider_tenant_provider_idx", "tenant_id", "provider_name"),
+        db.Index(
+            "tenant_preferred_model_provider_tenant_provider_idx",
+            "tenant_id",
+            "provider_name",
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
     tenant_id = db.Column(StringUUID, nullable=False)
     provider_name = db.Column(db.String(255), nullable=False)
     preferred_provider_type = db.Column(db.String(40), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class ProviderOrder(db.Model):
@@ -161,12 +200,20 @@ class ProviderOrder(db.Model):
     quantity = db.Column(db.Integer, nullable=False, server_default=db.text("1"))
     currency = db.Column(db.String(40))
     total_amount = db.Column(db.Integer)
-    payment_status = db.Column(db.String(40), nullable=False, server_default=db.text("'wait_pay'::character varying"))
+    payment_status = db.Column(
+        db.String(40),
+        nullable=False,
+        server_default=db.text("'wait_pay'::character varying"),
+    )
     paid_at = db.Column(db.DateTime)
     pay_failed_at = db.Column(db.DateTime)
     refunded_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class ProviderModelSetting(db.Model):
@@ -177,7 +224,12 @@ class ProviderModelSetting(db.Model):
     __tablename__ = "provider_model_settings"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="provider_model_setting_pkey"),
-        db.Index("provider_model_setting_tenant_provider_model_idx", "tenant_id", "provider_name", "model_type"),
+        db.Index(
+            "provider_model_setting_tenant_provider_model_idx",
+            "tenant_id",
+            "provider_name",
+            "model_type",
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -186,9 +238,15 @@ class ProviderModelSetting(db.Model):
     model_name = db.Column(db.String(255), nullable=False)
     model_type = db.Column(db.String(40), nullable=False)
     enabled = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
-    load_balancing_enabled = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    load_balancing_enabled = db.Column(
+        db.Boolean, nullable=False, server_default=db.text("false")
+    )
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class LoadBalancingModelConfig(db.Model):
@@ -199,7 +257,12 @@ class LoadBalancingModelConfig(db.Model):
     __tablename__ = "load_balancing_model_configs"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="load_balancing_model_config_pkey"),
-        db.Index("load_balancing_model_config_tenant_provider_model_idx", "tenant_id", "provider_name", "model_type"),
+        db.Index(
+            "load_balancing_model_config_tenant_provider_model_idx",
+            "tenant_id",
+            "provider_name",
+            "model_type",
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -210,5 +273,9 @@ class LoadBalancingModelConfig(db.Model):
     name = db.Column(db.String(255), nullable=False)
     encrypted_config = db.Column(db.Text, nullable=True)
     enabled = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )

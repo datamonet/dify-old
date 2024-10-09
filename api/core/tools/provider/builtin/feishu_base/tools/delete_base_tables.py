@@ -34,7 +34,13 @@ class DeleteBaseTablesTool(BuiltinTool):
         payload = {"table_ids": json.loads(table_ids)}
 
         try:
-            res = httpx.post(url.format(app_token=app_token), headers=headers, params=params, json=payload, timeout=30)
+            res = httpx.post(
+                url.format(app_token=app_token),
+                headers=headers,
+                params=params,
+                json=payload,
+                timeout=30,
+            )
             res_json = res.json()
             if res.is_success:
                 return self.create_text_message(text=json.dumps(res_json))
@@ -43,4 +49,6 @@ class DeleteBaseTablesTool(BuiltinTool):
                     f"Failed to delete base tables, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to delete base tables. {}".format(e))
+            return self.create_text_message(
+                "Failed to delete base tables. {}".format(e)
+            )

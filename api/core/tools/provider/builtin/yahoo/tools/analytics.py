@@ -39,7 +39,9 @@ class YahooFinanceAnalyticsTool(BuiltinTool):
         summary_data = []
         for i in range(max_segments):
             start_idx = i * rows_per_segment
-            end_idx = (i + 1) * rows_per_segment if i < max_segments - 1 else len(stock_data)
+            end_idx = (
+                (i + 1) * rows_per_segment if i < max_segments - 1 else len(stock_data)
+            )
             segment_data = stock_data.iloc[start_idx:end_idx]
             segment_summary = {
                 "Start Date": segment_data.index[0],
@@ -67,4 +69,6 @@ class YahooFinanceAnalyticsTool(BuiltinTool):
         try:
             return self.create_text_message(str(summary_df.to_dict()))
         except (HTTPError, ReadTimeout):
-            return self.create_text_message("There is a internet connection problem. Please try again later.")
+            return self.create_text_message(
+                "There is a internet connection problem. Please try again later."
+            )

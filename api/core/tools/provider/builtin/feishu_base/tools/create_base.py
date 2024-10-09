@@ -29,7 +29,9 @@ class CreateBaseTool(BuiltinTool):
         payload = {"name": name, "folder_token": folder_token}
 
         try:
-            res = httpx.post(url, headers=headers, params=params, json=payload, timeout=30)
+            res = httpx.post(
+                url, headers=headers, params=params, json=payload, timeout=30
+            )
             res_json = res.json()
             if res.is_success:
                 return self.create_text_message(text=json.dumps(res_json))

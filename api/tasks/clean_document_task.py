@@ -13,7 +13,9 @@ from models.model import UploadFile
 
 
 @shared_task(queue="dataset")
-def clean_document_task(document_id: str, dataset_id: str, doc_form: str, file_id: Optional[str]):
+def clean_document_task(
+    document_id: str, dataset_id: str, doc_form: str, file_id: Optional[str]
+):
     """
     Clean document when document deleted.
     :param document_id: document id
@@ -23,7 +25,12 @@ def clean_document_task(document_id: str, dataset_id: str, doc_form: str, file_i
 
     Usage: clean_document_task.delay(document_id, dataset_id)
     """
-    logging.info(click.style("Start clean document when document deleted: {}".format(document_id), fg="green"))
+    logging.info(
+        click.style(
+            "Start clean document when document deleted: {}".format(document_id),
+            fg="green",
+        )
+    )
     start_at = time.perf_counter()
 
     try:
@@ -32,7 +39,11 @@ def clean_document_task(document_id: str, dataset_id: str, doc_form: str, file_i
         if not dataset:
             raise Exception("Document has no dataset")
 
-        segments = db.session.query(DocumentSegment).filter(DocumentSegment.document_id == document_id).all()
+        segments = (
+            db.session.query(DocumentSegment)
+            .filter(DocumentSegment.document_id == document_id)
+            .all()
+        )
         # check segment is exist
         if segments:
             index_node_ids = [segment.index_node_id for segment in segments]
@@ -49,14 +60,20 @@ def clean_document_task(document_id: str, dataset_id: str, doc_form: str, file_i
                 try:
                     storage.delete(file.key)
                 except Exception:
-                    logging.exception("Delete file failed when document deleted, file_id: {}".format(file_id))
+                    logging.exception(
+                        "Delete file failed when document deleted, file_id: {}".format(
+                            file_id
+                        )
+                    )
                 db.session.delete(file)
                 db.session.commit()
 
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Cleaned document when document deleted: {} latency: {}".format(document_id, end_at - start_at),
+                "Cleaned document when document deleted: {} latency: {}".format(
+                    document_id, end_at - start_at
+                ),
                 fg="green",
             )
         )

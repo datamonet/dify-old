@@ -2,7 +2,11 @@ from typing import Union
 
 from core.app.entities.app_invoke_entities import ModelConfigWithCredentialsEntity
 from core.model_manager import ModelInstance
-from core.model_runtime.entities.message_entities import PromptMessageTool, SystemPromptMessage, UserPromptMessage
+from core.model_runtime.entities.message_entities import (
+    PromptMessageTool,
+    SystemPromptMessage,
+    UserPromptMessage,
+)
 
 
 class FunctionCallMultiDatasetRouter:
@@ -37,5 +41,5 @@ class FunctionCallMultiDatasetRouter:
                 # get retrieval model config
                 return result.message.tool_calls[0].function.name
             return None
-        except Exception as e:
+        except Exception:
             return None

@@ -17,7 +17,10 @@ class GetImgAIApp:
             raise ValueError("API key is required")
 
     def _prepare_headers(self):
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
         return headers
 
     def _request(
@@ -35,7 +38,11 @@ class GetImgAIApp:
                 response.raise_for_status()
                 return response.json()
             except requests.exceptions.RequestException as e:
-                if i < retries - 1 and isinstance(e, HTTPError) and e.response.status_code >= 500:
+                if (
+                    i < retries - 1
+                    and isinstance(e, HTTPError)
+                    and e.response.status_code >= 500
+                ):
                     time.sleep(backoff_factor * (2**i))
                 else:
                     raise

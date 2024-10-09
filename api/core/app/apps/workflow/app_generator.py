@@ -12,14 +12,25 @@ from pydantic import ValidationError
 import contexts
 from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
 from core.app.apps.base_app_generator import BaseAppGenerator
-from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
+from core.app.apps.base_app_queue_manager import (
+    AppQueueManager,
+    GenerateTaskStoppedError,
+    PublishFrom,
+)
 from core.app.apps.workflow.app_config_manager import WorkflowAppConfigManager
 from core.app.apps.workflow.app_queue_manager import WorkflowAppQueueManager
 from core.app.apps.workflow.app_runner import WorkflowAppRunner
-from core.app.apps.workflow.generate_response_converter import WorkflowAppGenerateResponseConverter
-from core.app.apps.workflow.generate_task_pipeline import WorkflowAppGenerateTaskPipeline
+from core.app.apps.workflow.generate_response_converter import (
+    WorkflowAppGenerateResponseConverter,
+)
+from core.app.apps.workflow.generate_task_pipeline import (
+    WorkflowAppGenerateTaskPipeline,
+)
 from core.app.entities.app_invoke_entities import InvokeFrom, WorkflowAppGenerateEntity
-from core.app.entities.task_entities import WorkflowAppBlockingResponse, WorkflowAppStreamResponse
+from core.app.entities.task_entities import (
+    WorkflowAppBlockingResponse,
+    WorkflowAppStreamResponse,
+)
 from core.file.message_file_parser import MessageFileParser
 from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeError
 from core.ops.ops_trace_manager import TraceQueueManager
@@ -85,15 +96,23 @@ class WorkflowAppGenerator(BaseAppGenerator):
 
         # parse files
         files = args["files"] if args.get("files") else []
-        message_file_parser = MessageFileParser(tenant_id=app_model.tenant_id, app_id=app_model.id)
-        file_extra_config = FileUploadConfigManager.convert(workflow.features_dict, is_vision=False)
+        message_file_parser = MessageFileParser(
+            tenant_id=app_model.tenant_id, app_id=app_model.id
+        )
+        file_extra_config = FileUploadConfigManager.convert(
+            workflow.features_dict, is_vision=False
+        )
         if file_extra_config:
-            file_objs = message_file_parser.validate_and_transform_files_arg(files, file_extra_config, user)
+            file_objs = message_file_parser.validate_and_transform_files_arg(
+                files, file_extra_config, user
+            )
         else:
             file_objs = []
 
         # convert to app config
-        app_config = WorkflowAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
+        app_config = WorkflowAppConfigManager.get_app_config(
+            app_model=app_model, workflow=workflow
+        )
 
         # get tracing instance
         user_id = user.id if isinstance(user, Account) else user.session_id
@@ -176,10 +195,18 @@ class WorkflowAppGenerator(BaseAppGenerator):
             stream=stream,
         )
 
-        return WorkflowAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
+        return WorkflowAppGenerateResponseConverter.convert(
+            response=response, invoke_from=invoke_from
+        )
 
     def single_iteration_generate(
-        self, app_model: App, workflow: Workflow, node_id: str, user: Account, args: dict, stream: bool = True
+        self,
+        app_model: App,
+        workflow: Workflow,
+        node_id: str,
+        user: Account,
+        args: dict,
+        stream: bool = True,
     ) -> dict[str, Any] | Generator[str, Any, None]:
         """
         Generate App response.
@@ -198,7 +225,9 @@ class WorkflowAppGenerator(BaseAppGenerator):
             raise ValueError("inputs is required")
 
         # convert to app config
-        app_config = WorkflowAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
+        app_config = WorkflowAppConfigManager.get_app_config(
+            app_model=app_model, workflow=workflow
+        )
 
         # init application generate entity
         application_generate_entity = WorkflowAppGenerateEntity(
@@ -257,13 +286,17 @@ class WorkflowAppGenerator(BaseAppGenerator):
                 pass
             except InvokeAuthorizationError:
                 queue_manager.publish_error(
-                    InvokeAuthorizationError("Incorrect API key provided"), PublishFrom.APPLICATION_MANAGER
+                    InvokeAuthorizationError("Incorrect API key provided"),
+                    PublishFrom.APPLICATION_MANAGER,
                 )
             except ValidationError as e:
                 logger.exception("Validation Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except (ValueError, InvokeError) as e:
-                if os.environ.get("DEBUG") and os.environ.get("DEBUG", "false").lower() == "true":
+                if (
+                    os.environ.get("DEBUG")
+                    and os.environ.get("DEBUG", "false").lower() == "true"
+                ):
                     logger.exception("Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except Exception as e:
@@ -279,7 +312,9 @@ class WorkflowAppGenerator(BaseAppGenerator):
         queue_manager: AppQueueManager,
         user: Union[Account, EndUser],
         stream: bool = False,
-    ) -> Union[WorkflowAppBlockingResponse, Generator[WorkflowAppStreamResponse, None, None]]:
+    ) -> Union[
+        WorkflowAppBlockingResponse, Generator[WorkflowAppStreamResponse, None, None]
+    ]:
         """
         Handle response.
         :param application_generate_entity: application generate entity

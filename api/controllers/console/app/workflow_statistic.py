@@ -26,8 +26,12 @@ class WorkflowDailyRunsStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -88,8 +92,12 @@ class WorkflowDailyTerminalsStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -136,7 +144,9 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "terminal_count": i.terminal_count})
+                response_data.append(
+                    {"date": str(i.date), "terminal_count": i.terminal_count}
+                )
 
         return jsonify({"data": response_data})
 
@@ -150,8 +160,12 @@ class WorkflowDailyTokenCostStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -217,8 +231,12 @@ class WorkflowAverageAppInteractionStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -281,15 +299,28 @@ GROUP BY
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
                 response_data.append(
-                    {"date": str(i.date), "interactions": float(i.interactions.quantize(Decimal("0.01")))}
+                    {
+                        "date": str(i.date),
+                        "interactions": float(i.interactions.quantize(Decimal("0.01"))),
+                    }
                 )
 
         return jsonify({"data": response_data})
 
 
-api.add_resource(WorkflowDailyRunsStatistic, "/apps/<uuid:app_id>/workflow/statistics/daily-conversations")
-api.add_resource(WorkflowDailyTerminalsStatistic, "/apps/<uuid:app_id>/workflow/statistics/daily-terminals")
-api.add_resource(WorkflowDailyTokenCostStatistic, "/apps/<uuid:app_id>/workflow/statistics/token-costs")
 api.add_resource(
-    WorkflowAverageAppInteractionStatistic, "/apps/<uuid:app_id>/workflow/statistics/average-app-interactions"
+    WorkflowDailyRunsStatistic,
+    "/apps/<uuid:app_id>/workflow/statistics/daily-conversations",
+)
+api.add_resource(
+    WorkflowDailyTerminalsStatistic,
+    "/apps/<uuid:app_id>/workflow/statistics/daily-terminals",
+)
+api.add_resource(
+    WorkflowDailyTokenCostStatistic,
+    "/apps/<uuid:app_id>/workflow/statistics/token-costs",
+)
+api.add_resource(
+    WorkflowAverageAppInteractionStatistic,
+    "/apps/<uuid:app_id>/workflow/statistics/average-app-interactions",
 )

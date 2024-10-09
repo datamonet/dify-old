@@ -31,9 +31,16 @@ class FetchAnsByStackExQuesIDTool(BuiltinTool):
             "page": input.page,
         }
 
-        response = requests.get(f"https://api.stackexchange.com/2.3/questions/{input.id}/answers", params=params)
+        response = requests.get(
+            f"https://api.stackexchange.com/2.3/questions/{input.id}/answers",
+            params=params,
+        )
 
         if response.status_code == 200:
-            return self.create_text_message(self.summary(user_id=user_id, content=response.text))
+            return self.create_text_message(
+                self.summary(user_id=user_id, content=response.text)
+            )
         else:
-            return self.create_text_message(f"API request failed with status code {response.status_code}")
+            return self.create_text_message(
+                f"API request failed with status code {response.status_code}"
+            )

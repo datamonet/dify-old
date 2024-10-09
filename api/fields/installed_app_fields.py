@@ -23,4 +23,6 @@ installed_app_fields = {
     "uninstallable": fields.Boolean,
 }
 
-installed_app_list_fields = {"installed_apps": fields.List(fields.Nested(installed_app_fields))}
+installed_app_list_fields = {
+    "installed_apps": fields.List(fields.Nested(installed_app_fields))
+}

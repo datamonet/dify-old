@@ -18,7 +18,9 @@ from core.model_runtime.model_providers.tencent.speech2text.flash_recognizer imp
 
 
 class TencentSpeech2TextModel(Speech2TextModel):
-    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
+    def _invoke(
+        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
+    ) -> str:
         """
         Invoke speech2text model
 
@@ -46,7 +48,9 @@ class TencentSpeech2TextModel(Speech2TextModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
+    def _speech2text_invoke(
+        self, model: str, credentials: dict, file: IO[bytes]
+    ) -> str:
         """
         Invoke speech2text model
 
@@ -59,15 +63,21 @@ class TencentSpeech2TextModel(Speech2TextModel):
         secret_id = credentials["secret_id"]
         secret_key = credentials["secret_key"]
         voice_format = file.voice_format if hasattr(file, "voice_format") else "mp3"
-        tencent_voice_recognizer = FlashRecognizer(app_id, Credential(secret_id, secret_key))
-        resp = tencent_voice_recognizer.recognize(FlashRecognitionRequest(voice_format), file)
+        tencent_voice_recognizer = FlashRecognizer(
+            app_id, Credential(secret_id, secret_key)
+        )
+        resp = tencent_voice_recognizer.recognize(
+            FlashRecognitionRequest(voice_format), file
+        )
         resp = json.loads(resp)
         code = resp["code"]
         message = resp["message"]
         if code == 4002:
             raise CredentialsValidateFailedError(str(message))
         elif code != 0:
-            return f"Tencent ASR Recognition failed with code {code} and message {message}"
+            return (
+                f"Tencent ASR Recognition failed with code {code} and message {message}"
+            )
         return "\n".join(item["text"] for item in resp["flash_result"])
 
     @property

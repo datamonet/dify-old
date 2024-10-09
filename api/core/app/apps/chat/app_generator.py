@@ -8,12 +8,20 @@ from typing import Any, Literal, Union, overload
 from flask import Flask, current_app
 from pydantic import ValidationError
 
-from core.app.app_config.easy_ui_based_app.model_config.converter import ModelConfigConverter
+from core.app.app_config.easy_ui_based_app.model_config.converter import (
+    ModelConfigConverter,
+)
 from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
-from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
+from core.app.apps.base_app_queue_manager import (
+    AppQueueManager,
+    GenerateTaskStoppedError,
+    PublishFrom,
+)
 from core.app.apps.chat.app_config_manager import ChatAppConfigManager
 from core.app.apps.chat.app_runner import ChatAppRunner
-from core.app.apps.chat.generate_response_converter import ChatAppGenerateResponseConverter
+from core.app.apps.chat.generate_response_converter import (
+    ChatAppGenerateResponseConverter,
+)
 from core.app.apps.message_based_app_generator import MessageBasedAppGenerator
 from core.app.apps.message_based_app_queue_manager import MessageBasedAppQueueManager
 from core.app.entities.app_invoke_entities import ChatAppGenerateEntity, InvokeFrom
@@ -75,15 +83,21 @@ class ChatAppGenerator(MessageBasedAppGenerator):
         query = query.replace("\x00", "")
         inputs = args["inputs"]
 
-        extras = {"auto_generate_conversation_name": args.get("auto_generate_name", True)}
+        extras = {
+            "auto_generate_conversation_name": args.get("auto_generate_name", True)
+        }
 
         # get conversation
         conversation = None
         if args.get("conversation_id"):
-            conversation = self._get_conversation_by_user(app_model, args.get("conversation_id"), user)
+            conversation = self._get_conversation_by_user(
+                app_model, args.get("conversation_id"), user
+            )
 
         # get app model config
-        app_model_config = self._get_app_model_config(app_model=app_model, conversation=conversation)
+        app_model_config = self._get_app_model_config(
+            app_model=app_model, conversation=conversation
+        )
 
         # validate override model config
         override_model_config_dict = None
@@ -101,10 +115,16 @@ class ChatAppGenerator(MessageBasedAppGenerator):
 
         # parse files
         files = args["files"] if args.get("files") else []
-        message_file_parser = MessageFileParser(tenant_id=app_model.tenant_id, app_id=app_model.id)
-        file_extra_config = FileUploadConfigManager.convert(override_model_config_dict or app_model_config.to_dict())
+        message_file_parser = MessageFileParser(
+            tenant_id=app_model.tenant_id, app_id=app_model.id
+        )
+        file_extra_config = FileUploadConfigManager.convert(
+            override_model_config_dict or app_model_config.to_dict()
+        )
         if file_extra_config:
-            file_objs = message_file_parser.validate_and_transform_files_arg(files, file_extra_config, user)
+            file_objs = message_file_parser.validate_and_transform_files_arg(
+                files, file_extra_config, user
+            )
         else:
             file_objs = []
 
@@ -125,9 +145,12 @@ class ChatAppGenerator(MessageBasedAppGenerator):
             app_config=app_config,
             model_conf=ModelConfigConverter.convert(app_config),
             conversation_id=conversation.id if conversation else None,
-            inputs=conversation.inputs if conversation else self._get_cleaned_inputs(inputs, app_config),
+            inputs=conversation.inputs
+            if conversation
+            else self._get_cleaned_inputs(inputs, app_config),
             query=query,
             files=file_objs,
+            parent_message_id=args.get("parent_message_id"),
             user_id=user.id,
             stream=stream,
             invoke_from=invoke_from,
@@ -136,7 +159,9 @@ class ChatAppGenerator(MessageBasedAppGenerator):
         )
 
         # init generate records
-        (conversation, message) = self._init_generate_records(application_generate_entity, conversation)
+        (conversation, message) = self._init_generate_records(
+            application_generate_entity, conversation
+        )
 
         # init queue manager
         queue_manager = MessageBasedAppQueueManager(
@@ -172,7 +197,9 @@ class ChatAppGenerator(MessageBasedAppGenerator):
             stream=stream,
         )
 
-        return ChatAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
+        return ChatAppGenerateResponseConverter.convert(
+            response=response, invoke_from=invoke_from
+        )
 
     def _generate_worker(
         self,
@@ -209,13 +236,17 @@ class ChatAppGenerator(MessageBasedAppGenerator):
                 pass
             except InvokeAuthorizationError:
                 queue_manager.publish_error(
-                    InvokeAuthorizationError("Incorrect API key provided"), PublishFrom.APPLICATION_MANAGER
+                    InvokeAuthorizationError("Incorrect API key provided"),
+                    PublishFrom.APPLICATION_MANAGER,
                 )
             except ValidationError as e:
                 logger.exception("Validation Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except (ValueError, InvokeError) as e:
-                if os.environ.get("DEBUG") and os.environ.get("DEBUG").lower() == "true":
+                if (
+                    os.environ.get("DEBUG")
+                    and os.environ.get("DEBUG").lower() == "true"
+                ):
                     logger.exception("Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except Exception as e:

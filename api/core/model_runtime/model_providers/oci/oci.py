@@ -20,9 +20,13 @@ class OCIGENAIProvider(ModelProvider):
             model_instance = self.get_model_instance(ModelType.LLM)
 
             # Use `cohere.command-r-plus` model for validate,
-            model_instance.validate_credentials(model="cohere.command-r-plus", credentials=credentials)
+            model_instance.validate_credentials(
+                model="cohere.command-r-plus", credentials=credentials
+            )
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
+            logger.exception(
+                f"{self.get_provider_schema().provider} credentials validate failed"
+            )
             raise ex

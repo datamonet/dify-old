@@ -4,17 +4,22 @@ import pytest
 
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.baichuan.text_embedding.text_embedding import BaichuanTextEmbeddingModel
+from core.model_runtime.model_providers.baichuan.text_embedding.text_embedding import (
+    BaichuanTextEmbeddingModel,
+)
 
 
 def test_validate_credentials():
     model = BaichuanTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="baichuan-text-embedding", credentials={"api_key": "invalid_key"})
+        model.validate_credentials(
+            model="baichuan-text-embedding", credentials={"api_key": "invalid_key"}
+        )
 
     model.validate_credentials(
-        model="baichuan-text-embedding", credentials={"api_key": os.environ.get("BAICHUAN_API_KEY")}
+        model="baichuan-text-embedding",
+        credentials={"api_key": os.environ.get("BAICHUAN_API_KEY")},
     )
 
 

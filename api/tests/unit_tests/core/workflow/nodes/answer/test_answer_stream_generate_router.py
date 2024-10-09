@@ -1,5 +1,7 @@
 from core.workflow.graph_engine.entities.graph import Graph
-from core.workflow.nodes.answer.answer_stream_generate_router import AnswerStreamGeneratorRouter
+from core.workflow.nodes.answer.answer_stream_generate_router import (
+    AnswerStreamGeneratorRouter,
+)
 
 
 def test_init():
@@ -89,11 +91,19 @@ def test_init():
                 "id": "llm5",
             },
             {
-                "data": {"type": "answer", "title": "answer", "answer": "1{{#llm2.text#}}2"},
+                "data": {
+                    "type": "answer",
+                    "title": "answer",
+                    "answer": "1{{#llm2.text#}}2",
+                },
                 "id": "answer",
             },
             {
-                "data": {"type": "answer", "title": "answer2", "answer": "1{{#llm3.text#}}2"},
+                "data": {
+                    "type": "answer",
+                    "title": "answer2",
+                    "answer": "1{{#llm3.text#}}2",
+                },
                 "id": "answer2",
             },
         ],
@@ -102,7 +112,8 @@ def test_init():
     graph = Graph.init(graph_config=graph_config)
 
     answer_stream_generate_route = AnswerStreamGeneratorRouter.init(
-        node_id_config_mapping=graph.node_id_config_mapping, reverse_edge_mapping=graph.reverse_edge_mapping
+        node_id_config_mapping=graph.node_id_config_mapping,
+        reverse_edge_mapping=graph.reverse_edge_mapping,
     )
 
     assert answer_stream_generate_route.answer_dependencies["answer"] == ["answer2"]

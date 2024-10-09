@@ -14,7 +14,10 @@ from core.workflow.nodes.http_request.entities import (
     HttpRequestNodeData,
     HttpRequestNodeTimeout,
 )
-from core.workflow.nodes.http_request.http_executor import HttpExecutor, HttpExecutorResponse
+from core.workflow.nodes.http_request.http_executor import (
+    HttpExecutor,
+    HttpExecutorResponse,
+)
 from models.workflow import WorkflowNodeExecutionStatus
 
 HTTP_REQUEST_DEFAULT_TIMEOUT = HttpRequestNodeTimeout(
@@ -52,7 +55,8 @@ class HttpRequestNode(BaseNode):
         # TODO: Switch to use segment directly
         if node_data.authorization.config and node_data.authorization.config.api_key:
             node_data.authorization.config.api_key = parser.convert_template(
-                template=node_data.authorization.config.api_key, variable_pool=self.graph_runtime_state.variable_pool
+                template=node_data.authorization.config.api_key,
+                variable_pool=self.graph_runtime_state.variable_pool,
             ).text
 
         # init http executor
@@ -106,7 +110,10 @@ class HttpRequestNode(BaseNode):
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
-        cls, graph_config: Mapping[str, Any], node_id: str, node_data: HttpRequestNodeData
+        cls,
+        graph_config: Mapping[str, Any],
+        node_id: str,
+        node_data: HttpRequestNodeData,
     ) -> Mapping[str, Sequence[str]]:
         """
         Extract variable selector to variable mapping
@@ -116,17 +123,23 @@ class HttpRequestNode(BaseNode):
         :return:
         """
         try:
-            http_executor = HttpExecutor(node_data=node_data, timeout=HTTP_REQUEST_DEFAULT_TIMEOUT)
+            http_executor = HttpExecutor(
+                node_data=node_data, timeout=HTTP_REQUEST_DEFAULT_TIMEOUT
+            )
 
             variable_selectors = http_executor.variable_selectors
 
             variable_mapping = {}
             for variable_selector in variable_selectors:
-                variable_mapping[node_id + "." + variable_selector.variable] = variable_selector.value_selector
+                variable_mapping[node_id + "." + variable_selector.variable] = (
+                    variable_selector.value_selector
+                )
 
             return variable_mapping
         except Exception as e:
-            logging.exception(f"Failed to extract variable selector to variable mapping: {e}")
+            logging.exception(
+                f"Failed to extract variable selector to variable mapping: {e}"
+            )
             return {}
 
     def extract_files(self, url: str, response: HttpExecutorResponse) -> list[FileVar]:

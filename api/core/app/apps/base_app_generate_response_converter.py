@@ -5,7 +5,11 @@ from typing import Any, Union
 
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.app.entities.task_entities import AppBlockingResponse, AppStreamResponse
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 
 
@@ -14,7 +18,9 @@ class AppGenerateResponseConverter(ABC):
 
     @classmethod
     def convert(
-        cls, response: Union[AppBlockingResponse, Generator[AppStreamResponse, Any, None]], invoke_from: InvokeFrom
+        cls,
+        response: Union[AppBlockingResponse, Generator[AppStreamResponse, Any, None]],
+        invoke_from: InvokeFrom,
     ) -> dict[str, Any] | Generator[str, Any, None]:
         if invoke_from in {InvokeFrom.DEBUGGER, InvokeFrom.SERVICE_API}:
             if isinstance(response, AppBlockingResponse):
@@ -45,12 +51,16 @@ class AppGenerateResponseConverter(ABC):
 
     @classmethod
     @abstractmethod
-    def convert_blocking_full_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
+    def convert_blocking_full_response(
+        cls, blocking_response: AppBlockingResponse
+    ) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def convert_blocking_simple_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
+    def convert_blocking_simple_response(
+        cls, blocking_response: AppBlockingResponse
+    ) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -75,10 +85,10 @@ class AppGenerateResponseConverter(ABC):
         :return:
         """
         # show_retrieve_source
+        updated_resources = []
         if "retriever_resources" in metadata:
-            metadata["retriever_resources"] = []
             for resource in metadata["retriever_resources"]:
-                metadata["retriever_resources"].append(
+                updated_resources.append(
                     {
                         "segment_id": resource["segment_id"],
                         "position": resource["position"],
@@ -87,6 +97,7 @@ class AppGenerateResponseConverter(ABC):
                         "content": resource["content"],
                     }
                 )
+            metadata["retriever_resources"] = updated_resources
 
         # show annotation reply
         if "annotation_reply" in metadata:
@@ -107,14 +118,20 @@ class AppGenerateResponseConverter(ABC):
         """
         error_responses = {
             ValueError: {"code": "invalid_param", "status": 400},
-            ProviderTokenNotInitError: {"code": "provider_not_initialize", "status": 400},
+            ProviderTokenNotInitError: {
+                "code": "provider_not_initialize",
+                "status": 400,
+            },
             QuotaExceededError: {
                 "code": "provider_quota_exceeded",
                 "message": "Your quota for Dify Hosted Model Provider has been exhausted. "
                 "Please go to Settings -> Model Provider to complete your own provider credentials.",
                 "status": 400,
             },
-            ModelCurrentlyNotSupportError: {"code": "model_currently_not_support", "status": 400},
+            ModelCurrentlyNotSupportError: {
+                "code": "model_currently_not_support",
+                "status": 400,
+            },
             InvokeError: {"code": "completion_request_error", "status": 400},
         }
 

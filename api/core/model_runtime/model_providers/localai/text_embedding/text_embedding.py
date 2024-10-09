@@ -5,9 +5,19 @@ from typing import Optional
 from requests import post
 from yarl import URL
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelPropertyKey,
+    ModelType,
+    PriceType,
+)
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -17,16 +27,23 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 
 
 class LocalAITextEmbeddingModel(TextEmbeddingModel):
     """
-    Model class for Jina text embedding model.
+    Model class for LocalAI text embedding model.
     """
 
     def _invoke(
-        self, model: str, credentials: dict, texts: list[str], user: Optional[str] = None
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
     ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
@@ -35,6 +52,7 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         if len(texts) != 1:
@@ -53,7 +71,12 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
         data = {"model": model_name, "input": texts[0]}
 
         try:
-            response = post(str(URL(url) / "embeddings"), headers=headers, data=dumps(data), timeout=10)
+            response = post(
+                str(URL(url) / "embeddings"),
+                headers=headers,
+                data=dumps(data),
+                timeout=10,
+            )
         except Exception as e:
             raise InvokeConnectionError(str(e))
 
@@ -83,12 +106,18 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
             embeddings = resp["data"]
             usage = resp["usage"]
         except Exception as e:
-            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
+            raise InvokeServerUnavailableError(
+                f"Failed to convert response to json: {e} with text: {response.text}"
+            )
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=usage["total_tokens"]
+        )
 
         result = TextEmbeddingResult(
-            model=model, embeddings=[[float(data) for data in x["embedding"]] for x in embeddings], usage=usage
+            model=model,
+            embeddings=[[float(data) for data in x["embedding"]] for x in embeddings],
+            usage=usage,
         )
 
         return result
@@ -108,7 +137,9 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
             num_tokens += self._get_num_tokens_by_gpt2(text)
         return num_tokens
 
-    def _get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def _get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         Get customizable model schema
 
@@ -123,7 +154,9 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
             features=[],
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", "512")),
+                ModelPropertyKey.CONTEXT_SIZE: int(
+                    credentials.get("context_size", "512")
+                ),
                 ModelPropertyKey.MAX_CHUNKS: 1,
             },
             parameter_rules=[],
@@ -154,7 +187,9 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError],
         }
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -165,7 +200,10 @@ class LocalAITextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
+            model=model,
+            credentials=credentials,
+            price_type=PriceType.INPUT,
+            tokens=tokens,
         )
 
         # transform usage

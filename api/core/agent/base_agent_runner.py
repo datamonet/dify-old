@@ -15,7 +15,9 @@ from core.app.entities.app_invoke_entities import (
     ModelConfigWithCredentialsEntity,
 )
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
-from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.callback_handler.index_tool_callback_handler import (
+    DatasetIndexToolCallbackHandler,
+)
 from core.file.message_file_parser import MessageFileParser
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
@@ -30,8 +32,11 @@ from core.model_runtime.entities.message_entities import (
     UserPromptMessage,
 )
 from core.model_runtime.entities.model_entities import ModelFeature
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.utils.encoders import jsonable_encoder
+from core.prompt.utils.extract_thread_messages import extract_thread_messages
 from core.tools.entities.tool_entities import (
     ToolParameter,
     ToolRuntimeVariablePool,
@@ -92,7 +97,9 @@ class BaseAgentRunner(AppRunner):
         self.message = message
         self.user_id = user_id
         self.memory = memory
-        self.history_prompt_messages = self.organize_agent_history(prompt_messages=prompt_messages or [])
+        self.history_prompt_messages = self.organize_agent_history(
+            prompt_messages=prompt_messages or []
+        )
         self.variables_pool = variables_pool
         self.db_variables_pool = db_variables
         self.model_instance = model_instance
@@ -110,7 +117,9 @@ class BaseAgentRunner(AppRunner):
         self.dataset_tools = DatasetRetrieverTool.get_dataset_tools(
             tenant_id=tenant_id,
             dataset_ids=app_config.dataset.dataset_ids if app_config.dataset else [],
-            retrieve_config=app_config.dataset.retrieve_config if app_config.dataset else None,
+            retrieve_config=app_config.dataset.retrieve_config
+            if app_config.dataset
+            else None,
             return_resource=app_config.additional_features.show_retrieve_source,
             invoke_from=application_generate_entity.invoke_from,
             hit_callback=hit_callback,
@@ -127,8 +136,12 @@ class BaseAgentRunner(AppRunner):
 
         # check if model supports stream tool call
         llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-        model_schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
-        if model_schema and ModelFeature.STREAM_TOOL_CALL in (model_schema.features or []):
+        model_schema = llm_model.get_model_schema(
+            model_instance.model, model_instance.credentials
+        )
+        if model_schema and ModelFeature.STREAM_TOOL_CALL in (
+            model_schema.features or []
+        ):
             self.stream_tool_call = True
         else:
             self.stream_tool_call = False
@@ -147,12 +160,17 @@ class BaseAgentRunner(AppRunner):
         """
         Repack app generate entity
         """
-        if app_generate_entity.app_config.prompt_template.simple_prompt_template is None:
+        if (
+            app_generate_entity.app_config.prompt_template.simple_prompt_template
+            is None
+        ):
             app_generate_entity.app_config.prompt_template.simple_prompt_template = ""
 
         return app_generate_entity
 
-    def _convert_tool_to_prompt_message_tool(self, tool: AgentToolEntity) -> tuple[PromptMessageTool, Tool]:
+    def _convert_tool_to_prompt_message_tool(
+        self, tool: AgentToolEntity
+    ) -> tuple[PromptMessageTool, Tool]:
         """
         convert tool to prompt message tool
         """
@@ -197,7 +215,9 @@ class BaseAgentRunner(AppRunner):
 
         return message_tool, tool_entity
 
-    def _convert_dataset_retriever_tool_to_prompt_message_tool(self, tool: DatasetRetrieverTool) -> PromptMessageTool:
+    def _convert_dataset_retriever_tool_to_prompt_message_tool(
+        self, tool: DatasetRetrieverTool
+    ) -> PromptMessageTool:
         """
         convert dataset retriever tool to prompt message tool
         """
@@ -225,7 +245,9 @@ class BaseAgentRunner(AppRunner):
 
         return prompt_tool
 
-    def _init_prompt_tools(self) -> tuple[Mapping[str, Tool], Sequence[PromptMessageTool]]:
+    def _init_prompt_tools(
+        self,
+    ) -> tuple[Mapping[str, Tool], Sequence[PromptMessageTool]]:
         """
         Init tools
         """
@@ -234,7 +256,9 @@ class BaseAgentRunner(AppRunner):
 
         for tool in self.app_config.agent.tools if self.app_config.agent else []:
             try:
-                prompt_tool, tool_entity = self._convert_tool_to_prompt_message_tool(tool)
+                prompt_tool, tool_entity = self._convert_tool_to_prompt_message_tool(
+                    tool
+                )
             except Exception:
                 # api tool may be deleted
                 continue
@@ -245,7 +269,9 @@ class BaseAgentRunner(AppRunner):
 
         # convert dataset tools into ModelRuntime Tool format
         for dataset_tool in self.dataset_tools:
-            prompt_tool = self._convert_dataset_retriever_tool_to_prompt_message_tool(dataset_tool)
+            prompt_tool = self._convert_dataset_retriever_tool_to_prompt_message_tool(
+                dataset_tool
+            )
             # save prompt tool
             prompt_messages_tools.append(prompt_tool)
             # save tool entity
@@ -253,7 +279,9 @@ class BaseAgentRunner(AppRunner):
 
         return tool_instances, prompt_messages_tools
 
-    def update_prompt_message_tool(self, tool: Tool, prompt_tool: PromptMessageTool) -> PromptMessageTool:
+    def update_prompt_message_tool(
+        self, tool: Tool, prompt_tool: PromptMessageTool
+    ) -> PromptMessageTool:
         """
         update prompt message tool
         """
@@ -284,7 +312,12 @@ class BaseAgentRunner(AppRunner):
         return prompt_tool
 
     def create_agent_thought(
-        self, message_id: str, message: str, tool_name: str, tool_input: str, messages_ids: list[str]
+        self,
+        message_id: str,
+        message: str,
+        tool_name: str,
+        tool_input: str,
+        messages_ids: list[str],
     ) -> MessageAgentThought:
         """
         Create agent thought
@@ -340,7 +373,11 @@ class BaseAgentRunner(AppRunner):
         """
         Save agent thought
         """
-        agent_thought = db.session.query(MessageAgentThought).filter(MessageAgentThought.id == agent_thought.id).first()
+        agent_thought = (
+            db.session.query(MessageAgentThought)
+            .filter(MessageAgentThought.id == agent_thought.id)
+            .first()
+        )
 
         if thought is not None:
             agent_thought.thought = thought
@@ -352,7 +389,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_input, dict):
                 try:
                     tool_input = json.dumps(tool_input, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     tool_input = json.dumps(tool_input)
 
             agent_thought.tool_input = tool_input
@@ -361,7 +398,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(observation, dict):
                 try:
                     observation = json.dumps(observation, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     observation = json.dumps(observation)
 
             agent_thought.observation = observation
@@ -401,7 +438,7 @@ class BaseAgentRunner(AppRunner):
             if isinstance(tool_invoke_meta, dict):
                 try:
                     tool_invoke_meta = json.dumps(tool_invoke_meta, ensure_ascii=False)
-                except Exception as e:
+                except Exception:
                     tool_invoke_meta = json.dumps(tool_invoke_meta)
 
             agent_thought.tool_meta_str = tool_invoke_meta
@@ -409,14 +446,19 @@ class BaseAgentRunner(AppRunner):
         db.session.commit()
         db.session.close()
 
-    def update_db_variables(self, tool_variables: ToolRuntimeVariablePool, db_variables: ToolConversationVariables):
+    def update_db_variables(
+        self,
+        tool_variables: ToolRuntimeVariablePool,
+        db_variables: ToolConversationVariables,
+    ):
         """
         convert tool variables to db variables
         """
         db_variables = (
             db.session.query(ToolConversationVariables)
             .filter(
-                ToolConversationVariables.conversation_id == self.message.conversation_id,
+                ToolConversationVariables.conversation_id
+                == self.message.conversation_id,
             )
             .first()
         )
@@ -426,7 +468,9 @@ class BaseAgentRunner(AppRunner):
         db.session.commit()
         db.session.close()
 
-    def organize_agent_history(self, prompt_messages: list[PromptMessage]) -> list[PromptMessage]:
+    def organize_agent_history(
+        self, prompt_messages: list[PromptMessage]
+    ) -> list[PromptMessage]:
         """
         Organize agent history
         """
@@ -441,9 +485,11 @@ class BaseAgentRunner(AppRunner):
             .filter(
                 Message.conversation_id == self.message.conversation_id,
             )
-            .order_by(Message.created_at.asc())
+            .order_by(Message.created_at.desc())
             .all()
         )
+
+        messages = list(reversed(extract_thread_messages(messages)))
 
         for message in messages:
             if message.id == self.message.id:
@@ -460,12 +506,14 @@ class BaseAgentRunner(AppRunner):
                         tool_call_response: list[ToolPromptMessage] = []
                         try:
                             tool_inputs = json.loads(agent_thought.tool_input)
-                        except Exception as e:
+                        except Exception:
                             tool_inputs = {tool: {} for tool in tools}
                         try:
                             tool_responses = json.loads(agent_thought.observation)
-                        except Exception as e:
-                            tool_responses = dict.fromkeys(tools, agent_thought.observation)
+                        except Exception:
+                            tool_responses = dict.fromkeys(
+                                tools, agent_thought.observation
+                            )
 
                         for tool in tools:
                             # generate a uuid for tool call
@@ -482,7 +530,9 @@ class BaseAgentRunner(AppRunner):
                             )
                             tool_call_response.append(
                                 ToolPromptMessage(
-                                    content=tool_responses.get(tool, agent_thought.observation),
+                                    content=tool_responses.get(
+                                        tool, agent_thought.observation
+                                    ),
                                     name=tool,
                                     tool_call_id=tool_call_id,
                                 )
@@ -498,7 +548,9 @@ class BaseAgentRunner(AppRunner):
                             ]
                         )
                     if not tools:
-                        result.append(AssistantPromptMessage(content=agent_thought.thought))
+                        result.append(
+                            AssistantPromptMessage(content=agent_thought.thought)
+                        )
             else:
                 if message.answer:
                     result.append(AssistantPromptMessage(content=message.answer))
@@ -515,10 +567,14 @@ class BaseAgentRunner(AppRunner):
 
         files = message.message_files
         if files:
-            file_extra_config = FileUploadConfigManager.convert(message.app_model_config.to_dict())
+            file_extra_config = FileUploadConfigManager.convert(
+                message.app_model_config.to_dict()
+            )
 
             if file_extra_config:
-                file_objs = message_file_parser.transform_message_files(files, file_extra_config)
+                file_objs = message_file_parser.transform_message_files(
+                    files, file_extra_config
+                )
             else:
                 file_objs = []
 

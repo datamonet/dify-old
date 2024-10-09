@@ -19,7 +19,9 @@ from core.model_runtime.entities.model_entities import (
     PriceType,
 )
 from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeError
-from core.model_runtime.model_providers.__base.tokenizers.gpt2_tokenzier import GPT2Tokenizer
+from core.model_runtime.model_providers.__base.tokenizers.gpt2_tokenzier import (
+    GPT2Tokenizer,
+)
 from core.tools.utils.yaml_utils import load_yaml_file
 
 
@@ -77,11 +79,15 @@ class AIModel(ABC):
                         )
                     )
 
-                return invoke_error(description=f"[{provider_name}] {invoke_error.description}, {str(error)}")
+                return invoke_error(
+                    description=f"[{provider_name}] {invoke_error.description}, {str(error)}"
+                )
 
         return InvokeError(description=f"[{provider_name}] Error: {str(error)}")
 
-    def get_price(self, model: str, credentials: dict, price_type: PriceType, tokens: int) -> PriceInfo:
+    def get_price(
+        self, model: str, credentials: dict, price_type: PriceType, tokens: int
+    ) -> PriceInfo:
         """
         Get price for given model and tokens
 
@@ -119,7 +125,9 @@ class AIModel(ABC):
         if not price_config:
             raise ValueError(f"Price config not found for model {model}")
         total_amount = tokens * unit_price * price_config.unit
-        total_amount = total_amount.quantize(decimal.Decimal("0.0000001"), rounding=decimal.ROUND_HALF_UP)
+        total_amount = total_amount.quantize(
+            decimal.Decimal("0.0000001"), rounding=decimal.ROUND_HALF_UP
+        )
 
         return PriceInfo(
             unit_price=unit_price,
@@ -158,7 +166,9 @@ class AIModel(ABC):
             for model_schema_yaml in os.listdir(provider_model_type_path)
             if not model_schema_yaml.startswith("__")
             and not model_schema_yaml.startswith("_")
-            and os.path.isfile(os.path.join(provider_model_type_path, model_schema_yaml))
+            and os.path.isfile(
+                os.path.join(provider_model_type_path, model_schema_yaml)
+            )
             and model_schema_yaml.endswith(".yaml")
         ]
 
@@ -174,8 +184,14 @@ class AIModel(ABC):
             for parameter_rule in yaml_data.get("parameter_rules", []):
                 if "use_template" in parameter_rule:
                     try:
-                        default_parameter_name = DefaultParameterName.value_of(parameter_rule["use_template"])
-                        default_parameter_rule = self._get_default_parameter_rule_variable_map(default_parameter_name)
+                        default_parameter_name = DefaultParameterName.value_of(
+                            parameter_rule["use_template"]
+                        )
+                        default_parameter_rule = (
+                            self._get_default_parameter_rule_variable_map(
+                                default_parameter_name
+                            )
+                        )
                         copy_default_parameter_rule = default_parameter_rule.copy()
                         copy_default_parameter_rule.update(parameter_rule)
                         parameter_rule = copy_default_parameter_rule
@@ -183,14 +199,20 @@ class AIModel(ABC):
                         pass
 
                 if "label" not in parameter_rule:
-                    parameter_rule["label"] = {"zh_Hans": parameter_rule["name"], "en_US": parameter_rule["name"]}
+                    parameter_rule["label"] = {
+                        "zh_Hans": parameter_rule["name"],
+                        "en_US": parameter_rule["name"],
+                    }
 
                 new_parameter_rules.append(parameter_rule)
 
             yaml_data["parameter_rules"] = new_parameter_rules
 
             if "label" not in yaml_data:
-                yaml_data["label"] = {"zh_Hans": yaml_data["model"], "en_US": yaml_data["model"]}
+                yaml_data["label"] = {
+                    "zh_Hans": yaml_data["model"],
+                    "en_US": yaml_data["model"],
+                }
 
             yaml_data["fetch_from"] = FetchFrom.PREDEFINED_MODEL.value
 
@@ -198,7 +220,9 @@ class AIModel(ABC):
                 # yaml_data to entity
                 model_schema = AIModelEntity(**yaml_data)
             except Exception as e:
-                model_schema_yaml_file_name = os.path.basename(model_schema_yaml_path).rstrip(".yaml")
+                model_schema_yaml_file_name = os.path.basename(
+                    model_schema_yaml_path
+                ).rstrip(".yaml")
                 raise Exception(
                     f"Invalid model schema for {provider_name}.{model_type}.{model_schema_yaml_file_name}: {str(e)}"
                 )
@@ -207,14 +231,18 @@ class AIModel(ABC):
             model_schemas.append(model_schema)
 
         # resort model schemas by position
-        model_schemas = sort_by_position_map(position_map, model_schemas, lambda x: x.model)
+        model_schemas = sort_by_position_map(
+            position_map, model_schemas, lambda x: x.model
+        )
 
         # cache model schemas
         self.model_schemas = model_schemas
 
         return model_schemas
 
-    def get_model_schema(self, model: str, credentials: Optional[Mapping] = None) -> Optional[AIModelEntity]:
+    def get_model_schema(
+        self, model: str, credentials: Optional[Mapping] = None
+    ) -> Optional[AIModelEntity]:
         """
         Get model schema by model name and credentials
 
@@ -230,7 +258,9 @@ class AIModel(ABC):
             return model_map[model]
 
         if credentials:
-            model_schema = self.get_customizable_model_schema_from_credentials(model, credentials)
+            model_schema = self.get_customizable_model_schema_from_credentials(
+                model, credentials
+            )
             if model_schema:
                 return model_schema
 
@@ -248,7 +278,9 @@ class AIModel(ABC):
         """
         return self._get_customizable_model_schema(model, credentials)
 
-    def _get_customizable_model_schema(self, model: str, credentials: Mapping) -> Optional[AIModelEntity]:
+    def _get_customizable_model_schema(
+        self, model: str, credentials: Mapping
+    ) -> Optional[AIModelEntity]:
         """
         Get customizable model schema and fill in the template
         """
@@ -262,17 +294,32 @@ class AIModel(ABC):
         for parameter_rule in schema.parameter_rules:
             if parameter_rule.use_template:
                 try:
-                    default_parameter_name = DefaultParameterName.value_of(parameter_rule.use_template)
-                    default_parameter_rule = self._get_default_parameter_rule_variable_map(default_parameter_name)
+                    default_parameter_name = DefaultParameterName.value_of(
+                        parameter_rule.use_template
+                    )
+                    default_parameter_rule = (
+                        self._get_default_parameter_rule_variable_map(
+                            default_parameter_name
+                        )
+                    )
                     if not parameter_rule.max and "max" in default_parameter_rule:
                         parameter_rule.max = default_parameter_rule["max"]
                     if not parameter_rule.min and "min" in default_parameter_rule:
                         parameter_rule.min = default_parameter_rule["min"]
-                    if not parameter_rule.default and "default" in default_parameter_rule:
+                    if (
+                        not parameter_rule.default
+                        and "default" in default_parameter_rule
+                    ):
                         parameter_rule.default = default_parameter_rule["default"]
-                    if not parameter_rule.precision and "precision" in default_parameter_rule:
+                    if (
+                        not parameter_rule.precision
+                        and "precision" in default_parameter_rule
+                    ):
                         parameter_rule.precision = default_parameter_rule["precision"]
-                    if not parameter_rule.required and "required" in default_parameter_rule:
+                    if (
+                        not parameter_rule.required
+                        and "required" in default_parameter_rule
+                    ):
                         parameter_rule.required = default_parameter_rule["required"]
                     if not parameter_rule.help and "help" in default_parameter_rule:
                         parameter_rule.help = I18nObject(
@@ -281,17 +328,25 @@ class AIModel(ABC):
                     if (
                         parameter_rule.help
                         and not parameter_rule.help.en_US
-                        and ("help" in default_parameter_rule and "en_US" in default_parameter_rule["help"])
+                        and (
+                            "help" in default_parameter_rule
+                            and "en_US" in default_parameter_rule["help"]
+                        )
                     ):
-                        parameter_rule.help.en_US = default_parameter_rule["help"]["en_US"]
+                        parameter_rule.help.en_US = default_parameter_rule["help"][
+                            "en_US"
+                        ]
                     if (
                         parameter_rule.help
                         and not parameter_rule.help.zh_Hans
-                        and ("help" in default_parameter_rule and "zh_Hans" in default_parameter_rule["help"])
-                    ):
-                        parameter_rule.help.zh_Hans = default_parameter_rule["help"].get(
-                            "zh_Hans", default_parameter_rule["help"]["en_US"]
+                        and (
+                            "help" in default_parameter_rule
+                            and "zh_Hans" in default_parameter_rule["help"]
                         )
+                    ):
+                        parameter_rule.help.zh_Hans = default_parameter_rule[
+                            "help"
+                        ].get("zh_Hans", default_parameter_rule["help"]["en_US"])
                 except ValueError:
                     pass
 
@@ -301,7 +356,9 @@ class AIModel(ABC):
 
         return schema
 
-    def get_customizable_model_schema(self, model: str, credentials: Mapping) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(
+        self, model: str, credentials: Mapping
+    ) -> Optional[AIModelEntity]:
         """
         Get customizable model schema
 
@@ -311,7 +368,9 @@ class AIModel(ABC):
         """
         return None
 
-    def _get_default_parameter_rule_variable_map(self, name: DefaultParameterName) -> dict:
+    def _get_default_parameter_rule_variable_map(
+        self, name: DefaultParameterName
+    ) -> dict:
         """
         Get default parameter rule for given name
 

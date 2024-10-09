@@ -9,12 +9,16 @@ import google.ai.generativelanguage as glm
 import google.generativeai as genai
 import requests
 from google.api_core import exceptions
-from google.generativeai import client
-from google.generativeai.types import ContentType, GenerateContentResponse, HarmBlockThreshold, HarmCategory
+from google.generativeai.client import _ClientManager
+from google.generativeai.types import ContentType, GenerateContentResponse
 from google.generativeai.types.content_types import to_part
 from PIL import Image
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -34,7 +38,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +80,16 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         # invoke model
-        return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
+        return self._generate(
+            model,
+            credentials,
+            prompt_messages,
+            model_parameters,
+            tools,
+            stop,
+            stream,
+            user,
+        )
 
     def get_num_tokens(
         self,
@@ -105,7 +120,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(self._convert_one_message_to_text(message) for message in messages)
+        text = "".join(
+            self._convert_one_message_to_text(message) for message in messages
+        )
 
         return text.rstrip()
 
@@ -128,7 +145,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                                 "description": value.get("description", ""),
                                 "enum": value.get("enum", []),
                             }
-                            for key, value in tool.parameters.get("properties", {}).items()
+                            for key, value in tool.parameters.get(
+                                "properties", {}
+                            ).items()
                         },
                         required=tool.parameters.get("required", []),
                     ),
@@ -148,7 +167,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         try:
             ping_message = SystemPromptMessage(content="ping")
-            self._generate(model, credentials, [ping_message], {"max_tokens_to_sample": 5})
+            self._generate(
+                model, credentials, [ping_message], {"max_tokens_to_sample": 5}
+            )
 
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
@@ -177,7 +198,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         config_kwargs = model_parameters.copy()
-        config_kwargs["max_output_tokens"] = config_kwargs.pop("max_tokens_to_sample", None)
+        config_kwargs["max_output_tokens"] = config_kwargs.pop(
+            "max_tokens_to_sample", None
+        )
 
         if stop:
             config_kwargs["stop_sequences"] = stop
@@ -200,35 +223,35 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                     history.append(content)
 
         # Create a new ClientManager with tenant's API key
-        new_client_manager = client._ClientManager()
+        new_client_manager = _ClientManager()
         new_client_manager.configure(api_key=credentials["google_api_key"])
         new_custom_client = new_client_manager.make_client("generative")
 
         google_model._client = new_custom_client
 
-        safety_settings = {
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
-
         response = google_model.generate_content(
             contents=history,
             generation_config=genai.types.GenerationConfig(**config_kwargs),
             stream=stream,
-            safety_settings=safety_settings,
             tools=self._convert_tools_to_glm_tool(tools) if tools else None,
             request_options={"timeout": 600},
         )
 
         if stream:
-            return self._handle_generate_stream_response(model, credentials, response, prompt_messages)
+            return self._handle_generate_stream_response(
+                model, credentials, response, prompt_messages
+            )
 
-        return self._handle_generate_response(model, credentials, response, prompt_messages)
+        return self._handle_generate_response(
+            model, credentials, response, prompt_messages
+        )
 
     def _handle_generate_response(
-        self, model: str, credentials: dict, response: GenerateContentResponse, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: GenerateContentResponse,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         Handle llm response
@@ -244,10 +267,14 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         # calculate num tokens
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+        completion_tokens = self.get_num_tokens(
+            model, credentials, [assistant_prompt_message]
+        )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         result = LLMResult(
@@ -260,7 +287,11 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         return result
 
     def _handle_generate_stream_response(
-        self, model: str, credentials: dict, response: GenerateContentResponse, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: GenerateContentResponse,
+        prompt_messages: list[PromptMessage],
     ) -> Generator:
         """
         Handle llm stream response
@@ -286,7 +317,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                             type="function",
                             function=AssistantPromptMessage.ToolCall.ToolCallFunction(
                                 name=part.function_call.name,
-                                arguments=json.dumps(dict(part.function_call.args.items())),
+                                arguments=json.dumps(
+                                    dict(part.function_call.args.items())
+                                ),
                             ),
                         )
                     ]
@@ -298,15 +331,23 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                     yield LLMResultChunk(
                         model=model,
                         prompt_messages=prompt_messages,
-                        delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message),
+                        delta=LLMResultChunkDelta(
+                            index=index, message=assistant_prompt_message
+                        ),
                     )
                 else:
                     # calculate num tokens
-                    prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-                    completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+                    prompt_tokens = self.get_num_tokens(
+                        model, credentials, prompt_messages
+                    )
+                    completion_tokens = self.get_num_tokens(
+                        model, credentials, [assistant_prompt_message]
+                    )
 
                     # transform usage
-                    usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+                    usage = self._calc_response_usage(
+                        model, credentials, prompt_tokens, completion_tokens
+                    )
 
                     yield LLMResultChunk(
                         model=model,
@@ -331,7 +372,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         content = message.content
         if isinstance(content, list):
-            content = "".join(c.data for c in content if c.type != PromptMessageContentType.IMAGE)
+            content = "".join(
+                c.data for c in content if c.type != PromptMessageContentType.IMAGE
+            )
 
         if isinstance(message, UserPromptMessage):
             message_text = f"{human_prompt} {content}"
@@ -367,13 +410,21 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                         else:
                             # fetch image data from url
                             try:
-                                image_content = requests.get(message_content.data).content
+                                image_content = requests.get(
+                                    message_content.data
+                                ).content
                                 with Image.open(io.BytesIO(image_content)) as img:
                                     mime_type = f"image/{img.format.lower()}"
-                                base64_data = base64.b64encode(image_content).decode("utf-8")
+                                base64_data = base64.b64encode(image_content).decode(
+                                    "utf-8"
+                                )
                             except Exception as ex:
-                                raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
-                        blob = {"inline_data": {"mime_type": mime_type, "data": base64_data}}
+                                raise ValueError(
+                                    f"Failed to fetch image data from url {message_content.data}, {ex}"
+                                )
+                        blob = {
+                            "inline_data": {"mime_type": mime_type, "data": base64_data}
+                        }
                         glm_content["parts"].append(blob)
 
             return glm_content
@@ -426,7 +477,10 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                 exceptions.GatewayTimeout,
                 exceptions.DeadlineExceeded,
             ],
-            InvokeRateLimitError: [exceptions.ResourceExhausted, exceptions.TooManyRequests],
+            InvokeRateLimitError: [
+                exceptions.ResourceExhausted,
+                exceptions.TooManyRequests,
+            ],
             InvokeAuthorizationError: [
                 exceptions.Unauthenticated,
                 exceptions.PermissionDenied,

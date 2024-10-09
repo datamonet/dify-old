@@ -7,10 +7,16 @@ import numpy as np
 from openai import OpenAI
 from tokenizers import Tokenizer
 
+from core.embedding.embedding_constant import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
+from core.model_runtime.entities.text_embedding_entities import (
+    EmbeddingUsage,
+    TextEmbeddingResult,
+)
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 from core.model_runtime.model_providers.upstage._common import _CommonUpstage
 
 
@@ -22,7 +28,14 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
     def _get_tokenizer(self) -> Tokenizer:
         return Tokenizer.from_pretrained("upstage/solar-1-mini-tokenizer")
 
-    def _invoke(self, model: str, credentials: dict, texts: list[str], user: str | None = None) -> TextEmbeddingResult:
+    def _invoke(
+        self,
+        model: str,
+        credentials: dict,
+        texts: list[str],
+        user: str | None = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
+    ) -> TextEmbeddingResult:
         """
         Invoke text embedding model
 
@@ -30,6 +43,7 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
         :param credentials: model credentials
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
 
@@ -93,7 +107,9 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
                 average = np.average(_result, axis=0, weights=num_tokens_in_batch[i])
             embeddings[i] = (average / np.linalg.norm(average)).tolist()
 
-        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
+        usage = self._calc_response_usage(
+            model=model, credentials=credentials, tokens=used_tokens
+        )
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
@@ -134,12 +150,18 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
             client = OpenAI(**credentials_kwargs)
 
             # call embedding model
-            self._embedding_invoke(model=model, client=client, texts=["ping"], extra_model_kwargs={})
+            self._embedding_invoke(
+                model=model, client=client, texts=["ping"], extra_model_kwargs={}
+            )
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
     def _embedding_invoke(
-        self, model: str, client: OpenAI, texts: Union[list[str], str], extra_model_kwargs: dict
+        self,
+        model: str,
+        client: OpenAI,
+        texts: Union[list[str], str],
+        extra_model_kwargs: dict,
     ) -> tuple[list[list[float]], int]:
         """
         Invoke embedding model
@@ -149,12 +171,21 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
         :param extra_model_kwargs: extra model kwargs
         :return: embeddings and used tokens
         """
-        response = client.embeddings.create(model=model, input=texts, **extra_model_kwargs)
+        response = client.embeddings.create(
+            model=model, input=texts, **extra_model_kwargs
+        )
 
-        if "encoding_format" in extra_model_kwargs and extra_model_kwargs["encoding_format"] == "base64":
+        if (
+            "encoding_format" in extra_model_kwargs
+            and extra_model_kwargs["encoding_format"] == "base64"
+        ):
             return (
                 [
-                    list(np.frombuffer(base64.b64decode(embedding.embedding), dtype=np.float32))
+                    list(
+                        np.frombuffer(
+                            base64.b64decode(embedding.embedding), dtype=np.float32
+                        )
+                    )
                     for embedding in response.data
                 ],
                 response.usage.total_tokens,
@@ -162,7 +193,9 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
 
         return [data.embedding for data in response.data], response.usage.total_tokens
 
-    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
+    def _calc_response_usage(
+        self, model: str, credentials: dict, tokens: int
+    ) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -172,7 +205,10 @@ class UpstageTextEmbeddingModel(_CommonUpstage, TextEmbeddingModel):
         :return: usage
         """
         input_price_info = self.get_price(
-            model=model, credentials=credentials, tokens=tokens, price_type=PriceType.INPUT
+            model=model,
+            credentials=credentials,
+            tokens=tokens,
+            price_type=PriceType.INPUT,
         )
 
         usage = EmbeddingUsage(

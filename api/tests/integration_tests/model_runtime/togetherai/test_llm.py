@@ -3,14 +3,20 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     SystemPromptMessage,
     UserPromptMessage,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.togetherai.llm.llm import TogetherAILargeLanguageModel
+from core.model_runtime.model_providers.togetherai.llm.llm import (
+    TogetherAILargeLanguageModel,
+)
 
 
 def test_validate_credentials():
@@ -18,7 +24,8 @@ def test_validate_credentials():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="mistralai/Mixtral-8x7B-Instruct-v0.1", credentials={"api_key": "invalid_key", "mode": "chat"}
+            model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+            credentials={"api_key": "invalid_key", "mode": "chat"},
         )
 
     model.validate_credentials(
@@ -32,7 +39,10 @@ def test_invoke_model():
 
     response = model.invoke(
         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-        credentials={"api_key": os.environ.get("TOGETHER_API_KEY"), "mode": "completion"},
+        credentials={
+            "api_key": os.environ.get("TOGETHER_API_KEY"),
+            "mode": "completion",
+        },
         prompt_messages=[
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",

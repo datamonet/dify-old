@@ -15,14 +15,18 @@ def handle(sender, **kwargs):
     published_workflow = cast(Workflow, published_workflow)
 
     dataset_ids = get_dataset_ids_from_workflow(published_workflow)
-    app_dataset_joins = db.session.query(AppDatasetJoin).filter(AppDatasetJoin.app_id == app.id).all()
+    app_dataset_joins = (
+        db.session.query(AppDatasetJoin).filter(AppDatasetJoin.app_id == app.id).all()
+    )
 
     removed_dataset_ids = []
     if not app_dataset_joins:
         added_dataset_ids = dataset_ids
     else:
         old_dataset_ids = set()
-        old_dataset_ids.update(app_dataset_join.dataset_id for app_dataset_join in app_dataset_joins)
+        old_dataset_ids.update(
+            app_dataset_join.dataset_id for app_dataset_join in app_dataset_joins
+        )
 
         added_dataset_ids = dataset_ids - old_dataset_ids
         removed_dataset_ids = old_dataset_ids - dataset_ids
@@ -51,7 +55,9 @@ def get_dataset_ids_from_workflow(published_workflow: Workflow) -> set:
 
     # fetch all knowledge retrieval nodes
     knowledge_retrieval_nodes = [
-        node for node in nodes if node.get("data", {}).get("type") == NodeType.KNOWLEDGE_RETRIEVAL.value
+        node
+        for node in nodes
+        if node.get("data", {}).get("type") == NodeType.KNOWLEDGE_RETRIEVAL.value
     ]
 
     if not knowledge_retrieval_nodes:

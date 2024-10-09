@@ -7,7 +7,10 @@ from controllers.console import api
 from controllers.console.app.error import NoFileUploadedError
 from controllers.console.datasets.error import TooManyFilesError
 from controllers.console.setup import setup_required
-from controllers.console.wraps import account_initialization_required, cloud_edition_billing_resource_check
+from controllers.console.wraps import (
+    account_initialization_required,
+    cloud_edition_billing_resource_check,
+)
 from extensions.ext_redis import redis_client
 from fields.annotation_fields import (
     annotation_fields,
@@ -28,9 +31,15 @@ class AnnotationReplyActionApi(Resource):
 
         app_id = str(app_id)
         parser = reqparse.RequestParser()
-        parser.add_argument("score_threshold", required=True, type=float, location="json")
-        parser.add_argument("embedding_provider_name", required=True, type=str, location="json")
-        parser.add_argument("embedding_model_name", required=True, type=str, location="json")
+        parser.add_argument(
+            "score_threshold", required=True, type=float, location="json"
+        )
+        parser.add_argument(
+            "embedding_provider_name", required=True, type=str, location="json"
+        )
+        parser.add_argument(
+            "embedding_model_name", required=True, type=str, location="json"
+        )
         args = parser.parse_args()
         if action == "enable":
             result = AppAnnotationService.enable_app_annotation(args, app_id)
@@ -66,10 +75,14 @@ class AppAnnotationSettingUpdateApi(Resource):
         annotation_setting_id = str(annotation_setting_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument("score_threshold", required=True, type=float, location="json")
+        parser.add_argument(
+            "score_threshold", required=True, type=float, location="json"
+        )
         args = parser.parse_args()
 
-        result = AppAnnotationService.update_app_annotation_setting(app_id, annotation_setting_id, args)
+        result = AppAnnotationService.update_app_annotation_setting(
+            app_id, annotation_setting_id, args
+        )
         return result, 200
 
 
@@ -91,7 +104,9 @@ class AnnotationReplyActionStatusApi(Resource):
         job_status = cache_result.decode()
         error_msg = ""
         if job_status == "error":
-            app_annotation_error_key = "{}_app_annotation_error_{}".format(action, str(job_id))
+            app_annotation_error_key = "{}_app_annotation_error_{}".format(
+                action, str(job_id)
+            )
             error_msg = redis_client.get(app_annotation_error_key).decode()
 
         return {"job_id": job_id, "job_status": job_status, "error_msg": error_msg}, 200
@@ -110,7 +125,9 @@ class AnnotationListApi(Resource):
         keyword = request.args.get("keyword", default=None, type=str)
 
         app_id = str(app_id)
-        annotation_list, total = AppAnnotationService.get_annotation_list_by_app_id(app_id, page, limit, keyword)
+        annotation_list, total = AppAnnotationService.get_annotation_list_by_app_id(
+            app_id, page, limit, keyword
+        )
         response = {
             "data": marshal(annotation_list, annotation_fields),
             "has_more": len(annotation_list) == limit,
@@ -170,7 +187,9 @@ class AnnotationUpdateDeleteApi(Resource):
         parser.add_argument("question", required=True, type=str, location="json")
         parser.add_argument("answer", required=True, type=str, location="json")
         args = parser.parse_args()
-        annotation = AppAnnotationService.update_app_annotation_directly(args, app_id, annotation_id)
+        annotation = AppAnnotationService.update_app_annotation_directly(
+            args, app_id, annotation_id
+        )
         return annotation
 
     @setup_required
@@ -227,7 +246,9 @@ class AnnotationBatchImportStatusApi(Resource):
         job_status = cache_result.decode()
         error_msg = ""
         if job_status == "error":
-            indexing_error_msg_key = "app_annotation_batch_import_error_msg_{}".format(str(job_id))
+            indexing_error_msg_key = "app_annotation_batch_import_error_msg_{}".format(
+                str(job_id)
+            )
             error_msg = redis_client.get(indexing_error_msg_key).decode()
 
         return {"job_id": job_id, "job_status": job_status, "error_msg": error_msg}, 200
@@ -245,8 +266,10 @@ class AnnotationHitHistoryListApi(Resource):
         limit = request.args.get("limit", default=20, type=int)
         app_id = str(app_id)
         annotation_id = str(annotation_id)
-        annotation_hit_history_list, total = AppAnnotationService.get_annotation_hit_histories(
-            app_id, annotation_id, page, limit
+        annotation_hit_history_list, total = (
+            AppAnnotationService.get_annotation_hit_histories(
+                app_id, annotation_id, page, limit
+            )
         )
         response = {
             "data": marshal(annotation_hit_history_list, annotation_hit_history_fields),
@@ -258,15 +281,33 @@ class AnnotationHitHistoryListApi(Resource):
         return response
 
 
-api.add_resource(AnnotationReplyActionApi, "/apps/<uuid:app_id>/annotation-reply/<string:action>")
 api.add_resource(
-    AnnotationReplyActionStatusApi, "/apps/<uuid:app_id>/annotation-reply/<string:action>/status/<uuid:job_id>"
+    AnnotationReplyActionApi, "/apps/<uuid:app_id>/annotation-reply/<string:action>"
+)
+api.add_resource(
+    AnnotationReplyActionStatusApi,
+    "/apps/<uuid:app_id>/annotation-reply/<string:action>/status/<uuid:job_id>",
 )
 api.add_resource(AnnotationListApi, "/apps/<uuid:app_id>/annotations")
 api.add_resource(AnnotationExportApi, "/apps/<uuid:app_id>/annotations/export")
-api.add_resource(AnnotationUpdateDeleteApi, "/apps/<uuid:app_id>/annotations/<uuid:annotation_id>")
-api.add_resource(AnnotationBatchImportApi, "/apps/<uuid:app_id>/annotations/batch-import")
-api.add_resource(AnnotationBatchImportStatusApi, "/apps/<uuid:app_id>/annotations/batch-import-status/<uuid:job_id>")
-api.add_resource(AnnotationHitHistoryListApi, "/apps/<uuid:app_id>/annotations/<uuid:annotation_id>/hit-histories")
-api.add_resource(AppAnnotationSettingDetailApi, "/apps/<uuid:app_id>/annotation-setting")
-api.add_resource(AppAnnotationSettingUpdateApi, "/apps/<uuid:app_id>/annotation-settings/<uuid:annotation_setting_id>")
+api.add_resource(
+    AnnotationUpdateDeleteApi, "/apps/<uuid:app_id>/annotations/<uuid:annotation_id>"
+)
+api.add_resource(
+    AnnotationBatchImportApi, "/apps/<uuid:app_id>/annotations/batch-import"
+)
+api.add_resource(
+    AnnotationBatchImportStatusApi,
+    "/apps/<uuid:app_id>/annotations/batch-import-status/<uuid:job_id>",
+)
+api.add_resource(
+    AnnotationHitHistoryListApi,
+    "/apps/<uuid:app_id>/annotations/<uuid:annotation_id>/hit-histories",
+)
+api.add_resource(
+    AppAnnotationSettingDetailApi, "/apps/<uuid:app_id>/annotation-setting"
+)
+api.add_resource(
+    AppAnnotationSettingUpdateApi,
+    "/apps/<uuid:app_id>/annotation-settings/<uuid:annotation_setting_id>",
+)

@@ -68,12 +68,17 @@ class AppParameterApi(InstalledAppResource):
             ),
             "speech_to_text": features_dict.get("speech_to_text", {"enabled": False}),
             "text_to_speech": features_dict.get("text_to_speech", {"enabled": False}),
-            "retriever_resource": features_dict.get("retriever_resource", {"enabled": False}),
-            "annotation_reply": features_dict.get("annotation_reply", {"enabled": False}),
+            "retriever_resource": features_dict.get(
+                "retriever_resource", {"enabled": False}
+            ),
+            "annotation_reply": features_dict.get(
+                "annotation_reply", {"enabled": False}
+            ),
             "more_like_this": features_dict.get("more_like_this", {"enabled": False}),
             "user_input_form": user_input_form,
             "sensitive_word_avoidance": features_dict.get(
-                "sensitive_word_avoidance", {"enabled": False, "type": "", "configs": []}
+                "sensitive_word_avoidance",
+                {"enabled": False, "type": "", "configs": []},
             ),
             "file_upload": features_dict.get(
                 "file_upload",
@@ -86,7 +91,9 @@ class AppParameterApi(InstalledAppResource):
                     }
                 },
             ),
-            "system_parameters": {"image_file_size_limit": dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT},
+            "system_parameters": {
+                "image_file_size_limit": dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT
+            },
         }
 
 
@@ -98,6 +105,12 @@ class ExploreAppMetaApi(InstalledAppResource):
 
 
 api.add_resource(
-    AppParameterApi, "/installed-apps/<uuid:installed_app_id>/parameters", endpoint="installed_app_parameters"
+    AppParameterApi,
+    "/installed-apps/<uuid:installed_app_id>/parameters",
+    endpoint="installed_app_parameters",
 )
-api.add_resource(ExploreAppMetaApi, "/installed-apps/<uuid:installed_app_id>/meta", endpoint="installed_app_meta")
+api.add_resource(
+    ExploreAppMetaApi,
+    "/installed-apps/<uuid:installed_app_id>/meta",
+    endpoint="installed_app_meta",
+)

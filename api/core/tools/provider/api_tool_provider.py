@@ -17,18 +17,28 @@ class ApiToolProviderController(ToolProviderController):
     provider_id: str
 
     @staticmethod
-    def from_db(db_provider: ApiToolProvider, auth_type: ApiProviderAuthType) -> "ApiToolProviderController":
+    def from_db(
+        db_provider: ApiToolProvider, auth_type: ApiProviderAuthType
+    ) -> "ApiToolProviderController":
         credentials_schema = {
             "auth_type": ToolProviderCredentials(
                 name="auth_type",
                 required=True,
                 type=ToolProviderCredentials.CredentialsType.SELECT,
                 options=[
-                    ToolCredentialsOption(value="none", label=I18nObject(en_US="None", zh_Hans="无")),
-                    ToolCredentialsOption(value="api_key", label=I18nObject(en_US="api_key", zh_Hans="api_key")),
+                    ToolCredentialsOption(
+                        value="none", label=I18nObject(en_US="None", zh_Hans="无")
+                    ),
+                    ToolCredentialsOption(
+                        value="api_key",
+                        label=I18nObject(en_US="api_key", zh_Hans="api_key"),
+                    ),
                 ],
                 default="none",
-                help=I18nObject(en_US="The auth type of the api provider", zh_Hans="api provider 的认证类型"),
+                help=I18nObject(
+                    en_US="The auth type of the api provider",
+                    zh_Hans="api provider 的认证类型",
+                ),
             )
         }
         if auth_type == ApiProviderAuthType.API_KEY:
@@ -39,7 +49,10 @@ class ApiToolProviderController(ToolProviderController):
                     required=False,
                     default="api_key",
                     type=ToolProviderCredentials.CredentialsType.TEXT_INPUT,
-                    help=I18nObject(en_US="The header name of the api key", zh_Hans="携带 api key 的 header 名称"),
+                    help=I18nObject(
+                        en_US="The header name of the api key",
+                        zh_Hans="携带 api key 的 header 名称",
+                    ),
                 ),
                 "api_key_value": ToolProviderCredentials(
                     name="api_key_value",
@@ -52,11 +65,23 @@ class ApiToolProviderController(ToolProviderController):
                     required=False,
                     default="basic",
                     type=ToolProviderCredentials.CredentialsType.SELECT,
-                    help=I18nObject(en_US="The prefix of the api key header", zh_Hans="api key header 的前缀"),
+                    help=I18nObject(
+                        en_US="The prefix of the api key header",
+                        zh_Hans="api key header 的前缀",
+                    ),
                     options=[
-                        ToolCredentialsOption(value="basic", label=I18nObject(en_US="Basic", zh_Hans="Basic")),
-                        ToolCredentialsOption(value="bearer", label=I18nObject(en_US="Bearer", zh_Hans="Bearer")),
-                        ToolCredentialsOption(value="custom", label=I18nObject(en_US="Custom", zh_Hans="Custom")),
+                        ToolCredentialsOption(
+                            value="basic",
+                            label=I18nObject(en_US="Basic", zh_Hans="Basic"),
+                        ),
+                        ToolCredentialsOption(
+                            value="bearer",
+                            label=I18nObject(en_US="Bearer", zh_Hans="Bearer"),
+                        ),
+                        ToolCredentialsOption(
+                            value="custom",
+                            label=I18nObject(en_US="Custom", zh_Hans="Custom"),
+                        ),
                     ],
                 ),
             }
@@ -73,7 +98,10 @@ class ApiToolProviderController(ToolProviderController):
                     "author": user_name,
                     "name": db_provider.name,
                     "label": {"en_US": db_provider.name, "zh_Hans": db_provider.name},
-                    "description": {"en_US": db_provider.description, "zh_Hans": db_provider.description},
+                    "description": {
+                        "en_US": db_provider.description,
+                        "zh_Hans": db_provider.description,
+                    },
                     "icon": db_provider.icon,
                 },
                 "credentials_schema": credentials_schema,
@@ -98,12 +126,18 @@ class ApiToolProviderController(ToolProviderController):
                 "identity": {
                     "author": tool_bundle.author,
                     "name": tool_bundle.operation_id,
-                    "label": {"en_US": tool_bundle.operation_id, "zh_Hans": tool_bundle.operation_id},
+                    "label": {
+                        "en_US": tool_bundle.operation_id,
+                        "zh_Hans": tool_bundle.operation_id,
+                    },
                     "icon": self.identity.icon,
                     "provider": self.provider_id,
                 },
                 "description": {
-                    "human": {"en_US": tool_bundle.summary or "", "zh_Hans": tool_bundle.summary or ""},
+                    "human": {
+                        "en_US": tool_bundle.summary or "",
+                        "zh_Hans": tool_bundle.summary or "",
+                    },
                     "llm": tool_bundle.summary or "",
                 },
                 "parameters": tool_bundle.parameters or [],
@@ -137,7 +171,10 @@ class ApiToolProviderController(ToolProviderController):
         # get tenant api providers
         db_providers: list[ApiToolProvider] = (
             db.session.query(ApiToolProvider)
-            .filter(ApiToolProvider.tenant_id == tenant_id, ApiToolProvider.name == self.identity.name)
+            .filter(
+                ApiToolProvider.tenant_id == tenant_id,
+                ApiToolProvider.name == self.identity.name,
+            )
             .all()
         )
 

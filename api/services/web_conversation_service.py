@@ -28,13 +28,16 @@ class WebConversationService:
                 db.session.query(PinnedConversation)
                 .filter(
                     PinnedConversation.app_id == app_model.id,
-                    PinnedConversation.created_by_role == ("account" if isinstance(user, Account) else "end_user"),
+                    PinnedConversation.created_by_role
+                    == ("account" if isinstance(user, Account) else "end_user"),
                     PinnedConversation.created_by == user.id,
                 )
                 .order_by(PinnedConversation.created_at.desc())
                 .all()
             )
-            pinned_conversation_ids = [pc.conversation_id for pc in pinned_conversations]
+            pinned_conversation_ids = [
+                pc.conversation_id for pc in pinned_conversations
+            ]
             if pinned:
                 include_ids = pinned_conversation_ids
             else:
@@ -52,13 +55,19 @@ class WebConversationService:
         )
 
     @classmethod
-    def pin(cls, app_model: App, conversation_id: str, user: Optional[Union[Account, EndUser]]):
+    def pin(
+        cls,
+        app_model: App,
+        conversation_id: str,
+        user: Optional[Union[Account, EndUser]],
+    ):
         pinned_conversation = (
             db.session.query(PinnedConversation)
             .filter(
                 PinnedConversation.app_id == app_model.id,
                 PinnedConversation.conversation_id == conversation_id,
-                PinnedConversation.created_by_role == ("account" if isinstance(user, Account) else "end_user"),
+                PinnedConversation.created_by_role
+                == ("account" if isinstance(user, Account) else "end_user"),
                 PinnedConversation.created_by == user.id,
             )
             .first()
@@ -82,13 +91,19 @@ class WebConversationService:
         db.session.commit()
 
     @classmethod
-    def unpin(cls, app_model: App, conversation_id: str, user: Optional[Union[Account, EndUser]]):
+    def unpin(
+        cls,
+        app_model: App,
+        conversation_id: str,
+        user: Optional[Union[Account, EndUser]],
+    ):
         pinned_conversation = (
             db.session.query(PinnedConversation)
             .filter(
                 PinnedConversation.app_id == app_model.id,
                 PinnedConversation.conversation_id == conversation_id,
-                PinnedConversation.created_by_role == ("account" if isinstance(user, Account) else "end_user"),
+                PinnedConversation.created_by_role
+                == ("account" if isinstance(user, Account) else "end_user"),
                 PinnedConversation.created_by == user.id,
             )
             .first()

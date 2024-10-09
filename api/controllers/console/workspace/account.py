@@ -22,7 +22,9 @@ from libs.helper import TimestampField, timezone
 from libs.login import login_required
 from models.account import AccountIntegrate, InvitationCode
 from services.account_service import AccountService
-from services.errors.account import CurrentPasswordIncorrectError as ServiceCurrentPasswordIncorrectError
+from services.errors.account import (
+    CurrentPasswordIncorrectError as ServiceCurrentPasswordIncorrectError,
+)
 
 
 class AccountInitApi(Resource):
@@ -39,7 +41,12 @@ class AccountInitApi(Resource):
         if dify_config.EDITION == "CLOUD":
             parser.add_argument("invitation_code", type=str, location="json")
 
-        parser.add_argument("interface_language", type=supported_language, required=True, location="json")
+        parser.add_argument(
+            "interface_language",
+            type=supported_language,
+            required=True,
+            location="json",
+        )
         parser.add_argument("timezone", type=timezone, required=True, location="json")
         args = parser.parse_args()
 
@@ -61,7 +68,9 @@ class AccountInitApi(Resource):
                 raise InvalidInvitationCodeError()
 
             invitation_code.status = "used"
-            invitation_code.used_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            invitation_code.used_at = datetime.datetime.now(
+                datetime.timezone.utc
+            ).replace(tzinfo=None)
             invitation_code.used_by_tenant_id = account.current_tenant_id
             invitation_code.used_by_account_id = account.id
 
@@ -69,7 +78,9 @@ class AccountInitApi(Resource):
         account.timezone = args["timezone"]
         account.interface_theme = "light"
         account.status = "active"
-        account.initialized_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        account.initialized_at = datetime.datetime.now(datetime.timezone.utc).replace(
+            tzinfo=None
+        )
         db.session.commit()
 
         return {"result": "success"}
@@ -113,7 +124,9 @@ class AccountAvatarApi(Resource):
         parser.add_argument("avatar", type=str, required=True, location="json")
         args = parser.parse_args()
 
-        updated_account = AccountService.update_account(current_user, avatar=args["avatar"])
+        updated_account = AccountService.update_account(
+            current_user, avatar=args["avatar"]
+        )
 
         return updated_account
 
@@ -125,10 +138,17 @@ class AccountInterfaceLanguageApi(Resource):
     @marshal_with(account_fields)
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("interface_language", type=supported_language, required=True, location="json")
+        parser.add_argument(
+            "interface_language",
+            type=supported_language,
+            required=True,
+            location="json",
+        )
         args = parser.parse_args()
 
-        updated_account = AccountService.update_account(current_user, interface_language=args["interface_language"])
+        updated_account = AccountService.update_account(
+            current_user, interface_language=args["interface_language"]
+        )
 
         return updated_account
 
@@ -140,10 +160,18 @@ class AccountInterfaceThemeApi(Resource):
     @marshal_with(account_fields)
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("interface_theme", type=str, choices=["light", "dark"], required=True, location="json")
+        parser.add_argument(
+            "interface_theme",
+            type=str,
+            choices=["light", "dark"],
+            required=True,
+            location="json",
+        )
         args = parser.parse_args()
 
-        updated_account = AccountService.update_account(current_user, interface_theme=args["interface_theme"])
+        updated_account = AccountService.update_account(
+            current_user, interface_theme=args["interface_theme"]
+        )
 
         return updated_account
 
@@ -162,7 +190,9 @@ class AccountTimezoneApi(Resource):
         if args["timezone"] not in pytz.all_timezones:
             raise ValueError("Invalid timezone string.")
 
-        updated_account = AccountService.update_account(current_user, timezone=args["timezone"])
+        updated_account = AccountService.update_account(
+            current_user, timezone=args["timezone"]
+        )
 
         return updated_account
 
@@ -176,14 +206,18 @@ class AccountPasswordApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("password", type=str, required=False, location="json")
         parser.add_argument("new_password", type=str, required=True, location="json")
-        parser.add_argument("repeat_new_password", type=str, required=True, location="json")
+        parser.add_argument(
+            "repeat_new_password", type=str, required=True, location="json"
+        )
         args = parser.parse_args()
 
         if args["new_password"] != args["repeat_new_password"]:
             raise RepeatPasswordNotMatchError()
 
         try:
-            AccountService.update_account_password(current_user, args["password"], args["new_password"])
+            AccountService.update_account_password(
+                current_user, args["password"], args["new_password"]
+            )
         except ServiceCurrentPasswordIncorrectError:
             raise CurrentPasswordIncorrectError()
 
@@ -209,7 +243,11 @@ class AccountIntegrateApi(Resource):
     def get(self):
         account = current_user
 
-        account_integrates = db.session.query(AccountIntegrate).filter(AccountIntegrate.account_id == account.id).all()
+        account_integrates = (
+            db.session.query(AccountIntegrate)
+            .filter(AccountIntegrate.account_id == account.id)
+            .all()
+        )
 
         base_url = request.url_root.rstrip("/")
         oauth_base_path = "/console/api/oauth/login"
@@ -217,7 +255,9 @@ class AccountIntegrateApi(Resource):
 
         integrate_data = []
         for provider in providers:
-            existing_integrate = next((ai for ai in account_integrates if ai.provider == provider), None)
+            existing_integrate = next(
+                (ai for ai in account_integrates if ai.provider == provider), None
+            )
             if existing_integrate:
                 integrate_data.append(
                     {

@@ -35,7 +35,12 @@ class ListBaseTablesTool(BuiltinTool):
         }
 
         try:
-            res = httpx.get(url.format(app_token=app_token), headers=headers, params=params, timeout=30)
+            res = httpx.get(
+                url.format(app_token=app_token),
+                headers=headers,
+                params=params,
+                timeout=30,
+            )
             res_json = res.json()
             if res.is_success:
                 return self.create_text_message(text=json.dumps(res_json))

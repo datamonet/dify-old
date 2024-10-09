@@ -21,9 +21,15 @@ class GithubRepositoriesTool(BuiltinTool):
         if not query:
             return self.create_text_message("Please input symbol")
 
-        if "access_tokens" not in self.runtime.credentials or not self.runtime.credentials.get("access_tokens"):
+        if (
+            "access_tokens" not in self.runtime.credentials
+            or not self.runtime.credentials.get("access_tokens")
+        ):
             return self.create_text_message("Github API Access Tokens is required.")
-        if "api_version" not in self.runtime.credentials or not self.runtime.credentials.get("api_version"):
+        if (
+            "api_version" not in self.runtime.credentials
+            or not self.runtime.credentials.get("api_version")
+        ):
             api_version = "2022-11-28"
         else:
             api_version = self.runtime.credentials.get("api_version")
@@ -42,16 +48,22 @@ class GithubRepositoriesTool(BuiltinTool):
                 url=f"{api_domain}/search/repositories?q={quote(query)}&sort=stars&per_page={top_n}&order=desc",
             )
             response_data = response.json()
-            if response.status_code == 200 and isinstance(response_data.get("items"), list):
+            if response.status_code == 200 and isinstance(
+                response_data.get("items"), list
+            ):
                 contents = []
                 if len(response_data.get("items")) > 0:
                     for item in response_data.get("items"):
                         content = {}
-                        updated_at_object = datetime.strptime(item["updated_at"], "%Y-%m-%dT%H:%M:%SZ")
+                        updated_at_object = datetime.strptime(
+                            item["updated_at"], "%Y-%m-%dT%H:%M:%SZ"
+                        )
                         content["owner"] = item["owner"]["login"]
                         content["name"] = item["name"]
                         content["description"] = (
-                            item["description"][:100] + "..." if len(item["description"]) > 100 else item["description"]
+                            item["description"][:100] + "..."
+                            if len(item["description"]) > 100
+                            else item["description"]
                         )
                         content["url"] = item["html_url"]
                         content["star"] = item["watchers"]
@@ -60,11 +72,18 @@ class GithubRepositoriesTool(BuiltinTool):
                         contents.append(content)
                     s.close()
                     return self.create_text_message(
-                        self.summary(user_id=user_id, content=json.dumps(contents, ensure_ascii=False))
+                        self.summary(
+                            user_id=user_id,
+                            content=json.dumps(contents, ensure_ascii=False),
+                        )
                     )
                 else:
-                    return self.create_text_message(f"No items related to {query} were found.")
+                    return self.create_text_message(
+                        f"No items related to {query} were found."
+                    )
             else:
                 return self.create_text_message((response.json()).get("message"))
         except Exception as e:
-            return self.create_text_message("Github API Key and Api Version is invalid. {}".format(e))
+            return self.create_text_message(
+                "Github API Key and Api Version is invalid. {}".format(e)
+            )

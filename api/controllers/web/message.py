@@ -18,7 +18,11 @@ from controllers.web.error import (
 )
 from controllers.web.wraps import WebApiResource
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from fields.conversation_fields import message_file_fields
 from fields.message_fields import agent_thought_fields
@@ -28,7 +32,10 @@ from models.model import AppMode
 from services.app_generate_service import AppGenerateService
 from services.errors.app import MoreLikeThisDisabledError
 from services.errors.conversation import ConversationNotExistsError
-from services.errors.message import MessageNotExistsError, SuggestedQuestionsAfterAnswerDisabledError
+from services.errors.message import (
+    MessageNotExistsError,
+    SuggestedQuestionsAfterAnswerDisabledError,
+)
 from services.message_service import MessageService
 
 
@@ -57,11 +64,16 @@ class MessageListApi(WebApiResource):
     message_fields = {
         "id": fields.String,
         "conversation_id": fields.String,
+        "parent_message_id": fields.String,
         "inputs": fields.Raw,
         "query": fields.String,
         "answer": fields.String(attribute="re_sign_file_url_answer"),
-        "message_files": fields.List(fields.Nested(message_file_fields), attribute="files"),
-        "feedback": fields.Nested(feedback_fields, attribute="user_feedback", allow_null=True),
+        "message_files": fields.List(
+            fields.Nested(message_file_fields), attribute="files"
+        ),
+        "feedback": fields.Nested(
+            feedback_fields, attribute="user_feedback", allow_null=True
+        ),
         "retriever_resources": fields.List(fields.Nested(retriever_resource_fields)),
         "created_at": TimestampField,
         "agent_thoughts": fields.List(fields.Nested(agent_thought_fields)),
@@ -82,14 +94,23 @@ class MessageListApi(WebApiResource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
+        parser.add_argument(
+            "conversation_id", required=True, type=uuid_value, location="args"
+        )
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         args = parser.parse_args()
 
         try:
             return MessageService.pagination_by_first_id(
-                app_model, end_user, args["conversation_id"], args["first_id"], args["limit"]
+                app_model,
+                end_user,
+                args["conversation_id"],
+                args["first_id"],
+                args["limit"],
+                "desc",
             )
         except services.errors.conversation.ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
@@ -102,11 +123,15 @@ class MessageFeedbackApi(WebApiResource):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
+        parser.add_argument(
+            "rating", type=str, choices=["like", "dislike", None], location="json"
+        )
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(app_model, message_id, end_user, args["rating"])
+            MessageService.create_feedback(
+                app_model, message_id, end_user, args["rating"]
+            )
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 
@@ -122,7 +147,11 @@ class MessageMoreLikeThisApi(WebApiResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "response_mode", type=str, required=True, choices=["blocking", "streaming"], location="args"
+            "response_mode",
+            type=str,
+            required=True,
+            choices=["blocking", "streaming"],
+            location="args",
         )
         args = parser.parse_args()
 
@@ -167,7 +196,10 @@ class MessageSuggestedQuestionApi(WebApiResource):
 
         try:
             questions = MessageService.get_suggested_questions_after_answer(
-                app_model=app_model, user=end_user, message_id=message_id, invoke_from=InvokeFrom.WEB_APP
+                app_model=app_model,
+                user=end_user,
+                message_id=message_id,
+                invoke_from=InvokeFrom.WEB_APP,
             )
         except MessageNotExistsError:
             raise NotFound("Message not found")
@@ -193,4 +225,6 @@ class MessageSuggestedQuestionApi(WebApiResource):
 api.add_resource(MessageListApi, "/messages")
 api.add_resource(MessageFeedbackApi, "/messages/<uuid:message_id>/feedbacks")
 api.add_resource(MessageMoreLikeThisApi, "/messages/<uuid:message_id>/more-like-this")
-api.add_resource(MessageSuggestedQuestionApi, "/messages/<uuid:message_id>/suggested-questions")
+api.add_resource(
+    MessageSuggestedQuestionApi, "/messages/<uuid:message_id>/suggested-questions"
+)

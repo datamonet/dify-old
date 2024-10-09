@@ -31,11 +31,15 @@ class SortOrder(Enum):
 
 
 class MyScaleVector(BaseVector):
-    def __init__(self, collection_name: str, config: MyScaleConfig, metric: str = "Cosine"):
+    def __init__(
+        self, collection_name: str, config: MyScaleConfig, metric: str = "Cosine"
+    ):
         super().__init__(collection_name)
         self._config = config
         self._metric = metric
-        self._vec_order = SortOrder.ASC if metric.upper() in {"COSINE", "L2"} else SortOrder.DESC
+        self._vec_order = (
+            SortOrder.ASC if metric.upper() in {"COSINE", "L2"} else SortOrder.DESC
+        )
         self._client = get_client(
             host=config.host,
             port=config.port,
@@ -53,7 +57,9 @@ class MyScaleVector(BaseVector):
         return self.add_texts(documents=texts, embeddings=embeddings, **kwargs)
 
     def _create_collection(self, dimension: int):
-        logging.info(f"create MyScale collection {self._collection_name} with dimension {dimension}")
+        logging.info(
+            f"create MyScale collection {self._collection_name} with dimension {dimension}"
+        )
         self._client.command(f"CREATE DATABASE IF NOT EXISTS {self._config.database}")
         fts_params = f"('{self._config.fts_params}')" if self._config.fts_params else ""
         sql = f"""
@@ -69,7 +75,9 @@ class MyScaleVector(BaseVector):
         """
         self._client.command(sql)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         ids = []
         columns = ["id", "text", "vector", "metadata"]
         values = []
@@ -95,7 +103,9 @@ class MyScaleVector(BaseVector):
         return "".join(" " if c in {"\\", "'"} else c for c in str(value))
 
     def text_exists(self, id: str) -> bool:
-        results = self._client.query(f"SELECT id FROM {self._config.database}.{self._collection_name} WHERE id='{id}'")
+        results = self._client.query(
+            f"SELECT id FROM {self._config.database}.{self._collection_name} WHERE id='{id}'"
+        )
         return results.row_count > 0
 
     def delete_by_ids(self, ids: list[str]) -> None:
@@ -114,18 +124,26 @@ class MyScaleVector(BaseVector):
             f"DELETE FROM {self._config.database}.{self._collection_name} WHERE metadata.{key}='{value}'"
         )
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
-        return self._search(f"distance(vector, {str(query_vector)})", self._vec_order, **kwargs)
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
+        return self._search(
+            f"distance(vector, {str(query_vector)})", self._vec_order, **kwargs
+        )
 
     def search_by_full_text(self, query: str, **kwargs: Any) -> list[Document]:
-        return self._search(f"TextSearch('enable_nlq=false')(text, '{query}')", SortOrder.DESC, **kwargs)
+        return self._search(
+            f"TextSearch('enable_nlq=false')(text, '{query}')", SortOrder.DESC, **kwargs
+        )
 
     def _search(self, dist: str, order: SortOrder, **kwargs: Any) -> list[Document]:
         top_k = kwargs.get("top_k", 5)
         score_threshold = float(kwargs.get("score_threshold") or 0.0)
         where_str = (
             f"WHERE dist < {1 - score_threshold}"
-            if self._metric.upper() == "COSINE" and order == SortOrder.ASC and score_threshold > 0.0
+            if self._metric.upper() == "COSINE"
+            and order == SortOrder.ASC
+            and score_threshold > 0.0
             else ""
         )
         sql = f"""
@@ -146,18 +164,26 @@ class MyScaleVector(BaseVector):
             return []
 
     def delete(self) -> None:
-        self._client.command(f"DROP TABLE IF EXISTS {self._config.database}.{self._collection_name}")
+        self._client.command(
+            f"DROP TABLE IF EXISTS {self._config.database}.{self._collection_name}"
+        )
 
 
 class MyScaleVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> MyScaleVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> MyScaleVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id).lower()
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.MYSCALE, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.MYSCALE, collection_name)
+            )
 
         return MyScaleVector(
             collection_name=collection_name,

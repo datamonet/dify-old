@@ -17,7 +17,9 @@ class DallE2Tool(BuiltinTool):
         """
         invoke tools
         """
-        openai_organization = self.runtime.credentials.get("openai_organizaion_id", None)
+        openai_organization = self.runtime.credentials.get(
+            "openai_organizaion_id", None
+        )
         if not openai_organization:
             openai_organization = None
         openai_base_url = self.runtime.credentials.get("openai_base_url", None)
@@ -50,7 +52,9 @@ class DallE2Tool(BuiltinTool):
         n = tool_parameters.get("n", 1)
 
         # call openapi dalle2
-        response = client.images.generate(prompt=prompt, model="dall-e-2", size=size, n=n, response_format="b64_json")
+        response = client.images.generate(
+            prompt=prompt, model="dall-e-2", size=size, n=n, response_format="b64_json"
+        )
 
         result = []
 

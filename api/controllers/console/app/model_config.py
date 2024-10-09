@@ -27,7 +27,9 @@ class ModelConfigResource(Resource):
         """Modify app model config"""
         # validate config
         model_configuration = AppModelConfigService.validate_configuration(
-            tenant_id=current_user.current_tenant_id, config=request.json, app_mode=AppMode.value_of(app_model.mode)
+            tenant_id=current_user.current_tenant_id,
+            config=request.json,
+            app_mode=AppMode.value_of(app_model.mode),
         )
 
         new_app_model_config = AppModelConfig(
@@ -35,12 +37,16 @@ class ModelConfigResource(Resource):
             created_by=current_user.id,
             updated_by=current_user.id,
         )
-        new_app_model_config = new_app_model_config.from_model_config_dict(model_configuration)
+        new_app_model_config = new_app_model_config.from_model_config_dict(
+            model_configuration
+        )
 
         if app_model.mode == AppMode.AGENT_CHAT.value or app_model.is_agent:
             # get original app model config
             original_app_model_config: AppModelConfig = (
-                db.session.query(AppModelConfig).filter(AppModelConfig.id == app_model.app_model_config_id).first()
+                db.session.query(AppModelConfig)
+                .filter(AppModelConfig.id == app_model.app_model_config_id)
+                .first()
             )
             agent_mode = original_app_model_config.agent_mode_dict
             # decrypt agent tool parameters if it's secret-input
@@ -71,7 +77,9 @@ class ModelConfigResource(Resource):
 
                 # get decrypted parameters
                 if agent_tool_entity.tool_parameters:
-                    parameters = manager.decrypt_tool_parameters(agent_tool_entity.tool_parameters or {})
+                    parameters = manager.decrypt_tool_parameters(
+                        agent_tool_entity.tool_parameters or {}
+                    )
                     masked_parameter = manager.mask_tool_parameters(parameters or {})
                 else:
                     parameters = {}
@@ -118,13 +126,18 @@ class ModelConfigResource(Resource):
                     for masked_key, masked_value in masked_parameter_map[key].items():
                         if (
                             masked_key in agent_tool_entity.tool_parameters
-                            and agent_tool_entity.tool_parameters[masked_key] == masked_value
+                            and agent_tool_entity.tool_parameters[masked_key]
+                            == masked_value
                         ):
-                            agent_tool_entity.tool_parameters[masked_key] = parameter_map[key].get(masked_key)
+                            agent_tool_entity.tool_parameters[masked_key] = (
+                                parameter_map[key].get(masked_key)
+                            )
 
                 # encrypt parameters
                 if agent_tool_entity.tool_parameters:
-                    tool["tool_parameters"] = manager.encrypt_tool_parameters(agent_tool_entity.tool_parameters or {})
+                    tool["tool_parameters"] = manager.encrypt_tool_parameters(
+                        agent_tool_entity.tool_parameters or {}
+                    )
 
             # update app model config
             new_app_model_config.agent_mode = json.dumps(agent_mode)
@@ -135,7 +148,9 @@ class ModelConfigResource(Resource):
         app_model.app_model_config_id = new_app_model_config.id
         db.session.commit()
 
-        app_model_config_was_updated.send(app_model, app_model_config=new_app_model_config)
+        app_model_config_was_updated.send(
+            app_model, app_model_config=new_app_model_config
+        )
 
         return {"result": "success"}
 

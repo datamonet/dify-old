@@ -18,7 +18,9 @@ class DallE3Tool(BuiltinTool):
         """
         invoke tools
         """
-        openai_organization = self.runtime.credentials.get("openai_organizaion_id", None)
+        openai_organization = self.runtime.credentials.get(
+            "openai_organizaion_id", None
+        )
         if not openai_organization:
             openai_organization = None
         openai_base_url = self.runtime.credentials.get("openai_base_url", None)
@@ -58,7 +60,13 @@ class DallE3Tool(BuiltinTool):
 
         # call openapi dalle3
         response = client.images.generate(
-            prompt=prompt, model="dall-e-3", size=size, n=n, style=style, quality=quality, response_format="b64_json"
+            prompt=prompt,
+            model="dall-e-3",
+            size=size,
+            n=n,
+            style=style,
+            quality=quality,
+            response_format="b64_json",
         )
 
         result = []
@@ -66,7 +74,9 @@ class DallE3Tool(BuiltinTool):
         for image in response.data:
             mime_type, blob_image = DallE3Tool._decode_image(image.b64_json)
             blob_message = self.create_blob_message(
-                blob=blob_image, meta={"mime_type": mime_type}, save_as=self.VARIABLE_KEY.IMAGE.value
+                blob=blob_image,
+                meta={"mime_type": mime_type},
+                save_as=self.VARIABLE_KEY.IMAGE.value,
             )
             result.append(blob_message)
             # takin command:需要增加附加参数，方便扣费的计算

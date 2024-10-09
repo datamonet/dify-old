@@ -80,10 +80,13 @@ class MarkdownExtractor(BaseExtractor):
         if current_header is not None:
             # pass linting, assert keys are defined
             markdown_tups = [
-                (re.sub(r"#", "", cast(str, key)).strip(), re.sub(r"<.*?>", "", value)) for key, value in markdown_tups
+                (re.sub(r"#", "", cast(str, key)).strip(), re.sub(r"<.*?>", "", value))
+                for key, value in markdown_tups
             ]
         else:
-            markdown_tups = [(key, re.sub("\n", "", value)) for key, value in markdown_tups]
+            markdown_tups = [
+                (key, re.sub("\n", "", value)) for key, value in markdown_tups
+            ]
 
         return markdown_tups
 

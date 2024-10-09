@@ -13,4 +13,6 @@ def test_validate_provider_credentials(setup_openai_mock):
     with pytest.raises(CredentialsValidateFailedError):
         provider.validate_provider_credentials(credentials={"api_base": "hahahaha"})
 
-    provider.validate_provider_credentials(credentials={"api_base": os.environ.get("CHATGLM_API_BASE")})
+    provider.validate_provider_credentials(
+        credentials={"api_base": os.environ.get("CHATGLM_API_BASE")}
+    )

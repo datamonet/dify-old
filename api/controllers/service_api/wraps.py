@@ -32,7 +32,9 @@ class FetchUserArg(BaseModel):
     required: bool = False
 
 
-def validate_app_token(view: Optional[Callable] = None, *, fetch_user_arg: Optional[FetchUserArg] = None):
+def validate_app_token(
+    view: Optional[Callable] = None, *, fetch_user_arg: Optional[FetchUserArg] = None
+):
     def decorator(view_func):
         @wraps(view_func)
         def decorated_view(*args, **kwargs):
@@ -48,7 +50,11 @@ def validate_app_token(view: Optional[Callable] = None, *, fetch_user_arg: Optio
             if not app_model.enable_api:
                 raise Forbidden("The app's API service has been disabled.")
 
-            tenant = db.session.query(Tenant).filter(Tenant.id == app_model.tenant_id).first()
+            tenant = (
+                db.session.query(Tenant)
+                .filter(Tenant.id == app_model.tenant_id)
+                .first()
+            )
             if tenant.status == TenantStatus.ARCHIVE:
                 raise Forbidden("The workspace's status is archived.")
 
@@ -71,7 +77,9 @@ def validate_app_token(view: Optional[Callable] = None, *, fetch_user_arg: Optio
                 if user_id:
                     user_id = str(user_id)
 
-                kwargs["end_user"] = create_or_update_end_user_for_user_id(app_model, user_id)
+                kwargs["end_user"] = create_or_update_end_user_for_user_id(
+                    app_model, user_id
+                )
 
             return view_func(*args, **kwargs)
 
@@ -96,13 +104,27 @@ def cloud_edition_billing_resource_check(resource: str, api_token_type: str):
                 documents_upload_quota = features.documents_upload_quota
 
                 if resource == "members" and 0 < members.limit <= members.size:
-                    raise Forbidden("The number of members has reached the limit of your subscription.")
+                    raise Forbidden(
+                        "The number of members has reached the limit of your subscription."
+                    )
                 elif resource == "apps" and 0 < apps.limit <= apps.size:
-                    raise Forbidden("The number of apps has reached the limit of your subscription.")
-                elif resource == "vector_space" and 0 < vector_space.limit <= vector_space.size:
-                    raise Forbidden("The capacity of the vector space has reached the limit of your subscription.")
-                elif resource == "documents" and 0 < documents_upload_quota.limit <= documents_upload_quota.size:
-                    raise Forbidden("The number of documents has reached the limit of your subscription.")
+                    raise Forbidden(
+                        "The number of apps has reached the limit of your subscription."
+                    )
+                elif (
+                    resource == "vector_space"
+                    and 0 < vector_space.limit <= vector_space.size
+                ):
+                    raise Forbidden(
+                        "The capacity of the vector space has reached the limit of your subscription."
+                    )
+                elif (
+                    resource == "documents"
+                    and 0 < documents_upload_quota.limit <= documents_upload_quota.size
+                ):
+                    raise Forbidden(
+                        "The number of documents has reached the limit of your subscription."
+                    )
                 else:
                     return view(*args, **kwargs)
 
@@ -155,7 +177,9 @@ def validate_dataset_token(view=None):
                 if account:
                     account.current_tenant = tenant
                     current_app.login_manager._update_request_context_with_user(account)
-                    user_logged_in.send(current_app._get_current_object(), user=_get_user())
+                    user_logged_in.send(
+                        current_app._get_current_object(), user=_get_user()
+                    )
                 else:
                     raise Unauthorized("Tenant owner account does not exist.")
             else:
@@ -178,7 +202,9 @@ def validate_and_get_api_token(scope=None):
     """
     auth_header = request.headers.get("Authorization")
     if auth_header is None or " " not in auth_header:
-        raise Unauthorized("Authorization header must be provided and start with 'Bearer'")
+        raise Unauthorized(
+            "Authorization header must be provided and start with 'Bearer'"
+        )
 
     auth_scheme, auth_token = auth_header.split(None, 1)
     auth_scheme = auth_scheme.lower()
@@ -204,7 +230,9 @@ def validate_and_get_api_token(scope=None):
     return api_token
 
 
-def create_or_update_end_user_for_user_id(app_model: App, user_id: Optional[str] = None) -> EndUser:
+def create_or_update_end_user_for_user_id(
+    app_model: App, user_id: Optional[str] = None
+) -> EndUser:
     """
     Create or update session terminal based on user ID.
     """

@@ -68,13 +68,16 @@ message_detail_fields = {
     "feedbacks": fields.List(fields.Nested(feedback_fields)),
     "workflow_run_id": fields.String,
     "annotation": fields.Nested(annotation_fields, allow_null=True),
-    "annotation_hit_history": fields.Nested(annotation_hit_history_fields, allow_null=True),
+    "annotation_hit_history": fields.Nested(
+        annotation_hit_history_fields, allow_null=True
+    ),
     "created_at": TimestampField,
     "agent_thoughts": fields.List(fields.Nested(agent_thought_fields)),
     "message_files": fields.List(fields.Nested(message_file_fields), attribute="files"),
     "metadata": fields.Raw(attribute="message_metadata_dict"),
     "status": fields.String,
     "error": fields.String,
+    "parent_message_id": fields.String,
 }
 
 feedback_stat_fields = {"like": fields.Integer, "dislike": fields.Integer}
@@ -165,7 +168,9 @@ conversation_with_summary_pagination_fields = {
     "limit": fields.Integer(attribute="per_page"),
     "total": fields.Integer,
     "has_more": fields.Boolean(attribute="has_next"),
-    "data": fields.List(fields.Nested(conversation_with_summary_fields), attribute="items"),
+    "data": fields.List(
+        fields.Nested(conversation_with_summary_fields), attribute="items"
+    ),
 }
 
 conversation_detail_fields = {

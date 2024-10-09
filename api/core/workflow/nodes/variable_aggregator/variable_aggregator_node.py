@@ -17,7 +17,10 @@ class VariableAggregatorNode(BaseNode):
         outputs = {}
         inputs = {}
 
-        if not node_data.advanced_settings or not node_data.advanced_settings.group_enabled:
+        if (
+            not node_data.advanced_settings
+            or not node_data.advanced_settings.group_enabled
+        ):
             for selector in node_data.variables:
                 variable = self.graph_runtime_state.variable_pool.get_any(selector)
                 if variable is not None:
@@ -35,11 +38,16 @@ class VariableAggregatorNode(BaseNode):
                         inputs[".".join(selector[1:])] = variable
                         break
 
-        return NodeRunResult(status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs=outputs, inputs=inputs)
+        return NodeRunResult(
+            status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs=outputs, inputs=inputs
+        )
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
-        cls, graph_config: Mapping[str, Any], node_id: str, node_data: VariableAssignerNodeData
+        cls,
+        graph_config: Mapping[str, Any],
+        node_id: str,
+        node_data: VariableAssignerNodeData,
     ) -> Mapping[str, Sequence[str]]:
         """
         Extract variable selector to variable mapping

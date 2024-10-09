@@ -7,7 +7,9 @@ class SuggestedQuestionsAfterAnswerConfigManager:
         :param config: model config args
         """
         suggested_questions_after_answer = False
-        suggested_questions_after_answer_dict = config.get("suggested_questions_after_answer")
+        suggested_questions_after_answer_dict = config.get(
+            "suggested_questions_after_answer"
+        )
         if suggested_questions_after_answer_dict:
             if suggested_questions_after_answer_dict.get("enabled"):
                 suggested_questions_after_answer = True
@@ -34,6 +36,8 @@ class SuggestedQuestionsAfterAnswerConfigManager:
             config["suggested_questions_after_answer"]["enabled"] = False
 
         if not isinstance(config["suggested_questions_after_answer"]["enabled"], bool):
-            raise ValueError("enabled in suggested_questions_after_answer must be of boolean type")
+            raise ValueError(
+                "enabled in suggested_questions_after_answer must be of boolean type"
+            )
 
         return config, ["suggested_questions_after_answer"]

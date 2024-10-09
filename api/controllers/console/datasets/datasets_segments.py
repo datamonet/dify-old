@@ -10,7 +10,11 @@ from werkzeug.exceptions import Forbidden, NotFound
 import services
 from controllers.console import api
 from controllers.console.app.error import ProviderNotInitializeError
-from controllers.console.datasets.error import InvalidActionError, NoFileUploadedError, TooManyFilesError
+from controllers.console.datasets.error import (
+    InvalidActionError,
+    NoFileUploadedError,
+    TooManyFilesError,
+)
 from controllers.console.setup import setup_required
 from controllers.console.wraps import (
     account_initialization_required,
@@ -55,7 +59,9 @@ class DatasetDocumentSegmentListApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=str, default=None, location="args")
         parser.add_argument("limit", type=int, default=20, location="args")
-        parser.add_argument("status", type=str, action="append", default=[], location="args")
+        parser.add_argument(
+            "status", type=str, action="append", default=[], location="args"
+        )
         parser.add_argument("hit_count_gte", type=int, default=None, location="args")
         parser.add_argument("enabled", type=str, default="all", location="args")
         parser.add_argument("keyword", type=str, default=None, location="args")
@@ -68,7 +74,8 @@ class DatasetDocumentSegmentListApi(Resource):
         keyword = args["keyword"]
 
         query = DocumentSegment.query.filter(
-            DocumentSegment.document_id == str(document_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.document_id == str(document_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         )
 
         if last_id is not None:
@@ -149,19 +156,24 @@ class DatasetDocumentSegmentApi(Resource):
                 raise ProviderNotInitializeError(ex.description)
 
         segment = DocumentSegment.query.filter(
-            DocumentSegment.id == str(segment_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.id == str(segment_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         ).first()
 
         if not segment:
             raise NotFound("Segment not found.")
 
         if segment.status != "completed":
-            raise NotFound("Segment is not completed, enable or disable function is not allowed")
+            raise NotFound(
+                "Segment is not completed, enable or disable function is not allowed"
+            )
 
         document_indexing_cache_key = "document_{}_indexing".format(segment.document_id)
         cache_result = redis_client.get(document_indexing_cache_key)
         if cache_result is not None:
-            raise InvalidActionError("Document is being indexed, please try again later")
+            raise InvalidActionError(
+                "Document is being indexed, please try again later"
+            )
 
         indexing_cache_key = "segment_{}_indexing".format(segment.id)
         cache_result = redis_client.get(indexing_cache_key)
@@ -244,13 +256,22 @@ class DatasetDocumentSegmentAddApi(Resource):
             raise Forbidden(str(e))
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument("content", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("answer", type=str, required=False, nullable=True, location="json")
-        parser.add_argument("keywords", type=list, required=False, nullable=True, location="json")
+        parser.add_argument(
+            "content", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "answer", type=str, required=False, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "keywords", type=list, required=False, nullable=True, location="json"
+        )
         args = parser.parse_args()
         SegmentService.segment_create_args_validate(args, document)
         segment = SegmentService.create_segment(args, document, dataset)
-        return {"data": marshal(segment, segment_fields), "doc_form": document.doc_form}, 200
+        return {
+            "data": marshal(segment, segment_fields),
+            "doc_form": document.doc_form,
+        }, 200
 
 
 class DatasetDocumentSegmentUpdateApi(Resource):
@@ -291,7 +312,8 @@ class DatasetDocumentSegmentUpdateApi(Resource):
             # check segment
         segment_id = str(segment_id)
         segment = DocumentSegment.query.filter(
-            DocumentSegment.id == str(segment_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.id == str(segment_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         ).first()
         if not segment:
             raise NotFound("Segment not found.")
@@ -304,13 +326,22 @@ class DatasetDocumentSegmentUpdateApi(Resource):
             raise Forbidden(str(e))
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument("content", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("answer", type=str, required=False, nullable=True, location="json")
-        parser.add_argument("keywords", type=list, required=False, nullable=True, location="json")
+        parser.add_argument(
+            "content", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "answer", type=str, required=False, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "keywords", type=list, required=False, nullable=True, location="json"
+        )
         args = parser.parse_args()
         SegmentService.segment_create_args_validate(args, document)
         segment = SegmentService.update_segment(args, segment, document, dataset)
-        return {"data": marshal(segment, segment_fields), "doc_form": document.doc_form}, 200
+        return {
+            "data": marshal(segment, segment_fields),
+            "doc_form": document.doc_form,
+        }, 200
 
     @setup_required
     @login_required
@@ -331,7 +362,8 @@ class DatasetDocumentSegmentUpdateApi(Resource):
         # check segment
         segment_id = str(segment_id)
         segment = DocumentSegment.query.filter(
-            DocumentSegment.id == str(segment_id), DocumentSegment.tenant_id == current_user.current_tenant_id
+            DocumentSegment.id == str(segment_id),
+            DocumentSegment.tenant_id == current_user.current_tenant_id,
         ).first()
         if not segment:
             raise NotFound("Segment not found.")
@@ -393,7 +425,12 @@ class DatasetDocumentSegmentBatchImportApi(Resource):
             # send batch add segments task
             redis_client.setnx(indexing_cache_key, "waiting")
             batch_create_segment_to_index_task.delay(
-                str(job_id), result, dataset_id, document_id, current_user.current_tenant_id, current_user.id
+                str(job_id),
+                result,
+                dataset_id,
+                document_id,
+                current_user.current_tenant_id,
+                current_user.id,
             )
         except Exception as e:
             return {"error": str(e)}, 500
@@ -412,9 +449,18 @@ class DatasetDocumentSegmentBatchImportApi(Resource):
         return {"job_id": job_id, "job_status": cache_result.decode()}, 200
 
 
-api.add_resource(DatasetDocumentSegmentListApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments")
-api.add_resource(DatasetDocumentSegmentApi, "/datasets/<uuid:dataset_id>/segments/<uuid:segment_id>/<string:action>")
-api.add_resource(DatasetDocumentSegmentAddApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segment")
+api.add_resource(
+    DatasetDocumentSegmentListApi,
+    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments",
+)
+api.add_resource(
+    DatasetDocumentSegmentApi,
+    "/datasets/<uuid:dataset_id>/segments/<uuid:segment_id>/<string:action>",
+)
+api.add_resource(
+    DatasetDocumentSegmentAddApi,
+    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segment",
+)
 api.add_resource(
     DatasetDocumentSegmentUpdateApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments/<uuid:segment_id>",

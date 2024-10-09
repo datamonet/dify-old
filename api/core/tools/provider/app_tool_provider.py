@@ -2,7 +2,11 @@ import logging
 from typing import Any
 
 from core.tools.entities.common_entities import I18nObject
-from core.tools.entities.tool_entities import ToolParameter, ToolParameterOption, ToolProviderType
+from core.tools.entities.tool_entities import (
+    ToolParameter,
+    ToolParameterOption,
+    ToolProviderType,
+)
 from core.tools.provider.tool_provider import ToolProviderController
 from core.tools.tool.tool import Tool
 from extensions.ext_database import db
@@ -17,10 +21,14 @@ class AppToolProviderEntity(ToolProviderController):
     def provider_type(self) -> ToolProviderType:
         return ToolProviderType.APP
 
-    def _validate_credentials(self, tool_name: str, credentials: dict[str, Any]) -> None:
+    def _validate_credentials(
+        self, tool_name: str, credentials: dict[str, Any]
+    ) -> None:
         pass
 
-    def validate_parameters(self, tool_name: str, tool_parameters: dict[str, Any]) -> None:
+    def validate_parameters(
+        self, tool_name: str, tool_parameters: dict[str, Any]
+    ) -> None:
         pass
 
     def get_tools(self, user_id: str) -> list[Tool]:
@@ -46,7 +54,10 @@ class AppToolProviderEntity(ToolProviderController):
                     "icon": "",
                 },
                 "description": {
-                    "human": {"en_US": db_tool.description_i18n.en_US, "zh_Hans": db_tool.description_i18n.zh_Hans},
+                    "human": {
+                        "en_US": db_tool.description_i18n.en_US,
+                        "zh_Hans": db_tool.description_i18n.zh_Hans,
+                    },
                     "llm": db_tool.llm_description,
                 },
                 "parameters": [],
@@ -93,7 +104,10 @@ class AppToolProviderEntity(ToolProviderController):
                             required=required,
                             default=default,
                             options=[
-                                ToolParameterOption(value=option, label=I18nObject(en_US=option, zh_Hans=option))
+                                ToolParameterOption(
+                                    value=option,
+                                    label=I18nObject(en_US=option, zh_Hans=option),
+                                )
                                 for option in options
                             ],
                         )

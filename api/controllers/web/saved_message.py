@@ -18,7 +18,9 @@ message_fields = {
     "query": fields.String,
     "answer": fields.String,
     "message_files": fields.List(fields.Nested(message_file_fields), attribute="files"),
-    "feedback": fields.Nested(feedback_fields, attribute="user_feedback", allow_null=True),
+    "feedback": fields.Nested(
+        feedback_fields, attribute="user_feedback", allow_null=True
+    ),
     "created_at": TimestampField,
 }
 
@@ -37,17 +39,23 @@ class SavedMessageListApi(WebApiResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         args = parser.parse_args()
 
-        return SavedMessageService.pagination_by_last_id(app_model, end_user, args["last_id"], args["limit"])
+        return SavedMessageService.pagination_by_last_id(
+            app_model, end_user, args["last_id"], args["limit"]
+        )
 
     def post(self, app_model, end_user):
         if app_model.mode != "completion":
             raise NotCompletionAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("message_id", type=uuid_value, required=True, location="json")
+        parser.add_argument(
+            "message_id", type=uuid_value, required=True, location="json"
+        )
         args = parser.parse_args()
 
         try:

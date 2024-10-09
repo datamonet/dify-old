@@ -42,7 +42,12 @@ class GetWorksheetPivotDataTool(BuiltinTool):
 
         url = f"{host}/report/getPivotData"
         headers = {"Content-Type": "application/json"}
-        payload = {"appKey": appkey, "sign": sign, "worksheetId": worksheet_id, "options": {"showTotal": True}}
+        payload = {
+            "appKey": appkey,
+            "sign": sign,
+            "worksheetId": worksheet_id,
+            "options": {"showTotal": True},
+        }
 
         try:
             x_column_fields = json.loads(x_column_fields)
@@ -62,19 +67,29 @@ class GetWorksheetPivotDataTool(BuiltinTool):
             res.raise_for_status()
             res_json = res.json()
             if res_json.get("status") != 1:
-                return self.create_text_message(f"Failed to get the worksheet pivot data. {res_json['msg']}")
+                return self.create_text_message(
+                    f"Failed to get the worksheet pivot data. {res_json['msg']}"
+                )
 
             pivot_json = self.generate_pivot_json(res_json["data"])
             pivot_table = self.generate_pivot_table(res_json["data"])
             result_type = tool_parameters.get("result_type", "")
-            text = pivot_table if result_type == "table" else json.dumps(pivot_json, ensure_ascii=False)
+            text = (
+                pivot_table
+                if result_type == "table"
+                else json.dumps(pivot_json, ensure_ascii=False)
+            )
             return self.create_text_message(text)
         except httpx.RequestError as e:
-            return self.create_text_message(f"Failed to get the worksheet pivot data, request error: {e}")
+            return self.create_text_message(
+                f"Failed to get the worksheet pivot data, request error: {e}"
+            )
         except json.JSONDecodeError as e:
             return self.create_text_message(f"Failed to parse JSON response: {e}")
         except Exception as e:
-            return self.create_text_message(f"Failed to get the worksheet pivot data, unexpected error: {e}")
+            return self.create_text_message(
+                f"Failed to get the worksheet pivot data, unexpected error: {e}"
+            )
 
     def generate_pivot_table(self, data: dict[str, Any]) -> str:
         columns = data["metadata"]["columns"]
@@ -88,13 +103,31 @@ class GetWorksheetPivotDataTool(BuiltinTool):
             + [column["displayName"] for column in columns]
             + [value["displayName"] for value in values]
         )
-        line = (["---"] * len(rows) if rows else []) + ["---"] * len(columns) + ["--:"] * len(values)
+        line = (
+            (["---"] * len(rows) if rows else [])
+            + ["---"] * len(columns)
+            + ["--:"] * len(values)
+        )
 
         table = [header, line]
         for row in rows_data:
-            row_data = [self.replace_pipe(row["rows"][r["controlId"]]) for r in rows] if rows else []
-            row_data.extend([self.replace_pipe(row["columns"][column["controlId"]]) for column in columns])
-            row_data.extend([self.replace_pipe(str(row["values"][value["controlId"]])) for value in values])
+            row_data = (
+                [self.replace_pipe(row["rows"][r["controlId"]]) for r in rows]
+                if rows
+                else []
+            )
+            row_data.extend(
+                [
+                    self.replace_pipe(row["columns"][column["controlId"]])
+                    for column in columns
+                ]
+            )
+            row_data.extend(
+                [
+                    self.replace_pipe(str(row["values"][value["controlId"]]))
+                    for value in values
+                ]
+            )
             table.append(row_data)
 
         return "\n".join([("|" + "|".join(row) + "|") for row in table])
@@ -109,7 +142,8 @@ class GetWorksheetPivotDataTool(BuiltinTool):
                 for column in data["metadata"]["columns"]
             ],
             "y-axis": [
-                {"fieldId": row["controlId"], "fieldName": row["displayName"]} for row in data["metadata"]["rows"]
+                {"fieldId": row["controlId"], "fieldName": row["displayName"]}
+                for row in data["metadata"]["rows"]
             ]
             if data["metadata"]["rows"]
             else [],

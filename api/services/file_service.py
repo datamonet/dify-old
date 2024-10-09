@@ -20,7 +20,18 @@ from services.errors.file import FileTooLargeError, UnsupportedFileTypeError
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "svg"]
 IMAGE_EXTENSIONS.extend([ext.upper() for ext in IMAGE_EXTENSIONS])
 
-ALLOWED_EXTENSIONS = ["txt", "markdown", "md", "pdf", "html", "htm", "xlsx", "xls", "docx", "csv"]
+ALLOWED_EXTENSIONS = [
+    "txt",
+    "markdown",
+    "md",
+    "pdf",
+    "html",
+    "htm",
+    "xlsx",
+    "xls",
+    "docx",
+    "csv",
+]
 UNSTRUCTURED_ALLOWED_EXTENSIONS = [
     "txt",
     "markdown",
@@ -45,7 +56,9 @@ PREVIEW_WORDS_LIMIT = 3000
 
 class FileService:
     @staticmethod
-    def upload_file(file: FileStorage, user: Union[Account, EndUser], only_image: bool = False) -> UploadFile:
+    def upload_file(
+        file: FileStorage, user: Union[Account, EndUser], only_image: bool = False
+    ) -> UploadFile:
         filename = file.filename
         extension = file.filename.split(".")[-1]
         if len(filename) > 200:
@@ -56,7 +69,11 @@ class FileService:
             if etl_type == "Unstructured"
             else ALLOWED_EXTENSIONS + IMAGE_EXTENSIONS
         )
-        if extension.lower() not in allowed_extensions or only_image and extension.lower() not in IMAGE_EXTENSIONS:
+        if (
+            extension.lower() not in allowed_extensions
+            or only_image
+            and extension.lower() not in IMAGE_EXTENSIONS
+        ):
             raise UnsupportedFileTypeError()
 
         # read file content
@@ -83,7 +100,9 @@ class FileService:
             # end_user
             current_tenant_id = user.tenant_id
 
-        file_key = "upload_files/" + current_tenant_id + "/" + file_uuid + "." + extension
+        file_key = (
+            "upload_files/" + current_tenant_id + "/" + file_uuid + "." + extension
+        )
 
         # save file to storage
         storage.save(file_key, file_content)
@@ -99,7 +118,9 @@ class FileService:
             mime_type=file.mimetype,
             created_by_role=("account" if isinstance(user, Account) else "end_user"),
             created_by=user.id,
-            created_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
+            created_at=datetime.datetime.now(datetime.timezone.utc).replace(
+                tzinfo=None
+            ),
             used=False,
             hash=hashlib.sha3_256(file_content).hexdigest(),
         )
@@ -115,7 +136,9 @@ class FileService:
             text_name = text_name[:200]
         # user uuid as file name
         file_uuid = str(uuid.uuid4())
-        file_key = "upload_files/" + current_user.current_tenant_id + "/" + file_uuid + ".txt"
+        file_key = (
+            "upload_files/" + current_user.current_tenant_id + "/" + file_uuid + ".txt"
+        )
 
         # save file to storage
         storage.save(file_key, text.encode("utf-8"))
@@ -130,7 +153,9 @@ class FileService:
             extension="txt",
             mime_type="text/plain",
             created_by=current_user.id,
-            created_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
+            created_at=datetime.datetime.now(datetime.timezone.utc).replace(
+                tzinfo=None
+            ),
             used=True,
             used_by=current_user.id,
             used_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
@@ -143,7 +168,9 @@ class FileService:
 
     @staticmethod
     def get_file_preview(file_id: str) -> str:
-        upload_file = db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        upload_file = (
+            db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        )
 
         if not upload_file:
             raise NotFound("File not found")
@@ -151,7 +178,11 @@ class FileService:
         # extract text from file
         extension = upload_file.extension
         etl_type = dify_config.ETL_TYPE
-        allowed_extensions = UNSTRUCTURED_ALLOWED_EXTENSIONS if etl_type == "Unstructured" else ALLOWED_EXTENSIONS
+        allowed_extensions = (
+            UNSTRUCTURED_ALLOWED_EXTENSIONS
+            if etl_type == "Unstructured"
+            else ALLOWED_EXTENSIONS
+        )
         if extension.lower() not in allowed_extensions:
             raise UnsupportedFileTypeError()
 
@@ -161,12 +192,18 @@ class FileService:
         return text
 
     @staticmethod
-    def get_image_preview(file_id: str, timestamp: str, nonce: str, sign: str) -> tuple[Generator, str]:
-        result = UploadFileParser.verify_image_file_signature(file_id, timestamp, nonce, sign)
+    def get_image_preview(
+        file_id: str, timestamp: str, nonce: str, sign: str
+    ) -> tuple[Generator, str]:
+        result = UploadFileParser.verify_image_file_signature(
+            file_id, timestamp, nonce, sign
+        )
         if not result:
             raise NotFound("File not found or signature is invalid")
 
-        upload_file = db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        upload_file = (
+            db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        )
 
         if not upload_file:
             raise NotFound("File not found or signature is invalid")
@@ -182,7 +219,9 @@ class FileService:
 
     @staticmethod
     def get_public_image_preview(file_id: str) -> tuple[Generator, str]:
-        upload_file = db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        upload_file = (
+            db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
+        )
 
         if not upload_file:
             raise NotFound("File not found or signature is invalid")

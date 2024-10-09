@@ -5,7 +5,13 @@ from urllib.parse import parse_qs, urlparse
 
 import requests
 
-from core.file.file_obj import FileBelongsTo, FileExtraConfig, FileTransferMethod, FileType, FileVar
+from core.file.file_obj import (
+    FileBelongsTo,
+    FileExtraConfig,
+    FileTransferMethod,
+    FileType,
+    FileVar,
+)
 from extensions.ext_database import db
 from models.account import Account
 from models.model import EndUser, MessageFile, UploadFile
@@ -18,7 +24,10 @@ class MessageFileParser:
         self.app_id = app_id
 
     def validate_and_transform_files_arg(
-        self, files: Sequence[Mapping[str, Any]], file_extra_config: FileExtraConfig, user: Union[Account, EndUser]
+        self,
+        files: Sequence[Mapping[str, Any]],
+        file_extra_config: FileExtraConfig,
+        user: Union[Account, EndUser],
     ) -> list[FileVar]:
         """
         validate and transform files arg
@@ -42,9 +51,13 @@ class MessageFileParser:
                     raise ValueError("Missing file url")
                 if not file.get("url").startswith("http"):
                     raise ValueError("Invalid file url")
-            if file.get("transfer_method") == FileTransferMethod.LOCAL_FILE.value and not file.get("upload_file_id"):
+            if file.get(
+                "transfer_method"
+            ) == FileTransferMethod.LOCAL_FILE.value and not file.get("upload_file_id"):
                 raise ValueError("Missing file upload_file_id")
-            if file.get("transform_method") == FileTransferMethod.TOOL_FILE.value and not file.get("tool_file_id"):
+            if file.get(
+                "transform_method"
+            ) == FileTransferMethod.TOOL_FILE.value and not file.get("tool_file_id"):
                 raise ValueError("Missing file tool_file_id")
 
         # transform files to file objs
@@ -63,12 +76,19 @@ class MessageFileParser:
 
                 # Validate number of files
                 if len(files) > image_config["number_limits"]:
-                    raise ValueError(f"Number of image files exceeds the maximum limit {image_config['number_limits']}")
+                    raise ValueError(
+                        f"Number of image files exceeds the maximum limit {image_config['number_limits']}"
+                    )
 
                 for file_obj in file_objs:
                     # Validate transfer method
-                    if file_obj.transfer_method.value not in image_config["transfer_methods"]:
-                        raise ValueError(f"Invalid transfer method: {file_obj.transfer_method.value}")
+                    if (
+                        file_obj.transfer_method.value
+                        not in image_config["transfer_methods"]
+                    ):
+                        raise ValueError(
+                            f"Invalid transfer method: {file_obj.transfer_method.value}"
+                        )
 
                     # Validate file type
                     if file_obj.type != FileType.IMAGE:
@@ -87,7 +107,12 @@ class MessageFileParser:
                                 UploadFile.id == file_obj.related_id,
                                 UploadFile.tenant_id == self.tenant_id,
                                 UploadFile.created_by == user.id,
-                                UploadFile.created_by_role == ("account" if isinstance(user, Account) else "end_user"),
+                                UploadFile.created_by_role
+                                == (
+                                    "account"
+                                    if isinstance(user, Account)
+                                    else "end_user"
+                                ),
                                 UploadFile.extension.in_(IMAGE_EXTENSIONS),
                             )
                             .first()
@@ -102,7 +127,9 @@ class MessageFileParser:
         # return all file objs
         return new_files
 
-    def transform_message_files(self, files: list[MessageFile], file_extra_config: FileExtraConfig):
+    def transform_message_files(
+        self, files: list[MessageFile], file_extra_config: FileExtraConfig
+    ):
         """
         transform message files
 
@@ -114,7 +141,9 @@ class MessageFileParser:
         type_file_objs = self._to_file_objs(files, file_extra_config)
 
         # return all file objs
-        return [file_obj for file_objs in type_file_objs.values() for file_obj in file_objs]
+        return [
+            file_obj for file_objs in type_file_objs.values() for file_obj in file_objs
+        ]
 
     def _to_file_objs(
         self, files: list[Union[dict, MessageFile]], file_extra_config: FileExtraConfig
@@ -148,7 +177,9 @@ class MessageFileParser:
 
         return type_file_objs
 
-    def _to_file_obj(self, file: Union[dict, MessageFile], file_extra_config: FileExtraConfig):
+    def _to_file_obj(
+        self, file: Union[dict, MessageFile], file_extra_config: FileExtraConfig
+    ):
         """
         transform file to file obj
 
@@ -162,8 +193,12 @@ class MessageFileParser:
                     tenant_id=self.tenant_id,
                     type=FileType.value_of(file.get("type")),
                     transfer_method=transfer_method,
-                    url=file.get("url") if transfer_method == FileTransferMethod.REMOTE_URL else None,
-                    related_id=file.get("upload_file_id") if transfer_method == FileTransferMethod.LOCAL_FILE else None,
+                    url=file.get("url")
+                    if transfer_method == FileTransferMethod.REMOTE_URL
+                    else None,
+                    related_id=file.get("upload_file_id")
+                    if transfer_method == FileTransferMethod.LOCAL_FILE
+                    else None,
                     extra_config=file_extra_config,
                 )
             return FileVar(
@@ -198,16 +233,36 @@ class MessageFileParser:
                     if "amazonaws.com" not in parsed_url.netloc:
                         return False
                     query_params = parse_qs(parsed_url.query)
-                    required_params = ["Signature", "Expires"]
-                    for param in required_params:
-                        if param not in query_params:
+
+                    def check_presign_v2(query_params):
+                        required_params = ["Signature", "Expires"]
+                        for param in required_params:
+                            if param not in query_params:
+                                return False
+                        if not query_params["Expires"][0].isdigit():
                             return False
-                    if not query_params["Expires"][0].isdigit():
-                        return False
-                    signature = query_params["Signature"][0]
-                    if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", signature):
-                        return False
-                    return True
+                        signature = query_params["Signature"][0]
+                        if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", signature):
+                            return False
+
+                        return True
+
+                    def check_presign_v4(query_params):
+                        required_params = ["X-Amz-Signature", "X-Amz-Expires"]
+                        for param in required_params:
+                            if param not in query_params:
+                                return False
+                        if not query_params["X-Amz-Expires"][0].isdigit():
+                            return False
+                        signature = query_params["X-Amz-Signature"][0]
+                        if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", signature):
+                            return False
+
+                        return True
+
+                    return check_presign_v4(query_params) or check_presign_v2(
+                        query_params
+                    )
                 except Exception:
                     return False
 

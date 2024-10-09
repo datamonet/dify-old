@@ -2,7 +2,9 @@ from typing import Any
 
 from core.app.app_config.entities import DatasetRetrieveConfigEntity
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.callback_handler.index_tool_callback_handler import (
+    DatasetIndexToolCallbackHandler,
+)
 from core.rag.retrieval.dataset_retrieval import DatasetRetrieval
 from core.tools.entities.common_entities import I18nObject
 from core.tools.entities.tool_entities import (
@@ -12,7 +14,9 @@ from core.tools.entities.tool_entities import (
     ToolParameter,
     ToolProviderType,
 )
-from core.tools.tool.dataset_retriever.dataset_retriever_base_tool import DatasetRetrieverBaseTool
+from core.tools.tool.dataset_retriever.dataset_retriever_base_tool import (
+    DatasetRetrieverBaseTool,
+)
 from core.tools.tool.tool import Tool
 
 
@@ -42,7 +46,9 @@ class DatasetRetrieverTool(Tool):
         # save original retrieve strategy, and set retrieve strategy to SINGLE
         # Agent only support SINGLE mode
         original_retriever_mode = retrieve_config.retrieve_strategy
-        retrieve_config.retrieve_strategy = DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
+        retrieve_config.retrieve_strategy = (
+            DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
+        )
         retrieval_tools = feature.to_dataset_retriever_tool(
             tenant_id=tenant_id,
             dataset_ids=dataset_ids,
@@ -60,11 +66,17 @@ class DatasetRetrieverTool(Tool):
             tool = DatasetRetrieverTool(
                 retrieval_tool=retrieval_tool,
                 identity=ToolIdentity(
-                    provider="", author="", name=retrieval_tool.name, label=I18nObject(en_US="", zh_Hans="")
+                    provider="",
+                    author="",
+                    name=retrieval_tool.name,
+                    label=I18nObject(en_US="", zh_Hans=""),
                 ),
                 parameters=[],
                 is_team_authorization=True,
-                description=ToolDescription(human=I18nObject(en_US="", zh_Hans=""), llm=retrieval_tool.description),
+                description=ToolDescription(
+                    human=I18nObject(en_US="", zh_Hans=""),
+                    llm=retrieval_tool.description,
+                ),
                 runtime=DatasetRetrieverTool.Runtime(),
             )
 
@@ -89,7 +101,9 @@ class DatasetRetrieverTool(Tool):
     def tool_provider_type(self) -> ToolProviderType:
         return ToolProviderType.DATASET_RETRIEVAL
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         invoke dataset retriever tool
         """
@@ -102,7 +116,9 @@ class DatasetRetrieverTool(Tool):
 
         return self.create_text_message(text=result)
 
-    def validate_credentials(self, credentials: dict[str, Any], parameters: dict[str, Any]) -> None:
+    def validate_credentials(
+        self, credentials: dict[str, Any], parameters: dict[str, Any]
+    ) -> None:
         """
         validate the credentials for dataset retriever tool
         """

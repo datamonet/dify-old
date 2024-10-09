@@ -26,7 +26,10 @@ from openai.types.chat.chat_completion_chunk import (
     ChoiceDeltaToolCall,
     ChoiceDeltaToolCallFunction,
 )
-from openai.types.chat.chat_completion_message import ChatCompletionMessage, FunctionCall
+from openai.types.chat.chat_completion_message import (
+    ChatCompletionMessage,
+    FunctionCall,
+)
 from openai.types.chat.chat_completion_message_tool_call import Function
 from openai.types.completion_usage import CompletionUsage
 
@@ -71,7 +74,9 @@ class MockChatClass:
         return FunctionCall(name=function_name, arguments=dumps(parameters))
 
     @staticmethod
-    def generate_tool_calls(tools=NOT_GIVEN) -> Optional[list[ChatCompletionMessageToolCall]]:
+    def generate_tool_calls(
+        tools=NOT_GIVEN,
+    ) -> Optional[list[ChatCompletionMessageToolCall]]:
         list_tool_calls = []
         if not tools or len(tools) == 0:
             return None
@@ -117,7 +122,10 @@ class MockChatClass:
                     finish_reason="content_filter",
                     index=0,
                     message=ChatCompletionMessage(
-                        content="elaina", role="assistant", function_call=function_call, tool_calls=tool_calls
+                        content="elaina",
+                        role="assistant",
+                        function_call=function_call,
+                        tool_calls=tool_calls,
                     ),
                 )
             ],
@@ -252,16 +260,25 @@ class MockChatClass:
             "gpt-3.5-turbo-16k-0613",
         ]
         azure_openai_models = ["gpt35", "gpt-4v", "gpt-35-turbo"]
-        if not re.match(r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)):
+        if not re.match(
+            r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)
+        ):
             raise InvokeAuthorizationError("Invalid base url")
         if model in openai_models + azure_openai_models:
-            if not re.match(r"sk-[a-zA-Z0-9]{24,}$", self._client.api_key) and type(self._client) == OpenAI:
+            if (
+                not re.match(r"sk-[a-zA-Z0-9]{24,}$", self._client.api_key)
+                and type(self._client) == OpenAI
+            ):
                 # sometime, provider use OpenAI compatible API will not have api key or have different api key format
                 # so we only check if model is in openai_models
                 raise InvokeAuthorizationError("Invalid api key")
             if len(self._client.api_key) < 18 and type(self._client) == AzureOpenAI:
                 raise InvokeAuthorizationError("Invalid api key")
         if stream:
-            return MockChatClass.mocked_openai_chat_create_stream(model=model, functions=functions, tools=tools)
+            return MockChatClass.mocked_openai_chat_create_stream(
+                model=model, functions=functions, tools=tools
+            )
 
-        return MockChatClass.mocked_openai_chat_create_sync(model=model, functions=functions, tools=tools)
+        return MockChatClass.mocked_openai_chat_create_sync(
+            model=model, functions=functions, tools=tools
+        )

@@ -17,7 +17,9 @@ class AppSiteApi(WebApiResource):
     model_config_fields = {
         "opening_statement": fields.String,
         "suggested_questions": fields.Raw(attribute="suggested_questions_list"),
-        "suggested_questions_after_answer": fields.Raw(attribute="suggested_questions_after_answer_dict"),
+        "suggested_questions_after_answer": fields.Raw(
+            attribute="suggested_questions_after_answer_dict"
+        ),
         "more_like_this": fields.Raw(attribute="more_like_this_dict"),
         "model": fields.Raw(attribute="model_dict"),
         "user_input_form": fields.Raw(attribute="user_input_form_list"),
@@ -65,9 +67,13 @@ class AppSiteApi(WebApiResource):
         if app_model.tenant.status == TenantStatus.ARCHIVE:
             raise Forbidden()
 
-        can_replace_logo = FeatureService.get_features(app_model.tenant_id).can_replace_logo
+        can_replace_logo = FeatureService.get_features(
+            app_model.tenant_id
+        ).can_replace_logo
 
-        return AppSiteInfo(app_model.tenant, app_model, site, end_user.id, can_replace_logo)
+        return AppSiteInfo(
+            app_model.tenant, app_model, site, end_user.id, can_replace_logo
+        )
 
 
 api.add_resource(AppSiteApi, "/site")
@@ -88,7 +94,9 @@ class AppSiteInfo:
 
         if can_replace_logo:
             base_url = dify_config.FILES_URL
-            remove_webapp_brand = tenant.custom_config_dict.get("remove_webapp_brand", False)
+            remove_webapp_brand = tenant.custom_config_dict.get(
+                "remove_webapp_brand", False
+            )
             replace_webapp_logo = (
                 f"{base_url}/files/workspaces/{tenant.id}/webapp-logo"
                 if tenant.custom_config_dict.get("replace_webapp_logo")

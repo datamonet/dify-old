@@ -13,4 +13,6 @@ def test_validate_provider_credentials(setup_google_mock):
     with pytest.raises(CredentialsValidateFailedError):
         provider.validate_provider_credentials(credentials={})
 
-    provider.validate_provider_credentials(credentials={"google_api_key": os.environ.get("GOOGLE_API_KEY")})
+    provider.validate_provider_credentials(
+        credentials={"google_api_key": os.environ.get("GOOGLE_API_KEY")}
+    )

@@ -15,7 +15,14 @@ class FirecrawlWebExtractor(BaseExtractor):
         mode: The mode of operation. Defaults to 'scrape'. Options are 'crawl', 'scrape' and 'crawl_return_urls'.
     """
 
-    def __init__(self, url: str, job_id: str, tenant_id: str, mode: str = "crawl", only_main_content: bool = False):
+    def __init__(
+        self,
+        url: str,
+        job_id: str,
+        tenant_id: str,
+        mode: str = "crawl",
+        only_main_content: bool = False,
+    ):
         """Initialize with url, api_key, base_url and mode."""
         self._url = url
         self.job_id = job_id
@@ -27,7 +34,9 @@ class FirecrawlWebExtractor(BaseExtractor):
         """Extract content from the URL."""
         documents = []
         if self.mode == "crawl":
-            crawl_data = WebsiteService.get_crawl_url_data(self.job_id, "firecrawl", self._url, self.tenant_id)
+            crawl_data = WebsiteService.get_crawl_url_data(
+                self.job_id, "firecrawl", self._url, self.tenant_id
+            )
             if crawl_data is None:
                 return []
             document = Document(

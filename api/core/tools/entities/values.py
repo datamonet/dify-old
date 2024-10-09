@@ -54,34 +54,54 @@ ICONS = {
 
 default_tool_label_dict = {
     ToolLabelEnum.SEARCH: ToolLabel(
-        name="search", label=I18nObject(en_US="Search", zh_Hans="搜索"), icon=ICONS[ToolLabelEnum.SEARCH]
+        name="search",
+        label=I18nObject(en_US="Search", zh_Hans="搜索"),
+        icon=ICONS[ToolLabelEnum.SEARCH],
     ),
     ToolLabelEnum.IMAGE: ToolLabel(
-        name="image", label=I18nObject(en_US="Image", zh_Hans="图片"), icon=ICONS[ToolLabelEnum.IMAGE]
+        name="image",
+        label=I18nObject(en_US="Image", zh_Hans="图片"),
+        icon=ICONS[ToolLabelEnum.IMAGE],
     ),
     ToolLabelEnum.VIDEOS: ToolLabel(
-        name="videos", label=I18nObject(en_US="Videos", zh_Hans="视频"), icon=ICONS[ToolLabelEnum.VIDEOS]
+        name="videos",
+        label=I18nObject(en_US="Videos", zh_Hans="视频"),
+        icon=ICONS[ToolLabelEnum.VIDEOS],
     ),
     ToolLabelEnum.WEATHER: ToolLabel(
-        name="weather", label=I18nObject(en_US="Weather", zh_Hans="天气"), icon=ICONS[ToolLabelEnum.WEATHER]
+        name="weather",
+        label=I18nObject(en_US="Weather", zh_Hans="天气"),
+        icon=ICONS[ToolLabelEnum.WEATHER],
     ),
     ToolLabelEnum.FINANCE: ToolLabel(
-        name="finance", label=I18nObject(en_US="Finance", zh_Hans="金融"), icon=ICONS[ToolLabelEnum.FINANCE]
+        name="finance",
+        label=I18nObject(en_US="Finance", zh_Hans="金融"),
+        icon=ICONS[ToolLabelEnum.FINANCE],
     ),
     ToolLabelEnum.DESIGN: ToolLabel(
-        name="design", label=I18nObject(en_US="Design", zh_Hans="设计"), icon=ICONS[ToolLabelEnum.DESIGN]
+        name="design",
+        label=I18nObject(en_US="Design", zh_Hans="设计"),
+        icon=ICONS[ToolLabelEnum.DESIGN],
     ),
     ToolLabelEnum.TRAVEL: ToolLabel(
-        name="travel", label=I18nObject(en_US="Travel", zh_Hans="旅行"), icon=ICONS[ToolLabelEnum.TRAVEL]
+        name="travel",
+        label=I18nObject(en_US="Travel", zh_Hans="旅行"),
+        icon=ICONS[ToolLabelEnum.TRAVEL],
     ),
     ToolLabelEnum.SOCIAL: ToolLabel(
-        name="social", label=I18nObject(en_US="Social", zh_Hans="社交"), icon=ICONS[ToolLabelEnum.SOCIAL]
+        name="social",
+        label=I18nObject(en_US="Social", zh_Hans="社交"),
+        icon=ICONS[ToolLabelEnum.SOCIAL],
     ),
     ToolLabelEnum.NEWS: ToolLabel(
-        name="news", label=I18nObject(en_US="News", zh_Hans="新闻"), icon=ICONS[ToolLabelEnum.NEWS]
+        name="news",
+        label=I18nObject(en_US="News", zh_Hans="新闻"),
+        icon=ICONS[ToolLabelEnum.NEWS],
     ),
     ToolLabelEnum.MEDICAL: ToolLabel(
-        name="medical", label=I18nObject(en_US="Medical", zh_Hans="医疗"), icon=ICONS[ToolLabelEnum.MEDICAL]
+        name="medical",
+        label=I18nObject(en_US="Medical", zh_Hans="医疗"),
+        icon=ICONS[ToolLabelEnum.MEDICAL],
     ),
     ToolLabelEnum.PRODUCTIVITY: ToolLabel(
         name="productivity",
@@ -89,10 +109,14 @@ default_tool_label_dict = {
         icon=ICONS[ToolLabelEnum.PRODUCTIVITY],
     ),
     ToolLabelEnum.EDUCATION: ToolLabel(
-        name="education", label=I18nObject(en_US="Education", zh_Hans="教育"), icon=ICONS[ToolLabelEnum.EDUCATION]
+        name="education",
+        label=I18nObject(en_US="Education", zh_Hans="教育"),
+        icon=ICONS[ToolLabelEnum.EDUCATION],
     ),
     ToolLabelEnum.BUSINESS: ToolLabel(
-        name="business", label=I18nObject(en_US="Business", zh_Hans="商业"), icon=ICONS[ToolLabelEnum.BUSINESS]
+        name="business",
+        label=I18nObject(en_US="Business", zh_Hans="商业"),
+        icon=ICONS[ToolLabelEnum.BUSINESS],
     ),
     ToolLabelEnum.ENTERTAINMENT: ToolLabel(
         name="entertainment",
@@ -100,10 +124,14 @@ default_tool_label_dict = {
         icon=ICONS[ToolLabelEnum.ENTERTAINMENT],
     ),
     ToolLabelEnum.UTILITIES: ToolLabel(
-        name="utilities", label=I18nObject(en_US="Utilities", zh_Hans="工具"), icon=ICONS[ToolLabelEnum.UTILITIES]
+        name="utilities",
+        label=I18nObject(en_US="Utilities", zh_Hans="工具"),
+        icon=ICONS[ToolLabelEnum.UTILITIES],
     ),
     ToolLabelEnum.OTHER: ToolLabel(
-        name="other", label=I18nObject(en_US="Other", zh_Hans="其他"), icon=ICONS[ToolLabelEnum.OTHER]
+        name="other",
+        label=I18nObject(en_US="Other", zh_Hans="其他"),
+        icon=ICONS[ToolLabelEnum.OTHER],
     ),
 }
 

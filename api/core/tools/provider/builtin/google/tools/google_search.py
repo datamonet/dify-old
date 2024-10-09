@@ -16,7 +16,11 @@ class GoogleSearchTool(BuiltinTool):
             result["description"] = response["knowledge_graph"].get("description", "")
         if "organic_results" in response:
             result["organic_results"] = [
-                {"title": item.get("title", ""), "link": item.get("link", ""), "snippet": item.get("snippet", "")}
+                {
+                    "title": item.get("title", ""),
+                    "link": item.get("link", ""),
+                    "snippet": item.get("snippet", ""),
+                }
                 for item in response["organic_results"]
             ]
         return result

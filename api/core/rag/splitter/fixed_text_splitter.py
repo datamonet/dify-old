@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from core.model_manager import ModelInstance
-from core.model_runtime.model_providers.__base.tokenizers.gpt2_tokenzier import GPT2Tokenizer
+from core.model_runtime.model_providers.__base.tokenizers.gpt2_tokenzier import (
+    GPT2Tokenizer,
+)
 from core.rag.splitter.text_splitter import (
     TS,
     Collection,
@@ -35,13 +37,17 @@ class EnhanceRecursiveCharacterTextSplitter(RecursiveCharacterTextSplitter):
                 return 0
 
             if embedding_model_instance:
-                return embedding_model_instance.get_text_embedding_num_tokens(texts=[text])
+                return embedding_model_instance.get_text_embedding_num_tokens(
+                    texts=[text]
+                )
             else:
                 return GPT2Tokenizer.get_num_tokens(text)
 
         if issubclass(cls, TokenTextSplitter):
             extra_kwargs = {
-                "model_name": embedding_model_instance.model if embedding_model_instance else "gpt2",
+                "model_name": embedding_model_instance.model
+                if embedding_model_instance
+                else "gpt2",
                 "allowed_special": allowed_special,
                 "disallowed_special": disallowed_special,
             }
@@ -51,7 +57,12 @@ class EnhanceRecursiveCharacterTextSplitter(RecursiveCharacterTextSplitter):
 
 
 class FixedRecursiveCharacterTextSplitter(EnhanceRecursiveCharacterTextSplitter):
-    def __init__(self, fixed_separator: str = "\n\n", separators: Optional[list[str]] = None, **kwargs: Any):
+    def __init__(
+        self,
+        fixed_separator: str = "\n\n",
+        separators: Optional[list[str]] = None,
+        **kwargs: Any,
+    ):
         """Create a new TextSplitter."""
         super().__init__(**kwargs)
         self._fixed_separator = fixed_separator
@@ -100,13 +111,17 @@ class FixedRecursiveCharacterTextSplitter(EnhanceRecursiveCharacterTextSplitter)
                 _good_splits_lengths.append(s_len)
             else:
                 if _good_splits:
-                    merged_text = self._merge_splits(_good_splits, separator, _good_splits_lengths)
+                    merged_text = self._merge_splits(
+                        _good_splits, separator, _good_splits_lengths
+                    )
                     final_chunks.extend(merged_text)
                     _good_splits = []
                     _good_splits_lengths = []
                 other_info = self.recursive_split_text(s)
                 final_chunks.extend(other_info)
         if _good_splits:
-            merged_text = self._merge_splits(_good_splits, separator, _good_splits_lengths)
+            merged_text = self._merge_splits(
+                _good_splits, separator, _good_splits_lengths
+            )
             final_chunks.extend(merged_text)
         return final_chunks

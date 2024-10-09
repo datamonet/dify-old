@@ -10,7 +10,12 @@ class CeleryTask(db.Model):
 
     __tablename__ = "celery_taskmeta"
 
-    id = db.Column(db.Integer, db.Sequence("task_id_sequence"), primary_key=True, autoincrement=True)
+    id = db.Column(
+        db.Integer,
+        db.Sequence("task_id_sequence"),
+        primary_key=True,
+        autoincrement=True,
+    )
     task_id = db.Column(db.String(155), unique=True)
     status = db.Column(db.String(50), default=states.PENDING)
     result = db.Column(db.PickleType, nullable=True)
@@ -34,7 +39,16 @@ class CeleryTaskSet(db.Model):
 
     __tablename__ = "celery_tasksetmeta"
 
-    id = db.Column(db.Integer, db.Sequence("taskset_id_sequence"), autoincrement=True, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        db.Sequence("taskset_id_sequence"),
+        autoincrement=True,
+        primary_key=True,
+    )
     taskset_id = db.Column(db.String(155), unique=True)
     result = db.Column(db.PickleType, nullable=True)
-    date_done = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None), nullable=True)
+    date_done = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        nullable=True,
+    )

@@ -21,7 +21,9 @@ class MockEmbeddingsClass:
         if isinstance(input, str):
             input = [input]
 
-        if not re.match(r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)):
+        if not re.match(
+            r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)
+        ):
             raise InvokeAuthorizationError("Invalid base url")
 
         if len(self._client.api_key) < 18:
@@ -30,7 +32,11 @@ class MockEmbeddingsClass:
         if encoding_format == "float":
             return CreateEmbeddingResponse(
                 data=[
-                    Embedding(embedding=[0.23333 for _ in range(233)], index=i, object="embedding")
+                    Embedding(
+                        embedding=[0.23333 for _ in range(233)],
+                        index=i,
+                        object="embedding",
+                    )
                     for i in range(len(input))
                 ],
                 model=model,

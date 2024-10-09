@@ -6,7 +6,12 @@ from replicate.exceptions import ReplicateError
 from replicate.prediction import Prediction
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMMode,
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -23,7 +28,9 @@ from core.model_runtime.entities.model_entities import (
     ParameterRule,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.model_providers.replicate._common import _CommonReplicate
 
 
@@ -43,7 +50,9 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
         if "model_version" in credentials:
             model_version = credentials["model_version"]
 
-        client = ReplicateClient(api_token=credentials["replicate_api_token"], timeout=30)
+        client = ReplicateClient(
+            api_token=credentials["replicate_api_token"], timeout=30
+        )
         model_info = client.models.get(model)
 
         if model_version:
@@ -54,7 +63,12 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
         inputs = {**model_parameters}
 
         if prompt_messages[0].role == PromptMessageRole.SYSTEM:
-            if "system_prompt" in model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"]:
+            if (
+                "system_prompt"
+                in model_info_version.openapi_schema["components"]["schemas"]["Input"][
+                    "properties"
+                ]
+            ):
                 inputs["system_prompt"] = prompt_messages[0].content
             inputs["prompt"] = prompt_messages[1].content
         else:
@@ -63,8 +77,12 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
         prediction = client.predictions.create(version=model_info_version, input=inputs)
 
         if stream:
-            return self._handle_generate_stream_response(model, credentials, prediction, stop, prompt_messages)
-        return self._handle_generate_response(model, credentials, prediction, stop, prompt_messages)
+            return self._handle_generate_stream_response(
+                model, credentials, prediction, stop, prompt_messages
+            )
+        return self._handle_generate_response(
+            model, credentials, prediction, stop, prompt_messages
+        )
 
     def get_num_tokens(
         self,
@@ -78,7 +96,9 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         if "replicate_api_token" not in credentials:
-            raise CredentialsValidateFailedError("Replicate Access Token must be provided.")
+            raise CredentialsValidateFailedError(
+                "Replicate Access Token must be provided."
+            )
 
         model_version = ""
         if "model_version" in credentials:
@@ -90,7 +110,9 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
             )
 
         try:
-            client = ReplicateClient(api_token=credentials["replicate_api_token"], timeout=30)
+            client = ReplicateClient(
+                api_token=credentials["replicate_api_token"], timeout=30
+            )
             model_info = client.models.get(model)
 
             if model_version:
@@ -98,7 +120,9 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
             else:
                 model_info_version = model_info.latest_version
 
-            self._check_text_generation_model(model_info_version, model, model_version, model_info.description)
+            self._check_text_generation_model(
+                model_info_version, model, model_version, model_info.description
+            )
         except ReplicateError as e:
             raise CredentialsValidateFailedError(
                 f"Model {model}:{model_version} not exists, cause: {e.__class__.__name__}:{str(e)}"
@@ -107,18 +131,33 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
             raise CredentialsValidateFailedError(str(e))
 
     @staticmethod
-    def _check_text_generation_model(model_info_version, model_name, version, description):
+    def _check_text_generation_model(
+        model_info_version, model_name, version, description
+    ):
         if "language model" in description.lower():
             return
 
         if (
-            "temperature" not in model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"]
-            or "top_p" not in model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"]
-            or "top_k" not in model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"]
+            "temperature"
+            not in model_info_version.openapi_schema["components"]["schemas"]["Input"][
+                "properties"
+            ]
+            or "top_p"
+            not in model_info_version.openapi_schema["components"]["schemas"]["Input"][
+                "properties"
+            ]
+            or "top_k"
+            not in model_info_version.openapi_schema["components"]["schemas"]["Input"][
+                "properties"
+            ]
         ):
-            raise CredentialsValidateFailedError(f"Model {model_name}:{version} is not a Text Generation model.")
+            raise CredentialsValidateFailedError(
+                f"Model {model_name}:{version} is not a Text Generation model."
+            )
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> Optional[AIModelEntity]:
         model_type = LLMMode.CHAT if model.endswith("-chat") else LLMMode.COMPLETION
 
         entity = AIModelEntity(
@@ -127,18 +166,24 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_type=ModelType.LLM,
             model_properties={ModelPropertyKey.MODE: model_type.value},
-            parameter_rules=self._get_customizable_model_parameter_rules(model, credentials),
+            parameter_rules=self._get_customizable_model_parameter_rules(
+                model, credentials
+            ),
         )
 
         return entity
 
     @classmethod
-    def _get_customizable_model_parameter_rules(cls, model: str, credentials: dict) -> list[ParameterRule]:
+    def _get_customizable_model_parameter_rules(
+        cls, model: str, credentials: dict
+    ) -> list[ParameterRule]:
         model_version = ""
         if "model_version" in credentials:
             model_version = credentials["model_version"]
 
-        client = ReplicateClient(api_token=credentials["replicate_api_token"], timeout=30)
+        client = ReplicateClient(
+            api_token=credentials["replicate_api_token"], timeout=30
+        )
         model_info = client.models.get(model)
 
         if model_version:
@@ -149,7 +194,9 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
         parameter_rules = []
 
         input_properties = sorted(
-            model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"].items(),
+            model_info_version.openapi_schema["components"]["schemas"]["Input"][
+                "properties"
+            ].items(),
             key=lambda item: item[1].get("x-order", 0),
         )
 
@@ -220,18 +267,26 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
                 yield LLMResultChunk(
                     model=model,
                     prompt_messages=prompt_messages,
-                    delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message),
+                    delta=LLMResultChunkDelta(
+                        index=index, message=assistant_prompt_message
+                    ),
                 )
             else:
                 prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-                completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+                completion_tokens = self.get_num_tokens(
+                    model, credentials, [assistant_prompt_message]
+                )
 
-                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+                usage = self._calc_response_usage(
+                    model, credentials, prompt_tokens, completion_tokens
+                )
 
                 yield LLMResultChunk(
                     model=model,
                     prompt_messages=prompt_messages,
-                    delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message, usage=usage),
+                    delta=LLMResultChunkDelta(
+                        index=index, message=assistant_prompt_message, usage=usage
+                    ),
                 )
 
     def _handle_generate_response(
@@ -262,9 +317,13 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
         assistant_prompt_message = AssistantPromptMessage(content=current_completion)
 
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
+        completion_tokens = self.get_num_tokens(
+            model, credentials, [assistant_prompt_message]
+        )
 
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         result = LLMResult(
             model=model,
@@ -277,13 +336,20 @@ class ReplicateLargeLanguageModel(_CommonReplicate, LargeLanguageModel):
 
     @classmethod
     def _get_parameter_type(cls, param_type: str) -> str:
-        type_mapping = {"integer": "int", "number": "float", "boolean": "boolean", "string": "string"}
+        type_mapping = {
+            "integer": "int",
+            "number": "float",
+            "boolean": "boolean",
+            "string": "string",
+        }
         return type_mapping.get(param_type)
 
     def _convert_messages_to_prompt(self, messages: list[PromptMessage]) -> str:
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(self._convert_one_message_to_text(message) for message in messages)
+        text = "".join(
+            self._convert_one_message_to_text(message) for message in messages
+        )
 
         return text.rstrip()
 

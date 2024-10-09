@@ -23,6 +23,8 @@ class PGVectorConfig(BaseModel):
     user: str
     password: str
     database: str
+    min_connection: int
+    max_connection: int
 
     @model_validator(mode="before")
     @classmethod
@@ -37,6 +39,14 @@ class PGVectorConfig(BaseModel):
             raise ValueError("config PGVECTOR_PASSWORD is required")
         if not values["database"]:
             raise ValueError("config PGVECTOR_DATABASE is required")
+        if not values["min_connection"]:
+            raise ValueError("config PGVECTOR_MIN_CONNECTION is required")
+        if not values["max_connection"]:
+            raise ValueError("config PGVECTOR_MAX_CONNECTION is required")
+        if values["min_connection"] > values["max_connection"]:
+            raise ValueError(
+                "config PGVECTOR_MIN_CONNECTION should less than PGVECTOR_MAX_CONNECTION"
+            )
         return values
 
 
@@ -61,8 +71,8 @@ class PGVector(BaseVector):
 
     def _create_connection_pool(self, config: PGVectorConfig):
         return psycopg2.pool.SimpleConnectionPool(
-            1,
-            5,
+            config.min_connection,
+            config.max_connection,
             host=config.host,
             port=config.port,
             user=config.user,
@@ -86,7 +96,9 @@ class PGVector(BaseVector):
         self._create_collection(dimension)
         return self.add_texts(texts, embeddings)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         values = []
         pks = []
         for i, doc in enumerate(documents):
@@ -102,7 +114,9 @@ class PGVector(BaseVector):
             )
         with self._get_cursor() as cur:
             psycopg2.extras.execute_values(
-                cur, f"INSERT INTO {self.table_name} (id, text, meta, embedding) VALUES %s", values
+                cur,
+                f"INSERT INTO {self.table_name} (id, text, meta, embedding) VALUES %s",
+                values,
             )
         return pks
 
@@ -113,7 +127,10 @@ class PGVector(BaseVector):
 
     def get_by_ids(self, ids: list[str]) -> list[Document]:
         with self._get_cursor() as cur:
-            cur.execute(f"SELECT meta, text FROM {self.table_name} WHERE id IN %s", (tuple(ids),))
+            cur.execute(
+                f"SELECT meta, text FROM {self.table_name} WHERE id IN %s",
+                (tuple(ids),),
+            )
             docs = []
             for record in cur:
                 docs.append(Document(page_content=record[1], metadata=record[0]))
@@ -125,9 +142,13 @@ class PGVector(BaseVector):
 
     def delete_by_metadata_field(self, key: str, value: str) -> None:
         with self._get_cursor() as cur:
-            cur.execute(f"DELETE FROM {self.table_name} WHERE meta->>%s = %s", (key, value))
+            cur.execute(
+                f"DELETE FROM {self.table_name} WHERE meta->>%s = %s", (key, value)
+            )
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         """
         Search the nearest neighbors to a vector.
 
@@ -158,7 +179,7 @@ class PGVector(BaseVector):
 
         with self._get_cursor() as cur:
             cur.execute(
-                f"""SELECT meta, text, ts_rank(to_tsvector(coalesce(text, '')), to_tsquery(%s)) AS score
+                f"""SELECT meta, text, ts_rank(to_tsvector(coalesce(text, '')), plainto_tsquery(%s)) AS score
                 FROM {self.table_name}
                 WHERE to_tsvector(text) @@ plainto_tsquery(%s)
                 ORDER BY score DESC
@@ -190,20 +211,30 @@ class PGVector(BaseVector):
 
             with self._get_cursor() as cur:
                 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
-                cur.execute(SQL_CREATE_TABLE.format(table_name=self.table_name, dimension=dimension))
+                cur.execute(
+                    SQL_CREATE_TABLE.format(
+                        table_name=self.table_name, dimension=dimension
+                    )
+                )
                 # TODO: create index https://github.com/pgvector/pgvector?tab=readme-ov-file#indexing
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
 
 class PGVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> PGVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> PGVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.PGVECTOR, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.PGVECTOR, collection_name)
+            )
 
         return PGVector(
             collection_name=collection_name,
@@ -213,5 +244,7 @@ class PGVectorFactory(AbstractVectorFactory):
                 user=dify_config.PGVECTOR_USER,
                 password=dify_config.PGVECTOR_PASSWORD,
                 database=dify_config.PGVECTOR_DATABASE,
+                min_connection=dify_config.PGVECTOR_MIN_CONNECTION,
+                max_connection=dify_config.PGVECTOR_MAX_CONNECTION,
             ),
         )

@@ -42,10 +42,16 @@ class MinimaxChatCompletion:
 
         extra_kwargs = {}
 
-        if "max_tokens" in model_parameters and type(model_parameters["max_tokens"]) == int:
+        if (
+            "max_tokens" in model_parameters
+            and type(model_parameters["max_tokens"]) == int
+        ):
             extra_kwargs["tokens_to_generate"] = model_parameters["max_tokens"]
 
-        if "temperature" in model_parameters and type(model_parameters["temperature"]) == float:
+        if (
+            "temperature" in model_parameters
+            and type(model_parameters["temperature"]) == float
+        ):
             extra_kwargs["temperature"] = model_parameters["temperature"]
 
         if "top_p" in model_parameters and type(model_parameters["top_p"]) == float:
@@ -76,7 +82,10 @@ class MinimaxChatCompletion:
             for message in prompt_messages
         ]
 
-        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+        headers = {
+            "Authorization": "Bearer " + api_key,
+            "Content-Type": "application/json",
+        }
 
         body = {
             "model": model,
@@ -88,7 +97,13 @@ class MinimaxChatCompletion:
         }
 
         try:
-            response = post(url=url, data=dumps(body), headers=headers, stream=stream, timeout=(10, 300))
+            response = post(
+                url=url,
+                data=dumps(body),
+                headers=headers,
+                stream=stream,
+                timeout=(10, 300),
+            )
         except Exception as e:
             raise InternalServerError(e)
 
@@ -123,7 +138,9 @@ class MinimaxChatCompletion:
             msg = response["base_resp"]["status_msg"]
             self._handle_error(code, msg)
 
-        message = MinimaxMessage(content=response["reply"], role=MinimaxMessage.Role.ASSISTANT.value)
+        message = MinimaxMessage(
+            content=response["reply"], role=MinimaxMessage.Role.ASSISTANT.value
+        )
         message.usage = {
             "prompt_tokens": 0,
             "completion_tokens": response["usage"]["total_tokens"],
@@ -132,7 +149,9 @@ class MinimaxChatCompletion:
         message.stop_reason = response["choices"][0]["finish_reason"]
         return message
 
-    def _handle_stream_chat_generate_response(self, response: Response) -> Generator[MinimaxMessage, None, None]:
+    def _handle_stream_chat_generate_response(
+        self, response: Response
+    ) -> Generator[MinimaxMessage, None, None]:
         """
         handle stream chat generate response
         """
@@ -151,8 +170,14 @@ class MinimaxChatCompletion:
 
             if data["reply"]:
                 total_tokens = data["usage"]["total_tokens"]
-                message = MinimaxMessage(role=MinimaxMessage.Role.ASSISTANT.value, content="")
-                message.usage = {"prompt_tokens": 0, "completion_tokens": total_tokens, "total_tokens": total_tokens}
+                message = MinimaxMessage(
+                    role=MinimaxMessage.Role.ASSISTANT.value, content=""
+                )
+                message.usage = {
+                    "prompt_tokens": 0,
+                    "completion_tokens": total_tokens,
+                    "total_tokens": total_tokens,
+                }
                 message.stop_reason = data["choices"][0]["finish_reason"]
                 yield message
                 return
@@ -163,4 +188,6 @@ class MinimaxChatCompletion:
 
             for choice in choices:
                 message = choice["delta"]
-                yield MinimaxMessage(content=message, role=MinimaxMessage.Role.ASSISTANT.value)
+                yield MinimaxMessage(
+                    content=message, role=MinimaxMessage.Role.ASSISTANT.value
+                )

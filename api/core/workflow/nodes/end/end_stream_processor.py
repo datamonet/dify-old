@@ -19,54 +19,74 @@ class EndStreamProcessor(StreamProcessor):
         super().__init__(graph, variable_pool)
         self.end_stream_param = graph.end_stream_param
         self.route_position = {}
-        for end_node_id, _ in self.end_stream_param.end_stream_variable_selector_mapping.items():
+        for (
+            end_node_id,
+            _,
+        ) in self.end_stream_param.end_stream_variable_selector_mapping.items():
             self.route_position[end_node_id] = 0
         self.current_stream_chunk_generating_node_ids: dict[str, list[str]] = {}
-        self.has_outputed = False
-        self.outputed_node_ids = set()
+        self.has_output = False
+        self.output_node_ids = set()
 
-    def process(self, generator: Generator[GraphEngineEvent, None, None]) -> Generator[GraphEngineEvent, None, None]:
+    def process(
+        self, generator: Generator[GraphEngineEvent, None, None]
+    ) -> Generator[GraphEngineEvent, None, None]:
         for event in generator:
             if isinstance(event, NodeRunStartedEvent):
-                if event.route_node_state.node_id == self.graph.root_node_id and not self.rest_node_ids:
+                if (
+                    event.route_node_state.node_id == self.graph.root_node_id
+                    and not self.rest_node_ids
+                ):
                     self.reset()
 
                 yield event
             elif isinstance(event, NodeRunStreamChunkEvent):
                 if event.in_iteration_id:
-                    if self.has_outputed and event.node_id not in self.outputed_node_ids:
+                    if self.has_output and event.node_id not in self.output_node_ids:
                         event.chunk_content = "\n" + event.chunk_content
 
-                    self.outputed_node_ids.add(event.node_id)
-                    self.has_outputed = True
+                    self.output_node_ids.add(event.node_id)
+                    self.has_output = True
                     yield event
                     continue
 
-                if event.route_node_state.node_id in self.current_stream_chunk_generating_node_ids:
-                    stream_out_end_node_ids = self.current_stream_chunk_generating_node_ids[
-                        event.route_node_state.node_id
-                    ]
+                if (
+                    event.route_node_state.node_id
+                    in self.current_stream_chunk_generating_node_ids
+                ):
+                    stream_out_end_node_ids = (
+                        self.current_stream_chunk_generating_node_ids[
+                            event.route_node_state.node_id
+                        ]
+                    )
                 else:
                     stream_out_end_node_ids = self._get_stream_out_end_node_ids(event)
-                    self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id] = (
-                        stream_out_end_node_ids
-                    )
+                    self.current_stream_chunk_generating_node_ids[
+                        event.route_node_state.node_id
+                    ] = stream_out_end_node_ids
 
                 if stream_out_end_node_ids:
-                    if self.has_outputed and event.node_id not in self.outputed_node_ids:
+                    if self.has_output and event.node_id not in self.output_node_ids:
                         event.chunk_content = "\n" + event.chunk_content
 
-                    self.outputed_node_ids.add(event.node_id)
-                    self.has_outputed = True
+                    self.output_node_ids.add(event.node_id)
+                    self.has_output = True
                     yield event
             elif isinstance(event, NodeRunSucceededEvent):
                 yield event
-                if event.route_node_state.node_id in self.current_stream_chunk_generating_node_ids:
+                if (
+                    event.route_node_state.node_id
+                    in self.current_stream_chunk_generating_node_ids
+                ):
                     # update self.route_position after all stream event finished
-                    for end_node_id in self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id]:
+                    for end_node_id in self.current_stream_chunk_generating_node_ids[
+                        event.route_node_state.node_id
+                    ]:
                         self.route_position[end_node_id] += 1
 
-                    del self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id]
+                    del self.current_stream_chunk_generating_node_ids[
+                        event.route_node_state.node_id
+                    ]
 
                 # remove unreachable nodes
                 self._remove_unreachable_nodes(event)
@@ -78,7 +98,10 @@ class EndStreamProcessor(StreamProcessor):
 
     def reset(self) -> None:
         self.route_position = {}
-        for end_node_id, _ in self.end_stream_param.end_stream_variable_selector_mapping.items():
+        for (
+            end_node_id,
+            _,
+        ) in self.end_stream_param.end_stream_variable_selector_mapping.items():
             self.route_position[end_node_id] = 0
         self.rest_node_ids = self.graph.node_ids.copy()
         self.current_stream_chunk_generating_node_ids = {}
@@ -96,7 +119,8 @@ class EndStreamProcessor(StreamProcessor):
             if event.route_node_state.node_id != end_node_id and (
                 end_node_id not in self.rest_node_ids
                 or not all(
-                    dep_id not in self.rest_node_ids for dep_id in self.end_stream_param.end_dependencies[end_node_id]
+                    dep_id not in self.rest_node_ids
+                    for dep_id in self.end_stream_param.end_dependencies[end_node_id]
                 )
             ):
                 continue
@@ -105,7 +129,11 @@ class EndStreamProcessor(StreamProcessor):
 
             position = 0
             value_selectors = []
-            for current_value_selectors in self.end_stream_param.end_stream_variable_selector_mapping[end_node_id]:
+            for (
+                current_value_selectors
+            ) in self.end_stream_param.end_stream_variable_selector_mapping[
+                end_node_id
+            ]:
                 if position >= route_position:
                     value_selectors.append(current_value_selectors)
 
@@ -124,11 +152,11 @@ class EndStreamProcessor(StreamProcessor):
 
                 if text:
                     current_node_id = value_selector[0]
-                    if self.has_outputed and current_node_id not in self.outputed_node_ids:
+                    if self.has_output and current_node_id not in self.output_node_ids:
                         text = "\n" + text
 
-                    self.outputed_node_ids.add(current_node_id)
-                    self.has_outputed = True
+                    self.output_node_ids.add(current_node_id)
+                    self.has_output = True
                     yield NodeRunStreamChunkEvent(
                         id=event.id,
                         node_id=event.node_id,
@@ -162,13 +190,24 @@ class EndStreamProcessor(StreamProcessor):
                 continue
 
             # all depends on end node id not in rest node ids
-            if all(dep_id not in self.rest_node_ids for dep_id in self.end_stream_param.end_dependencies[end_node_id]):
-                if route_position >= len(self.end_stream_param.end_stream_variable_selector_mapping[end_node_id]):
+            if all(
+                dep_id not in self.rest_node_ids
+                for dep_id in self.end_stream_param.end_dependencies[end_node_id]
+            ):
+                if route_position >= len(
+                    self.end_stream_param.end_stream_variable_selector_mapping[
+                        end_node_id
+                    ]
+                ):
                     continue
 
                 position = 0
                 value_selector = None
-                for current_value_selectors in self.end_stream_param.end_stream_variable_selector_mapping[end_node_id]:
+                for (
+                    current_value_selectors
+                ) in self.end_stream_param.end_stream_variable_selector_mapping[
+                    end_node_id
+                ]:
                     if position == route_position:
                         value_selector = current_value_selectors
                         break

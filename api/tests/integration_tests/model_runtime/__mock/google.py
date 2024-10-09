@@ -7,7 +7,11 @@ from google.ai import generativelanguage as glm
 from google.ai.generativelanguage_v1beta.types import content as gag_content
 from google.generativeai import GenerativeModel
 from google.generativeai.client import _ClientManager, configure
-from google.generativeai.types import GenerateContentResponse, content_types, safety_types
+from google.generativeai.types import (
+    GenerateContentResponse,
+    content_types,
+    safety_types,
+)
 from google.generativeai.types.generation_types import BaseGenerateContentResponse
 
 current_api_key = ""
@@ -23,11 +27,17 @@ class MockGoogleResponseClass:
             if i == len(full_response_text):
                 self._done = True
                 yield GenerateContentResponse(
-                    done=True, iterator=None, result=glm.GenerateContentResponse({}), chunks=[]
+                    done=True,
+                    iterator=None,
+                    result=glm.GenerateContentResponse({}),
+                    chunks=[],
                 )
             else:
                 yield GenerateContentResponse(
-                    done=False, iterator=None, result=glm.GenerateContentResponse({}), chunks=[]
+                    done=False,
+                    iterator=None,
+                    result=glm.GenerateContentResponse({}),
+                    chunks=[],
                 )
 
 
@@ -42,7 +52,9 @@ class MockGoogleResponseCandidateClass:
 class MockGoogleClass:
     @staticmethod
     def generate_content_sync() -> GenerateContentResponse:
-        return GenerateContentResponse(done=True, iterator=None, result=glm.GenerateContentResponse({}), chunks=[])
+        return GenerateContentResponse(
+            done=True, iterator=None, result=glm.GenerateContentResponse({}), chunks=[]
+        )
 
     @staticmethod
     def generate_content_stream() -> Generator[GenerateContentResponse, None, None]:
@@ -106,9 +118,17 @@ class MockGoogleClass:
 
 @pytest.fixture()
 def setup_google_mock(request, monkeypatch: MonkeyPatch):
-    monkeypatch.setattr(BaseGenerateContentResponse, "text", MockGoogleClass.generative_response_text)
-    monkeypatch.setattr(BaseGenerateContentResponse, "candidates", MockGoogleClass.generative_response_candidates)
-    monkeypatch.setattr(GenerativeModel, "generate_content", MockGoogleClass.generate_content)
+    monkeypatch.setattr(
+        BaseGenerateContentResponse, "text", MockGoogleClass.generative_response_text
+    )
+    monkeypatch.setattr(
+        BaseGenerateContentResponse,
+        "candidates",
+        MockGoogleClass.generative_response_candidates,
+    )
+    monkeypatch.setattr(
+        GenerativeModel, "generate_content", MockGoogleClass.generate_content
+    )
     monkeypatch.setattr(_ClientManager, "make_client", MockGoogleClass.make_client)
 
     yield

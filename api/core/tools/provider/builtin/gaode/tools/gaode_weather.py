@@ -18,7 +18,10 @@ class GaodeRepositoriesTool(BuiltinTool):
         if not city:
             return self.create_text_message("Please tell me your city")
 
-        if "api_key" not in self.runtime.credentials or not self.runtime.credentials.get("api_key"):
+        if (
+            "api_key" not in self.runtime.credentials
+            or not self.runtime.credentials.get("api_key")
+        ):
             return self.create_text_message("Gaode API key is required.")
 
         try:
@@ -28,7 +31,9 @@ class GaodeRepositoriesTool(BuiltinTool):
                 method="GET",
                 headers={"Content-Type": "application/json; charset=utf-8"},
                 url="{url}/config/district?keywords={keywords}&subdistrict=0&extensions=base&key={apikey}".format(
-                    url=api_domain, keywords=city, apikey=self.runtime.credentials.get("api_key")
+                    url=api_domain,
+                    keywords=city,
+                    apikey=self.runtime.credentials.get("api_key"),
                 ),
             )
             City_data = city_response.json()
@@ -38,10 +43,17 @@ class GaodeRepositoriesTool(BuiltinTool):
                     weatherInfo_response = s.request(
                         method="GET",
                         url="{url}/weather/weatherInfo?city={citycode}&extensions=all&key={apikey}&output=json"
-                        "".format(url=api_domain, citycode=CityCode, apikey=self.runtime.credentials.get("api_key")),
+                        "".format(
+                            url=api_domain,
+                            citycode=CityCode,
+                            apikey=self.runtime.credentials.get("api_key"),
+                        ),
                     )
                     weatherInfo_data = weatherInfo_response.json()
-                    if weatherInfo_response.status_code == 200 and weatherInfo_data.get("info") == "OK":
+                    if (
+                        weatherInfo_response.status_code == 200
+                        and weatherInfo_data.get("info") == "OK"
+                    ):
                         contents = []
                         if len(weatherInfo_data.get("forecasts")) > 0:
                             for item in weatherInfo_data["forecasts"][0]["casts"]:
@@ -56,9 +68,16 @@ class GaodeRepositoriesTool(BuiltinTool):
                                 contents.append(content)
                             s.close()
                             return self.create_text_message(
-                                self.summary(user_id=user_id, content=json.dumps(contents, ensure_ascii=False))
+                                self.summary(
+                                    user_id=user_id,
+                                    content=json.dumps(contents, ensure_ascii=False),
+                                )
                             )
             s.close()
-            return self.create_text_message(f"No weather information for {city} was found.")
+            return self.create_text_message(
+                f"No weather information for {city} was found."
+            )
         except Exception as e:
-            return self.create_text_message("Gaode API Key and Api Version is invalid. {}".format(e))
+            return self.create_text_message(
+                "Gaode API Key and Api Version is invalid. {}".format(e)
+            )

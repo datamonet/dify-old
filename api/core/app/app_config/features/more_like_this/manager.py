@@ -27,7 +27,10 @@ class MoreLikeThisConfigManager:
         if not isinstance(config["more_like_this"], dict):
             raise ValueError("more_like_this must be of dict type")
 
-        if "enabled" not in config["more_like_this"] or not config["more_like_this"]["enabled"]:
+        if (
+            "enabled" not in config["more_like_this"]
+            or not config["more_like_this"]["enabled"]
+        ):
             config["more_like_this"]["enabled"] = False
 
         if not isinstance(config["more_like_this"]["enabled"], bool):

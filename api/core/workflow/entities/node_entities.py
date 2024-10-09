@@ -76,7 +76,9 @@ class NodeRunResult(BaseModel):
     metadata: Optional[dict[NodeRunMetadataKey, Any]] = None  # node metadata
     llm_usage: Optional[LLMUsage] = None  # llm usage
 
-    edge_source_handle: Optional[str] = None  # source handle id of node with multiple branches
+    edge_source_handle: Optional[str] = (
+        None  # source handle id of node with multiple branches
+    )
 
     error: Optional[str] = None  # error message if status is failed
 

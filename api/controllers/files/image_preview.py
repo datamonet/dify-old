@@ -4,7 +4,7 @@ from werkzeug.exceptions import NotFound
 
 import services
 from controllers.files import api
-from libs.exception import BaseHTTPException
+from controllers.files.error import UnsupportedFileTypeError
 from services.account_service import TenantService
 from services.file_service import FileService
 
@@ -21,7 +21,9 @@ class ImagePreviewApi(Resource):
             return {"content": "Invalid request."}, 400
 
         try:
-            generator, mimetype = FileService.get_image_preview(file_id, timestamp, nonce, sign)
+            generator, mimetype = FileService.get_image_preview(
+                file_id, timestamp, nonce, sign
+            )
         except services.errors.file.UnsupportedFileTypeError:
             raise UnsupportedFileTypeError()
 
@@ -33,7 +35,11 @@ class WorkspaceWebappLogoApi(Resource):
         workspace_id = str(workspace_id)
 
         custom_config = TenantService.get_custom_config(workspace_id)
-        webapp_logo_file_id = custom_config.get("replace_webapp_logo") if custom_config is not None else None
+        webapp_logo_file_id = (
+            custom_config.get("replace_webapp_logo")
+            if custom_config is not None
+            else None
+        )
 
         if not webapp_logo_file_id:
             raise NotFound("webapp logo is not found")
@@ -49,10 +55,6 @@ class WorkspaceWebappLogoApi(Resource):
 
 
 api.add_resource(ImagePreviewApi, "/files/<uuid:file_id>/image-preview")
-api.add_resource(WorkspaceWebappLogoApi, "/files/workspaces/<uuid:workspace_id>/webapp-logo")
-
-
-class UnsupportedFileTypeError(BaseHTTPException):
-    error_code = "unsupported_file_type"
-    description = "File type not allowed."
-    code = 415
+api.add_resource(
+    WorkspaceWebappLogoApi, "/files/workspaces/<uuid:workspace_id>/webapp-logo"
+)

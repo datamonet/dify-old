@@ -40,7 +40,10 @@ class InputModeration:
         moderation_type = sensitive_word_avoidance_config.type
 
         moderation_factory = ModerationFactory(
-            name=moderation_type, app_id=app_id, tenant_id=tenant_id, config=sensitive_word_avoidance_config.config
+            name=moderation_type,
+            app_id=app_id,
+            tenant_id=tenant_id,
+            config=sensitive_word_avoidance_config.config,
         )
 
         with measure_time() as timer:

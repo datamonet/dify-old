@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessageTool,
@@ -11,7 +15,9 @@ from core.model_runtime.entities.message_entities import (
     UserPromptMessage,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
+    OAIAPICompatLargeLanguageModel,
+)
 
 """
 Using Together.ai's OpenAI-compatible API as testing endpoint
@@ -24,7 +30,11 @@ def test_validate_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-            credentials={"api_key": "invalid_key", "endpoint_url": "https://api.together.xyz/v1/", "mode": "chat"},
+            credentials={
+                "api_key": "invalid_key",
+                "endpoint_url": "https://api.together.xyz/v1/",
+                "mode": "chat",
+            },
         )
 
     model.validate_credentials(
@@ -162,7 +172,10 @@ def test_invoke_chat_model_with_tools():
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
                     },
                     "required": ["location"],
@@ -184,7 +197,10 @@ def test_get_num_tokens():
 
     num_tokens = model.get_num_tokens(
         model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-        credentials={"api_key": os.environ.get("OPENAI_API_KEY"), "endpoint_url": "https://api.openai.com/v1/"},
+        credentials={
+            "api_key": os.environ.get("OPENAI_API_KEY"),
+            "endpoint_url": "https://api.openai.com/v1/",
+        },
         prompt_messages=[
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",

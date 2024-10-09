@@ -7,8 +7,17 @@ from core.agent.base_agent_runner import BaseAgentRunner
 from core.agent.entities import AgentScratchpadUnit
 from core.agent.output_parser.cot_output_parser import CotAgentOutputParser
 from core.app.apps.base_app_queue_manager import PublishFrom
-from core.app.entities.queue_entities import QueueAgentThoughtEvent, QueueMessageEndEvent, QueueMessageFileEvent
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta, LLMUsage
+from core.app.entities.queue_entities import (
+    QueueAgentThoughtEvent,
+    QueueMessageEndEvent,
+    QueueMessageFileEvent,
+)
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+    LLMUsage,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -49,7 +58,10 @@ class CotAgentRunner(BaseAgentRunner, ABC):
 
         # check model mode
         if "Observation" not in app_generate_entity.model_conf.stop:
-            if app_generate_entity.model_conf.provider not in self._ignore_observation_providers:
+            if (
+                app_generate_entity.model_conf.provider
+                not in self._ignore_observation_providers
+            ):
                 app_generate_entity.model_conf.stop.append("Observation")
 
         app_config = self.app_config
@@ -57,7 +69,9 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         # init instruction
         inputs = inputs or {}
         instruction = app_config.prompt_template.simple_prompt_template
-        self._instruction = self._fill_in_inputs_from_external_data_tools(instruction, inputs)
+        self._instruction = self._fill_in_inputs_from_external_data_tools(
+            instruction, inputs
+        )
 
         iteration_step = 1
         max_iteration_steps = min(app_config.agent.max_iteration, 5) + 1
@@ -93,12 +107,17 @@ class CotAgentRunner(BaseAgentRunner, ABC):
             message_file_ids = []
 
             agent_thought = self.create_agent_thought(
-                message_id=message.id, message="", tool_name="", tool_input="", messages_ids=message_file_ids
+                message_id=message.id,
+                message="",
+                tool_name="",
+                tool_input="",
+                messages_ids=message_file_ids,
             )
 
             if iteration_step > 1:
                 self.queue_manager.publish(
-                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id), PublishFrom.APPLICATION_MANAGER
+                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id),
+                    PublishFrom.APPLICATION_MANAGER,
                 )
 
             # recalc llm max tokens
@@ -120,7 +139,9 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                 raise ValueError("failed to invoke llm")
 
             usage_dict = {}
-            react_chunks = CotAgentOutputParser.handle_react_stream_output(chunks, usage_dict)
+            react_chunks = CotAgentOutputParser.handle_react_stream_output(
+                chunks, usage_dict
+            )
             scratchpad = AgentScratchpadUnit(
                 agent_response="",
                 thought="",
@@ -132,7 +153,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
             # publish agent thought if it's first iteration
             if iteration_step == 1:
                 self.queue_manager.publish(
-                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id), PublishFrom.APPLICATION_MANAGER
+                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id),
+                    PublishFrom.APPLICATION_MANAGER,
                 )
 
             for chunk in react_chunks:
@@ -149,10 +171,16 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                         model=self.model_config.model,
                         prompt_messages=prompt_messages,
                         system_fingerprint="",
-                        delta=LLMResultChunkDelta(index=0, message=AssistantPromptMessage(content=chunk), usage=None),
+                        delta=LLMResultChunkDelta(
+                            index=0,
+                            message=AssistantPromptMessage(content=chunk),
+                            usage=None,
+                        ),
                     )
 
-            scratchpad.thought = scratchpad.thought.strip() or "I am thinking about how to help you"
+            scratchpad.thought = (
+                scratchpad.thought.strip() or "I am thinking about how to help you"
+            )
             self._agent_scratchpad.append(scratchpad)
 
             # get llm usage
@@ -164,7 +192,11 @@ class CotAgentRunner(BaseAgentRunner, ABC):
             self.save_agent_thought(
                 agent_thought=agent_thought,
                 tool_name=scratchpad.action.action_name if scratchpad.action else "",
-                tool_input={scratchpad.action.action_name: scratchpad.action.action_input} if scratchpad.action else {},
+                tool_input={
+                    scratchpad.action.action_name: scratchpad.action.action_input
+                }
+                if scratchpad.action
+                else {},
                 tool_invoke_meta={},
                 thought=scratchpad.thought,
                 observation="",
@@ -175,7 +207,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
 
             if not scratchpad.is_final():
                 self.queue_manager.publish(
-                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id), PublishFrom.APPLICATION_MANAGER
+                    QueueAgentThoughtEvent(agent_thought_id=agent_thought.id),
+                    PublishFrom.APPLICATION_MANAGER,
                 )
 
             if not scratchpad.action:
@@ -208,22 +241,31 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                     self.save_agent_thought(
                         agent_thought=agent_thought,
                         tool_name=scratchpad.action.action_name,
-                        tool_input={scratchpad.action.action_name: scratchpad.action.action_input},
+                        tool_input={
+                            scratchpad.action.action_name: scratchpad.action.action_input
+                        },
                         thought=scratchpad.thought,
-                        observation={scratchpad.action.action_name: tool_invoke_response},
-                        tool_invoke_meta={scratchpad.action.action_name: tool_invoke_meta.to_dict()},
+                        observation={
+                            scratchpad.action.action_name: tool_invoke_response
+                        },
+                        tool_invoke_meta={
+                            scratchpad.action.action_name: tool_invoke_meta.to_dict()
+                        },
                         answer=scratchpad.agent_response,
                         messages_ids=message_file_ids,
                         llm_usage=usage_dict["usage"],
                     )
 
                     self.queue_manager.publish(
-                        QueueAgentThoughtEvent(agent_thought_id=agent_thought.id), PublishFrom.APPLICATION_MANAGER
+                        QueueAgentThoughtEvent(agent_thought_id=agent_thought.id),
+                        PublishFrom.APPLICATION_MANAGER,
                     )
 
                 # update prompt tool message
                 for prompt_tool in self._prompt_messages_tools:
-                    self.update_prompt_message_tool(tool_instances[prompt_tool.name], prompt_tool)
+                    self.update_prompt_message_tool(
+                        tool_instances[prompt_tool.name], prompt_tool
+                    )
 
             iteration_step += 1
 
@@ -231,7 +273,9 @@ class CotAgentRunner(BaseAgentRunner, ABC):
             model=model_instance.model,
             prompt_messages=prompt_messages,
             delta=LLMResultChunkDelta(
-                index=0, message=AssistantPromptMessage(content=final_answer), usage=llm_usage["usage"]
+                index=0,
+                message=AssistantPromptMessage(content=final_answer),
+                usage=llm_usage["usage"],
             ),
             system_fingerprint="",
         )
@@ -308,11 +352,14 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         # publish files
         for message_file_id, save_as in message_files:
             if save_as:
-                self.variables_pool.set_file(tool_name=tool_call_name, value=message_file_id, name=save_as)
+                self.variables_pool.set_file(
+                    tool_name=tool_call_name, value=message_file_id, name=save_as
+                )
 
             # publish message file
             self.queue_manager.publish(
-                QueueMessageFileEvent(message_file_id=message_file_id), PublishFrom.APPLICATION_MANAGER
+                QueueMessageFileEvent(message_file_id=message_file_id),
+                PublishFrom.APPLICATION_MANAGER,
             )
             # add message file ids
             message_file_ids.append(message_file_id)
@@ -323,16 +370,20 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         """
         convert dict to action
         """
-        return AgentScratchpadUnit.Action(action_name=action["action"], action_input=action["action_input"])
+        return AgentScratchpadUnit.Action(
+            action_name=action["action"], action_input=action["action_input"]
+        )
 
-    def _fill_in_inputs_from_external_data_tools(self, instruction: str, inputs: dict) -> str:
+    def _fill_in_inputs_from_external_data_tools(
+        self, instruction: str, inputs: dict
+    ) -> str:
         """
         fill in inputs from external data tools
         """
         for key, value in inputs.items():
             try:
                 instruction = instruction.replace(f"{{{{{key}}}}}", str(value))
-            except Exception as e:
+            except Exception:
                 continue
 
         return instruction
@@ -351,7 +402,9 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         organize prompt messages
         """
 
-    def _format_assistant_message(self, agent_scratchpad: list[AgentScratchpadUnit]) -> str:
+    def _format_assistant_message(
+        self, agent_scratchpad: list[AgentScratchpadUnit]
+    ) -> str:
         """
         format assistant message
         """
@@ -383,7 +436,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                 if not current_scratchpad:
                     current_scratchpad = AgentScratchpadUnit(
                         agent_response=message.content,
-                        thought=message.content or "I am thinking about how to help you",
+                        thought=message.content
+                        or "I am thinking about how to help you",
                         action_str="",
                         action=None,
                         observation=None,
@@ -393,9 +447,13 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                     try:
                         current_scratchpad.action = AgentScratchpadUnit.Action(
                             action_name=message.tool_calls[0].function.name,
-                            action_input=json.loads(message.tool_calls[0].function.arguments),
+                            action_input=json.loads(
+                                message.tool_calls[0].function.arguments
+                            ),
                         )
-                        current_scratchpad.action_str = json.dumps(current_scratchpad.action.to_dict())
+                        current_scratchpad.action_str = json.dumps(
+                            current_scratchpad.action.to_dict()
+                        )
                     except:
                         pass
             elif isinstance(message, ToolPromptMessage):
@@ -403,14 +461,22 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                     current_scratchpad.observation = message.content
             elif isinstance(message, UserPromptMessage):
                 if scratchpads:
-                    result.append(AssistantPromptMessage(content=self._format_assistant_message(scratchpads)))
+                    result.append(
+                        AssistantPromptMessage(
+                            content=self._format_assistant_message(scratchpads)
+                        )
+                    )
                     scratchpads = []
                     current_scratchpad = None
 
                 result.append(message)
 
         if scratchpads:
-            result.append(AssistantPromptMessage(content=self._format_assistant_message(scratchpads)))
+            result.append(
+                AssistantPromptMessage(
+                    content=self._format_assistant_message(scratchpads)
+                )
+            )
 
         historic_prompts = AgentHistoryPromptTransform(
             model_config=self.model_config,

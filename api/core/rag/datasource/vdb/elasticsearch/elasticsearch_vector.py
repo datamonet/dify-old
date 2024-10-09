@@ -73,12 +73,16 @@ class ElasticSearchVector(BaseVector):
 
     def _check_version(self):
         if self._version < "8.0.0":
-            raise ValueError("Elasticsearch vector database version must be greater than 8.0.0")
+            raise ValueError(
+                "Elasticsearch vector database version must be greater than 8.0.0"
+            )
 
     def get_type(self) -> str:
         return "elasticsearch"
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         uuids = self._get_uuids(documents)
         for i in range(len(documents)):
             self._client.index(
@@ -110,7 +114,9 @@ class ElasticSearchVector(BaseVector):
     def delete(self) -> None:
         self._client.indices.delete(index=self._collection_name)
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         top_k = kwargs.get("top_k", 10)
         knn = {"field": Field.VECTOR.value, "query_vector": query_vector, "k": top_k}
 
@@ -159,7 +165,10 @@ class ElasticSearchVector(BaseVector):
         self.add_texts(texts, embeddings, **kwargs)
 
     def create_collection(
-        self, embeddings: list, metadatas: Optional[list[dict]] = None, index_params: Optional[dict] = None
+        self,
+        embeddings: list,
+        metadatas: Optional[list[dict]] = None,
+        index_params: Optional[dict] = None,
     ):
         lock_name = f"vector_indexing_lock_{self._collection_name}"
         with redis_client.lock(lock_name, timeout=20):
@@ -181,25 +190,35 @@ class ElasticSearchVector(BaseVector):
                         Field.METADATA_KEY.value: {
                             "type": "object",
                             "properties": {
-                                "doc_id": {"type": "keyword"}  # Map doc_id to keyword type
+                                "doc_id": {
+                                    "type": "keyword"
+                                }  # Map doc_id to keyword type
                             },
                         },
                     }
                 }
-                self._client.indices.create(index=self._collection_name, mappings=mappings)
+                self._client.indices.create(
+                    index=self._collection_name, mappings=mappings
+                )
 
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
 
 class ElasticSearchVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> ElasticSearchVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> ElasticSearchVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.ELASTICSEARCH, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.ELASTICSEARCH, collection_name)
+            )
 
         config = current_app.config
         return ElasticSearchVector(

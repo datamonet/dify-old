@@ -22,11 +22,19 @@ class NovitaAiModelQueryTool(BuiltinTool):
         """
         invoke tools
         """
-        if "api_key" not in self.runtime.credentials or not self.runtime.credentials.get("api_key"):
-            raise ToolProviderCredentialValidationError("Novita AI API Key is required.")
+        if (
+            "api_key" not in self.runtime.credentials
+            or not self.runtime.credentials.get("api_key")
+        ):
+            raise ToolProviderCredentialValidationError(
+                "Novita AI API Key is required."
+            )
 
         api_key = self.runtime.credentials.get("api_key")
-        headers = {"Content-Type": "application/json", "Authorization": "Bearer " + api_key}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + api_key,
+        }
         params = self._process_parameters(tool_parameters)
         result_type = params.get("result_type")
         del params["result_type"]
@@ -40,22 +48,38 @@ class NovitaAiModelQueryTool(BuiltinTool):
 
         result_str = ""
         if result_type == "first sd_name":
-            result_str = models_data[0]["sd_name_in_api"] if len(models_data) > 0 else ""
+            result_str = (
+                models_data[0]["sd_name_in_api"] if len(models_data) > 0 else ""
+            )
         elif result_type == "first name sd_name pair":
             result_str = (
-                json.dumps({"name": models_data[0]["name"], "sd_name": models_data[0]["sd_name_in_api"]})
+                json.dumps(
+                    {
+                        "name": models_data[0]["name"],
+                        "sd_name": models_data[0]["sd_name_in_api"],
+                    }
+                )
                 if len(models_data) > 0
                 else ""
             )
         elif result_type == "sd_name array":
-            sd_name_array = [model["sd_name_in_api"] for model in models_data] if len(models_data) > 0 else []
+            sd_name_array = (
+                [model["sd_name_in_api"] for model in models_data]
+                if len(models_data) > 0
+                else []
+            )
             result_str = json.dumps(sd_name_array)
         elif result_type == "name array":
-            name_array = [model["name"] for model in models_data] if len(models_data) > 0 else []
+            name_array = (
+                [model["name"] for model in models_data] if len(models_data) > 0 else []
+            )
             result_str = json.dumps(name_array)
         elif result_type == "name sd_name pair array":
             name_sd_name_pair_array = (
-                [{"name": model["name"], "sd_name": model["sd_name_in_api"]} for model in models_data]
+                [
+                    {"name": model["name"], "sd_name": model["sd_name_in_api"]}
+                    for model in models_data
+                ]
                 if len(models_data) > 0
                 else []
             )
@@ -84,7 +108,10 @@ class NovitaAiModelQueryTool(BuiltinTool):
             inside_params["pagination.cursor"] = pagination_cursor
 
         response = ssrf_proxy.get(
-            url=str(URL(self._model_query_endpoint)), headers=headers, params=params, timeout=(10, 60)
+            url=str(URL(self._model_query_endpoint)),
+            headers=headers,
+            params=params,
+            timeout=(10, 60),
         )
 
         res_data = response.json()
@@ -92,7 +119,11 @@ class NovitaAiModelQueryTool(BuiltinTool):
         models_data.extend(res_data["models"])
 
         res_data_len = len(res_data["models"])
-        if res_data_len == 0 or res_data_len < int(params["pagination.limit"]) or recursive is False:
+        if (
+            res_data_len == 0
+            or res_data_len < int(params["pagination.limit"])
+            or recursive is False
+        ):
             # deduplicate
             df = DataFrame.from_dict(models_data)
             df_unique = df.drop_duplicates(subset=["id"])
@@ -114,20 +145,34 @@ class NovitaAiModelQueryTool(BuiltinTool):
         res_parameters = {}
 
         # delete none or empty
-        keys_to_delete = [k for k, v in process_parameters.items() if v is None or v == ""]
+        keys_to_delete = [
+            k for k, v in process_parameters.items() if v is None or v == ""
+        ]
         for k in keys_to_delete:
             del process_parameters[k]
 
-        if "query" in process_parameters and process_parameters.get("query") != "unspecified":
+        if (
+            "query" in process_parameters
+            and process_parameters.get("query") != "unspecified"
+        ):
             res_parameters["filter.query"] = process_parameters["query"]
 
-        if "visibility" in process_parameters and process_parameters.get("visibility") != "unspecified":
+        if (
+            "visibility" in process_parameters
+            and process_parameters.get("visibility") != "unspecified"
+        ):
             res_parameters["filter.visibility"] = process_parameters["visibility"]
 
-        if "source" in process_parameters and process_parameters.get("source") != "unspecified":
+        if (
+            "source" in process_parameters
+            and process_parameters.get("source") != "unspecified"
+        ):
             res_parameters["filter.source"] = process_parameters["source"]
 
-        if "type" in process_parameters and process_parameters.get("type") != "unspecified":
+        if (
+            "type" in process_parameters
+            and process_parameters.get("type") != "unspecified"
+        ):
             res_parameters["filter.types"] = process_parameters["type"]
 
         if "is_sdxl" in process_parameters:
@@ -136,7 +181,9 @@ class NovitaAiModelQueryTool(BuiltinTool):
             elif process_parameters["is_sdxl"] == "false":
                 res_parameters["filter.is_sdxl"] = False
 
-        res_parameters["result_type"] = process_parameters.get("result_type", "first sd_name")
+        res_parameters["result_type"] = process_parameters.get(
+            "result_type", "first sd_name"
+        )
 
         res_parameters["pagination.limit"] = (
             1

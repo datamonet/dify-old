@@ -3,15 +3,22 @@ import logging
 import re
 from typing import Optional
 
-from core.llm_generator.output_parser.rule_config_generator import RuleConfigGeneratorOutputParser
-from core.llm_generator.output_parser.suggested_questions_after_answer import SuggestedQuestionsAfterAnswerOutputParser
+from core.llm_generator.output_parser.rule_config_generator import (
+    RuleConfigGeneratorOutputParser,
+)
+from core.llm_generator.output_parser.suggested_questions_after_answer import (
+    SuggestedQuestionsAfterAnswerOutputParser,
+)
 from core.llm_generator.prompts import (
     CONVERSATION_TITLE_PROMPT,
     GENERATOR_QA_PROMPT,
     WORKFLOW_RULE_CONFIG_PROMPT_GENERATE_TEMPLATE,
 )
 from core.model_manager import ModelManager
-from core.model_runtime.entities.message_entities import SystemPromptMessage, UserPromptMessage
+from core.model_runtime.entities.message_entities import (
+    SystemPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeError
 from core.ops.entities.trace_entity import TraceTaskName
@@ -23,7 +30,11 @@ from core.prompt.utils.prompt_template_parser import PromptTemplateParser
 class LLMGenerator:
     @classmethod
     def generate_conversation_name(
-        cls, tenant_id: str, query, conversation_id: Optional[str] = None, app_id: Optional[str] = None
+        cls,
+        tenant_id: str,
+        query,
+        conversation_id: Optional[str] = None,
+        app_id: Optional[str] = None,
     ):
         prompt = CONVERSATION_TITLE_PROMPT
 
@@ -43,10 +54,14 @@ class LLMGenerator:
 
         with measure_time() as timer:
             response = model_instance.invoke_llm(
-                prompt_messages=prompts, model_parameters={"max_tokens": 100, "temperature": 1}, stream=False
+                prompt_messages=prompts,
+                model_parameters={"max_tokens": 100, "temperature": 1},
+                stream=False,
             )
         answer = response.message.content
         cleaned_answer = re.sub(r"^.*(\{.*\}).*$", r"\1", answer, flags=re.DOTALL)
+        if cleaned_answer is None:
+            return ""
         result_dict = json.loads(cleaned_answer)
         answer = result_dict["Your Output"]
         name = answer.strip()
@@ -74,9 +89,13 @@ class LLMGenerator:
         output_parser = SuggestedQuestionsAfterAnswerOutputParser()
         format_instructions = output_parser.get_format_instructions()
 
-        prompt_template = PromptTemplateParser(template="{{histories}}\n{{format_instructions}}\nquestions:\n")
+        prompt_template = PromptTemplateParser(
+            template="{{histories}}\n{{format_instructions}}\nquestions:\n"
+        )
 
-        prompt = prompt_template.format({"histories": histories, "format_instructions": format_instructions})
+        prompt = prompt_template.format(
+            {"histories": histories, "format_instructions": format_instructions}
+        )
 
         try:
             model_manager = ModelManager()
@@ -91,7 +110,9 @@ class LLMGenerator:
 
         try:
             response = model_instance.invoke_llm(
-                prompt_messages=prompt_messages, model_parameters={"max_tokens": 256, "temperature": 0}, stream=False
+                prompt_messages=prompt_messages,
+                model_parameters={"max_tokens": 256, "temperature": 0},
+                stream=False,
             )
 
             questions = output_parser.parse(response.message.content)
@@ -105,17 +126,29 @@ class LLMGenerator:
 
     @classmethod
     def generate_rule_config(
-        cls, tenant_id: str, instruction: str, model_config: dict, no_variable: bool, rule_config_max_tokens: int = 512
+        cls,
+        tenant_id: str,
+        instruction: str,
+        model_config: dict,
+        no_variable: bool,
+        rule_config_max_tokens: int = 512,
     ) -> dict:
         output_parser = RuleConfigGeneratorOutputParser()
 
         error = ""
         error_step = ""
-        rule_config = {"prompt": "", "variables": [], "opening_statement": "", "error": ""}
+        rule_config = {
+            "prompt": "",
+            "variables": [],
+            "opening_statement": "",
+            "error": "",
+        }
         model_parameters = {"max_tokens": rule_config_max_tokens, "temperature": 0.01}
 
         if no_variable:
-            prompt_template = PromptTemplateParser(WORKFLOW_RULE_CONFIG_PROMPT_GENERATE_TEMPLATE)
+            prompt_template = PromptTemplateParser(
+                WORKFLOW_RULE_CONFIG_PROMPT_GENERATE_TEMPLATE
+            )
 
             prompt_generate = prompt_template.format(
                 inputs={
@@ -135,7 +168,9 @@ class LLMGenerator:
 
             try:
                 response = model_instance.invoke_llm(
-                    prompt_messages=prompt_messages, model_parameters=model_parameters, stream=False
+                    prompt_messages=prompt_messages,
+                    model_parameters=model_parameters,
+                    stream=False,
                 )
 
                 rule_config["prompt"] = response.message.content
@@ -147,12 +182,16 @@ class LLMGenerator:
                 logging.exception(e)
                 rule_config["error"] = str(e)
 
-            rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
+            rule_config["error"] = (
+                f"Failed to {error_step}. Error: {error}" if error else ""
+            )
 
             return rule_config
 
         # get rule config prompt, parameter and statement
-        prompt_generate, parameter_generate, statement_generate = output_parser.get_format_instructions()
+        prompt_generate, parameter_generate, statement_generate = (
+            output_parser.get_format_instructions()
+        )
 
         prompt_template = PromptTemplateParser(prompt_generate)
 
@@ -182,12 +221,16 @@ class LLMGenerator:
             try:
                 # the first step to generate the task prompt
                 prompt_content = model_instance.invoke_llm(
-                    prompt_messages=prompt_messages, model_parameters=model_parameters, stream=False
+                    prompt_messages=prompt_messages,
+                    model_parameters=model_parameters,
+                    stream=False,
                 )
             except InvokeError as e:
                 error = str(e)
                 error_step = "generate prefix prompt"
-                rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
+                rule_config["error"] = (
+                    f"Failed to {error_step}. Error: {error}" if error else ""
+                )
 
                 return rule_config
 
@@ -213,16 +256,22 @@ class LLMGenerator:
 
             try:
                 parameter_content = model_instance.invoke_llm(
-                    prompt_messages=parameter_messages, model_parameters=model_parameters, stream=False
+                    prompt_messages=parameter_messages,
+                    model_parameters=model_parameters,
+                    stream=False,
                 )
-                rule_config["variables"] = re.findall(r'"\s*([^"]+)\s*"', parameter_content.message.content)
+                rule_config["variables"] = re.findall(
+                    r'"\s*([^"]+)\s*"', parameter_content.message.content
+                )
             except InvokeError as e:
                 error = str(e)
                 error_step = "generate variables"
 
             try:
                 statement_content = model_instance.invoke_llm(
-                    prompt_messages=statement_messages, model_parameters=model_parameters, stream=False
+                    prompt_messages=statement_messages,
+                    model_parameters=model_parameters,
+                    stream=False,
                 )
                 rule_config["opening_statement"] = statement_content.message.content
             except InvokeError as e:
@@ -233,7 +282,9 @@ class LLMGenerator:
             logging.exception(e)
             rule_config["error"] = str(e)
 
-        rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
+        rule_config["error"] = (
+            f"Failed to {error_step}. Error: {error}" if error else ""
+        )
 
         return rule_config
 
@@ -247,10 +298,15 @@ class LLMGenerator:
             model_type=ModelType.LLM,
         )
 
-        prompt_messages = [SystemPromptMessage(content=prompt), UserPromptMessage(content=query)]
+        prompt_messages = [
+            SystemPromptMessage(content=prompt),
+            UserPromptMessage(content=query),
+        ]
 
         response = model_instance.invoke_llm(
-            prompt_messages=prompt_messages, model_parameters={"temperature": 0.01, "max_tokens": 2000}, stream=False
+            prompt_messages=prompt_messages,
+            model_parameters={"temperature": 0.01, "max_tokens": 2000},
+            stream=False,
         )
 
         answer = response.message.content

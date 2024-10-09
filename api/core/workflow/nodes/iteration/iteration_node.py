@@ -5,7 +5,11 @@ from typing import Any, cast
 
 from configs import dify_config
 from core.model_runtime.utils.encoders import jsonable_encoder
-from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult, NodeType
+from core.workflow.entities.node_entities import (
+    NodeRunMetadataKey,
+    NodeRunResult,
+    NodeType,
+)
 from core.workflow.graph_engine.entities.event import (
     BaseGraphEvent,
     BaseNodeEvent,
@@ -41,27 +45,37 @@ class IterationNode(BaseNode):
         Run the node.
         """
         self.node_data = cast(IterationNodeData, self.node_data)
-        iterator_list_segment = self.graph_runtime_state.variable_pool.get(self.node_data.iterator_selector)
+        iterator_list_segment = self.graph_runtime_state.variable_pool.get(
+            self.node_data.iterator_selector
+        )
 
         if not iterator_list_segment:
-            raise ValueError(f"Iterator variable {self.node_data.iterator_selector} not found")
+            raise ValueError(
+                f"Iterator variable {self.node_data.iterator_selector} not found"
+            )
 
         iterator_list_value = iterator_list_segment.to_object()
 
         if not isinstance(iterator_list_value, list):
-            raise ValueError(f"Invalid iterator value: {iterator_list_value}, please provide a list.")
+            raise ValueError(
+                f"Invalid iterator value: {iterator_list_value}, please provide a list."
+            )
 
         inputs = {"iterator_selector": iterator_list_value}
 
         graph_config = self.graph_config
 
         if not self.node_data.start_node_id:
-            raise ValueError(f"field start_node_id in iteration {self.node_id} not found")
+            raise ValueError(
+                f"field start_node_id in iteration {self.node_id} not found"
+            )
 
         root_node_id = self.node_data.start_node_id
 
         # init graph
-        iteration_graph = Graph.init(graph_config=graph_config, root_node_id=root_node_id)
+        iteration_graph = Graph.init(
+            graph_config=graph_config, root_node_id=root_node_id
+        )
 
         if not iteration_graph:
             raise ValueError("iteration graph not found")
@@ -89,6 +103,7 @@ class IterationNode(BaseNode):
             variable_pool=variable_pool,
             max_execution_steps=dify_config.WORKFLOW_MAX_EXECUTION_STEPS,
             max_execution_time=dify_config.WORKFLOW_MAX_EXECUTION_TIME,
+            thread_pool_id=self.thread_pool_id,
         )
 
         start_at = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -119,7 +134,10 @@ class IterationNode(BaseNode):
                 # run workflow
                 rst = graph_engine.run()
                 for event in rst:
-                    if isinstance(event, (BaseNodeEvent | BaseParallelBranchEvent)) and not event.in_iteration_id:
+                    if (
+                        isinstance(event, (BaseNodeEvent | BaseParallelBranchEvent))
+                        and not event.in_iteration_id
+                    ):
                         event.in_iteration_id = self.node_id
 
                     if (
@@ -137,10 +155,12 @@ class IterationNode(BaseNode):
 
                             if NodeRunMetadataKey.ITERATION_ID not in metadata:
                                 metadata[NodeRunMetadataKey.ITERATION_ID] = self.node_id
-                                metadata[NodeRunMetadataKey.ITERATION_INDEX] = variable_pool.get_any(
-                                    [self.node_id, "index"]
+                                metadata[NodeRunMetadataKey.ITERATION_INDEX] = (
+                                    variable_pool.get_any([self.node_id, "index"])
                                 )
-                                event.route_node_state.node_run_result.metadata = metadata
+                                event.route_node_state.node_run_result.metadata = (
+                                    metadata
+                                )
 
                         yield event
                     elif isinstance(event, BaseGraphEvent):
@@ -155,7 +175,9 @@ class IterationNode(BaseNode):
                                 inputs=inputs,
                                 outputs={"output": jsonable_encoder(outputs)},
                                 steps=len(iterator_list_value),
-                                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
+                                metadata={
+                                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
+                                },
                                 error=event.error,
                             )
 
@@ -171,7 +193,9 @@ class IterationNode(BaseNode):
                         yield event
 
                 # append to iteration output variable list
-                current_iteration_output = variable_pool.get_any(self.node_data.output_selector)
+                current_iteration_output = variable_pool.get_any(
+                    self.node_data.output_selector
+                )
                 outputs.append(current_iteration_output)
 
                 # remove all nodes outputs from variable pool
@@ -181,13 +205,17 @@ class IterationNode(BaseNode):
                 # move to next iteration
                 current_index = variable_pool.get([self.node_id, "index"])
                 if current_index is None:
-                    raise ValueError(f"iteration {self.node_id} current index not found")
+                    raise ValueError(
+                        f"iteration {self.node_id} current index not found"
+                    )
 
                 next_index = int(current_index.to_object()) + 1
                 variable_pool.add([self.node_id, "index"], next_index)
 
                 if next_index < len(iterator_list_value):
-                    variable_pool.add([self.node_id, "item"], iterator_list_value[next_index])
+                    variable_pool.add(
+                        [self.node_id, "item"], iterator_list_value[next_index]
+                    )
 
                 yield IterationRunNextEvent(
                     iteration_id=self.id,
@@ -209,12 +237,15 @@ class IterationNode(BaseNode):
                 inputs=inputs,
                 outputs={"output": jsonable_encoder(outputs)},
                 steps=len(iterator_list_value),
-                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
+                metadata={
+                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
+                },
             )
 
             yield RunCompletedEvent(
                 run_result=NodeRunResult(
-                    status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs={"output": jsonable_encoder(outputs)}
+                    status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                    outputs={"output": jsonable_encoder(outputs)},
                 )
             )
         except Exception as e:
@@ -229,7 +260,9 @@ class IterationNode(BaseNode):
                 inputs=inputs,
                 outputs={"output": jsonable_encoder(outputs)},
                 steps=len(iterator_list_value),
-                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
+                metadata={
+                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
+                },
                 error=str(e),
             )
 
@@ -260,12 +293,17 @@ class IterationNode(BaseNode):
         }
 
         # init graph
-        iteration_graph = Graph.init(graph_config=graph_config, root_node_id=node_data.start_node_id)
+        iteration_graph = Graph.init(
+            graph_config=graph_config, root_node_id=node_data.start_node_id
+        )
 
         if not iteration_graph:
             raise ValueError("iteration graph not found")
 
-        for sub_node_id, sub_node_config in iteration_graph.node_id_config_mapping.items():
+        for (
+            sub_node_id,
+            sub_node_config,
+        ) in iteration_graph.node_id_config_mapping.items():
             if sub_node_config.get("data", {}).get("iteration_id") != node_id:
                 continue
 
@@ -274,17 +312,23 @@ class IterationNode(BaseNode):
                 # Get node class
                 from core.workflow.nodes.node_mapping import node_classes
 
-                node_type = NodeType.value_of(sub_node_config.get("data", {}).get("type"))
+                node_type = NodeType.value_of(
+                    sub_node_config.get("data", {}).get("type")
+                )
                 node_cls = node_classes.get(node_type)
                 if not node_cls:
                     continue
 
                 node_cls = cast(BaseNode, node_cls)
 
-                sub_node_variable_mapping = node_cls.extract_variable_selector_to_variable_mapping(
-                    graph_config=graph_config, config=sub_node_config
+                sub_node_variable_mapping = (
+                    node_cls.extract_variable_selector_to_variable_mapping(
+                        graph_config=graph_config, config=sub_node_config
+                    )
                 )
-                sub_node_variable_mapping = cast(dict[str, list[str]], sub_node_variable_mapping)
+                sub_node_variable_mapping = cast(
+                    dict[str, list[str]], sub_node_variable_mapping
+                )
             except NotImplementedError:
                 sub_node_variable_mapping = {}
 
@@ -299,7 +343,9 @@ class IterationNode(BaseNode):
 
         # remove variable out from iteration
         variable_mapping = {
-            key: value for key, value in variable_mapping.items() if value[0] not in iteration_graph.node_ids
+            key: value
+            for key, value in variable_mapping.items()
+            if value[0] not in iteration_graph.node_ids
         }
 
         return variable_mapping

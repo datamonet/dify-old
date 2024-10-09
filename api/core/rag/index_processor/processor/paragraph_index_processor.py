@@ -18,7 +18,8 @@ from models.dataset import Dataset
 class ParagraphIndexProcessor(BaseIndexProcessor):
     def extract(self, extract_setting: ExtractSetting, **kwargs) -> list[Document]:
         text_docs = ExtractProcessor.extract(
-            extract_setting=extract_setting, is_automatic=kwargs.get("process_rule_mode") == "automatic"
+            extract_setting=extract_setting,
+            is_automatic=kwargs.get("process_rule_mode") == "automatic",
         )
 
         return text_docs
@@ -26,12 +27,15 @@ class ParagraphIndexProcessor(BaseIndexProcessor):
     def transform(self, documents: list[Document], **kwargs) -> list[Document]:
         # Split the text documents into nodes.
         splitter = self._get_splitter(
-            processing_rule=kwargs.get("process_rule"), embedding_model_instance=kwargs.get("embedding_model_instance")
+            processing_rule=kwargs.get("process_rule"),
+            embedding_model_instance=kwargs.get("embedding_model_instance"),
         )
         all_documents = []
         for document in documents:
             # document clean
-            document_text = CleanProcessor.clean(document.page_content, kwargs.get("process_rule"))
+            document_text = CleanProcessor.clean(
+                document.page_content, kwargs.get("process_rule")
+            )
             document.page_content = document_text
             # parse document to nodes
             document_nodes = splitter.split_documents([document])
@@ -54,7 +58,9 @@ class ParagraphIndexProcessor(BaseIndexProcessor):
             all_documents.extend(split_documents)
         return all_documents
 
-    def load(self, dataset: Dataset, documents: list[Document], with_keywords: bool = True):
+    def load(
+        self, dataset: Dataset, documents: list[Document], with_keywords: bool = True
+    ):
         if dataset.indexing_technique == "high_quality":
             vector = Vector(dataset)
             vector.create(documents)
@@ -62,7 +68,12 @@ class ParagraphIndexProcessor(BaseIndexProcessor):
             keyword = Keyword(dataset)
             keyword.create(documents)
 
-    def clean(self, dataset: Dataset, node_ids: Optional[list[str]], with_keywords: bool = True):
+    def clean(
+        self,
+        dataset: Dataset,
+        node_ids: Optional[list[str]],
+        with_keywords: bool = True,
+    ):
         if dataset.indexing_technique == "high_quality":
             vector = Vector(dataset)
             if node_ids:

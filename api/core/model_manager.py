@@ -3,21 +3,36 @@ import os
 from collections.abc import Callable, Generator, Sequence
 from typing import IO, Optional, Union, cast
 
-from core.entities.provider_configuration import ProviderConfiguration, ProviderModelBundle
+from core.embedding.embedding_constant import EmbeddingInputType
+from core.entities.provider_configuration import (
+    ProviderConfiguration,
+    ProviderModelBundle,
+)
 from core.entities.provider_entities import ModelLoadBalancingConfiguration
 from core.errors.error import ProviderTokenNotInitError
 from core.model_runtime.callbacks.base_callback import Callback
 from core.model_runtime.entities.llm_entities import LLMResult
-from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageTool
+from core.model_runtime.entities.message_entities import (
+    PromptMessage,
+    PromptMessageTool,
+)
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.entities.rerank_entities import RerankResult
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
-from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeConnectionError, InvokeRateLimitError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.errors.invoke import (
+    InvokeAuthorizationError,
+    InvokeConnectionError,
+    InvokeRateLimitError,
+)
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.model_providers.__base.moderation_model import ModerationModel
 from core.model_runtime.model_providers.__base.rerank_model import RerankModel
 from core.model_runtime.model_providers.__base.speech2text_model import Speech2TextModel
-from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.__base.text_embedding_model import (
+    TextEmbeddingModel,
+)
 from core.model_runtime.model_providers.__base.tts_model import TTSModel
 from core.provider_manager import ProviderManager
 from extensions.ext_redis import redis_client
@@ -35,7 +50,9 @@ class ModelInstance:
         self.provider_model_bundle = provider_model_bundle
         self.model = model
         self.provider = provider_model_bundle.configuration.provider.provider
-        self.credentials = self._fetch_credentials_from_bundle(provider_model_bundle, model)
+        self.credentials = self._fetch_credentials_from_bundle(
+            provider_model_bundle, model
+        )
         self.model_type_instance = self.provider_model_bundle.model_type_instance
         self.load_balancing_manager = self._get_load_balancing_manager(
             configuration=provider_model_bundle.configuration,
@@ -45,7 +62,9 @@ class ModelInstance:
         )
 
     @staticmethod
-    def _fetch_credentials_from_bundle(provider_model_bundle: ProviderModelBundle, model: str) -> dict:
+    def _fetch_credentials_from_bundle(
+        provider_model_bundle: ProviderModelBundle, model: str
+    ) -> dict:
         """
         Fetch credentials from provider model bundle
         :param provider_model_bundle: provider model bundle
@@ -54,16 +73,23 @@ class ModelInstance:
         """
         configuration = provider_model_bundle.configuration
         model_type = provider_model_bundle.model_type_instance.model_type
-        credentials = configuration.get_current_credentials(model_type=model_type, model=model)
+        credentials = configuration.get_current_credentials(
+            model_type=model_type, model=model
+        )
 
         if credentials is None:
-            raise ProviderTokenNotInitError(f"Model {model} credentials is not initialized.")
+            raise ProviderTokenNotInitError(
+                f"Model {model} credentials is not initialized."
+            )
 
         return credentials
 
     @staticmethod
     def _get_load_balancing_manager(
-        configuration: ProviderConfiguration, model_type: ModelType, model: str, credentials: dict
+        configuration: ProviderConfiguration,
+        model_type: ModelType,
+        model: str,
+        credentials: dict,
     ) -> Optional["LBModelManager"]:
         """
         Get load balancing model credentials
@@ -73,11 +99,17 @@ class ModelInstance:
         :param credentials: model credentials
         :return:
         """
-        if configuration.model_settings and configuration.using_provider_type == ProviderType.CUSTOM:
+        if (
+            configuration.model_settings
+            and configuration.using_provider_type == ProviderType.CUSTOM
+        ):
             current_model_setting = None
             # check if model is disabled by admin
             for model_setting in configuration.model_settings:
-                if model_setting.model_type == model_type and model_setting.model == model:
+                if (
+                    model_setting.model_type == model_type
+                    and model_setting.model == model
+                ):
                     current_model_setting = model_setting
                     break
 
@@ -90,7 +122,9 @@ class ModelInstance:
                     model_type=model_type,
                     model=model,
                     load_balancing_configs=current_model_setting.load_balancing_configs,
-                    managed_credentials=credentials if configuration.custom_configuration.provider else None,
+                    managed_credentials=credentials
+                    if configuration.custom_configuration.provider
+                    else None,
                 )
 
                 return lb_model_manager
@@ -137,7 +171,9 @@ class ModelInstance:
         )
 
     def get_llm_num_tokens(
-        self, prompt_messages: list[PromptMessage], tools: Optional[list[PromptMessageTool]] = None
+        self,
+        prompt_messages: list[PromptMessage],
+        tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         """
         Get number of tokens for llm
@@ -158,12 +194,18 @@ class ModelInstance:
             tools=tools,
         )
 
-    def invoke_text_embedding(self, texts: list[str], user: Optional[str] = None) -> TextEmbeddingResult:
+    def invoke_text_embedding(
+        self,
+        texts: list[str],
+        user: Optional[str] = None,
+        input_type: EmbeddingInputType = EmbeddingInputType.DOCUMENT,
+    ) -> TextEmbeddingResult:
         """
         Invoke large language model
 
         :param texts: texts to embed
         :param user: unique user id
+        :param input_type: input type
         :return: embeddings result
         """
         if not isinstance(self.model_type_instance, TextEmbeddingModel):
@@ -176,6 +218,7 @@ class ModelInstance:
             credentials=self.credentials,
             texts=texts,
             user=user,
+            input_type=input_type,
         )
 
     def get_text_embedding_num_tokens(self, texts: list[str]) -> int:
@@ -269,7 +312,9 @@ class ModelInstance:
             user=user,
         )
 
-    def invoke_tts(self, content_text: str, tenant_id: str, voice: str, user: Optional[str] = None) -> str:
+    def invoke_tts(
+        self, content_text: str, tenant_id: str, voice: str, user: Optional[str] = None
+    ) -> str:
         """
         Invoke large language tts model
 
@@ -309,7 +354,9 @@ class ModelInstance:
             lb_config = self.load_balancing_manager.fetch_next()
             if not lb_config:
                 if not last_exception:
-                    raise ProviderTokenNotInitError("Model credentials is not initialized.")
+                    raise ProviderTokenNotInitError(
+                        "Model credentials is not initialized."
+                    )
                 else:
                     raise last_exception
 
@@ -350,7 +397,9 @@ class ModelManager:
     def __init__(self) -> None:
         self._provider_manager = ProviderManager()
 
-    def get_model_instance(self, tenant_id: str, provider: str, model_type: ModelType, model: str) -> ModelInstance:
+    def get_model_instance(
+        self, tenant_id: str, provider: str, model_type: ModelType, model: str
+    ) -> ModelInstance:
         """
         Get model instance
         :param tenant_id: tenant id
@@ -368,23 +417,31 @@ class ModelManager:
 
         return ModelInstance(provider_model_bundle, model)
 
-    def get_default_provider_model_name(self, tenant_id: str, model_type: ModelType) -> tuple[str, str]:
+    def get_default_provider_model_name(
+        self, tenant_id: str, model_type: ModelType
+    ) -> tuple[str, str]:
         """
         Return first provider and the first model in the provider
         :param tenant_id: tenant id
         :param model_type: model type
         :return: provider name, model name
         """
-        return self._provider_manager.get_first_provider_first_model(tenant_id, model_type)
+        return self._provider_manager.get_first_provider_first_model(
+            tenant_id, model_type
+        )
 
-    def get_default_model_instance(self, tenant_id: str, model_type: ModelType) -> ModelInstance:
+    def get_default_model_instance(
+        self, tenant_id: str, model_type: ModelType
+    ) -> ModelInstance:
         """
         Get default model instance
         :param tenant_id: tenant id
         :param model_type: model type
         :return:
         """
-        default_model_entity = self._provider_manager.get_default_model(tenant_id=tenant_id, model_type=model_type)
+        default_model_entity = self._provider_manager.get_default_model(
+            tenant_id=tenant_id, model_type=model_type
+        )
 
         if not default_model_entity:
             raise ProviderTokenNotInitError(f"Default model not found for {model_type}")
@@ -422,7 +479,9 @@ class LBModelManager:
         self._model = model
         self._load_balancing_configs = load_balancing_configs
 
-        for load_balancing_config in self._load_balancing_configs[:]:  # Iterate over a shallow copy of the list
+        for load_balancing_config in self._load_balancing_configs[
+            :
+        ]:  # Iterate over a shallow copy of the list
             if load_balancing_config.name == "__inherit__":
                 if not managed_credentials:
                     # remove __inherit__ if managed credentials is not provided
@@ -462,7 +521,9 @@ class LBModelManager:
 
             if self.in_cooldown(config):
                 cooldown_load_balancing_configs.append(config)
-                if len(cooldown_load_balancing_configs) >= len(self._load_balancing_configs):
+                if len(cooldown_load_balancing_configs) >= len(
+                    self._load_balancing_configs
+                ):
                     # all configs are in cooldown
                     return None
 
@@ -479,7 +540,9 @@ class LBModelManager:
 
         return None
 
-    def cooldown(self, config: ModelLoadBalancingConfiguration, expire: int = 60) -> None:
+    def cooldown(
+        self, config: ModelLoadBalancingConfiguration, expire: int = 60
+    ) -> None:
         """
         Cooldown model load balancing config
         :param config: model load balancing config
@@ -487,7 +550,11 @@ class LBModelManager:
         :return:
         """
         cooldown_cache_key = "model_lb_index:cooldown:{}:{}:{}:{}:{}".format(
-            self._tenant_id, self._provider, self._model_type.value, self._model, config.id
+            self._tenant_id,
+            self._provider,
+            self._model_type.value,
+            self._model,
+            config.id,
         )
 
         redis_client.setex(cooldown_cache_key, expire, "true")
@@ -499,7 +566,11 @@ class LBModelManager:
         :return:
         """
         cooldown_cache_key = "model_lb_index:cooldown:{}:{}:{}:{}:{}".format(
-            self._tenant_id, self._provider, self._model_type.value, self._model, config.id
+            self._tenant_id,
+            self._provider,
+            self._model_type.value,
+            self._model,
+            config.id,
         )
 
         res = redis_client.exists(cooldown_cache_key)

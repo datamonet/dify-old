@@ -57,7 +57,8 @@ def init_app(app):
 
     if app.config.get("REDIS_USE_SENTINEL"):
         sentinel_hosts = [
-            (node.split(":")[0], int(node.split(":")[1])) for node in app.config.get("REDIS_SENTINELS").split(",")
+            (node.split(":")[0], int(node.split(":")[1]))
+            for node in app.config.get("REDIS_SENTINELS").split(",")
         ]
         sentinel = Sentinel(
             sentinel_hosts,
@@ -67,7 +68,9 @@ def init_app(app):
                 "password": app.config.get("REDIS_SENTINEL_PASSWORD"),
             },
         )
-        master = sentinel.master_for(app.config.get("REDIS_SENTINEL_SERVICE_NAME"), **redis_params)
+        master = sentinel.master_for(
+            app.config.get("REDIS_SENTINEL_SERVICE_NAME"), **redis_params
+        )
         redis_client.initialize(master)
     else:
         redis_params.update(

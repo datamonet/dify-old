@@ -13,7 +13,14 @@ class CodeNodeData(BaseNodeData):
     """
 
     class Output(BaseModel):
-        type: Literal["string", "number", "object", "array[string]", "array[number]", "array[object]"]
+        type: Literal[
+            "string",
+            "number",
+            "object",
+            "array[string]",
+            "array[number]",
+            "array[object]",
+        ]
         children: Optional[dict[str, "Output"]] = None
 
     class Dependency(BaseModel):

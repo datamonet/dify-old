@@ -56,11 +56,15 @@ def login_required(func):
         if admin_api_key_enable.lower() == "true":
             if auth_header:
                 if " " not in auth_header:
-                    raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+                    raise Unauthorized(
+                        "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
+                    )
                 auth_scheme, auth_token = auth_header.split(None, 1)
                 auth_scheme = auth_scheme.lower()
                 if auth_scheme != "bearer":
-                    raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+                    raise Unauthorized(
+                        "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
+                    )
                 admin_api_key = os.getenv("ADMIN_API_KEY")
 
                 if admin_api_key:
@@ -76,12 +80,19 @@ def login_required(func):
                             )
                             if tenant_account_join:
                                 tenant, ta = tenant_account_join
-                                account = Account.query.filter_by(id=ta.account_id).first()
+                                account = Account.query.filter_by(
+                                    id=ta.account_id
+                                ).first()
                                 # Login admin
                                 if account:
                                     account.current_tenant = tenant
-                                    current_app.login_manager._update_request_context_with_user(account)
-                                    user_logged_in.send(current_app._get_current_object(), user=_get_user())
+                                    current_app.login_manager._update_request_context_with_user(
+                                        account
+                                    )
+                                    user_logged_in.send(
+                                        current_app._get_current_object(),
+                                        user=_get_user(),
+                                    )
         if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
             pass
         elif not current_user.is_authenticated:

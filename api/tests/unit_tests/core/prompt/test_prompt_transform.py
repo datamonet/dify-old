@@ -1,11 +1,20 @@
 from unittest.mock import MagicMock
 
 from core.app.app_config.entities import ModelConfigEntity
-from core.entities.provider_configuration import ProviderConfiguration, ProviderModelBundle
+from core.entities.provider_configuration import (
+    ProviderConfiguration,
+    ProviderModelBundle,
+)
 from core.model_runtime.entities.message_entities import UserPromptMessage
-from core.model_runtime.entities.model_entities import AIModelEntity, ModelPropertyKey, ParameterRule
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    ModelPropertyKey,
+    ParameterRule,
+)
 from core.model_runtime.entities.provider_entities import ProviderEntity
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.prompt.prompt_transform import PromptTransform
 
 
@@ -40,7 +49,9 @@ def test__calculate_rest_token():
     prompt_transform = PromptTransform()
 
     prompt_messages = [UserPromptMessage(content="Hello, how are you?")]
-    rest_tokens = prompt_transform._calculate_rest_token(prompt_messages, model_config_mock)
+    rest_tokens = prompt_transform._calculate_rest_token(
+        prompt_messages, model_config_mock
+    )
 
     # Validate based on the mock configuration and expected logic
     expected_rest_tokens = (

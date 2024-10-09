@@ -78,7 +78,11 @@ class ExternalDataFetch:
             tool_config = external_data_tool.config
 
             external_data_tool_factory = ExternalDataToolFactory(
-                name=tool_type, tenant_id=tenant_id, app_id=app_id, variable=tool_variable, config=tool_config
+                name=tool_type,
+                tenant_id=tenant_id,
+                app_id=app_id,
+                variable=tool_variable,
+                config=tool_config,
             )
 
             # query external data tool

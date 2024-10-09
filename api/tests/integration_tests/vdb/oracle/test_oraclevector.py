@@ -21,7 +21,9 @@ class OracleVectorTest(AbstractVectorTest):
         )
 
     def search_by_full_text(self):
-        hits_by_full_text: list[Document] = self.vector.search_by_full_text(query=get_example_text())
+        hits_by_full_text: list[Document] = self.vector.search_by_full_text(
+            query=get_example_text()
+        )
         assert len(hits_by_full_text) == 0
 
 

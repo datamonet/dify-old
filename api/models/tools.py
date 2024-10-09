@@ -4,7 +4,10 @@ from sqlalchemy import ForeignKey
 
 from core.tools.entities.common_entities import I18nObject
 from core.tools.entities.tool_bundle import ApiToolBundle
-from core.tools.entities.tool_entities import ApiProviderSchemaType, WorkflowToolParameterConfiguration
+from core.tools.entities.tool_entities import (
+    ApiProviderSchemaType,
+    WorkflowToolParameterConfiguration,
+)
 from extensions.ext_database import db
 
 from .model import Account, App, Tenant
@@ -20,7 +23,9 @@ class BuiltinToolProvider(db.Model):
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="tool_builtin_provider_pkey"),
         # one tenant can only have one tool provider with the same name
-        db.UniqueConstraint("tenant_id", "provider", name="unique_builtin_tool_provider"),
+        db.UniqueConstraint(
+            "tenant_id", "provider", name="unique_builtin_tool_provider"
+        ),
     )
 
     # id of the tool provider
@@ -33,8 +38,12 @@ class BuiltinToolProvider(db.Model):
     provider = db.Column(db.String(40), nullable=False)
     # credential of the tool provider
     encrypted_credentials = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def credentials(self) -> dict:
@@ -71,8 +80,12 @@ class PublishedAppTool(db.Model):
     tool_name = db.Column(db.String(40), nullable=False)
     # author
     author = db.Column(db.String(40), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def description_i18n(self) -> I18nObject:
@@ -118,8 +131,12 @@ class ApiToolProvider(db.Model):
     # custom_disclaimer
     custom_disclaimer = db.Column(db.String(255), nullable=True)
 
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def schema_type(self) -> ApiProviderSchemaType:
@@ -171,7 +188,9 @@ class WorkflowToolProvider(db.Model):
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="tool_workflow_provider_pkey"),
         db.UniqueConstraint("name", "tenant_id", name="unique_workflow_tool_provider"),
-        db.UniqueConstraint("tenant_id", "app_id", name="unique_workflow_tool_provider_app_id"),
+        db.UniqueConstraint(
+            "tenant_id", "app_id", name="unique_workflow_tool_provider_app_id"
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -196,8 +215,12 @@ class WorkflowToolProvider(db.Model):
     # privacy policy
     privacy_policy = db.Column(db.String(255), nullable=True, server_default="")
 
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def schema_type(self) -> ApiProviderSchemaType:
@@ -213,7 +236,10 @@ class WorkflowToolProvider(db.Model):
 
     @property
     def parameter_configurations(self) -> list[WorkflowToolParameterConfiguration]:
-        return [WorkflowToolParameterConfiguration(**config) for config in json.loads(self.parameter_configuration)]
+        return [
+            WorkflowToolParameterConfiguration(**config)
+            for config in json.loads(self.parameter_configuration)
+        ]
 
     @property
     def app(self) -> App:
@@ -249,12 +275,20 @@ class ToolModelInvoke(db.Model):
     prompt_tokens = db.Column(db.Integer, nullable=False, server_default=db.text("0"))
     answer_tokens = db.Column(db.Integer, nullable=False, server_default=db.text("0"))
     answer_unit_price = db.Column(db.Numeric(10, 4), nullable=False)
-    answer_price_unit = db.Column(db.Numeric(10, 7), nullable=False, server_default=db.text("0.001"))
-    provider_response_latency = db.Column(db.Float, nullable=False, server_default=db.text("0"))
+    answer_price_unit = db.Column(
+        db.Numeric(10, 7), nullable=False, server_default=db.text("0.001")
+    )
+    provider_response_latency = db.Column(
+        db.Float, nullable=False, server_default=db.text("0")
+    )
     total_price = db.Column(db.Numeric(10, 7))
     currency = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
 
 class ToolConversationVariables(db.Model):
@@ -280,8 +314,12 @@ class ToolConversationVariables(db.Model):
     # variables pool
     variables_str = db.Column(db.Text, nullable=False)
 
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
+    updated_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def variables(self) -> dict:

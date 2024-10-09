@@ -9,7 +9,10 @@ from extensions.ext_database import db
 from libs.infinite_scroll_pagination import InfiniteScrollPagination
 from models.account import Account
 from models.model import App, Conversation, EndUser, Message
-from services.errors.conversation import ConversationNotExistsError, LastConversationNotExistsError
+from services.errors.conversation import (
+    ConversationNotExistsError,
+    LastConversationNotExistsError,
+)
 from services.errors.message import MessageNotExistsError
 
 
@@ -32,10 +35,16 @@ class ConversationService:
         base_query = db.session.query(Conversation).filter(
             Conversation.is_deleted == False,
             Conversation.app_id == app_model.id,
-            Conversation.from_source == ("api" if isinstance(user, EndUser) else "console"),
-            Conversation.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
-            Conversation.from_account_id == (user.id if isinstance(user, Account) else None),
-            or_(Conversation.invoke_from.is_(None), Conversation.invoke_from == invoke_from.value),
+            Conversation.from_source
+            == ("api" if isinstance(user, EndUser) else "console"),
+            Conversation.from_end_user_id
+            == (user.id if isinstance(user, EndUser) else None),
+            Conversation.from_account_id
+            == (user.id if isinstance(user, Account) else None),
+            or_(
+                Conversation.invoke_from.is_(None),
+                Conversation.invoke_from == invoke_from.value,
+            ),
         )
 
         if include_ids is not None:
@@ -53,10 +62,14 @@ class ConversationService:
                 raise LastConversationNotExistsError()
 
             # build filters based on sorting
-            filter_condition = cls._build_filter_condition(sort_field, sort_direction, last_conversation)
+            filter_condition = cls._build_filter_condition(
+                sort_field, sort_direction, last_conversation
+            )
             base_query = base_query.filter(filter_condition)
 
-        base_query = base_query.order_by(sort_direction(getattr(Conversation, sort_field)))
+        base_query = base_query.order_by(
+            sort_direction(getattr(Conversation, sort_field))
+        )
 
         conversations = base_query.limit(limit).all()
 
@@ -64,14 +77,19 @@ class ConversationService:
         if len(conversations) == limit:
             current_page_last_conversation = conversations[-1]
             rest_filter_condition = cls._build_filter_condition(
-                sort_field, sort_direction, current_page_last_conversation, is_next_page=True
+                sort_field,
+                sort_direction,
+                current_page_last_conversation,
+                is_next_page=True,
             )
             rest_count = base_query.filter(rest_filter_condition).count()
 
             if rest_count > 0:
                 has_more = True
 
-        return InfiniteScrollPagination(data=conversations, limit=limit, has_more=has_more)
+        return InfiniteScrollPagination(
+            data=conversations, limit=limit, has_more=has_more
+        )
 
     @classmethod
     def _get_sort_params(cls, sort_by: str) -> tuple[str, callable]:
@@ -81,10 +99,16 @@ class ConversationService:
 
     @classmethod
     def _build_filter_condition(
-        cls, sort_field: str, sort_direction: callable, reference_conversation: Conversation, is_next_page: bool = False
+        cls,
+        sort_field: str,
+        sort_direction: callable,
+        reference_conversation: Conversation,
+        is_next_page: bool = False,
     ):
         field_value = getattr(reference_conversation, sort_field)
-        if (sort_direction == desc and not is_next_page) or (sort_direction == asc and is_next_page):
+        if (sort_direction == desc and not is_next_page) or (
+            sort_direction == asc and is_next_page
+        ):
             return getattr(Conversation, sort_field) < field_value
         else:
             return getattr(Conversation, sort_field) > field_value
@@ -114,7 +138,10 @@ class ConversationService:
         # get conversation first message
         message = (
             db.session.query(Message)
-            .filter(Message.app_id == app_model.id, Message.conversation_id == conversation.id)
+            .filter(
+                Message.app_id == app_model.id,
+                Message.conversation_id == conversation.id,
+            )
             .order_by(Message.created_at.asc())
             .first()
         )
@@ -136,15 +163,23 @@ class ConversationService:
         return conversation
 
     @classmethod
-    def get_conversation(cls, app_model: App, conversation_id: str, user: Optional[Union[Account, EndUser]]):
+    def get_conversation(
+        cls,
+        app_model: App,
+        conversation_id: str,
+        user: Optional[Union[Account, EndUser]],
+    ):
         conversation = (
             db.session.query(Conversation)
             .filter(
                 Conversation.id == conversation_id,
                 Conversation.app_id == app_model.id,
-                Conversation.from_source == ("api" if isinstance(user, EndUser) else "console"),
-                Conversation.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
-                Conversation.from_account_id == (user.id if isinstance(user, Account) else None),
+                Conversation.from_source
+                == ("api" if isinstance(user, EndUser) else "console"),
+                Conversation.from_end_user_id
+                == (user.id if isinstance(user, EndUser) else None),
+                Conversation.from_account_id
+                == (user.id if isinstance(user, Account) else None),
                 Conversation.is_deleted == False,
             )
             .first()
@@ -156,7 +191,12 @@ class ConversationService:
         return conversation
 
     @classmethod
-    def delete(cls, app_model: App, conversation_id: str, user: Optional[Union[Account, EndUser]]):
+    def delete(
+        cls,
+        app_model: App,
+        conversation_id: str,
+        user: Optional[Union[Account, EndUser]],
+    ):
         conversation = cls.get_conversation(app_model, conversation_id, user)
 
         conversation.is_deleted = True

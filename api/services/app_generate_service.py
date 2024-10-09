@@ -44,21 +44,33 @@ class AppGenerateService:
             if app_model.mode == AppMode.COMPLETION.value:
                 return rate_limit.generate(
                     CompletionAppGenerator().generate(
-                        app_model=app_model, user=user, args=args, invoke_from=invoke_from, stream=streaming
+                        app_model=app_model,
+                        user=user,
+                        args=args,
+                        invoke_from=invoke_from,
+                        stream=streaming,
                     ),
                     request_id,
                 )
             elif app_model.mode == AppMode.AGENT_CHAT.value or app_model.is_agent:
                 return rate_limit.generate(
                     AgentChatAppGenerator().generate(
-                        app_model=app_model, user=user, args=args, invoke_from=invoke_from, stream=streaming
+                        app_model=app_model,
+                        user=user,
+                        args=args,
+                        invoke_from=invoke_from,
+                        stream=streaming,
                     ),
                     request_id,
                 )
             elif app_model.mode == AppMode.CHAT.value:
                 return rate_limit.generate(
                     ChatAppGenerator().generate(
-                        app_model=app_model, user=user, args=args, invoke_from=invoke_from, stream=streaming
+                        app_model=app_model,
+                        user=user,
+                        args=args,
+                        invoke_from=invoke_from,
+                        stream=streaming,
                     ),
                     request_id,
                 )
@@ -104,16 +116,33 @@ class AppGenerateService:
         return max_active_requests
 
     @classmethod
-    def generate_single_iteration(cls, app_model: App, user: Account, node_id: str, args: Any, streaming: bool = True):
+    def generate_single_iteration(
+        cls,
+        app_model: App,
+        user: Account,
+        node_id: str,
+        args: Any,
+        streaming: bool = True,
+    ):
         if app_model.mode == AppMode.ADVANCED_CHAT.value:
             workflow = cls._get_workflow(app_model, InvokeFrom.DEBUGGER)
             return AdvancedChatAppGenerator().single_iteration_generate(
-                app_model=app_model, workflow=workflow, node_id=node_id, user=user, args=args, stream=streaming
+                app_model=app_model,
+                workflow=workflow,
+                node_id=node_id,
+                user=user,
+                args=args,
+                stream=streaming,
             )
         elif app_model.mode == AppMode.WORKFLOW.value:
             workflow = cls._get_workflow(app_model, InvokeFrom.DEBUGGER)
             return WorkflowAppGenerator().single_iteration_generate(
-                app_model=app_model, workflow=workflow, node_id=node_id, user=user, args=args, stream=streaming
+                app_model=app_model,
+                workflow=workflow,
+                node_id=node_id,
+                user=user,
+                args=args,
+                stream=streaming,
             )
         else:
             raise ValueError(f"Invalid app mode {app_model.mode}")
@@ -137,7 +166,11 @@ class AppGenerateService:
         :return:
         """
         return CompletionAppGenerator().generate_more_like_this(
-            app_model=app_model, message_id=message_id, user=user, invoke_from=invoke_from, stream=streaming
+            app_model=app_model,
+            message_id=message_id,
+            user=user,
+            invoke_from=invoke_from,
+            stream=streaming,
         )
 
     @classmethod

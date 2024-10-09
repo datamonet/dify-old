@@ -3,16 +3,23 @@ import os
 import pytest
 
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.localai.speech2text.speech2text import LocalAISpeech2text
+from core.model_runtime.model_providers.localai.speech2text.speech2text import (
+    LocalAISpeech2text,
+)
 
 
 def test_validate_credentials():
     model = LocalAISpeech2text()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="whisper-1", credentials={"server_url": "invalid_url"})
+        model.validate_credentials(
+            model="whisper-1", credentials={"server_url": "invalid_url"}
+        )
 
-    model.validate_credentials(model="whisper-1", credentials={"server_url": os.environ.get("LOCALAI_SERVER_URL")})
+    model.validate_credentials(
+        model="whisper-1",
+        credentials={"server_url": os.environ.get("LOCALAI_SERVER_URL")},
+    )
 
 
 def test_invoke_model():

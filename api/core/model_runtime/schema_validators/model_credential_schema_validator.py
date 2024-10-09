@@ -4,7 +4,9 @@ from core.model_runtime.schema_validators.common_validator import CommonValidato
 
 
 class ModelCredentialSchemaValidator(CommonValidator):
-    def __init__(self, model_type: ModelType, model_credential_schema: ModelCredentialSchema):
+    def __init__(
+        self, model_type: ModelType, model_credential_schema: ModelCredentialSchema
+    ):
         self.model_type = model_type
         self.model_credential_schema = model_credential_schema
 
@@ -24,4 +26,6 @@ class ModelCredentialSchemaValidator(CommonValidator):
 
         credentials["__model_type"] = self.model_type.value
 
-        return self._validate_and_filter_credential_form_schemas(credential_form_schemas, credentials)
+        return self._validate_and_filter_credential_form_schemas(
+            credential_form_schemas, credentials
+        )

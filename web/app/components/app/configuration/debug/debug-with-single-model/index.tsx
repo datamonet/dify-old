@@ -4,37 +4,39 @@ import {
   useCallback,
   useImperativeHandle,
   useMemo,
-} from 'react'
+} from "react";
 import {
   useConfigFromDebugContext,
   useFormattingChangedSubscription,
-} from '../hooks'
-import Chat from '@/app/components/base/chat/chat'
-import { useChat } from '@/app/components/base/chat/chat/hooks'
-import { useDebugConfigurationContext } from '@/context/debug-configuration'
-import type { OnSend } from '@/app/components/base/chat/types'
-import { useProviderContext } from '@/context/provider-context'
+} from "../hooks";
+import Chat from "@/app/components/base/chat/chat";
+import { useChat } from "@/app/components/base/chat/chat/hooks";
+import { useDebugConfigurationContext } from "@/context/debug-configuration";
+import type { ChatItem, OnSend } from "@/app/components/base/chat/types";
+import { useProviderContext } from "@/context/provider-context";
 import {
   fetchConversationMessages,
   fetchSuggestedQuestions,
   stopChatMessageResponding,
-} from '@/service/debug'
-import Avatar from '@/app/components/base/avatar'
-import { useAppContext } from '@/context/app-context'
-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { useModalContext } from '@/context/modal-context'
+} from "@/service/debug";
+import Avatar from "@/app/components/base/avatar";
+import { useAppContext } from "@/context/app-context";
+import { ModelFeatureEnum } from "@/app/components/header/account-setting/model-provider-page/declarations";
+import { useModalContext } from "@/context/modal-context";
+import { getLastAnswer } from "@/app/components/base/chat/utils";
 
 type DebugWithSingleModelProps = {
-  checkCanSend?: () => boolean
-}
+  checkCanSend?: () => boolean;
+};
 export type DebugWithSingleModelRefType = {
-  handleRestart: () => void
-}
-const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSingleModelProps>(({
-  checkCanSend,
-}, ref) => {
-  const { userProfile } = useAppContext()
-  const { setShowCreditsBillingModal } = useModalContext()
+  handleRestart: () => void;
+};
+const DebugWithSingleModel = forwardRef<
+  DebugWithSingleModelRefType,
+  DebugWithSingleModelProps
+>(({ checkCanSend }, ref) => {
+  const { userProfile } = useAppContext();
+  const { setShowCreditsBillingModal } = useModalContext();
   const {
     modelConfig,
     appId,
@@ -42,15 +44,17 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
     visionConfig,
     collectionList,
     completionParams,
-  } = useDebugConfigurationContext()
-  const { textGenerationModelList } = useProviderContext()
-  const config = useConfigFromDebugContext()
+  } = useDebugConfigurationContext();
+  const { textGenerationModelList } = useProviderContext();
+  const config = useConfigFromDebugContext();
   const {
     chatList,
+    chatListRef,
     isResponding,
     handleSend,
     suggestedQuestions,
     handleStop,
+    handleUpdateChatList,
     handleRestart,
     handleAnnotationAdded,
     handleAnnotationEdited,
@@ -62,72 +66,112 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
       promptVariables: modelConfig.configs.prompt_variables,
     },
     [],
-    taskId => stopChatMessageResponding(appId, taskId),
-  )
-  useFormattingChangedSubscription(chatList)
+    (taskId) => stopChatMessageResponding(appId, taskId)
+  );
+  useFormattingChangedSubscription(chatList);
 
-  const doSend: OnSend = useCallback((message, files) => {
-    if ((userProfile.credits || 0) <= 0)
-      return setShowCreditsBillingModal()
+  const doSend: OnSend = useCallback(
+    (message, files, last_answer) => {
+      if (checkCanSend && !checkCanSend()) return;
+      const currentProvider = textGenerationModelList.find(
+        (item) => item.provider === modelConfig.provider
+      );
+      const currentModel = currentProvider?.models.find(
+        (model) => model.model === modelConfig.model_id
+      );
+      const supportVision = currentModel?.features?.includes(
+        ModelFeatureEnum.vision
+      );
 
-    if (checkCanSend && !checkCanSend())
-      return
-    const currentProvider = textGenerationModelList.find(item => item.provider === modelConfig.provider)
-    const currentModel = currentProvider?.models.find(model => model.model === modelConfig.model_id)
-    const supportVision = currentModel?.features?.includes(ModelFeatureEnum.vision)
+      const configData = {
+        ...config,
+        model: {
+          provider: modelConfig.provider,
+          name: modelConfig.model_id,
+          mode: modelConfig.mode,
+          completion_params: completionParams,
+        },
+      };
 
-    const configData = {
-      ...config,
-      model: {
-        provider: modelConfig.provider,
-        name: modelConfig.model_id,
-        mode: modelConfig.mode,
-        completion_params: completionParams,
-      },
-    }
+      const data: any = {
+        query: message,
+        inputs,
+        model_config: configData,
+        parent_message_id:
+          last_answer?.id || getLastAnswer(chatListRef.current)?.id || null,
+      };
 
-    const data: any = {
-      query: message,
+      if (visionConfig.enabled && files?.length && supportVision)
+        data.files = files;
+
+      handleSend(`apps/${appId}/chat-messages`, data, {
+        onGetConversationMessages: (conversationId, getAbortController) =>
+          fetchConversationMessages(appId, conversationId, getAbortController),
+        onGetSuggestedQuestions: (responseItemId, getAbortController) =>
+          fetchSuggestedQuestions(appId, responseItemId, getAbortController),
+      });
+    },
+    [
+      chatListRef,
+      appId,
+      checkCanSend,
+      completionParams,
+      config,
+      handleSend,
       inputs,
-      model_config: configData,
-    }
+      modelConfig,
+      textGenerationModelList,
+      visionConfig.enabled,
+    ]
+  );
 
-    if (visionConfig.enabled && files?.length && supportVision)
-      data.files = files
+  const doRegenerate = useCallback(
+    (chatItem: ChatItem) => {
+      const index = chatList.findIndex((item) => item.id === chatItem.id);
+      if (index === -1) return;
 
-    handleSend(
-      `apps/${appId}/chat-messages`,
-      data,
-      {
-        onGetConversationMessages: (conversationId, getAbortController) => fetchConversationMessages(appId, conversationId, getAbortController),
-        onGetSuggestedQuestions: (responseItemId, getAbortController) => fetchSuggestedQuestions(appId, responseItemId, getAbortController),
-      },
-    )
-  }, [appId, checkCanSend, completionParams, config, handleSend, inputs, modelConfig, textGenerationModelList, visionConfig.enabled])
+      const prevMessages = chatList.slice(0, index);
+      const question = prevMessages.pop();
+      const lastAnswer = getLastAnswer(prevMessages);
+
+      if (!question) return;
+
+      handleUpdateChatList(prevMessages);
+      doSend(question.content, question.message_files, lastAnswer);
+    },
+    [chatList, handleUpdateChatList, doSend]
+  );
 
   const allToolIcons = useMemo(() => {
-    const icons: Record<string, any> = {}
+    const icons: Record<string, any> = {};
     modelConfig.agentConfig.tools?.forEach((item: any) => {
-      icons[item.tool_name] = collectionList.find((collection: any) => collection.id === item.provider_id)?.icon
-    })
-    return icons
-  }, [collectionList, modelConfig.agentConfig.tools])
+      icons[item.tool_name] = collectionList.find(
+        (collection: any) => collection.id === item.provider_id
+      )?.icon;
+    });
+    return icons;
+  }, [collectionList, modelConfig.agentConfig.tools]);
 
-  useImperativeHandle(ref, () => {
-    return {
-      handleRestart,
-    }
-  }, [handleRestart])
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        handleRestart,
+      };
+    },
+    [handleRestart]
+  );
 
   return (
     <Chat
       config={config}
       chatList={chatList}
       isResponding={isResponding}
-      chatContainerClassName='p-6'
-      chatFooterClassName='px-6 pt-10 pb-4'
+      chatContainerClassName="p-6"
+      chatFooterClassName="px-6 pt-10 pb-4"
       suggestedQuestions={suggestedQuestions}
       onSend={doSend}
+      onRegenerate={doRegenerate}
       onStopResponding={handleStop}
       showPromptLog
       questionIcon={<Avatar name={userProfile.name} size={40} />}
@@ -137,9 +181,9 @@ const DebugWithSingleModel = forwardRef<DebugWithSingleModelRefType, DebugWithSi
       onAnnotationRemoved={handleAnnotationRemoved}
       noSpacing
     />
-  )
-})
+  );
+});
 
-DebugWithSingleModel.displayName = 'DebugWithSingleModel'
+DebugWithSingleModel.displayName = "DebugWithSingleModel";
 
-export default memo(DebugWithSingleModel)
+export default memo(DebugWithSingleModel);

@@ -8,7 +8,9 @@ from core.app.entities.app_invoke_entities import (
     ChatAppGenerateEntity,
 )
 from core.app.entities.queue_entities import QueueAnnotationReplyEvent
-from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.callback_handler.index_tool_callback_handler import (
+    DatasetIndexToolCallbackHandler,
+)
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
 from core.moderation.base import ModerationError
@@ -72,7 +74,9 @@ class ChatAppRunner(AppRunner):
                 model=application_generate_entity.model_conf.model,
             )
 
-            memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
+            memory = TokenBufferMemory(
+                conversation=conversation, model_instance=model_instance
+            )
 
         # organize all inputs and template to prompt messages
         # Include: prompt template, inputs, query(optional), files(optional)
@@ -120,7 +124,9 @@ class ChatAppRunner(AppRunner):
 
             if annotation_reply:
                 queue_manager.publish(
-                    QueueAnnotationReplyEvent(message_annotation_id=annotation_reply.id),
+                    QueueAnnotationReplyEvent(
+                        message_annotation_id=annotation_reply.id
+                    ),
                     PublishFrom.APPLICATION_MANAGER,
                 )
 
@@ -195,7 +201,10 @@ class ChatAppRunner(AppRunner):
             return
 
         # Re-calculate the max tokens if sum(prompt_token +  max_tokens) over model token limit
-        self.recalc_llm_max_tokens(model_config=application_generate_entity.model_conf, prompt_messages=prompt_messages)
+        self.recalc_llm_max_tokens(
+            model_config=application_generate_entity.model_conf,
+            prompt_messages=prompt_messages,
+        )
 
         # Invoke model
         model_instance = ModelInstance(
@@ -215,5 +224,7 @@ class ChatAppRunner(AppRunner):
 
         # handle invoke result
         self._handle_invoke_result(
-            invoke_result=invoke_result, queue_manager=queue_manager, stream=application_generate_entity.stream
+            invoke_result=invoke_result,
+            queue_manager=queue_manager,
+            stream=application_generate_entity.stream,
         )

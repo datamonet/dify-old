@@ -1,9 +1,16 @@
 from typing import Optional
 
-from xinference_client.client.restful.restful_client import Client, RESTfulRerankModelHandle
+from xinference_client.client.restful.restful_client import (
+    Client,
+    RESTfulRerankModelHandle,
+)
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+)
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -15,6 +22,9 @@ from core.model_runtime.errors.invoke import (
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.rerank_model import RerankModel
+from core.model_runtime.model_providers.xinference.xinference_helper import (
+    validate_model_uid,
+)
 
 
 class XinferenceRerankModel(RerankModel):
@@ -53,7 +63,12 @@ class XinferenceRerankModel(RerankModel):
         server_url = server_url.removesuffix("/")
         auth_headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
 
-        params = {"documents": docs, "query": query, "top_n": top_n, "return_documents": True}
+        params = {
+            "documents": docs,
+            "query": query,
+            "top_n": top_n,
+            "return_documents": True,
+        }
         try:
             handle = RESTfulRerankModelHandle(model_uid, server_url, auth_headers)
             response = handle.rerank(**params)
@@ -62,14 +77,20 @@ class XinferenceRerankModel(RerankModel):
                 raise InvokeServerUnavailableError(str(e))
 
             # compatible xinference server between v0.10.1 - v0.12.1, not support 'return_len'
-            handle = RESTfulRerankModelHandleWithoutExtraParameter(model_uid, server_url, auth_headers)
+            handle = RESTfulRerankModelHandleWithoutExtraParameter(
+                model_uid, server_url, auth_headers
+            )
             response = handle.rerank(**params)
 
         rerank_documents = []
         for idx, result in enumerate(response["results"]):
             # format document
             index = result["index"]
-            page_content = result["document"] if isinstance(result["document"], str) else result["document"]["text"]
+            page_content = (
+                result["document"]
+                if isinstance(result["document"], str)
+                else result["document"]["text"]
+            )
             rerank_document = RerankDocument(
                 index=index,
                 text=page_content,
@@ -77,10 +98,7 @@ class XinferenceRerankModel(RerankModel):
             )
 
             # score threshold check
-            if score_threshold is not None:
-                if result["relevance_score"] >= score_threshold:
-                    rerank_documents.append(rerank_document)
-            else:
+            if score_threshold is None or result["relevance_score"] >= score_threshold:
                 rerank_documents.append(rerank_document)
 
         return RerankResult(model=model, docs=rerank_documents)
@@ -94,8 +112,10 @@ class XinferenceRerankModel(RerankModel):
         :return:
         """
         try:
-            if "/" in credentials["model_uid"] or "?" in credentials["model_uid"] or "#" in credentials["model_uid"]:
-                raise CredentialsValidateFailedError("model_uid should not contain /, ?, or #")
+            if not validate_model_uid(credentials):
+                raise CredentialsValidateFailedError(
+                    "model_uid should not contain /, ?, or #"
+                )
 
             credentials["server_url"] = credentials["server_url"].removesuffix("/")
 
@@ -144,7 +164,9 @@ class XinferenceRerankModel(RerankModel):
             InvokeBadRequestError: [InvokeBadRequestError, KeyError, ValueError],
         }
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """
@@ -184,6 +206,8 @@ class RESTfulRerankModelHandleWithoutExtraParameter(RESTfulRerankModelHandle):
 
         response = requests.post(url, json=request_body, headers=self.auth_headers)
         if response.status_code != 200:
-            raise InvokeServerUnavailableError(f"Failed to rerank documents, detail: {response.json()['detail']}")
+            raise InvokeServerUnavailableError(
+                f"Failed to rerank documents, detail: {response.json()['detail']}"
+            )
         response_data = response.json()
         return response_data

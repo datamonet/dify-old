@@ -20,7 +20,8 @@ def get_oauth_providers():
         notion_oauth = NotionOAuth(
             client_id=dify_config.NOTION_CLIENT_ID,
             client_secret=dify_config.NOTION_CLIENT_SECRET,
-            redirect_uri=dify_config.CONSOLE_API_URL + "/console/api/oauth/data-source/callback/notion",
+            redirect_uri=dify_config.CONSOLE_API_URL
+            + "/console/api/oauth/data-source/callback/notion",
         )
 
         OAUTH_PROVIDERS = {"notion": notion_oauth}
@@ -65,7 +66,9 @@ class OAuthDataSourceCallback(Resource):
 
             return redirect(f"{dify_config.CONSOLE_WEB_URL}?type=notion&error={error}")
         else:
-            return redirect(f"{dify_config.CONSOLE_WEB_URL}?type=notion&error=Access denied")
+            return redirect(
+                f"{dify_config.CONSOLE_WEB_URL}?type=notion&error=Access denied"
+            )
 
 
 class OAuthDataSourceBinding(Resource):
@@ -103,13 +106,19 @@ class OAuthDataSourceSync(Resource):
         try:
             oauth_provider.sync_data_source(binding_id)
         except requests.exceptions.HTTPError as e:
-            logging.exception(f"An error occurred during the OAuthCallback process with {provider}: {e.response.text}")
+            logging.exception(
+                f"An error occurred during the OAuthCallback process with {provider}: {e.response.text}"
+            )
             return {"error": "OAuth data source process failed"}, 400
 
         return {"result": "success"}, 200
 
 
 api.add_resource(OAuthDataSource, "/oauth/data-source/<string:provider>")
-api.add_resource(OAuthDataSourceCallback, "/oauth/data-source/callback/<string:provider>")
+api.add_resource(
+    OAuthDataSourceCallback, "/oauth/data-source/callback/<string:provider>"
+)
 api.add_resource(OAuthDataSourceBinding, "/oauth/data-source/binding/<string:provider>")
-api.add_resource(OAuthDataSourceSync, "/oauth/data-source/<string:provider>/<uuid:binding_id>/sync")
+api.add_resource(
+    OAuthDataSourceSync, "/oauth/data-source/<string:provider>/<uuid:binding_id>/sync"
+)

@@ -26,7 +26,11 @@ def document_indexing_sync_task(dataset_id: str, document_id: str):
     logging.info(click.style("Start sync document: {}".format(document_id), fg="green"))
     start_at = time.perf_counter()
 
-    document = db.session.query(Document).filter(Document.id == document_id, Document.dataset_id == dataset_id).first()
+    document = (
+        db.session.query(Document)
+        .filter(Document.id == document_id, Document.dataset_id == dataset_id)
+        .first()
+    )
 
     if not document:
         raise NotFound("Document not found")
@@ -48,7 +52,8 @@ def document_indexing_sync_task(dataset_id: str, document_id: str):
                 DataSourceOauthBinding.tenant_id == document.tenant_id,
                 DataSourceOauthBinding.provider == "notion",
                 DataSourceOauthBinding.disabled == False,
-                DataSourceOauthBinding.source_info["workspace_id"] == f'"{workspace_id}"',
+                DataSourceOauthBinding.source_info["workspace_id"]
+                == f'"{workspace_id}"',
             )
         ).first()
         if not data_source_binding:
@@ -67,18 +72,28 @@ def document_indexing_sync_task(dataset_id: str, document_id: str):
         # check the page is updated
         if last_edited_time != page_edited_time:
             document.indexing_status = "parsing"
-            document.processing_started_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            document.processing_started_at = datetime.datetime.now(
+                datetime.timezone.utc
+            ).replace(tzinfo=None)
             db.session.commit()
 
             # delete all document segment and index
             try:
-                dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
+                dataset = (
+                    db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
+                )
                 if not dataset:
                     raise Exception("Dataset not found")
                 index_type = document.doc_form
-                index_processor = IndexProcessorFactory(index_type).init_index_processor()
+                index_processor = IndexProcessorFactory(
+                    index_type
+                ).init_index_processor()
 
-                segments = db.session.query(DocumentSegment).filter(DocumentSegment.document_id == document_id).all()
+                segments = (
+                    db.session.query(DocumentSegment)
+                    .filter(DocumentSegment.document_id == document_id)
+                    .all()
+                )
                 index_node_ids = [segment.index_node_id for segment in segments]
 
                 # delete from vector index
@@ -97,14 +112,21 @@ def document_indexing_sync_task(dataset_id: str, document_id: str):
                     )
                 )
             except Exception:
-                logging.exception("Cleaned document when document update data source or process rule failed")
+                logging.exception(
+                    "Cleaned document when document update data source or process rule failed"
+                )
 
             try:
                 indexing_runner = IndexingRunner()
                 indexing_runner.run([document])
                 end_at = time.perf_counter()
                 logging.info(
-                    click.style("update document: {} latency: {}".format(document.id, end_at - start_at), fg="green")
+                    click.style(
+                        "update document: {} latency: {}".format(
+                            document.id, end_at - start_at
+                        ),
+                        fg="green",
+                    )
                 )
             except DocumentIsPausedError as ex:
                 logging.info(click.style(str(ex), fg="yellow"))

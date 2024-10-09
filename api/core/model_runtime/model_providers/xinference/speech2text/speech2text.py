@@ -1,9 +1,16 @@
 from typing import IO, Optional
 
-from xinference_client.client.restful.restful_client import Client, RESTfulAudioModelHandle
+from xinference_client.client.restful.restful_client import (
+    Client,
+    RESTfulAudioModelHandle,
+)
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -14,6 +21,9 @@ from core.model_runtime.errors.invoke import (
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.speech2text_model import Speech2TextModel
+from core.model_runtime.model_providers.xinference.xinference_helper import (
+    validate_model_uid,
+)
 
 
 class XinferenceSpeech2TextModel(Speech2TextModel):
@@ -21,7 +31,9 @@ class XinferenceSpeech2TextModel(Speech2TextModel):
     Model class for Xinference speech to text model.
     """
 
-    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
+    def _invoke(
+        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
+    ) -> str:
         """
         Invoke speech2text model
 
@@ -42,8 +54,10 @@ class XinferenceSpeech2TextModel(Speech2TextModel):
         :return:
         """
         try:
-            if "/" in credentials["model_uid"] or "?" in credentials["model_uid"] or "#" in credentials["model_uid"]:
-                raise CredentialsValidateFailedError("model_uid should not contain /, ?, or #")
+            if not validate_model_uid(credentials):
+                raise CredentialsValidateFailedError(
+                    "model_uid should not contain /, ?, or #"
+                )
 
             credentials["server_url"] = credentials["server_url"].removesuffix("/")
 
@@ -121,14 +135,20 @@ class XinferenceSpeech2TextModel(Speech2TextModel):
         try:
             handle = RESTfulAudioModelHandle(model_uid, server_url, auth_headers)
             response = handle.transcriptions(
-                audio=file, language=language, prompt=prompt, response_format=response_format, temperature=temperature
+                audio=file,
+                language=language,
+                prompt=prompt,
+                response_format=response_format,
+                temperature=temperature,
             )
         except RuntimeError as e:
             raise InvokeServerUnavailableError(str(e))
 
         return response["text"]
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """

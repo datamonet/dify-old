@@ -19,12 +19,21 @@ class BillingService:
         return billing_info
 
     @classmethod
-    def get_subscription(cls, plan: str, interval: str, prefilled_email: str = "", tenant_id: str = ""):
-        params = {"plan": plan, "interval": interval, "prefilled_email": prefilled_email, "tenant_id": tenant_id}
+    def get_subscription(
+        cls, plan: str, interval: str, prefilled_email: str = "", tenant_id: str = ""
+    ):
+        params = {
+            "plan": plan,
+            "interval": interval,
+            "prefilled_email": prefilled_email,
+            "tenant_id": tenant_id,
+        }
         return cls._send_request("GET", "/subscription/payment-link", params=params)
 
     @classmethod
-    def get_model_provider_payment_link(cls, provider_name: str, tenant_id: str, account_id: str, prefilled_email: str):
+    def get_model_provider_payment_link(
+        cls, provider_name: str, tenant_id: str, account_id: str, prefilled_email: str
+    ):
         params = {
             "provider_name": provider_name,
             "tenant_id": tenant_id,
@@ -40,10 +49,15 @@ class BillingService:
 
     @classmethod
     def _send_request(cls, method, endpoint, json=None, params=None):
-        headers = {"Content-Type": "application/json", "Billing-Api-Secret-Key": cls.secret_key}
+        headers = {
+            "Content-Type": "application/json",
+            "Billing-Api-Secret-Key": cls.secret_key,
+        }
 
         url = f"{cls.base_url}{endpoint}"
-        response = requests.request(method, url, json=json, params=params, headers=headers)
+        response = requests.request(
+            method, url, json=json, params=params, headers=headers
+        )
 
         return response.json()
 
@@ -53,7 +67,10 @@ class BillingService:
 
         join = (
             db.session.query(TenantAccountJoin)
-            .filter(TenantAccountJoin.tenant_id == tenant_id, TenantAccountJoin.account_id == current_user.id)
+            .filter(
+                TenantAccountJoin.tenant_id == tenant_id,
+                TenantAccountJoin.account_id == current_user.id,
+            )
             .first()
         )
 

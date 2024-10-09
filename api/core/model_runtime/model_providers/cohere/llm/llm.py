@@ -23,7 +23,12 @@ from cohere import (
 )
 from cohere.core import RequestOptions
 
-from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMMode,
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -35,7 +40,12 @@ from core.model_runtime.entities.message_entities import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, I18nObject, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    I18nObject,
+    ModelType,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -45,7 +55,9 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -125,9 +137,13 @@ class CohereLargeLanguageModel(LargeLanguageModel):
 
         try:
             if model_mode == LLMMode.CHAT:
-                return self._num_tokens_from_messages(model, credentials, prompt_messages)
+                return self._num_tokens_from_messages(
+                    model, credentials, prompt_messages
+                )
             else:
-                return self._num_tokens_from_string(model, credentials, prompt_messages[0].content)
+                return self._num_tokens_from_string(
+                    model, credentials, prompt_messages[0].content
+                )
         except Exception as e:
             raise self._transform_invoke_error(e)
 
@@ -191,7 +207,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         # initialize client
-        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
+        client = cohere.Client(
+            credentials.get("api_key"), base_url=credentials.get("base_url")
+        )
 
         if stop:
             model_parameters["end_sequences"] = stop
@@ -204,7 +222,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 request_options=RequestOptions(max_retries=0),
             )
 
-            return self._handle_generate_stream_response(model, credentials, response, prompt_messages)
+            return self._handle_generate_stream_response(
+                model, credentials, response, prompt_messages
+            )
         else:
             response = client.generate(
                 prompt=prompt_messages[0].content,
@@ -213,10 +233,16 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 request_options=RequestOptions(max_retries=0),
             )
 
-            return self._handle_generate_response(model, credentials, response, prompt_messages)
+            return self._handle_generate_response(
+                model, credentials, response, prompt_messages
+            )
 
     def _handle_generate_response(
-        self, model: str, credentials: dict, response: Generation, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: Generation,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         Handle llm response
@@ -237,11 +263,16 @@ class CohereLargeLanguageModel(LargeLanguageModel):
         completion_tokens = int(response.meta.billed_units.output_tokens)
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         response = LLMResult(
-            model=model, prompt_messages=prompt_messages, message=assistant_prompt_message, usage=usage
+            model=model,
+            prompt_messages=prompt_messages,
+            message=assistant_prompt_message,
+            usage=usage,
         )
 
         return response
@@ -290,13 +321,19 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 chunk = cast(GenerateStreamedResponse_StreamEnd, chunk)
 
                 # calculate num tokens
-                prompt_tokens = self._num_tokens_from_messages(model, credentials, prompt_messages)
+                prompt_tokens = self._num_tokens_from_messages(
+                    model, credentials, prompt_messages
+                )
                 completion_tokens = self._num_tokens_from_messages(
-                    model, credentials, [AssistantPromptMessage(content=full_assistant_content)]
+                    model,
+                    credentials,
+                    [AssistantPromptMessage(content=full_assistant_content)],
                 )
 
                 # transform usage
-                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+                usage = self._calc_response_usage(
+                    model, credentials, prompt_tokens, completion_tokens
+                )
 
                 yield LLMResultChunk(
                     model=model,
@@ -338,19 +375,23 @@ class CohereLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         # initialize client
-        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
+        client = cohere.Client(
+            credentials.get("api_key"), base_url=credentials.get("base_url")
+        )
 
         if stop:
             model_parameters["stop_sequences"] = stop
 
         if tools:
             if len(tools) == 1:
-                raise ValueError("Cohere tool call requires at least two tools to be specified.")
+                raise ValueError(
+                    "Cohere tool call requires at least two tools to be specified."
+                )
 
             model_parameters["tools"] = self._convert_tools(tools)
 
-        message, chat_histories, tool_results = self._convert_prompt_messages_to_message_and_chat_histories(
-            prompt_messages
+        message, chat_histories, tool_results = (
+            self._convert_prompt_messages_to_message_and_chat_histories(prompt_messages)
         )
 
         if tool_results:
@@ -358,7 +399,10 @@ class CohereLargeLanguageModel(LargeLanguageModel):
 
         # chat model
         real_model = model
-        if self.get_model_schema(model, credentials).fetch_from == FetchFrom.PREDEFINED_MODEL:
+        if (
+            self.get_model_schema(model, credentials).fetch_from
+            == FetchFrom.PREDEFINED_MODEL
+        ):
             real_model = model.removesuffix("-chat")
 
         if stream:
@@ -370,7 +414,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 request_options=RequestOptions(max_retries=0),
             )
 
-            return self._handle_chat_generate_stream_response(model, credentials, response, prompt_messages)
+            return self._handle_chat_generate_stream_response(
+                model, credentials, response, prompt_messages
+            )
         else:
             response = client.chat(
                 message=message,
@@ -380,10 +426,16 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 request_options=RequestOptions(max_retries=0),
             )
 
-            return self._handle_chat_generate_response(model, credentials, response, prompt_messages)
+            return self._handle_chat_generate_response(
+                model, credentials, response, prompt_messages
+            )
 
     def _handle_chat_generate_response(
-        self, model: str, credentials: dict, response: NonStreamedChatResponse, prompt_messages: list[PromptMessage]
+        self,
+        model: str,
+        credentials: dict,
+        response: NonStreamedChatResponse,
+        prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         """
         Handle llm chat response
@@ -403,24 +455,36 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                     id=cohere_tool_call.name,
                     type="function",
                     function=AssistantPromptMessage.ToolCall.ToolCallFunction(
-                        name=cohere_tool_call.name, arguments=json.dumps(cohere_tool_call.parameters)
+                        name=cohere_tool_call.name,
+                        arguments=json.dumps(cohere_tool_call.parameters),
                     ),
                 )
                 tool_calls.append(tool_call)
 
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=assistant_text, tool_calls=tool_calls)
+        assistant_prompt_message = AssistantPromptMessage(
+            content=assistant_text, tool_calls=tool_calls
+        )
 
         # calculate num tokens
-        prompt_tokens = self._num_tokens_from_messages(model, credentials, prompt_messages)
-        completion_tokens = self._num_tokens_from_messages(model, credentials, [assistant_prompt_message])
+        prompt_tokens = self._num_tokens_from_messages(
+            model, credentials, prompt_messages
+        )
+        completion_tokens = self._num_tokens_from_messages(
+            model, credentials, [assistant_prompt_message]
+        )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         response = LLMResult(
-            model=model, prompt_messages=prompt_messages, message=assistant_prompt_message, usage=usage
+            model=model,
+            prompt_messages=prompt_messages,
+            message=assistant_prompt_message,
+            usage=usage,
         )
 
         return response
@@ -448,13 +512,21 @@ class CohereLargeLanguageModel(LargeLanguageModel):
             finish_reason: Optional[str] = None,
         ) -> LLMResultChunk:
             # calculate num tokens
-            prompt_tokens = self._num_tokens_from_messages(model, credentials, prompt_messages)
+            prompt_tokens = self._num_tokens_from_messages(
+                model, credentials, prompt_messages
+            )
 
-            full_assistant_prompt_message = AssistantPromptMessage(content=full_text, tool_calls=tool_calls)
-            completion_tokens = self._num_tokens_from_messages(model, credentials, [full_assistant_prompt_message])
+            full_assistant_prompt_message = AssistantPromptMessage(
+                content=full_text, tool_calls=tool_calls
+            )
+            completion_tokens = self._num_tokens_from_messages(
+                model, credentials, [full_assistant_prompt_message]
+            )
 
             # transform usage
-            usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+            usage = self._calc_response_usage(
+                model, credentials, prompt_tokens, completion_tokens
+            )
 
             return LLMResultChunk(
                 model=model,
@@ -501,13 +573,16 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                             id=cohere_tool_call.name,
                             type="function",
                             function=AssistantPromptMessage.ToolCall.ToolCallFunction(
-                                name=cohere_tool_call.name, arguments=json.dumps(cohere_tool_call.parameters)
+                                name=cohere_tool_call.name,
+                                arguments=json.dumps(cohere_tool_call.parameters),
                             ),
                         )
                         tool_calls.append(tool_call)
             elif isinstance(chunk, StreamedChatResponse_StreamEnd):
                 chunk = cast(StreamedChatResponse_StreamEnd, chunk)
-                yield final_response(full_assistant_content, tool_calls, index, chunk.finish_reason)
+                yield final_response(
+                    full_assistant_content, tool_calls, index, chunk.finish_reason
+                )
                 index += 1
 
     def _convert_prompt_messages_to_message_and_chat_histories(
@@ -528,13 +603,16 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                         latest_tool_call_n_outputs.append(
                             ChatStreamRequestToolResultsItem(
                                 call=ToolCall(
-                                    name=tool_call.function.name, parameters=json.loads(tool_call.function.arguments)
+                                    name=tool_call.function.name,
+                                    parameters=json.loads(tool_call.function.arguments),
                                 ),
                                 outputs=[],
                             )
                         )
                 else:
-                    cohere_prompt_message = self._convert_prompt_message_to_dict(prompt_message)
+                    cohere_prompt_message = self._convert_prompt_message_to_dict(
+                        prompt_message
+                    )
                     if cohere_prompt_message:
                         chat_histories.append(cohere_prompt_message)
             elif prompt_message.role == PromptMessageRole.TOOL:
@@ -543,16 +621,21 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                     i = 0
                     for tool_call_n_outputs in latest_tool_call_n_outputs:
                         if tool_call_n_outputs.call.name == prompt_message.tool_call_id:
-                            latest_tool_call_n_outputs[i] = ChatStreamRequestToolResultsItem(
-                                call=ToolCall(
-                                    name=tool_call_n_outputs.call.name, parameters=tool_call_n_outputs.call.parameters
-                                ),
-                                outputs=[{"result": prompt_message.content}],
+                            latest_tool_call_n_outputs[i] = (
+                                ChatStreamRequestToolResultsItem(
+                                    call=ToolCall(
+                                        name=tool_call_n_outputs.call.name,
+                                        parameters=tool_call_n_outputs.call.parameters,
+                                    ),
+                                    outputs=[{"result": prompt_message.content}],
+                                )
                             )
                             break
                         i += 1
             else:
-                cohere_prompt_message = self._convert_prompt_message_to_dict(prompt_message)
+                cohere_prompt_message = self._convert_prompt_message_to_dict(
+                    prompt_message
+                )
                 if cohere_prompt_message:
                     chat_histories.append(cohere_prompt_message)
 
@@ -573,7 +656,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
 
         return message, chat_histories, latest_tool_call_n_outputs
 
-    def _convert_prompt_message_to_dict(self, message: PromptMessage) -> Optional[ChatMessage]:
+    def _convert_prompt_message_to_dict(
+        self, message: PromptMessage
+    ) -> Optional[ChatMessage]:
         """
         Convert PromptMessage to dict for Cohere model
         """
@@ -585,7 +670,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 sub_message_text = ""
                 for message_content in message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(TextPromptMessageContent, message_content)
+                        message_content = cast(
+                            TextPromptMessageContent, message_content
+                        )
                         sub_message_text += message_content.data
 
                 chat_message = ChatMessage(role="USER", message=sub_message_text)
@@ -628,7 +715,9 @@ class CohereLargeLanguageModel(LargeLanguageModel):
                 )
 
             cohere_tool = Tool(
-                name=tool.name, description=tool.description, parameter_definitions=parameter_definitions
+                name=tool.name,
+                description=tool.description,
+                parameter_definitions=parameter_definitions,
             )
 
             cohere_tools.append(cohere_tool)
@@ -645,29 +734,40 @@ class CohereLargeLanguageModel(LargeLanguageModel):
         :return: number of tokens
         """
         # initialize client
-        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
+        client = cohere.Client(
+            credentials.get("api_key"), base_url=credentials.get("base_url")
+        )
 
         response = client.tokenize(text=text, model=model)
 
         return len(response.tokens)
 
-    def _num_tokens_from_messages(self, model: str, credentials: dict, messages: list[PromptMessage]) -> int:
+    def _num_tokens_from_messages(
+        self, model: str, credentials: dict, messages: list[PromptMessage]
+    ) -> int:
         """Calculate num tokens Cohere model."""
         calc_messages = []
         for message in messages:
             cohere_message = self._convert_prompt_message_to_dict(message)
             if cohere_message:
                 calc_messages.append(cohere_message)
-        message_strs = [f"{message.role}: {message.message}" for message in calc_messages]
+        message_strs = [
+            f"{message.role}: {message.message}" for message in calc_messages
+        ]
         message_str = "\n".join(message_strs)
 
         real_model = model
-        if self.get_model_schema(model, credentials).fetch_from == FetchFrom.PREDEFINED_MODEL:
+        if (
+            self.get_model_schema(model, credentials).fetch_from
+            == FetchFrom.PREDEFINED_MODEL
+        ):
             real_model = model.removesuffix("-chat")
 
         return self._num_tokens_from_string(real_model, credentials, message_str)
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity:
         """
         Cohere supports fine-tuning of their models. This method returns the schema of the base model
         but renamed to the fine-tuned model name.
@@ -718,9 +818,15 @@ class CohereLargeLanguageModel(LargeLanguageModel):
         :return: Invoke error mapping
         """
         return {
-            InvokeConnectionError: [cohere.errors.service_unavailable_error.ServiceUnavailableError],
-            InvokeServerUnavailableError: [cohere.errors.internal_server_error.InternalServerError],
-            InvokeRateLimitError: [cohere.errors.too_many_requests_error.TooManyRequestsError],
+            InvokeConnectionError: [
+                cohere.errors.service_unavailable_error.ServiceUnavailableError
+            ],
+            InvokeServerUnavailableError: [
+                cohere.errors.internal_server_error.InternalServerError
+            ],
+            InvokeRateLimitError: [
+                cohere.errors.too_many_requests_error.TooManyRequestsError
+            ],
             InvokeAuthorizationError: [
                 cohere.errors.unauthorized_error.UnauthorizedError,
                 cohere.errors.forbidden_error.ForbiddenError,

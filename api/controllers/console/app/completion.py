@@ -47,8 +47,15 @@ class CompletionMessageApi(Resource):
         parser.add_argument("query", type=str, location="json", default="")
         parser.add_argument("files", type=list, required=False, location="json")
         parser.add_argument("model_config", type=dict, required=True, location="json")
-        parser.add_argument("response_mode", type=str, choices=["blocking", "streaming"], location="json")
-        parser.add_argument("retriever_from", type=str, required=False, default="dev", location="json")
+        parser.add_argument(
+            "response_mode",
+            type=str,
+            choices=["blocking", "streaming"],
+            location="json",
+        )
+        parser.add_argument(
+            "retriever_from", type=str, required=False, default="dev", location="json"
+        )
         args = parser.parse_args()
 
         streaming = args["response_mode"] != "blocking"
@@ -58,7 +65,11 @@ class CompletionMessageApi(Resource):
 
         try:
             response = AppGenerateService.generate(
-                app_model=app_model, user=account, args=args, invoke_from=InvokeFrom.DEBUGGER, streaming=streaming
+                app_model=app_model,
+                user=account,
+                args=args,
+                invoke_from=InvokeFrom.DEBUGGER,
+                streaming=streaming,
             )
 
             return helper.compact_generate_response(response)
@@ -109,8 +120,18 @@ class ChatMessageApi(Resource):
         parser.add_argument("files", type=list, required=False, location="json")
         parser.add_argument("model_config", type=dict, required=True, location="json")
         parser.add_argument("conversation_id", type=uuid_value, location="json")
-        parser.add_argument("response_mode", type=str, choices=["blocking", "streaming"], location="json")
-        parser.add_argument("retriever_from", type=str, required=False, default="dev", location="json")
+        parser.add_argument(
+            "parent_message_id", type=uuid_value, required=False, location="json"
+        )
+        parser.add_argument(
+            "response_mode",
+            type=str,
+            choices=["blocking", "streaming"],
+            location="json",
+        )
+        parser.add_argument(
+            "retriever_from", type=str, required=False, default="dev", location="json"
+        )
         args = parser.parse_args()
 
         streaming = args["response_mode"] != "blocking"
@@ -120,7 +141,11 @@ class ChatMessageApi(Resource):
 
         try:
             response = AppGenerateService.generate(
-                app_model=app_model, user=account, args=args, invoke_from=InvokeFrom.DEBUGGER, streaming=streaming
+                app_model=app_model,
+                user=account,
+                args=args,
+                invoke_from=InvokeFrom.DEBUGGER,
+                streaming=streaming,
             )
 
             return helper.compact_generate_response(response)
@@ -162,6 +187,11 @@ class ChatMessageStopApi(Resource):
 
 
 api.add_resource(CompletionMessageApi, "/apps/<uuid:app_id>/completion-messages")
-api.add_resource(CompletionMessageStopApi, "/apps/<uuid:app_id>/completion-messages/<string:task_id>/stop")
+api.add_resource(
+    CompletionMessageStopApi,
+    "/apps/<uuid:app_id>/completion-messages/<string:task_id>/stop",
+)
 api.add_resource(ChatMessageApi, "/apps/<uuid:app_id>/chat-messages")
-api.add_resource(ChatMessageStopApi, "/apps/<uuid:app_id>/chat-messages/<string:task_id>/stop")
+api.add_resource(
+    ChatMessageStopApi, "/apps/<uuid:app_id>/chat-messages/<string:task_id>/stop"
+)

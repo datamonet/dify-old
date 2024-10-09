@@ -1,5 +1,9 @@
 from core.extension.extensible import ExtensionModule
-from core.moderation.base import Moderation, ModerationInputsResult, ModerationOutputsResult
+from core.moderation.base import (
+    Moderation,
+    ModerationInputsResult,
+    ModerationOutputsResult,
+)
 from extensions.ext_code_based_extension import code_based_extension
 
 
@@ -7,7 +11,9 @@ class ModerationFactory:
     __extension_instance: Moderation
 
     def __init__(self, name: str, app_id: str, tenant_id: str, config: dict) -> None:
-        extension_class = code_based_extension.extension_class(ExtensionModule.MODERATION, name)
+        extension_class = code_based_extension.extension_class(
+            ExtensionModule.MODERATION, name
+        )
         self.__extension_instance = extension_class(app_id, tenant_id, config)
 
     @classmethod
@@ -20,11 +26,17 @@ class ModerationFactory:
         :param config: the form config data
         :return:
         """
-        code_based_extension.validate_form_schema(ExtensionModule.MODERATION, name, config)
-        extension_class = code_based_extension.extension_class(ExtensionModule.MODERATION, name)
+        code_based_extension.validate_form_schema(
+            ExtensionModule.MODERATION, name, config
+        )
+        extension_class = code_based_extension.extension_class(
+            ExtensionModule.MODERATION, name
+        )
         extension_class.validate_config(tenant_id, config)
 
-    def moderation_for_inputs(self, inputs: dict, query: str = "") -> ModerationInputsResult:
+    def moderation_for_inputs(
+        self, inputs: dict, query: str = ""
+    ) -> ModerationInputsResult:
         """
         Moderation for inputs.
         After the user inputs, this method will be called to perform sensitive content review

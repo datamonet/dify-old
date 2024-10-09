@@ -10,7 +10,9 @@ from models.model import App, Conversation, EndUser, Message, MessageAgentThough
 
 class AgentService:
     @classmethod
-    def get_agent_logs(cls, app_model: App, conversation_id: str, message_id: str) -> dict:
+    def get_agent_logs(
+        cls, app_model: App, conversation_id: str, message_id: str
+    ) -> dict:
         """
         Service to get agent logs
         """
@@ -43,11 +45,15 @@ class AgentService:
         if conversation.from_end_user_id:
             # only select name field
             executor = (
-                db.session.query(EndUser, EndUser.name).filter(EndUser.id == conversation.from_end_user_id).first()
+                db.session.query(EndUser, EndUser.name)
+                .filter(EndUser.id == conversation.from_end_user_id)
+                .first()
             )
         else:
             executor = (
-                db.session.query(Account, Account.name).filter(Account.id == conversation.from_account_id).first()
+                db.session.query(Account, Account.name)
+                .filter(Account.id == conversation.from_account_id)
+                .first()
             )
 
         if executor:
@@ -64,7 +70,9 @@ class AgentService:
                 "start_time": message.created_at.astimezone(timezone).isoformat(),
                 "elapsed_time": message.provider_response_latency,
                 "total_tokens": message.answer_tokens + message.message_tokens,
-                "agent_mode": app_model.app_model_config.agent_mode_dict.get("strategy", "react"),
+                "agent_mode": app_model.app_model_config.agent_mode_dict.get(
+                    "strategy", "react"
+                ),
                 "iterations": len(agent_thoughts),
             },
             "iterations": [],
@@ -112,7 +120,9 @@ class AgentService:
 
                 tool_calls.append(
                     {
-                        "status": "success" if not tool_meta_data.get("error") else "error",
+                        "status": "success"
+                        if not tool_meta_data.get("error")
+                        else "error",
                         "error": tool_meta_data.get("error"),
                         "time_cost": tool_meta_data.get("time_cost", 0),
                         "tool_name": tool_name,

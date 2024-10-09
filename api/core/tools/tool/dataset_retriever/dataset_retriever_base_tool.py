@@ -4,7 +4,9 @@ from typing import Any, Optional
 from msal_extensions.persistence import ABC
 from pydantic import BaseModel, ConfigDict
 
-from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.callback_handler.index_tool_callback_handler import (
+    DatasetIndexToolCallbackHandler,
+)
 
 
 class DatasetRetrieverBaseTool(BaseModel, ABC):

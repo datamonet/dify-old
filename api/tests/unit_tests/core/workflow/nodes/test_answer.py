@@ -52,7 +52,10 @@ def test_execute_answer():
 
     # construct variable pool
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
         conversation_variables=[],
@@ -64,7 +67,9 @@ def test_execute_answer():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config={
             "id": "answer",
             "data": {
@@ -82,4 +87,7 @@ def test_execute_answer():
     result = node._run()
 
     assert result.status == WorkflowNodeExecutionStatus.SUCCEEDED
-    assert result.outputs["answer"] == "Today's weather is sunny\nYou are a helpful AI.\n{{img}}\nFin."
+    assert (
+        result.outputs["answer"]
+        == "Today's weather is sunny\nYou are a helpful AI.\n{{img}}\nFin."
+    )

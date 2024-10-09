@@ -3,13 +3,19 @@ from os import path
 from typing import Any, cast
 
 from core.app.segments import ArrayAnySegment, ArrayAnyVariable, parser
-from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
+from core.callback_handler.workflow_tool_callback_handler import (
+    DifyWorkflowCallbackHandler,
+)
 from core.file.file_obj import FileTransferMethod, FileType, FileVar
 from core.tools.entities.tool_entities import ToolInvokeMessage, ToolParameter
 from core.tools.tool_engine import ToolEngine
 from core.tools.tool_manager import ToolManager
 from core.tools.utils.message_transformer import ToolFileMessageTransformer
-from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult, NodeType
+from core.workflow.entities.node_entities import (
+    NodeRunMetadataKey,
+    NodeRunResult,
+    NodeType,
+)
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.enums import SystemVariableKey
 from core.workflow.nodes.base_node import BaseNode
@@ -34,7 +40,10 @@ class ToolNode(BaseNode):
         node_data = cast(ToolNodeData, self.node_data)
 
         # fetch tool icon
-        tool_info = {"provider_type": node_data.provider_type, "provider_id": node_data.provider_id}
+        tool_info = {
+            "provider_type": node_data.provider_type,
+            "provider_id": node_data.provider_id,
+        }
 
         # get tool runtime
         try:
@@ -52,7 +61,9 @@ class ToolNode(BaseNode):
         # get parameters
         tool_parameters = tool_runtime.get_runtime_parameters() or []
         parameters = self._generate_parameters(
-            tool_parameters=tool_parameters, variable_pool=self.graph_runtime_state.variable_pool, node_data=node_data
+            tool_parameters=tool_parameters,
+            variable_pool=self.graph_runtime_state.variable_pool,
+            node_data=node_data,
         )
         parameters_for_log = self._generate_parameters(
             tool_parameters=tool_parameters,
@@ -108,7 +119,9 @@ class ToolNode(BaseNode):
             Mapping[str, Any]: A dictionary containing the generated parameters.
 
         """
-        tool_parameters_dictionary = {parameter.name: parameter for parameter in tool_parameters}
+        tool_parameters_dictionary = {
+            parameter.name: parameter for parameter in tool_parameters
+        }
 
         result = {}
         for parameter_name in node_data.tool_parameters:
@@ -117,7 +130,9 @@ class ToolNode(BaseNode):
                 result[parameter_name] = None
                 continue
             if parameter.type == ToolParameter.ToolParameterType.FILE:
-                result[parameter_name] = [v.to_dict() for v in self._fetch_files(variable_pool)]
+                result[parameter_name] = [
+                    v.to_dict() for v in self._fetch_files(variable_pool)
+                ]
             else:
                 tool_input = node_data.tool_parameters[parameter_name]
                 if tool_input.type == "variable":
@@ -128,7 +143,9 @@ class ToolNode(BaseNode):
                         template=str(tool_input.value),
                         variable_pool=variable_pool,
                     )
-                    parameter_value = segment_group.log if for_log else segment_group.text
+                    parameter_value = (
+                        segment_group.log if for_log else segment_group.text
+                    )
                 result[parameter_name] = parameter_value
 
         return result
@@ -138,7 +155,9 @@ class ToolNode(BaseNode):
         assert isinstance(variable, ArrayAnyVariable | ArrayAnySegment)
         return list(variable.value) if variable else []
 
-    def _convert_tool_messages(self, messages: list[ToolInvokeMessage]) -> tuple[str, list[FileVar], list[dict]]:
+    def _convert_tool_messages(
+        self, messages: list[ToolInvokeMessage]
+    ) -> tuple[str, list[FileVar], list[dict]]:
         """
         Convert ToolInvokeMessages into tuple[plain_text, files]
         """
@@ -156,19 +175,26 @@ class ToolNode(BaseNode):
 
         return plain_text, files, json
 
-    def _extract_tool_response_binary(self, tool_response: list[ToolInvokeMessage]) -> list[FileVar]:
+    def _extract_tool_response_binary(
+        self, tool_response: list[ToolInvokeMessage]
+    ) -> list[FileVar]:
         """
         Extract tool response binary
         """
         result = []
 
         for response in tool_response:
-            if response.type in {ToolInvokeMessage.MessageType.IMAGE_LINK, ToolInvokeMessage.MessageType.IMAGE}:
+            if response.type in {
+                ToolInvokeMessage.MessageType.IMAGE_LINK,
+                ToolInvokeMessage.MessageType.IMAGE,
+            }:
                 url = response.message
                 ext = path.splitext(url)[1]
                 mimetype = response.meta.get("mime_type", "image/jpeg")
                 filename = response.save_as or url.split("/")[-1]
-                transfer_method = response.meta.get("transfer_method", FileTransferMethod.TOOL_FILE)
+                transfer_method = response.meta.get(
+                    "transfer_method", FileTransferMethod.TOOL_FILE
+                )
 
                 # get tool file id
                 tool_file_id = url.split("/")[-1].split(".")[0]
@@ -195,7 +221,9 @@ class ToolNode(BaseNode):
                         related_id=tool_file_id,
                         filename=response.save_as,
                         extension=path.splitext(response.save_as)[1],
-                        mime_type=response.meta.get("mime_type", "application/octet-stream"),
+                        mime_type=response.meta.get(
+                            "mime_type", "application/octet-stream"
+                        ),
                     )
                 )
             elif response.type == ToolInvokeMessage.MessageType.LINK:
@@ -203,7 +231,9 @@ class ToolNode(BaseNode):
 
         return result
 
-    def _extract_tool_response_text(self, tool_response: list[ToolInvokeMessage]) -> str:
+    def _extract_tool_response_text(
+        self, tool_response: list[ToolInvokeMessage]
+    ) -> str:
         """
         Extract tool response text
         """
@@ -218,8 +248,14 @@ class ToolNode(BaseNode):
             ]
         )
 
-    def _extract_tool_response_json(self, tool_response: list[ToolInvokeMessage]) -> list[dict]:
-        return [message.message for message in tool_response if message.type == ToolInvokeMessage.MessageType.JSON]
+    def _extract_tool_response_json(
+        self, tool_response: list[ToolInvokeMessage]
+    ) -> list[dict]:
+        return [
+            message.message
+            for message in tool_response
+            if message.type == ToolInvokeMessage.MessageType.JSON
+        ]
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
@@ -236,7 +272,9 @@ class ToolNode(BaseNode):
         for parameter_name in node_data.tool_parameters:
             input = node_data.tool_parameters[parameter_name]
             if input.type == "mixed":
-                selectors = VariableTemplateParser(input.value).extract_variable_selectors()
+                selectors = VariableTemplateParser(
+                    input.value
+                ).extract_variable_selectors()
                 for selector in selectors:
                     result[selector.variable] = selector.value_selector
             elif input.type == "variable":

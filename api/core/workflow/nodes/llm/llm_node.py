@@ -8,7 +8,11 @@ from pydantic import BaseModel
 from core.app.entities.app_invoke_entities import ModelConfigWithCredentialsEntity
 from core.entities.model_entities import ModelStatus
 from core.entities.provider_entities import QuotaUnit
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance, ModelManager
 from core.model_runtime.entities.llm_entities import LLMResult, LLMUsage
@@ -18,17 +22,31 @@ from core.model_runtime.entities.message_entities import (
     PromptMessageContentType,
 )
 from core.model_runtime.entities.model_entities import ModelType
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.utils.encoders import jsonable_encoder
 from core.prompt.advanced_prompt_transform import AdvancedPromptTransform
-from core.prompt.entities.advanced_prompt_entities import CompletionModelPromptTemplate, MemoryConfig
+from core.prompt.entities.advanced_prompt_entities import (
+    CompletionModelPromptTemplate,
+    MemoryConfig,
+)
 from core.prompt.utils.prompt_message_util import PromptMessageUtil
-from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult, NodeType
+from core.workflow.entities.node_entities import (
+    NodeRunMetadataKey,
+    NodeRunResult,
+    NodeType,
+)
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.event import InNodeEvent
 from core.workflow.nodes.base_node import BaseNode
-from core.workflow.nodes.event import RunCompletedEvent, RunEvent, RunRetrieverResourceEvent, RunStreamChunkEvent
+from core.workflow.nodes.event import (
+    RunCompletedEvent,
+    RunEvent,
+    RunRetrieverResourceEvent,
+    RunStreamChunkEvent,
+)
 from core.workflow.nodes.llm.entities import (
     LLMNodeChatModelMessage,
     LLMNodeCompletionModelPromptTemplate,
@@ -72,7 +90,9 @@ class LLMNode(BaseNode):
 
         try:
             # init messages template
-            node_data.prompt_template = self._transform_chat_messages(node_data.prompt_template)
+            node_data.prompt_template = self._transform_chat_messages(
+                node_data.prompt_template
+            )
 
             # fetch variables and fetch values from variable pool
             inputs = self._fetch_inputs(node_data, variable_pool)
@@ -111,8 +131,12 @@ class LLMNode(BaseNode):
             # fetch prompt messages
             prompt_messages, stop = self._fetch_prompt_messages(
                 node_data=node_data,
-                query=variable_pool.get_any(["sys", SystemVariableKey.QUERY.value]) if node_data.memory else None,
-                query_prompt_template=node_data.memory.query_prompt_template if node_data.memory else None,
+                query=variable_pool.get_any(["sys", SystemVariableKey.QUERY.value])
+                if node_data.memory
+                else None,
+                query_prompt_template=node_data.memory.query_prompt_template
+                if node_data.memory
+                else None,
                 inputs=inputs,
                 files=files,
                 context=context,
@@ -159,7 +183,11 @@ class LLMNode(BaseNode):
             )
             return
 
-        outputs = {"text": result_text, "usage": jsonable_encoder(usage), "finish_reason": finish_reason}
+        outputs = {
+            "text": result_text,
+            "usage": jsonable_encoder(usage),
+            "finish_reason": finish_reason,
+        }
 
         yield RunCompletedEvent(
             run_result=NodeRunResult(
@@ -211,7 +239,9 @@ class LLMNode(BaseNode):
                 usage = event.usage
 
         # deduct quota
-        self.deduct_llm_quota(tenant_id=self.tenant_id, model_instance=model_instance, usage=usage)
+        self.deduct_llm_quota(
+            tenant_id=self.tenant_id, model_instance=model_instance, usage=usage
+        )
 
     def _handle_invoke_result(
         self, invoke_result: LLMResult | Generator
@@ -233,7 +263,9 @@ class LLMNode(BaseNode):
             text = result.delta.message.content
             full_text += text
 
-            yield RunStreamChunkEvent(chunk_content=text, from_variable_selector=[self.node_id, "text"])
+            yield RunStreamChunkEvent(
+                chunk_content=text, from_variable_selector=[self.node_id, "text"]
+            )
 
             if not model:
                 model = result.model
@@ -250,10 +282,13 @@ class LLMNode(BaseNode):
         if not usage:
             usage = LLMUsage.empty_usage()
 
-        yield ModelInvokeCompleted(text=full_text, usage=usage, finish_reason=finish_reason)
+        yield ModelInvokeCompleted(
+            text=full_text, usage=usage, finish_reason=finish_reason
+        )
 
     def _transform_chat_messages(
-        self, messages: list[LLMNodeChatModelMessage] | LLMNodeCompletionModelPromptTemplate
+        self,
+        messages: list[LLMNodeChatModelMessage] | LLMNodeCompletionModelPromptTemplate,
     ) -> list[LLMNodeChatModelMessage] | LLMNodeCompletionModelPromptTemplate:
         """
         Transform chat messages
@@ -274,7 +309,9 @@ class LLMNode(BaseNode):
 
         return messages
 
-    def _fetch_jinja_inputs(self, node_data: LLMNodeData, variable_pool: VariablePool) -> dict[str, str]:
+    def _fetch_jinja_inputs(
+        self, node_data: LLMNodeData, variable_pool: VariablePool
+    ) -> dict[str, str]:
         """
         Fetch jinja inputs
         :param node_data: node data
@@ -330,7 +367,9 @@ class LLMNode(BaseNode):
 
         return variables
 
-    def _fetch_inputs(self, node_data: LLMNodeData, variable_pool: VariablePool) -> dict[str, str]:
+    def _fetch_inputs(
+        self, node_data: LLMNodeData, variable_pool: VariablePool
+    ) -> dict[str, str]:
         """
         Fetch inputs
         :param node_data: node data
@@ -344,9 +383,13 @@ class LLMNode(BaseNode):
         if isinstance(prompt_template, list):
             for prompt in prompt_template:
                 variable_template_parser = VariableTemplateParser(template=prompt.text)
-                variable_selectors.extend(variable_template_parser.extract_variable_selectors())
+                variable_selectors.extend(
+                    variable_template_parser.extract_variable_selectors()
+                )
         elif isinstance(prompt_template, CompletionModelPromptTemplate):
-            variable_template_parser = VariableTemplateParser(template=prompt_template.text)
+            variable_template_parser = VariableTemplateParser(
+                template=prompt_template.text
+            )
             variable_selectors = variable_template_parser.extract_variable_selectors()
 
         for variable_selector in variable_selectors:
@@ -370,7 +413,9 @@ class LLMNode(BaseNode):
 
         return inputs
 
-    def _fetch_files(self, node_data: LLMNodeData, variable_pool: VariablePool) -> list["FileVar"]:
+    def _fetch_files(
+        self, node_data: LLMNodeData, variable_pool: VariablePool
+    ) -> list["FileVar"]:
         """
         Fetch files
         :param node_data: node data
@@ -386,7 +431,9 @@ class LLMNode(BaseNode):
 
         return files
 
-    def _fetch_context(self, node_data: LLMNodeData, variable_pool: VariablePool) -> Generator[RunEvent, None, None]:
+    def _fetch_context(
+        self, node_data: LLMNodeData, variable_pool: VariablePool
+    ) -> Generator[RunEvent, None, None]:
         """
         Fetch context
         :param node_data: node data
@@ -402,7 +449,9 @@ class LLMNode(BaseNode):
         context_value = variable_pool.get_any(node_data.context.variable_selector)
         if context_value:
             if isinstance(context_value, str):
-                yield RunRetrieverResourceEvent(retriever_resources=[], context=context_value)
+                yield RunRetrieverResourceEvent(
+                    retriever_resources=[], context=context_value
+                )
             elif isinstance(context_value, list):
                 context_str = ""
                 original_retriever_resource = []
@@ -415,15 +464,20 @@ class LLMNode(BaseNode):
 
                         context_str += item["content"] + "\n"
 
-                        retriever_resource = self._convert_to_original_retriever_resource(item)
+                        retriever_resource = (
+                            self._convert_to_original_retriever_resource(item)
+                        )
                         if retriever_resource:
                             original_retriever_resource.append(retriever_resource)
 
                 yield RunRetrieverResourceEvent(
-                    retriever_resources=original_retriever_resource, context=context_str.strip()
+                    retriever_resources=original_retriever_resource,
+                    context=context_str.strip(),
                 )
 
-    def _convert_to_original_retriever_resource(self, context_dict: dict) -> Optional[dict]:
+    def _convert_to_original_retriever_resource(
+        self, context_dict: dict
+    ) -> Optional[dict]:
         """
         Convert to original retriever resource, temp.
         :param context_dict: context dict
@@ -470,7 +524,10 @@ class LLMNode(BaseNode):
 
         model_manager = ModelManager()
         model_instance = model_manager.get_model_instance(
-            tenant_id=self.tenant_id, model_type=ModelType.LLM, provider=provider_name, model=model_name
+            tenant_id=self.tenant_id,
+            model_type=ModelType.LLM,
+            provider=provider_name,
+            model=model_name,
         )
 
         provider_model_bundle = model_instance.provider_model_bundle
@@ -488,9 +545,13 @@ class LLMNode(BaseNode):
             raise ValueError(f"Model {model_name} not exist.")
 
         if provider_model.status == ModelStatus.NO_CONFIGURE:
-            raise ProviderTokenNotInitError(f"Model {model_name} credentials is not initialized.")
+            raise ProviderTokenNotInitError(
+                f"Model {model_name} credentials is not initialized."
+            )
         elif provider_model.status == ModelStatus.NO_PERMISSION:
-            raise ModelCurrentlyNotSupportError(f"Dify Hosted OpenAI {model_name} currently not support.")
+            raise ModelCurrentlyNotSupportError(
+                f"Dify Hosted OpenAI {model_name} currently not support."
+            )
         elif provider_model.status == ModelStatus.QUOTA_EXCEEDED:
             raise QuotaExceededError(f"Model provider {provider_name} quota exceeded.")
 
@@ -506,7 +567,9 @@ class LLMNode(BaseNode):
         if not model_mode:
             raise ValueError("LLM mode is required.")
 
-        model_schema = model_type_instance.get_model_schema(model_name, model_credentials)
+        model_schema = model_type_instance.get_model_schema(
+            model_name, model_credentials
+        )
 
         if not model_schema:
             raise ValueError(f"Model {model_name} not exist.")
@@ -523,7 +586,10 @@ class LLMNode(BaseNode):
         )
 
     def _fetch_memory(
-        self, node_data_memory: Optional[MemoryConfig], variable_pool: VariablePool, model_instance: ModelInstance
+        self,
+        node_data_memory: Optional[MemoryConfig],
+        variable_pool: VariablePool,
+        model_instance: ModelInstance,
     ) -> Optional[TokenBufferMemory]:
         """
         Fetch memory
@@ -535,21 +601,27 @@ class LLMNode(BaseNode):
             return None
 
         # get conversation id
-        conversation_id = variable_pool.get_any(["sys", SystemVariableKey.CONVERSATION_ID.value])
+        conversation_id = variable_pool.get_any(
+            ["sys", SystemVariableKey.CONVERSATION_ID.value]
+        )
         if conversation_id is None:
             return None
 
         # get conversation
         conversation = (
             db.session.query(Conversation)
-            .filter(Conversation.app_id == self.app_id, Conversation.id == conversation_id)
+            .filter(
+                Conversation.app_id == self.app_id, Conversation.id == conversation_id
+            )
             .first()
         )
 
         if not conversation:
             return None
 
-        memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
+        memory = TokenBufferMemory(
+            conversation=conversation, model_instance=model_instance
+        )
 
         return memory
 
@@ -591,7 +663,9 @@ class LLMNode(BaseNode):
         stop = model_config.stop
 
         vision_enabled = node_data.vision.enabled
-        vision_detail = node_data.vision.configs.detail if node_data.vision.configs else None
+        vision_detail = (
+            node_data.vision.configs.detail if node_data.vision.configs else None
+        )
         filtered_prompt_messages = []
         for prompt_message in prompt_messages:
             if prompt_message.is_empty():
@@ -607,7 +681,9 @@ class LLMNode(BaseNode):
                     ):
                         # Override vision config if LLM node has vision config
                         if vision_detail:
-                            content_item.detail = ImagePromptMessageContent.DETAIL(vision_detail)
+                            content_item.detail = ImagePromptMessageContent.DETAIL(
+                                vision_detail
+                            )
                         prompt_message_content.append(content_item)
                     elif content_item.type == PromptMessageContentType.TEXT:
                         prompt_message_content.append(content_item)
@@ -615,7 +691,8 @@ class LLMNode(BaseNode):
                 if len(prompt_message_content) > 1:
                     prompt_message.content = prompt_message_content
                 elif (
-                    len(prompt_message_content) == 1 and prompt_message_content[0].type == PromptMessageContentType.TEXT
+                    len(prompt_message_content) == 1
+                    and prompt_message_content[0].type == PromptMessageContentType.TEXT
                 ):
                     prompt_message.content = prompt_message_content[0].data
 
@@ -630,7 +707,9 @@ class LLMNode(BaseNode):
         return filtered_prompt_messages, stop
 
     @classmethod
-    def deduct_llm_quota(cls, tenant_id: str, model_instance: ModelInstance, usage: LLMUsage) -> None:
+    def deduct_llm_quota(
+        cls, tenant_id: str, model_instance: ModelInstance, usage: LLMUsage
+    ) -> None:
         """
         Deduct LLM quota
         :param tenant_id: tenant id
@@ -648,7 +727,10 @@ class LLMNode(BaseNode):
 
         quota_unit = None
         for quota_configuration in system_configuration.quota_configurations:
-            if quota_configuration.quota_type == system_configuration.current_quota_type:
+            if (
+                quota_configuration.quota_type
+                == system_configuration.current_quota_type
+            ):
                 quota_unit = quota_configuration.quota_unit
 
                 if quota_configuration.quota_limit == -1:
@@ -695,16 +777,26 @@ class LLMNode(BaseNode):
         if isinstance(prompt_template, list):
             for prompt in prompt_template:
                 if prompt.edition_type != "jinja2":
-                    variable_template_parser = VariableTemplateParser(template=prompt.text)
-                    variable_selectors.extend(variable_template_parser.extract_variable_selectors())
+                    variable_template_parser = VariableTemplateParser(
+                        template=prompt.text
+                    )
+                    variable_selectors.extend(
+                        variable_template_parser.extract_variable_selectors()
+                    )
         else:
             if prompt_template.edition_type != "jinja2":
-                variable_template_parser = VariableTemplateParser(template=prompt_template.text)
-                variable_selectors = variable_template_parser.extract_variable_selectors()
+                variable_template_parser = VariableTemplateParser(
+                    template=prompt_template.text
+                )
+                variable_selectors = (
+                    variable_template_parser.extract_variable_selectors()
+                )
 
         variable_mapping = {}
         for variable_selector in variable_selectors:
-            variable_mapping[variable_selector.variable] = variable_selector.value_selector
+            variable_mapping[variable_selector.variable] = (
+                variable_selector.value_selector
+            )
 
         memory = node_data.memory
         if memory and memory.query_prompt_template:
@@ -712,7 +804,9 @@ class LLMNode(BaseNode):
                 template=memory.query_prompt_template
             ).extract_variable_selectors()
             for variable_selector in query_variable_selectors:
-                variable_mapping[variable_selector.variable] = variable_selector.value_selector
+                variable_mapping[variable_selector.variable] = (
+                    variable_selector.value_selector
+                )
 
         if node_data.context.enabled:
             variable_mapping["#context#"] = node_data.context.variable_selector
@@ -737,9 +831,13 @@ class LLMNode(BaseNode):
 
             if enable_jinja:
                 for variable_selector in node_data.prompt_config.jinja2_variables or []:
-                    variable_mapping[variable_selector.variable] = variable_selector.value_selector
+                    variable_mapping[variable_selector.variable] = (
+                        variable_selector.value_selector
+                    )
 
-        variable_mapping = {node_id + "." + key: value for key, value in variable_mapping.items()}
+        variable_mapping = {
+            node_id + "." + key: value for key, value in variable_mapping.items()
+        }
 
         return variable_mapping
 
@@ -756,11 +854,18 @@ class LLMNode(BaseNode):
                 "prompt_templates": {
                     "chat_model": {
                         "prompts": [
-                            {"role": "system", "text": "You are a helpful AI assistant.", "edition_type": "basic"}
+                            {
+                                "role": "system",
+                                "text": "You are a helpful AI assistant.",
+                                "edition_type": "basic",
+                            }
                         ]
                     },
                     "completion_model": {
-                        "conversation_histories_role": {"user_prefix": "Human", "assistant_prefix": "Assistant"},
+                        "conversation_histories_role": {
+                            "user_prefix": "Human",
+                            "assistant_prefix": "Assistant",
+                        },
                         "prompt": {
                             "text": "Here is the chat histories between human and assistant, inside "
                             "<histories></histories> XML tags.\n\n<histories>\n{{"

@@ -3,7 +3,11 @@ from os import listdir, path
 from typing import Any
 
 from core.helper.module_import_helper import load_single_subclass_from_source
-from core.tools.entities.tool_entities import ToolParameter, ToolProviderCredentials, ToolProviderType
+from core.tools.entities.tool_entities import (
+    ToolParameter,
+    ToolProviderCredentials,
+    ToolProviderType,
+)
 from core.tools.entities.values import ToolLabelEnum, default_tool_label_dict
 from core.tools.errors import (
     ToolNotFoundError,
@@ -25,21 +29,35 @@ class BuiltinToolProviderController(ToolProviderController):
 
         # load provider yaml
         provider = self.__class__.__module__.split(".")[-1]
-        yaml_path = path.join(path.dirname(path.realpath(__file__)), "builtin", provider, f"{provider}.yaml")
+        yaml_path = path.join(
+            path.dirname(path.realpath(__file__)),
+            "builtin",
+            provider,
+            f"{provider}.yaml",
+        )
         try:
             provider_yaml = load_yaml_file(yaml_path, ignore_error=False)
         except Exception as e:
-            raise ToolProviderNotFoundError(f"can not load provider yaml for {provider}: {e}")
+            raise ToolProviderNotFoundError(
+                f"can not load provider yaml for {provider}: {e}"
+            )
 
-        if "credentials_for_provider" in provider_yaml and provider_yaml["credentials_for_provider"] is not None:
+        if (
+            "credentials_for_provider" in provider_yaml
+            and provider_yaml["credentials_for_provider"] is not None
+        ):
             # set credentials name
             for credential_name in provider_yaml["credentials_for_provider"]:
-                provider_yaml["credentials_for_provider"][credential_name]["name"] = credential_name
+                provider_yaml["credentials_for_provider"][credential_name]["name"] = (
+                    credential_name
+                )
 
         super().__init__(
             **{
                 "identity": provider_yaml["identity"],
-                "credentials_schema": provider_yaml.get("credentials_for_provider", None),
+                "credentials_schema": provider_yaml.get(
+                    "credentials_for_provider", None
+                ),
             }
         )
 
@@ -53,9 +71,16 @@ class BuiltinToolProviderController(ToolProviderController):
             return self.tools
 
         provider = self.identity.name
-        tool_path = path.join(path.dirname(path.realpath(__file__)), "builtin", provider, "tools")
+        tool_path = path.join(
+            path.dirname(path.realpath(__file__)), "builtin", provider, "tools"
+        )
         # get all the yaml files in the tool path
-        tool_files = list(filter(lambda x: x.endswith(".yaml") and not x.startswith("__"), listdir(tool_path)))
+        tool_files = list(
+            filter(
+                lambda x: x.endswith(".yaml") and not x.startswith("__"),
+                listdir(tool_path),
+            )
+        )
         tools = []
         for tool_file in tool_files:
             # get tool name
@@ -66,7 +91,11 @@ class BuiltinToolProviderController(ToolProviderController):
             assistant_tool_class = load_single_subclass_from_source(
                 module_name=f"core.tools.provider.builtin.{provider}.tools.{tool_name}",
                 script_path=path.join(
-                    path.dirname(path.realpath(__file__)), "builtin", provider, "tools", f"{tool_name}.py"
+                    path.dirname(path.realpath(__file__)),
+                    "builtin",
+                    provider,
+                    "tools",
+                    f"{tool_name}.py",
                 ),
                 parent_type=BuiltinTool,
             )
@@ -99,7 +128,9 @@ class BuiltinToolProviderController(ToolProviderController):
         """
         returns the tool that the provider can provide
         """
-        return next(filter(lambda x: x.identity.name == tool_name, self.get_tools()), None)
+        return next(
+            filter(lambda x: x.identity.name == tool_name, self.get_tools()), None
+        )
 
     def get_parameters(self, tool_name: str) -> list[ToolParameter]:
         """
@@ -108,7 +139,9 @@ class BuiltinToolProviderController(ToolProviderController):
         :param tool_name: the name of the tool, defined in `get_tools`
         :return: list of parameters
         """
-        tool = next(filter(lambda x: x.identity.name == tool_name, self.get_tools()), None)
+        tool = next(
+            filter(lambda x: x.identity.name == tool_name, self.get_tools()), None
+        )
         if tool is None:
             raise ToolNotFoundError(f"tool {tool_name} not found")
         return tool.parameters
@@ -147,7 +180,9 @@ class BuiltinToolProviderController(ToolProviderController):
         """
         return self.identity.tags or []
 
-    def validate_parameters(self, tool_id: int, tool_name: str, tool_parameters: dict[str, Any]) -> None:
+    def validate_parameters(
+        self, tool_id: int, tool_name: str, tool_parameters: dict[str, Any]
+    ) -> None:
         """
         validate the parameters of the tool and set the default value if needed
 
@@ -162,42 +197,62 @@ class BuiltinToolProviderController(ToolProviderController):
 
         for parameter in tool_parameters:
             if parameter not in tool_parameters_need_to_validate:
-                raise ToolParameterValidationError(f"parameter {parameter} not found in tool {tool_name}")
+                raise ToolParameterValidationError(
+                    f"parameter {parameter} not found in tool {tool_name}"
+                )
 
             # check type
             parameter_schema = tool_parameters_need_to_validate[parameter]
             if parameter_schema.type == ToolParameter.ToolParameterType.STRING:
                 if not isinstance(tool_parameters[parameter], str):
-                    raise ToolParameterValidationError(f"parameter {parameter} should be string")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} should be string"
+                    )
 
             elif parameter_schema.type == ToolParameter.ToolParameterType.NUMBER:
                 if not isinstance(tool_parameters[parameter], int | float):
-                    raise ToolParameterValidationError(f"parameter {parameter} should be number")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} should be number"
+                    )
 
-                if parameter_schema.min is not None and tool_parameters[parameter] < parameter_schema.min:
+                if (
+                    parameter_schema.min is not None
+                    and tool_parameters[parameter] < parameter_schema.min
+                ):
                     raise ToolParameterValidationError(
                         f"parameter {parameter} should be greater than {parameter_schema.min}"
                     )
 
-                if parameter_schema.max is not None and tool_parameters[parameter] > parameter_schema.max:
+                if (
+                    parameter_schema.max is not None
+                    and tool_parameters[parameter] > parameter_schema.max
+                ):
                     raise ToolParameterValidationError(
                         f"parameter {parameter} should be less than {parameter_schema.max}"
                     )
 
             elif parameter_schema.type == ToolParameter.ToolParameterType.BOOLEAN:
                 if not isinstance(tool_parameters[parameter], bool):
-                    raise ToolParameterValidationError(f"parameter {parameter} should be boolean")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} should be boolean"
+                    )
 
             elif parameter_schema.type == ToolParameter.ToolParameterType.SELECT:
                 if not isinstance(tool_parameters[parameter], str):
-                    raise ToolParameterValidationError(f"parameter {parameter} should be string")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} should be string"
+                    )
 
                 options = parameter_schema.options
                 if not isinstance(options, list):
-                    raise ToolParameterValidationError(f"parameter {parameter} options should be list")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} options should be list"
+                    )
 
                 if tool_parameters[parameter] not in [x.value for x in options]:
-                    raise ToolParameterValidationError(f"parameter {parameter} should be one of {options}")
+                    raise ToolParameterValidationError(
+                        f"parameter {parameter} should be one of {options}"
+                    )
 
             tool_parameters_need_to_validate.pop(parameter)
 

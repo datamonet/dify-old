@@ -1,7 +1,9 @@
 from typing import Any
 
 from core.tools.errors import ToolProviderCredentialValidationError
-from core.tools.provider.builtin.nominatim.tools.nominatim_search import NominatimSearchTool
+from core.tools.provider.builtin.nominatim.tools.nominatim_search import (
+    NominatimSearchTool,
+)
 from core.tools.provider.builtin_tool_provider import BuiltinToolProviderController
 
 

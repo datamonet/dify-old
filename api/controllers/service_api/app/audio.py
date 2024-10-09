@@ -17,8 +17,16 @@ from controllers.service_api.app.error import (
     ProviderQuotaExceededError,
     UnsupportedAudioTypeError,
 )
-from controllers.service_api.wraps import FetchUserArg, WhereisUserArg, validate_app_token
-from core.errors.error import ModelCurrentlyNotSupportError, ProviderTokenNotInitError, QuotaExceededError
+from controllers.service_api.wraps import (
+    FetchUserArg,
+    WhereisUserArg,
+    validate_app_token,
+)
+from core.errors.error import (
+    ModelCurrentlyNotSupportError,
+    ProviderTokenNotInitError,
+    QuotaExceededError,
+)
 from core.model_runtime.errors.invoke import InvokeError
 from models.model import App, AppMode, EndUser
 from services.audio_service import AudioService
@@ -36,7 +44,9 @@ class AudioApi(Resource):
         file = request.files["file"]
 
         try:
-            response = AudioService.transcript_asr(app_model=app_model, file=file, end_user=end_user)
+            response = AudioService.transcript_asr(
+                app_model=app_model, file=file, end_user=end_user
+            )
 
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
@@ -87,11 +97,17 @@ class TextApi(Resource):
                 voice = args.get("voice") or text_to_speech.get("voice")
             else:
                 try:
-                    voice = args.get("voice") or app_model.app_model_config.text_to_speech_dict.get("voice")
+                    voice = args.get(
+                        "voice"
+                    ) or app_model.app_model_config.text_to_speech_dict.get("voice")
                 except Exception:
                     voice = None
             response = AudioService.transcript_tts(
-                app_model=app_model, message_id=message_id, end_user=end_user.external_user_id, voice=voice, text=text
+                app_model=app_model,
+                message_id=message_id,
+                end_user=end_user.external_user_id,
+                voice=voice,
+                text=text,
             )
 
             return response

@@ -64,18 +64,24 @@ class Extensible:
 
                     builtin_file_path = os.path.join(subdir_path, "__builtin__")
                     if os.path.exists(builtin_file_path):
-                        position = int(Path(builtin_file_path).read_text(encoding="utf-8").strip())
+                        position = int(
+                            Path(builtin_file_path).read_text(encoding="utf-8").strip()
+                        )
                     position_map[extension_name] = position
 
                 if (extension_name + ".py") not in file_names:
-                    logging.warning(f"Missing {extension_name}.py file in {subdir_path}, Skip.")
+                    logging.warning(
+                        f"Missing {extension_name}.py file in {subdir_path}, Skip."
+                    )
                     continue
 
                 # Dynamic loading {subdir_name}.py file and find the subclass of Extensible
                 py_path = os.path.join(subdir_path, extension_name + ".py")
                 spec = importlib.util.spec_from_file_location(extension_name, py_path)
                 if not spec or not spec.loader:
-                    raise Exception(f"Failed to load module {extension_name} from {py_path}")
+                    raise Exception(
+                        f"Failed to load module {extension_name} from {py_path}"
+                    )
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
 
@@ -86,13 +92,17 @@ class Extensible:
                         break
 
                 if not extension_class:
-                    logging.warning(f"Missing subclass of {cls.__name__} in {py_path}, Skip.")
+                    logging.warning(
+                        f"Missing subclass of {cls.__name__} in {py_path}, Skip."
+                    )
                     continue
 
                 json_data = {}
                 if not builtin:
                     if "schema.json" not in file_names:
-                        logging.warning(f"Missing schema.json file in {subdir_path}, Skip.")
+                        logging.warning(
+                            f"Missing schema.json file in {subdir_path}, Skip."
+                        )
                         continue
 
                     json_path = os.path.join(subdir_path, "schema.json")

@@ -62,12 +62,20 @@ class MockTcvectordbClass:
             timeout=timeout,
         )
 
-    def describe_collection(self, name: str, timeout: Optional[float] = None) -> Collection:
-        collection = Collection(self, name, shard=1, replicas=2, description=name, timeout=timeout)
+    def describe_collection(
+        self, name: str, timeout: Optional[float] = None
+    ) -> Collection:
+        collection = Collection(
+            self, name, shard=1, replicas=2, description=name, timeout=timeout
+        )
         return collection
 
     def collection_upsert(
-        self, documents: list[Document], timeout: Optional[float] = None, build_index: bool = True, **kwargs
+        self,
+        documents: list[Document],
+        timeout: Optional[float] = None,
+        build_index: bool = True,
+        **kwargs,
     ):
         return {"code": 0, "msg": "operation success"}
 
@@ -81,7 +89,16 @@ class MockTcvectordbClass:
         output_fields: Optional[list[str]] = None,
         timeout: Optional[float] = None,
     ) -> list[list[dict]]:
-        return [[{"metadata": '{"doc_id":"foo1"}', "text": "text", "doc_id": "foo1", "score": 0.1}]]
+        return [
+            [
+                {
+                    "metadata": '{"doc_id":"foo1"}',
+                    "text": "text",
+                    "doc_id": "foo1",
+                    "score": 0.1,
+                }
+            ]
+        ]
 
     def collection_query(
         self,
@@ -93,7 +110,14 @@ class MockTcvectordbClass:
         output_fields: Optional[list[str]] = None,
         timeout: Optional[float] = None,
     ) -> list[dict]:
-        return [{"metadata": '{"doc_id":"foo1"}', "text": "text", "doc_id": "foo1", "score": 0.1}]
+        return [
+            {
+                "metadata": '{"doc_id":"foo1"}',
+                "text": "text",
+                "doc_id": "foo1",
+                "score": 0.1,
+            }
+        ]
 
     def collection_delete(
         self,
@@ -110,12 +134,24 @@ MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 @pytest.fixture()
 def setup_tcvectordb_mock(request, monkeypatch: MonkeyPatch):
     if MOCK:
-        monkeypatch.setattr(VectorDBClient, "__init__", MockTcvectordbClass.mock_vector_db_client)
-        monkeypatch.setattr(VectorDBClient, "list_databases", MockTcvectordbClass.list_databases)
-        monkeypatch.setattr(Database, "collection", MockTcvectordbClass.describe_collection)
-        monkeypatch.setattr(Database, "list_collections", MockTcvectordbClass.list_collections)
-        monkeypatch.setattr(Database, "drop_collection", MockTcvectordbClass.drop_collection)
-        monkeypatch.setattr(Database, "create_collection", MockTcvectordbClass.create_collection)
+        monkeypatch.setattr(
+            VectorDBClient, "__init__", MockTcvectordbClass.mock_vector_db_client
+        )
+        monkeypatch.setattr(
+            VectorDBClient, "list_databases", MockTcvectordbClass.list_databases
+        )
+        monkeypatch.setattr(
+            Database, "collection", MockTcvectordbClass.describe_collection
+        )
+        monkeypatch.setattr(
+            Database, "list_collections", MockTcvectordbClass.list_collections
+        )
+        monkeypatch.setattr(
+            Database, "drop_collection", MockTcvectordbClass.drop_collection
+        )
+        monkeypatch.setattr(
+            Database, "create_collection", MockTcvectordbClass.create_collection
+        )
         monkeypatch.setattr(Collection, "upsert", MockTcvectordbClass.collection_upsert)
         monkeypatch.setattr(Collection, "search", MockTcvectordbClass.collection_search)
         monkeypatch.setattr(Collection, "query", MockTcvectordbClass.collection_query)

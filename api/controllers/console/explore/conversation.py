@@ -7,11 +7,17 @@ from controllers.console import api
 from controllers.console.explore.error import NotChatAppError
 from controllers.console.explore.wraps import InstalledAppResource
 from core.app.entities.app_invoke_entities import InvokeFrom
-from fields.conversation_fields import conversation_infinite_scroll_pagination_fields, simple_conversation_fields
+from fields.conversation_fields import (
+    conversation_infinite_scroll_pagination_fields,
+    simple_conversation_fields,
+)
 from libs.helper import uuid_value
 from models.model import AppMode
 from services.conversation_service import ConversationService
-from services.errors.conversation import ConversationNotExistsError, LastConversationNotExistsError
+from services.errors.conversation import (
+    ConversationNotExistsError,
+    LastConversationNotExistsError,
+)
 from services.web_conversation_service import WebConversationService
 
 
@@ -25,8 +31,12 @@ class ConversationListApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
-        parser.add_argument("pinned", type=str, choices=["true", "false", None], location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
+        parser.add_argument(
+            "pinned", type=str, choices=["true", "false", None], location="args"
+        )
         args = parser.parse_args()
 
         pinned = None
@@ -75,12 +85,18 @@ class ConversationRenameApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=False, location="json")
-        parser.add_argument("auto_generate", type=bool, required=False, default=False, location="json")
+        parser.add_argument(
+            "auto_generate", type=bool, required=False, default=False, location="json"
+        )
         args = parser.parse_args()
 
         try:
             return ConversationService.rename(
-                app_model, conversation_id, current_user, args["name"], args["auto_generate"]
+                app_model,
+                conversation_id,
+                current_user,
+                args["name"],
+                args["auto_generate"],
             )
         except ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
@@ -122,7 +138,9 @@ api.add_resource(
     endpoint="installed_app_conversation_rename",
 )
 api.add_resource(
-    ConversationListApi, "/installed-apps/<uuid:installed_app_id>/conversations", endpoint="installed_app_conversations"
+    ConversationListApi,
+    "/installed-apps/<uuid:installed_app_id>/conversations",
+    endpoint="installed_app_conversations",
 )
 api.add_resource(
     ConversationApi,

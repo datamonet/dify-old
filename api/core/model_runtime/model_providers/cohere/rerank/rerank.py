@@ -47,7 +47,9 @@ class CohereRerankModel(RerankModel):
             return RerankResult(model=model, docs=docs)
 
         # initialize client
-        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
+        client = cohere.Client(
+            credentials.get("api_key"), base_url=credentials.get("base_url")
+        )
         response = client.rerank(
             query=query,
             documents=docs,
@@ -110,9 +112,15 @@ class CohereRerankModel(RerankModel):
         :return: Invoke error mapping
         """
         return {
-            InvokeConnectionError: [cohere.errors.service_unavailable_error.ServiceUnavailableError],
-            InvokeServerUnavailableError: [cohere.errors.internal_server_error.InternalServerError],
-            InvokeRateLimitError: [cohere.errors.too_many_requests_error.TooManyRequestsError],
+            InvokeConnectionError: [
+                cohere.errors.service_unavailable_error.ServiceUnavailableError
+            ],
+            InvokeServerUnavailableError: [
+                cohere.errors.internal_server_error.InternalServerError
+            ],
+            InvokeRateLimitError: [
+                cohere.errors.too_many_requests_error.TooManyRequestsError
+            ],
             InvokeAuthorizationError: [
                 cohere.errors.unauthorized_error.UnauthorizedError,
                 cohere.errors.forbidden_error.ForbiddenError,

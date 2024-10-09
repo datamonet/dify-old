@@ -3,13 +3,24 @@ from collections.abc import Generator
 from typing import Optional, Union, cast
 
 from openai import OpenAI, Stream
-from openai.types.chat import ChatCompletion, ChatCompletionChunk, ChatCompletionMessageToolCall
-from openai.types.chat.chat_completion_chunk import ChoiceDeltaFunctionCall, ChoiceDeltaToolCall
+from openai.types.chat import (
+    ChatCompletion,
+    ChatCompletionChunk,
+    ChatCompletionMessageToolCall,
+)
+from openai.types.chat.chat_completion_chunk import (
+    ChoiceDeltaFunctionCall,
+    ChoiceDeltaToolCall,
+)
 from openai.types.chat.chat_completion_message import FunctionCall
 from tokenizers import Tokenizer
 
 from core.model_runtime.callbacks.base_callback import Callback
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -22,7 +33,9 @@ from core.model_runtime.entities.message_entities import (
     UserPromptMessage,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.model_providers.upstage._common import _CommonUpstage
 
 logger = logging.getLogger(__name__)
@@ -93,7 +106,9 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         """
         Code block mode wrapper for invoking large language model
         """
-        if "response_format" in model_parameters and model_parameters["response_format"] in {"JSON", "XML"}:
+        if "response_format" in model_parameters and model_parameters[
+            "response_format"
+        ] in {"JSON", "XML"}:
             stop = stop or []
             self._transform_chat_json_prompts(
                 model=model,
@@ -141,23 +156,30 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         if "\n```" not in stop:
             stop.append("\n```")
 
-        if len(prompt_messages) > 0 and isinstance(prompt_messages[0], SystemPromptMessage):
+        if len(prompt_messages) > 0 and isinstance(
+            prompt_messages[0], SystemPromptMessage
+        ):
             prompt_messages[0] = SystemPromptMessage(
-                content=UPSTAGE_BLOCK_MODE_PROMPT.replace("{{instructions}}", prompt_messages[0].content).replace(
-                    "{{block}}", response_format
-                )
+                content=UPSTAGE_BLOCK_MODE_PROMPT.replace(
+                    "{{instructions}}", prompt_messages[0].content
+                ).replace("{{block}}", response_format)
             )
-            prompt_messages.append(AssistantPromptMessage(content=f"\n```{response_format}\n"))
+            prompt_messages.append(
+                AssistantPromptMessage(content=f"\n```{response_format}\n")
+            )
         else:
             prompt_messages.insert(
                 0,
                 SystemPromptMessage(
                     content=UPSTAGE_BLOCK_MODE_PROMPT.replace(
-                        "{{instructions}}", f"Please output a valid {response_format} object."
+                        "{{instructions}}",
+                        f"Please output a valid {response_format} object.",
                     ).replace("{{block}}", response_format)
                 ),
             )
-            prompt_messages.append(AssistantPromptMessage(content=f"\n```{response_format}"))
+            prompt_messages.append(
+                AssistantPromptMessage(content=f"\n```{response_format}")
+            )
 
     def get_num_tokens(
         self,
@@ -190,7 +212,11 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
             client = OpenAI(**credentials_kwargs)
 
             client.chat.completions.create(
-                messages=[{"role": "user", "content": "ping"}], model=model, temperature=0, max_tokens=10, stream=False
+                messages=[{"role": "user", "content": "ping"}],
+                model=model,
+                temperature=0,
+                max_tokens=10,
+                stream=False,
             )
         except Exception as e:
             raise CredentialsValidateFailedError(str(e))
@@ -213,7 +239,12 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
 
         if tools:
             extra_model_kwargs["functions"] = [
-                {"name": tool.name, "description": tool.description, "parameters": tool.parameters} for tool in tools
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.parameters,
+                }
+                for tool in tools
             ]
 
         if stop:
@@ -232,8 +263,12 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         )
 
         if stream:
-            return self._handle_chat_generate_stream_response(model, credentials, response, prompt_messages, tools)
-        return self._handle_chat_generate_response(model, credentials, response, prompt_messages, tools)
+            return self._handle_chat_generate_stream_response(
+                model, credentials, response, prompt_messages, tools
+            )
+        return self._handle_chat_generate_response(
+            model, credentials, response, prompt_messages, tools
+        )
 
     def _handle_chat_generate_response(
         self,
@@ -259,11 +294,15 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
 
         # extract tool calls from response
         # tool_calls = self._extract_response_tool_calls(assistant_message_tool_calls)
-        function_call = self._extract_response_function_call(assistant_message_function_call)
+        function_call = self._extract_response_function_call(
+            assistant_message_function_call
+        )
         tool_calls = [function_call] if function_call else []
 
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=assistant_message.content, tool_calls=tool_calls)
+        assistant_prompt_message = AssistantPromptMessage(
+            content=assistant_message.content, tool_calls=tool_calls
+        )
 
         # calculate num tokens
         if response.usage:
@@ -272,11 +311,17 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
             completion_tokens = response.usage.completion_tokens
         else:
             # calculate num tokens
-            prompt_tokens = self._num_tokens_from_messages(model, prompt_messages, tools)
-            completion_tokens = self._num_tokens_from_messages(model, [assistant_prompt_message])
+            prompt_tokens = self._num_tokens_from_messages(
+                model, prompt_messages, tools
+            )
+            completion_tokens = self._num_tokens_from_messages(
+                model, [assistant_prompt_message]
+            )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
 
         # transform response
         response = LLMResult(
@@ -307,7 +352,9 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         :return: llm response chunk generator
         """
         full_assistant_content = ""
-        delta_assistant_message_function_call_storage: Optional[ChoiceDeltaFunctionCall] = None
+        delta_assistant_message_function_call_storage: Optional[
+            ChoiceDeltaFunctionCall
+        ] = None
         prompt_tokens = 0
         completion_tokens = 0
         final_tool_calls = []
@@ -346,29 +393,39 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
                 # handle process of stream function call
                 if assistant_message_function_call:
                     # message has not ended ever
-                    delta_assistant_message_function_call_storage.arguments += assistant_message_function_call.arguments
+                    delta_assistant_message_function_call_storage.arguments += (
+                        assistant_message_function_call.arguments
+                    )
                     continue
                 else:
                     # message has ended
-                    assistant_message_function_call = delta_assistant_message_function_call_storage
+                    assistant_message_function_call = (
+                        delta_assistant_message_function_call_storage
+                    )
                     delta_assistant_message_function_call_storage = None
             else:
                 if assistant_message_function_call:
                     # start of stream function call
-                    delta_assistant_message_function_call_storage = assistant_message_function_call
+                    delta_assistant_message_function_call_storage = (
+                        assistant_message_function_call
+                    )
                     if delta_assistant_message_function_call_storage.arguments is None:
                         delta_assistant_message_function_call_storage.arguments = ""
                     if not has_finish_reason:
                         continue
 
             # tool_calls = self._extract_response_tool_calls(assistant_message_tool_calls)
-            function_call = self._extract_response_function_call(assistant_message_function_call)
+            function_call = self._extract_response_function_call(
+                assistant_message_function_call
+            )
             tool_calls = [function_call] if function_call else []
             if tool_calls:
                 final_tool_calls.extend(tool_calls)
 
             # transform assistant message to prompt message
-            assistant_prompt_message = AssistantPromptMessage(content=delta.delta.content or "", tool_calls=tool_calls)
+            assistant_prompt_message = AssistantPromptMessage(
+                content=delta.delta.content or "", tool_calls=tool_calls
+            )
 
             full_assistant_content += delta.delta.content or ""
 
@@ -395,22 +452,29 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
                 )
 
         if not prompt_tokens:
-            prompt_tokens = self._num_tokens_from_messages(model, prompt_messages, tools)
+            prompt_tokens = self._num_tokens_from_messages(
+                model, prompt_messages, tools
+            )
 
         if not completion_tokens:
             full_assistant_prompt_message = AssistantPromptMessage(
                 content=full_assistant_content, tool_calls=final_tool_calls
             )
-            completion_tokens = self._num_tokens_from_messages(model, [full_assistant_prompt_message])
+            completion_tokens = self._num_tokens_from_messages(
+                model, [full_assistant_prompt_message]
+            )
 
         # transform usage
-        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
+        usage = self._calc_response_usage(
+            model, credentials, prompt_tokens, completion_tokens
+        )
         final_chunk.delta.usage = usage
 
         yield final_chunk
 
     def _extract_response_tool_calls(
-        self, response_tool_calls: list[ChatCompletionMessageToolCall | ChoiceDeltaToolCall]
+        self,
+        response_tool_calls: list[ChatCompletionMessageToolCall | ChoiceDeltaToolCall],
     ) -> list[AssistantPromptMessage.ToolCall]:
         """
         Extract tool calls from response
@@ -422,11 +486,14 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         if response_tool_calls:
             for response_tool_call in response_tool_calls:
                 function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                    name=response_tool_call.function.name, arguments=response_tool_call.function.arguments
+                    name=response_tool_call.function.name,
+                    arguments=response_tool_call.function.arguments,
                 )
 
                 tool_call = AssistantPromptMessage.ToolCall(
-                    id=response_tool_call.id, type=response_tool_call.type, function=function
+                    id=response_tool_call.id,
+                    type=response_tool_call.type,
+                    function=function,
                 )
                 tool_calls.append(tool_call)
 
@@ -444,7 +511,8 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         tool_call = None
         if response_function_call:
             function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                name=response_function_call.name, arguments=response_function_call.arguments
+                name=response_function_call.name,
+                arguments=response_function_call.arguments,
             )
 
             tool_call = AssistantPromptMessage.ToolCall(
@@ -465,14 +533,24 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
                 sub_messages = []
                 for message_content in message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(TextPromptMessageContent, message_content)
-                        sub_message_dict = {"type": "text", "text": message_content.data}
+                        message_content = cast(
+                            TextPromptMessageContent, message_content
+                        )
+                        sub_message_dict = {
+                            "type": "text",
+                            "text": message_content.data,
+                        }
                         sub_messages.append(sub_message_dict)
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(ImagePromptMessageContent, message_content)
+                        message_content = cast(
+                            ImagePromptMessageContent, message_content
+                        )
                         sub_message_dict = {
                             "type": "image_url",
-                            "image_url": {"url": message_content.data, "detail": message_content.detail.value},
+                            "image_url": {
+                                "url": message_content.data,
+                                "detail": message_content.detail.value,
+                            },
                         }
                         sub_messages.append(sub_message_dict)
 
@@ -498,7 +576,11 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
             #     "content": message.content,
             #     "tool_call_id": message.tool_call_id
             # }
-            message_dict = {"role": "function", "content": message.content, "name": message.tool_call_id}
+            message_dict = {
+                "role": "function",
+                "content": message.content,
+                "name": message.tool_call_id,
+            }
         else:
             raise ValueError(f"Got unknown type {message}")
 
@@ -511,7 +593,10 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         return Tokenizer.from_pretrained("upstage/solar-1-mini-tokenizer")
 
     def _num_tokens_from_messages(
-        self, model: str, messages: list[PromptMessage], tools: Optional[list[PromptMessageTool]] = None
+        self,
+        model: str,
+        messages: list[PromptMessage],
+        tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         """
         Calculate num tokens for solar with Huggingface Solar tokenizer.
@@ -525,7 +610,9 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
         num_tokens = 0
         num_tokens += tokens_prefix
 
-        messages_dict = [self._convert_prompt_message_to_dict(message) for message in messages]
+        messages_dict = [
+            self._convert_prompt_message_to_dict(message) for message in messages
+        ]
         for message in messages_dict:
             num_tokens += tokens_per_message
             for key, value in message.items():
@@ -539,16 +626,32 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
                 if key == "tool_calls":
                     for tool_call in value:
                         for t_key, t_value in tool_call.items():
-                            num_tokens += len(tokenizer.encode(t_key, add_special_tokens=False))
+                            num_tokens += len(
+                                tokenizer.encode(t_key, add_special_tokens=False)
+                            )
                             if t_key == "function":
                                 for f_key, f_value in t_value.items():
-                                    num_tokens += len(tokenizer.encode(f_key, add_special_tokens=False))
-                                    num_tokens += len(tokenizer.encode(f_value, add_special_tokens=False))
+                                    num_tokens += len(
+                                        tokenizer.encode(
+                                            f_key, add_special_tokens=False
+                                        )
+                                    )
+                                    num_tokens += len(
+                                        tokenizer.encode(
+                                            f_value, add_special_tokens=False
+                                        )
+                                    )
                             else:
-                                num_tokens += len(tokenizer.encode(t_key, add_special_tokens=False))
-                                num_tokens += len(tokenizer.encode(t_value, add_special_tokens=False))
+                                num_tokens += len(
+                                    tokenizer.encode(t_key, add_special_tokens=False)
+                                )
+                                num_tokens += len(
+                                    tokenizer.encode(t_value, add_special_tokens=False)
+                                )
                 else:
-                    num_tokens += len(tokenizer.encode(str(value), add_special_tokens=False))
+                    num_tokens += len(
+                        tokenizer.encode(str(value), add_special_tokens=False)
+                    )
         num_tokens += tokens_suffix
 
         if tools:
@@ -556,7 +659,9 @@ class UpstageLargeLanguageModel(_CommonUpstage, LargeLanguageModel):
 
         return num_tokens
 
-    def _num_tokens_for_tools(self, tokenizer: Tokenizer, tools: list[PromptMessageTool]) -> int:
+    def _num_tokens_for_tools(
+        self, tokenizer: Tokenizer, tools: list[PromptMessageTool]
+    ) -> int:
         """
         Calculate num tokens for tool calling with upstage tokenizer.
 

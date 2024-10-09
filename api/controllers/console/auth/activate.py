@@ -17,35 +17,68 @@ from services.account_service import RegisterService
 class ActivateCheckApi(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("workspace_id", type=str, required=False, nullable=True, location="args")
-        parser.add_argument("email", type=email, required=False, nullable=True, location="args")
-        parser.add_argument("token", type=str, required=True, nullable=False, location="args")
+        parser.add_argument(
+            "workspace_id", type=str, required=False, nullable=True, location="args"
+        )
+        parser.add_argument(
+            "email", type=email, required=False, nullable=True, location="args"
+        )
+        parser.add_argument(
+            "token", type=str, required=True, nullable=False, location="args"
+        )
         args = parser.parse_args()
 
         workspaceId = args["workspace_id"]
         reg_email = args["email"]
         token = args["token"]
 
-        invitation = RegisterService.get_invitation_if_token_valid(workspaceId, reg_email, token)
+        invitation = RegisterService.get_invitation_if_token_valid(
+            workspaceId, reg_email, token
+        )
 
-        return {"is_valid": invitation is not None, "workspace_name": invitation["tenant"].name if invitation else None}
+        return {
+            "is_valid": invitation is not None,
+            "workspace_name": invitation["tenant"].name if invitation else None,
+        }
 
 
 class ActivateApi(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("workspace_id", type=str, required=False, nullable=True, location="json")
-        parser.add_argument("email", type=email, required=False, nullable=True, location="json")
-        parser.add_argument("token", type=str, required=True, nullable=False, location="json")
-        parser.add_argument("name", type=StrLen(30), required=True, nullable=False, location="json")
-        parser.add_argument("password", type=valid_password, required=True, nullable=False, location="json")
         parser.add_argument(
-            "interface_language", type=supported_language, required=True, nullable=False, location="json"
+            "workspace_id", type=str, required=False, nullable=True, location="json"
         )
-        parser.add_argument("timezone", type=timezone, required=True, nullable=False, location="json")
+        parser.add_argument(
+            "email", type=email, required=False, nullable=True, location="json"
+        )
+        parser.add_argument(
+            "token", type=str, required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "name", type=StrLen(30), required=True, nullable=False, location="json"
+        )
+        parser.add_argument(
+            "password",
+            type=valid_password,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        parser.add_argument(
+            "interface_language",
+            type=supported_language,
+            required=True,
+            nullable=False,
+            location="json",
+        )
+        parser.add_argument(
+            "timezone", type=timezone, required=True, nullable=False, location="json"
+        )
         args = parser.parse_args()
 
-        invitation = RegisterService.get_invitation_if_token_valid(args["workspace_id"], args["email"], args["token"])
+        invitation = RegisterService.get_invitation_if_token_valid(
+            args["workspace_id"], args["email"], args["token"]
+        )
         if invitation is None:
             raise AlreadyActivateError()
 
@@ -67,7 +100,9 @@ class ActivateApi(Resource):
         account.timezone = args["timezone"]
         account.interface_theme = "light"
         account.status = AccountStatus.ACTIVE.value
-        account.initialized_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        account.initialized_at = datetime.datetime.now(datetime.timezone.utc).replace(
+            tzinfo=None
+        )
         db.session.commit()
 
         return {"result": "success"}

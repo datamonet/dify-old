@@ -33,7 +33,9 @@ class ApplyGuardrailTool(BuiltinTool):
             params = GuardrailParameters(**tool_parameters)
 
             # Initialize AWS client
-            bedrock_client = boto3.client("bedrock-runtime", region_name=params.aws_region)
+            bedrock_client = boto3.client(
+                "bedrock-runtime", region_name=params.aws_region
+            )
 
             # Apply guardrail
             response = bedrock_client.apply_guardrail(
@@ -47,12 +49,18 @@ class ApplyGuardrailTool(BuiltinTool):
 
             # Check for empty response
             if not response:
-                return self.create_text_message(text="Received empty response from AWS Bedrock.")
+                return self.create_text_message(
+                    text="Received empty response from AWS Bedrock."
+                )
 
             # Process the result
             action = response.get("action", "No action specified")
             outputs = response.get("outputs", [])
-            output = outputs[0].get("text", "No output received") if outputs else "No output received"
+            output = (
+                outputs[0].get("text", "No output received")
+                if outputs
+                else "No output received"
+            )
             assessments = response.get("assessments", [])
 
             # Format assessments
@@ -66,7 +74,9 @@ class ApplyGuardrailTool(BuiltinTool):
                                 f" Action: {topic['action']}"
                             )
                     else:
-                        formatted_assessments.append(f"Policy: {policy_type}, Data: {policy_data}")
+                        formatted_assessments.append(
+                            f"Policy: {policy_type}, Data: {policy_data}"
+                        )
 
             result = f"Action: {action}\n "
             result += f"Output: {output}\n "

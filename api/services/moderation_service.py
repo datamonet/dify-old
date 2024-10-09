@@ -4,11 +4,15 @@ from models.model import App, AppModelConfig
 
 
 class ModerationService:
-    def moderation_for_outputs(self, app_id: str, app_model: App, text: str) -> ModerationOutputsResult:
+    def moderation_for_outputs(
+        self, app_id: str, app_model: App, text: str
+    ) -> ModerationOutputsResult:
         app_model_config: AppModelConfig = None
 
         app_model_config = (
-            db.session.query(AppModelConfig).filter(AppModelConfig.id == app_model.app_model_config_id).first()
+            db.session.query(AppModelConfig)
+            .filter(AppModelConfig.id == app_model.app_model_config_id)
+            .first()
         )
 
         if not app_model_config:

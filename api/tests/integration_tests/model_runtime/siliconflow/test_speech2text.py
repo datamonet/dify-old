@@ -3,7 +3,9 @@ import os
 import pytest
 
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.siliconflow.speech2text.speech2text import SiliconflowSpeech2TextModel
+from core.model_runtime.model_providers.siliconflow.speech2text.speech2text import (
+    SiliconflowSpeech2TextModel,
+)
 
 
 def test_validate_credentials():
@@ -38,7 +40,9 @@ def test_invoke_model():
         file = audio_file
 
         result = model.invoke(
-            model="iic/SenseVoiceSmall", credentials={"api_key": os.environ.get("API_KEY")}, file=file
+            model="iic/SenseVoiceSmall",
+            credentials={"api_key": os.environ.get("API_KEY")},
+            file=file,
         )
 
         assert isinstance(result, str)

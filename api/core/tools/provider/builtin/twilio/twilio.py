@@ -22,8 +22,12 @@ class TwilioProvider(BuiltinToolProviderController):
             client.api.accounts(account_sid).fetch()
 
         except TwilioRestException as e:
-            raise ToolProviderCredentialValidationError(f"Twilio API error: {e.msg}") from e
+            raise ToolProviderCredentialValidationError(
+                f"Twilio API error: {e.msg}"
+            ) from e
         except KeyError as e:
-            raise ToolProviderCredentialValidationError(f"Missing required credential: {e}") from e
+            raise ToolProviderCredentialValidationError(
+                f"Missing required credential: {e}"
+            ) from e
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

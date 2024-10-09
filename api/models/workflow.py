@@ -71,7 +71,9 @@ class WorkflowType(Enum):
         """
         from models.model import AppMode
 
-        app_mode = app_mode if isinstance(app_mode, AppMode) else AppMode.value_of(app_mode)
+        app_mode = (
+            app_mode if isinstance(app_mode, AppMode) else AppMode.value_of(app_mode)
+        )
         return cls.WORKFLOW if app_mode == AppMode.WORKFLOW else cls.CHAT
 
 
@@ -114,7 +116,9 @@ class Workflow(db.Model):
         db.Index("workflow_version_idx", "tenant_id", "app_id", "version"),
     )
 
-    id: Mapped[str] = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
+    id: Mapped[str] = db.Column(
+        StringUUID, server_default=db.text("uuid_generate_v4()")
+    )
     tenant_id: Mapped[str] = db.Column(StringUUID, nullable=False)
     app_id: Mapped[str] = db.Column(StringUUID, nullable=False)
     type: Mapped[str] = db.Column(db.String(255), nullable=False)
@@ -182,7 +186,10 @@ class Workflow(db.Model):
         if "nodes" not in graph_dict:
             return []
 
-        start_node = next((node for node in graph_dict["nodes"] if node["data"]["type"] == "start"), None)
+        start_node = next(
+            (node for node in graph_dict["nodes"] if node["data"]["type"] == "start"),
+            None,
+        )
         if not start_node:
             return []
 
@@ -214,7 +221,9 @@ class Workflow(db.Model):
         from models.tools import WorkflowToolProvider
 
         return (
-            db.session.query(WorkflowToolProvider).filter(WorkflowToolProvider.app_id == self.app_id).first()
+            db.session.query(WorkflowToolProvider)
+            .filter(WorkflowToolProvider.app_id == self.app_id)
+            .first()
             is not None
         )
 
@@ -226,12 +235,23 @@ class Workflow(db.Model):
 
         tenant_id = contexts.tenant_id.get()
 
-        environment_variables_dict: dict[str, Any] = json.loads(self._environment_variables)
-        results = [factory.build_variable_from_mapping(v) for v in environment_variables_dict.values()]
+        environment_variables_dict: dict[str, Any] = json.loads(
+            self._environment_variables
+        )
+        results = [
+            factory.build_variable_from_mapping(v)
+            for v in environment_variables_dict.values()
+        ]
 
         # decrypt secret variables value
         decrypt_func = (
-            lambda var: var.model_copy(update={"value": encrypter.decrypt_token(tenant_id=tenant_id, token=var.value)})
+            lambda var: var.model_copy(
+                update={
+                    "value": encrypter.decrypt_token(
+                        tenant_id=tenant_id, token=var.value
+                    )
+                }
+            )
             if isinstance(var, SecretVariable)
             else var
         )
@@ -248,14 +268,27 @@ class Workflow(db.Model):
 
         # Compare inputs and origin variables,
         # if the value is HIDDEN_VALUE, use the origin variable value (only update `name`).
-        origin_variables_dictionary = {var.id: var for var in self.environment_variables}
+        origin_variables_dictionary = {
+            var.id: var for var in self.environment_variables
+        }
         for i, variable in enumerate(value):
-            if variable.id in origin_variables_dictionary and variable.value == HIDDEN_VALUE:
-                value[i] = origin_variables_dictionary[variable.id].model_copy(update={"name": variable.name})
+            if (
+                variable.id in origin_variables_dictionary
+                and variable.value == HIDDEN_VALUE
+            ):
+                value[i] = origin_variables_dictionary[variable.id].model_copy(
+                    update={"name": variable.name}
+                )
 
         # encrypt secret variables value
         encrypt_func = (
-            lambda var: var.model_copy(update={"value": encrypter.encrypt_token(tenant_id=tenant_id, token=var.value)})
+            lambda var: var.model_copy(
+                update={
+                    "value": encrypter.encrypt_token(
+                        tenant_id=tenant_id, token=var.value
+                    )
+                }
+            )
             if isinstance(var, SecretVariable)
             else var
         )
@@ -269,15 +302,21 @@ class Workflow(db.Model):
     def to_dict(self, *, include_secret: bool = False) -> Mapping[str, Any]:
         environment_variables = list(self.environment_variables)
         environment_variables = [
-            v if not isinstance(v, SecretVariable) or include_secret else v.model_copy(update={"value": ""})
+            v
+            if not isinstance(v, SecretVariable) or include_secret
+            else v.model_copy(update={"value": ""})
             for v in environment_variables
         ]
 
         result = {
             "graph": self.graph_dict,
             "features": self.features_dict,
-            "environment_variables": [var.model_dump(mode="json") for var in environment_variables],
-            "conversation_variables": [var.model_dump(mode="json") for var in self.conversation_variables],
+            "environment_variables": [
+                var.model_dump(mode="json") for var in environment_variables
+            ],
+            "conversation_variables": [
+                var.model_dump(mode="json") for var in self.conversation_variables
+            ],
         }
         return result
 
@@ -288,7 +327,9 @@ class Workflow(db.Model):
             self._conversation_variables = "{}"
 
         variables_dict: dict[str, Any] = json.loads(self._conversation_variables)
-        results = [factory.build_variable_from_mapping(v) for v in variables_dict.values()]
+        results = [
+            factory.build_variable_from_mapping(v) for v in variables_dict.values()
+        ]
         return results
 
     @conversation_variables.setter
@@ -386,8 +427,15 @@ class WorkflowRun(db.Model):
     __tablename__ = "workflow_runs"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="workflow_run_pkey"),
-        db.Index("workflow_run_triggerd_from_idx", "tenant_id", "app_id", "triggered_from"),
-        db.Index("workflow_run_tenant_app_sequence_idx", "tenant_id", "app_id", "sequence_number"),
+        db.Index(
+            "workflow_run_triggerd_from_idx", "tenant_id", "app_id", "triggered_from"
+        ),
+        db.Index(
+            "workflow_run_tenant_app_sequence_idx",
+            "tenant_id",
+            "app_id",
+            "sequence_number",
+        ),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -408,20 +456,30 @@ class WorkflowRun(db.Model):
     total_steps = db.Column(db.Integer, server_default=db.text("0"))
     created_by_role = db.Column(db.String(255), nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
     finished_at = db.Column(db.DateTime)
 
     @property
     def created_by_account(self):
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(Account, self.created_by) if created_by_role == CreatedByRole.ACCOUNT else None
+        return (
+            db.session.get(Account, self.created_by)
+            if created_by_role == CreatedByRole.ACCOUNT
+            else None
+        )
 
     @property
     def created_by_end_user(self):
         from models.model import EndUser
 
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(EndUser, self.created_by) if created_by_role == CreatedByRole.END_USER else None
+        return (
+            db.session.get(EndUser, self.created_by)
+            if created_by_role == CreatedByRole.END_USER
+            else None
+        )
 
     @property
     def graph_dict(self):
@@ -440,12 +498,16 @@ class WorkflowRun(db.Model):
         from models.model import Message
 
         return (
-            db.session.query(Message).filter(Message.app_id == self.app_id, Message.workflow_run_id == self.id).first()
+            db.session.query(Message)
+            .filter(Message.app_id == self.app_id, Message.workflow_run_id == self.id)
+            .first()
         )
 
     @property
     def workflow(self):
-        return db.session.query(Workflow).filter(Workflow.id == self.workflow_id).first()
+        return (
+            db.session.query(Workflow).filter(Workflow.id == self.workflow_id).first()
+        )
 
     def to_dict(self):
         return {
@@ -516,7 +578,9 @@ class WorkflowNodeExecutionTriggeredFrom(Enum):
         for mode in cls:
             if mode.value == value:
                 return mode
-        raise ValueError(f"invalid workflow node execution triggered from value {value}")
+        raise ValueError(
+            f"invalid workflow node execution triggered from value {value}"
+        )
 
 
 class WorkflowNodeExecutionStatus(Enum):
@@ -602,7 +666,12 @@ class WorkflowNodeExecution(db.Model):
             "workflow_run_id",
         ),
         db.Index(
-            "workflow_node_execution_node_run_idx", "tenant_id", "app_id", "workflow_id", "triggered_from", "node_id"
+            "workflow_node_execution_node_run_idx",
+            "tenant_id",
+            "app_id",
+            "workflow_id",
+            "triggered_from",
+            "node_id",
         ),
         db.Index(
             "workflow_node_execution_id_idx",
@@ -633,7 +702,9 @@ class WorkflowNodeExecution(db.Model):
     error = db.Column(db.Text)
     elapsed_time = db.Column(db.Float, nullable=False, server_default=db.text("0"))
     execution_metadata = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
     created_by_role = db.Column(db.String(255), nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
     finished_at = db.Column(db.DateTime)
@@ -641,14 +712,22 @@ class WorkflowNodeExecution(db.Model):
     @property
     def created_by_account(self):
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(Account, self.created_by) if created_by_role == CreatedByRole.ACCOUNT else None
+        return (
+            db.session.get(Account, self.created_by)
+            if created_by_role == CreatedByRole.ACCOUNT
+            else None
+        )
 
     @property
     def created_by_end_user(self):
         from models.model import EndUser
 
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(EndUser, self.created_by) if created_by_role == CreatedByRole.END_USER else None
+        return (
+            db.session.get(EndUser, self.created_by)
+            if created_by_role == CreatedByRole.END_USER
+            else None
+        )
 
     @property
     def inputs_dict(self):
@@ -674,7 +753,10 @@ class WorkflowNodeExecution(db.Model):
         if self.execution_metadata_dict:
             from core.workflow.entities.node_entities import NodeType
 
-            if self.node_type == NodeType.TOOL.value and "tool_info" in self.execution_metadata_dict:
+            if (
+                self.node_type == NodeType.TOOL.value
+                and "tool_info" in self.execution_metadata_dict
+            ):
                 tool_info = self.execution_metadata_dict["tool_info"]
                 extras["icon"] = ToolManager.get_tool_icon(
                     tenant_id=self.tenant_id,
@@ -751,7 +833,9 @@ class WorkflowAppLog(db.Model):
     created_from = db.Column(db.String(255), nullable=False)
     created_by_role = db.Column(db.String(255), nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
+    )
 
     @property
     def workflow_run(self):
@@ -760,36 +844,58 @@ class WorkflowAppLog(db.Model):
     @property
     def created_by_account(self):
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(Account, self.created_by) if created_by_role == CreatedByRole.ACCOUNT else None
+        return (
+            db.session.get(Account, self.created_by)
+            if created_by_role == CreatedByRole.ACCOUNT
+            else None
+        )
 
     @property
     def created_by_end_user(self):
         from models.model import EndUser
 
         created_by_role = CreatedByRole.value_of(self.created_by_role)
-        return db.session.get(EndUser, self.created_by) if created_by_role == CreatedByRole.END_USER else None
+        return (
+            db.session.get(EndUser, self.created_by)
+            if created_by_role == CreatedByRole.END_USER
+            else None
+        )
 
 
 class ConversationVariable(db.Model):
     __tablename__ = "workflow_conversation_variables"
 
     id: Mapped[str] = db.Column(StringUUID, primary_key=True)
-    conversation_id: Mapped[str] = db.Column(StringUUID, nullable=False, primary_key=True)
+    conversation_id: Mapped[str] = db.Column(
+        StringUUID, nullable=False, primary_key=True
+    )
     app_id: Mapped[str] = db.Column(StringUUID, nullable=False, index=True)
     data = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, index=True, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        index=True,
+        server_default=db.text("CURRENT_TIMESTAMP(0)"),
+    )
     updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
+        db.DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
     )
 
-    def __init__(self, *, id: str, app_id: str, conversation_id: str, data: str) -> None:
+    def __init__(
+        self, *, id: str, app_id: str, conversation_id: str, data: str
+    ) -> None:
         self.id = id
         self.app_id = app_id
         self.conversation_id = conversation_id
         self.data = data
 
     @classmethod
-    def from_variable(cls, *, app_id: str, conversation_id: str, variable: Variable) -> "ConversationVariable":
+    def from_variable(
+        cls, *, app_id: str, conversation_id: str, variable: Variable
+    ) -> "ConversationVariable":
         obj = cls(
             id=variable.id,
             app_id=app_id,

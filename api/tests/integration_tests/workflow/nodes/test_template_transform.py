@@ -10,9 +10,10 @@ from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.graph import Graph
 from core.workflow.graph_engine.entities.graph_init_params import GraphInitParams
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
-from core.workflow.nodes.template_transform.template_transform_node import TemplateTransformNode
+from core.workflow.nodes.template_transform.template_transform_node import (
+    TemplateTransformNode,
+)
 from models.workflow import WorkflowNodeExecutionStatus, WorkflowType
-from tests.integration_tests.workflow.nodes.__mock.code_executor import setup_code_executor_mock
 
 
 @pytest.mark.parametrize("setup_code_executor_mock", [["none"]], indirect=True)
@@ -60,7 +61,10 @@ def test_execute_code(setup_code_executor_mock):
 
     # construct variable pool
     variable_pool = VariablePool(
-        system_variables={SystemVariableKey.FILES: [], SystemVariableKey.USER_ID: "aaa"},
+        system_variables={
+            SystemVariableKey.FILES: [],
+            SystemVariableKey.USER_ID: "aaa",
+        },
         user_inputs={},
         environment_variables=[],
         conversation_variables=[],
@@ -72,7 +76,9 @@ def test_execute_code(setup_code_executor_mock):
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+        graph_runtime_state=GraphRuntimeState(
+            variable_pool=variable_pool, start_at=time.perf_counter()
+        ),
         config=config,
     )
 

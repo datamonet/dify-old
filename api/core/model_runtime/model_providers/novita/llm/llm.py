@@ -2,9 +2,14 @@ from collections.abc import Generator
 from typing import Optional, Union
 
 from core.model_runtime.entities.llm_entities import LLMResult
-from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageTool
+from core.model_runtime.entities.message_entities import (
+    PromptMessage,
+    PromptMessageTool,
+)
 from core.model_runtime.entities.model_entities import AIModelEntity
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
+    OAIAPICompatLargeLanguageModel,
+)
 
 
 class NovitaLargeLanguageModel(OAIAPICompatLargeLanguageModel):
@@ -25,7 +30,16 @@ class NovitaLargeLanguageModel(OAIAPICompatLargeLanguageModel):
         user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
-        return super()._invoke(model, cred_with_endpoint, prompt_messages, model_parameters, tools, stop, stream, user)
+        return super()._invoke(
+            model,
+            cred_with_endpoint,
+            prompt_messages,
+            model_parameters,
+            tools,
+            stop,
+            stream,
+            user,
+        )
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
@@ -49,10 +63,19 @@ class NovitaLargeLanguageModel(OAIAPICompatLargeLanguageModel):
     ) -> Union[LLMResult, Generator]:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
         return super()._generate(
-            model, cred_with_endpoint, prompt_messages, model_parameters, tools, stop, stream, user
+            model,
+            cred_with_endpoint,
+            prompt_messages,
+            model_parameters,
+            tools,
+            stop,
+            stream,
+            user,
         )
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
 
         return super().get_customizable_model_schema(model, cred_with_endpoint)

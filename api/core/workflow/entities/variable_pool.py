@@ -35,7 +35,9 @@ class VariablePool(BaseModel):
         description="System variables",
     )
 
-    environment_variables: Sequence[Variable] = Field(description="Environment variables.", default_factory=list)
+    environment_variables: Sequence[Variable] = Field(
+        description="Environment variables.", default_factory=list
+    )
 
     conversation_variables: Sequence[Variable] | None = None
 

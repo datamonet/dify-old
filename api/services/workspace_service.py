@@ -26,12 +26,17 @@ class WorkspaceService:
         # Get role of user
         tenant_account_join = (
             db.session.query(TenantAccountJoin)
-            .filter(TenantAccountJoin.tenant_id == tenant.id, TenantAccountJoin.account_id == current_user.id)
+            .filter(
+                TenantAccountJoin.tenant_id == tenant.id,
+                TenantAccountJoin.account_id == current_user.id,
+            )
             .first()
         )
         tenant_info["role"] = tenant_account_join.role
 
-        can_replace_logo = FeatureService.get_features(tenant_info["id"]).can_replace_logo
+        can_replace_logo = FeatureService.get_features(
+            tenant_info["id"]
+        ).can_replace_logo
 
         if can_replace_logo and TenantService.has_roles(
             tenant, [TenantAccountJoinRole.OWNER, TenantAccountJoinRole.ADMIN]
@@ -42,7 +47,9 @@ class WorkspaceService:
                 if tenant.custom_config_dict.get("replace_webapp_logo")
                 else None
             )
-            remove_webapp_brand = tenant.custom_config_dict.get("remove_webapp_brand", False)
+            remove_webapp_brand = tenant.custom_config_dict.get(
+                "remove_webapp_brand", False
+            )
 
             tenant_info["custom_config"] = {
                 "remove_webapp_brand": remove_webapp_brand,

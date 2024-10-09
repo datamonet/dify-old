@@ -133,7 +133,9 @@ class OracleVector(BaseVector):
         self._create_collection(dimension)
         return self.add_texts(texts, embeddings)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         values = []
         pks = []
         for i, doc in enumerate(documents):
@@ -151,7 +153,8 @@ class OracleVector(BaseVector):
         # print(f"INSERT INTO {self.table_name} (id, text, meta, embedding) VALUES (:1, :2, :3, :4)")
         with self._get_cursor() as cur:
             cur.executemany(
-                f"INSERT INTO {self.table_name} (id, text, meta, embedding) VALUES (:1, :2, :3, :4)", values
+                f"INSERT INTO {self.table_name} (id, text, meta, embedding) VALUES (:1, :2, :3, :4)",
+                values,
             )
         return pks
 
@@ -162,7 +165,10 @@ class OracleVector(BaseVector):
 
     def get_by_ids(self, ids: list[str]) -> list[Document]:
         with self._get_cursor() as cur:
-            cur.execute(f"SELECT meta, text FROM {self.table_name} WHERE id IN %s", (tuple(ids),))
+            cur.execute(
+                f"SELECT meta, text FROM {self.table_name} WHERE id IN %s",
+                (tuple(ids),),
+            )
             docs = []
             for record in cur:
                 docs.append(Document(page_content=record[1], metadata=record[0]))
@@ -182,9 +188,13 @@ class OracleVector(BaseVector):
 
     def delete_by_metadata_field(self, key: str, value: str) -> None:
         with self._get_cursor() as cur:
-            cur.execute(f"DELETE FROM {self.table_name} WHERE meta->>%s = %s", (key, value))
+            cur.execute(
+                f"DELETE FROM {self.table_name} WHERE meta->>%s = %s", (key, value)
+            )
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         """
         Search the nearest neighbors to a vector.
 
@@ -223,7 +233,15 @@ class OracleVector(BaseVector):
                 words = pseg.cut(query)
                 current_entity = ""
                 for word, pos in words:
-                    if pos in {"nr", "Ng", "eng", "nz", "n", "ORG", "v"}:  # nr: 人名, ns: 地名, nt: 机构名
+                    if pos in {
+                        "nr",
+                        "Ng",
+                        "eng",
+                        "nz",
+                        "n",
+                        "ORG",
+                        "v",
+                    }:  # nr: 人名, ns: 地名, nt: 机构名
                         current_entity += word
                     else:
                         if current_entity:
@@ -254,7 +272,9 @@ class OracleVector(BaseVector):
                 docs = []
                 for record in cur:
                     metadata, text, embedding = record
-                    docs.append(Document(page_content=text, vector=embedding, metadata=metadata))
+                    docs.append(
+                        Document(page_content=text, vector=embedding, metadata=metadata)
+                    )
             return docs
         else:
             return [Document(page_content="", metadata={})]
@@ -280,14 +300,20 @@ class OracleVector(BaseVector):
 
 
 class OracleVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> OracleVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> OracleVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.ORACLE, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.ORACLE, collection_name)
+            )
 
         return OracleVector(
             collection_name=collection_name,

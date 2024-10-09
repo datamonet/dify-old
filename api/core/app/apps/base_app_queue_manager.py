@@ -32,9 +32,15 @@ class AppQueueManager:
         self._user_id = user_id
         self._invoke_from = invoke_from
 
-        user_prefix = "account" if self._invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER} else "end-user"
+        user_prefix = (
+            "account"
+            if self._invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
+            else "end-user"
+        )
         redis_client.setex(
-            AppQueueManager._generate_task_belong_cache_key(self._task_id), 1800, f"{user_prefix}-{self._user_id}"
+            AppQueueManager._generate_task_belong_cache_key(self._task_id),
+            1800,
+            f"{user_prefix}-{self._user_id}",
         )
 
         q = queue.Queue()
@@ -65,7 +71,8 @@ class AppQueueManager:
                     # publish two messages to make sure the client can receive the stop signal
                     # and stop listening after the stop signal processed
                     self.publish(
-                        QueueStopEvent(stopped_by=QueueStopEvent.StopBy.USER_MANUAL), PublishFrom.TASK_PIPELINE
+                        QueueStopEvent(stopped_by=QueueStopEvent.StopBy.USER_MANUAL),
+                        PublishFrom.TASK_PIPELINE,
                     )
 
                 if elapsed_time // 10 > last_ping_time:
@@ -118,7 +125,11 @@ class AppQueueManager:
         if result is None:
             return
 
-        user_prefix = "account" if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER} else "end-user"
+        user_prefix = (
+            "account"
+            if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
+            else "end-user"
+        )
         if result.decode("utf-8") != f"{user_prefix}-{user_id}":
             return
 

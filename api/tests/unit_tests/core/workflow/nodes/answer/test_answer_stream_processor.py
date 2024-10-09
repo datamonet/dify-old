@@ -17,7 +17,9 @@ from core.workflow.nodes.answer.answer_stream_processor import AnswerStreamProce
 from core.workflow.nodes.start.entities import StartNodeData
 
 
-def _recursive_process(graph: Graph, next_node_id: str) -> Generator[GraphEngineEvent, None, None]:
+def _recursive_process(
+    graph: Graph, next_node_id: str
+) -> Generator[GraphEngineEvent, None, None]:
     if next_node_id == "start":
         yield from _publish_events(graph, next_node_id)
 
@@ -28,8 +30,12 @@ def _recursive_process(graph: Graph, next_node_id: str) -> Generator[GraphEngine
         yield from _recursive_process(graph, edge.target_node_id)
 
 
-def _publish_events(graph: Graph, next_node_id: str) -> Generator[GraphEngineEvent, None, None]:
-    route_node_state = RouteNodeState(node_id=next_node_id, start_at=datetime.now(timezone.utc).replace(tzinfo=None))
+def _publish_events(
+    graph: Graph, next_node_id: str
+) -> Generator[GraphEngineEvent, None, None]:
+    route_node_state = RouteNodeState(
+        node_id=next_node_id, start_at=datetime.now(timezone.utc).replace(tzinfo=None)
+    )
 
     parallel_id = graph.node_parallel_mapping.get(next_node_id)
     parallel_start_node_id = None
@@ -167,11 +173,19 @@ def test_process():
                 "id": "llm5",
             },
             {
-                "data": {"type": "answer", "title": "answer", "answer": "a{{#llm2.text#}}b"},
+                "data": {
+                    "type": "answer",
+                    "title": "answer",
+                    "answer": "a{{#llm2.text#}}b",
+                },
                 "id": "answer",
             },
             {
-                "data": {"type": "answer", "title": "answer2", "answer": "c{{#llm3.text#}}d"},
+                "data": {
+                    "type": "answer",
+                    "title": "answer2",
+                    "answer": "c{{#llm3.text#}}d",
+                },
                 "id": "answer2",
             },
         ],
@@ -189,7 +203,9 @@ def test_process():
         user_inputs={},
     )
 
-    answer_stream_processor = AnswerStreamProcessor(graph=graph, variable_pool=variable_pool)
+    answer_stream_processor = AnswerStreamProcessor(
+        graph=graph, variable_pool=variable_pool
+    )
 
     def graph_generator() -> Generator[GraphEngineEvent, None, None]:
         # print("")
@@ -200,7 +216,10 @@ def test_process():
                 if "llm" in event.route_node_state.node_id:
                     variable_pool.add(
                         [event.route_node_state.node_id, "text"],
-                        "".join(str(i) for i in range(0, int(event.route_node_state.node_id[-1]))),
+                        "".join(
+                            str(i)
+                            for i in range(0, int(event.route_node_state.node_id[-1]))
+                        ),
                     )
             yield event
 

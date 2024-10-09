@@ -37,7 +37,12 @@ class UpdateWorksheetRecordTool(BuiltinTool):
 
         url = f"{host}/v2/open/worksheet/editRow"
         headers = {"Content-Type": "application/json"}
-        payload = {"appKey": appkey, "sign": sign, "worksheetId": worksheet_id, "rowId": row_id}
+        payload = {
+            "appKey": appkey,
+            "sign": sign,
+            "worksheetId": worksheet_id,
+            "rowId": row_id,
+        }
 
         try:
             payload["controls"] = json.loads(record_data)
@@ -45,11 +50,17 @@ class UpdateWorksheetRecordTool(BuiltinTool):
             res.raise_for_status()
             res_json = res.json()
             if res_json.get("error_code") != 1:
-                return self.create_text_message(f"Failed to update the record. {res_json['error_msg']}")
+                return self.create_text_message(
+                    f"Failed to update the record. {res_json['error_msg']}"
+                )
             return self.create_text_message("Record updated successfully.")
         except httpx.RequestError as e:
-            return self.create_text_message(f"Failed to update the record, request error: {e}")
+            return self.create_text_message(
+                f"Failed to update the record, request error: {e}"
+            )
         except json.JSONDecodeError as e:
             return self.create_text_message(f"Failed to parse JSON response: {e}")
         except Exception as e:
-            return self.create_text_message(f"Failed to update the record, unexpected error: {e}")
+            return self.create_text_message(
+                f"Failed to update the record, unexpected error: {e}"
+            )

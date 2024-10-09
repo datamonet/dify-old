@@ -23,8 +23,12 @@ class JinaReaderTool(BuiltinTool):
 
         headers = {"Accept": "application/json"}
 
-        if "api_key" in self.runtime.credentials and self.runtime.credentials.get("api_key"):
-            headers["Authorization"] = "Bearer " + self.runtime.credentials.get("api_key")
+        if "api_key" in self.runtime.credentials and self.runtime.credentials.get(
+            "api_key"
+        ):
+            headers["Authorization"] = "Bearer " + self.runtime.credentials.get(
+                "api_key"
+            )
 
         request_params = tool_parameters.get("request_params")
         if request_params is not None and request_params != "":

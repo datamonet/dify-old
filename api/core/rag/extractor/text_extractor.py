@@ -16,7 +16,12 @@ class TextExtractor(BaseExtractor):
         file_path: Path to the file to load.
     """
 
-    def __init__(self, file_path: str, encoding: Optional[str] = None, autodetect_encoding: bool = False):
+    def __init__(
+        self,
+        file_path: str,
+        encoding: Optional[str] = None,
+        autodetect_encoding: bool = False,
+    ):
         """Initialize with file path."""
         self._file_path = file_path
         self._encoding = encoding
@@ -32,7 +37,9 @@ class TextExtractor(BaseExtractor):
                 detected_encodings = detect_file_encodings(self._file_path)
                 for encoding in detected_encodings:
                     try:
-                        text = Path(self._file_path).read_text(encoding=encoding.encoding)
+                        text = Path(self._file_path).read_text(
+                            encoding=encoding.encoding
+                        )
                         break
                     except UnicodeDecodeError:
                         continue

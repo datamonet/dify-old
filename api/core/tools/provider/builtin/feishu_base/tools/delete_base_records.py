@@ -53,4 +53,6 @@ class DeleteBaseRecordsTool(BuiltinTool):
                     f"Failed to delete base records, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message("Failed to delete base records. {}".format(e))
+            return self.create_text_message(
+                "Failed to delete base records. {}".format(e)
+            )

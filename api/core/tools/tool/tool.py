@@ -160,7 +160,9 @@ class Tool(BaseModel, ABC):
 
         message_file_id = variable.value
         # get file binary
-        file_binary = ToolFileManager.get_file_binary_by_message_file_id(message_file_id)
+        file_binary = ToolFileManager.get_file_binary_by_message_file_id(
+            message_file_id
+        )
         if not file_binary:
             return None
 
@@ -194,7 +196,9 @@ class Tool(BaseModel, ABC):
 
         return result
 
-    def invoke(self, user_id: str, tool_parameters: Mapping[str, Any]) -> list[ToolInvokeMessage]:
+    def invoke(
+        self, user_id: str, tool_parameters: Mapping[str, Any]
+    ) -> list[ToolInvokeMessage]:
         # update tool_parameters
         # TODO: Fix type error.
         if self.runtime.runtime_parameters:
@@ -213,7 +217,9 @@ class Tool(BaseModel, ABC):
 
         return result
 
-    def _transform_tool_parameters_type(self, tool_parameters: Mapping[str, Any]) -> dict[str, Any]:
+    def _transform_tool_parameters_type(
+        self, tool_parameters: Mapping[str, Any]
+    ) -> dict[str, Any]:
         """
         Transform tool parameters type
         """
@@ -233,7 +239,9 @@ class Tool(BaseModel, ABC):
     ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
         pass
 
-    def validate_credentials(self, credentials: dict[str, Any], parameters: dict[str, Any]) -> None:
+    def validate_credentials(
+        self, credentials: dict[str, Any], parameters: dict[str, Any]
+    ) -> None:
         """
         validate the credentials
 
@@ -293,11 +301,16 @@ class Tool(BaseModel, ABC):
         :param image: the url of the image
         :return: the image message
         """
-        return ToolInvokeMessage(type=ToolInvokeMessage.MessageType.IMAGE, message=image, save_as=save_as)
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.IMAGE, message=image, save_as=save_as
+        )
 
     def create_file_var_message(self, file_var: "FileVar") -> ToolInvokeMessage:
         return ToolInvokeMessage(
-            type=ToolInvokeMessage.MessageType.FILE_VAR, message="", meta={"file_var": file_var}, save_as=""
+            type=ToolInvokeMessage.MessageType.FILE_VAR,
+            message="",
+            meta={"file_var": file_var},
+            save_as="",
         )
 
     def create_link_message(self, link: str, save_as: str = "") -> ToolInvokeMessage:
@@ -307,7 +320,9 @@ class Tool(BaseModel, ABC):
         :param link: the url of the link
         :return: the link message
         """
-        return ToolInvokeMessage(type=ToolInvokeMessage.MessageType.LINK, message=link, save_as=save_as)
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.LINK, message=link, save_as=save_as
+        )
 
     def create_text_message(self, text: str, save_as: str = "") -> ToolInvokeMessage:
         """
@@ -316,19 +331,30 @@ class Tool(BaseModel, ABC):
         :param text: the text
         :return: the text message
         """
-        return ToolInvokeMessage(type=ToolInvokeMessage.MessageType.TEXT, message=text, save_as=save_as)
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.TEXT, message=text, save_as=save_as
+        )
 
-    def create_blob_message(self, blob: bytes, meta: dict = None, save_as: str = "") -> ToolInvokeMessage:
+    def create_blob_message(
+        self, blob: bytes, meta: dict = None, save_as: str = ""
+    ) -> ToolInvokeMessage:
         """
         create a blob message
 
         :param blob: the blob
         :return: the blob message
         """
-        return ToolInvokeMessage(type=ToolInvokeMessage.MessageType.BLOB, message=blob, meta=meta, save_as=save_as)
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.BLOB,
+            message=blob,
+            meta=meta,
+            save_as=save_as,
+        )
 
     def create_json_message(self, object: dict) -> ToolInvokeMessage:
         """
         create a json message
         """
-        return ToolInvokeMessage(type=ToolInvokeMessage.MessageType.JSON, message=object)
+        return ToolInvokeMessage(
+            type=ToolInvokeMessage.MessageType.JSON, message=object
+        )

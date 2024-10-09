@@ -25,15 +25,23 @@ logger = logging.getLogger(__name__)
 
 class ToolTransformService:
     @staticmethod
-    def get_tool_provider_icon_url(provider_type: str, provider_name: str, icon: str) -> Union[str, dict]:
+    def get_tool_provider_icon_url(
+        provider_type: str, provider_name: str, icon: str
+    ) -> Union[str, dict]:
         """
         get tool provider icon url
         """
-        url_prefix = dify_config.CONSOLE_API_URL + "/console/api/workspaces/current/tool-provider/"
+        url_prefix = (
+            dify_config.CONSOLE_API_URL
+            + "/console/api/workspaces/current/tool-provider/"
+        )
 
         if provider_type == ToolProviderType.BUILT_IN.value:
             return url_prefix + "builtin/" + provider_name + "/icon"
-        elif provider_type in {ToolProviderType.API.value, ToolProviderType.WORKFLOW.value}:
+        elif provider_type in {
+            ToolProviderType.API.value,
+            ToolProviderType.WORKFLOW.value,
+        }:
             try:
                 return json.loads(icon)
             except:
@@ -50,11 +58,15 @@ class ToolTransformService:
         """
         if isinstance(provider, dict) and "icon" in provider:
             provider["icon"] = ToolTransformService.get_tool_provider_icon_url(
-                provider_type=provider["type"], provider_name=provider["name"], icon=provider["icon"]
+                provider_type=provider["type"],
+                provider_name=provider["name"],
+                icon=provider["icon"],
             )
         elif isinstance(provider, UserToolProvider):
             provider.icon = ToolTransformService.get_tool_provider_icon_url(
-                provider_type=provider.type.value, provider_name=provider.name, icon=provider.icon
+                provider_type=provider.type.value,
+                provider_name=provider.name,
+                icon=provider.icon,
             )
 
     @staticmethod
@@ -74,12 +86,14 @@ class ToolTransformService:
                 en_US=provider_controller.identity.description.en_US,
                 zh_Hans=provider_controller.identity.description.zh_Hans,
                 pt_BR=provider_controller.identity.description.pt_BR,
+                ja_JP=provider_controller.identity.description.ja_JP,
             ),
             icon=provider_controller.identity.icon,
             label=I18nObject(
                 en_US=provider_controller.identity.label.en_US,
                 zh_Hans=provider_controller.identity.label.zh_Hans,
                 pt_BR=provider_controller.identity.label.pt_BR,
+                ja_JP=provider_controller.identity.label.ja_JP,
             ),
             type=ToolProviderType.BUILT_IN,
             masked_credentials={},
@@ -91,7 +105,9 @@ class ToolTransformService:
         # get credentials schema
         schema = provider_controller.get_credentials_schema()
         for name, value in schema.items():
-            result.masked_credentials[name] = ToolProviderCredentials.CredentialsType.default(value.type)
+            result.masked_credentials[name] = (
+                ToolProviderCredentials.CredentialsType.default(value.type)
+            )
 
         # check if the provider need credentials
         if not provider_controller.need_credentials:
@@ -105,11 +121,16 @@ class ToolTransformService:
 
                 # init tool configuration
                 tool_configuration = ToolConfigurationManager(
-                    tenant_id=db_provider.tenant_id, provider_controller=provider_controller
+                    tenant_id=db_provider.tenant_id,
+                    provider_controller=provider_controller,
                 )
                 # decrypt the credentials and mask the credentials
-                decrypted_credentials = tool_configuration.decrypt_tool_credentials(credentials=credentials)
-                masked_credentials = tool_configuration.mask_tool_credentials(credentials=decrypted_credentials)
+                decrypted_credentials = tool_configuration.decrypt_tool_credentials(
+                    credentials=credentials
+                )
+                masked_credentials = tool_configuration.mask_tool_credentials(
+                    credentials=decrypted_credentials
+                )
 
                 result.masked_credentials = masked_credentials
                 result.original_credentials = decrypted_credentials
@@ -134,7 +155,9 @@ class ToolTransformService:
         return controller
 
     @staticmethod
-    def workflow_provider_to_controller(db_provider: WorkflowToolProvider) -> WorkflowToolProviderController:
+    def workflow_provider_to_controller(
+        db_provider: WorkflowToolProvider,
+    ) -> WorkflowToolProviderController:
         """
         convert provider controller to provider
         """
@@ -181,7 +204,9 @@ class ToolTransformService:
         try:
             username = db_provider.user.name
         except Exception as e:
-            logger.error(f"failed to get user name for api provider {db_provider.id}: {str(e)}")
+            logger.error(
+                f"failed to get user name for api provider {db_provider.id}: {str(e)}"
+            )
         # add provider into providers
         credentials = db_provider.credentials
         result = UserToolProvider(
@@ -211,8 +236,12 @@ class ToolTransformService:
             )
 
             # decrypt the credentials and mask the credentials
-            decrypted_credentials = tool_configuration.decrypt_tool_credentials(credentials=credentials)
-            masked_credentials = tool_configuration.mask_tool_credentials(credentials=decrypted_credentials)
+            decrypted_credentials = tool_configuration.decrypt_tool_credentials(
+                credentials=credentials
+            )
+            masked_credentials = tool_configuration.mask_tool_credentials(
+                credentials=decrypted_credentials
+            )
 
             result.masked_credentials = masked_credentials
 
@@ -246,12 +275,18 @@ class ToolTransformService:
             for runtime_parameter in runtime_parameters:
                 found = False
                 for index, parameter in enumerate(current_parameters):
-                    if parameter.name == runtime_parameter.name and parameter.form == runtime_parameter.form:
+                    if (
+                        parameter.name == runtime_parameter.name
+                        and parameter.form == runtime_parameter.form
+                    ):
                         current_parameters[index] = runtime_parameter
                         found = True
                         break
 
-                if not found and runtime_parameter.form == ToolParameter.ToolParameterForm.FORM:
+                if (
+                    not found
+                    and runtime_parameter.form == ToolParameter.ToolParameterForm.FORM
+                ):
                     current_parameters.append(runtime_parameter)
 
             return UserTool(
@@ -267,7 +302,9 @@ class ToolTransformService:
                 author=tool.author,
                 name=tool.operation_id,
                 label=I18nObject(en_US=tool.operation_id, zh_Hans=tool.operation_id),
-                description=I18nObject(en_US=tool.summary or "", zh_Hans=tool.summary or ""),
+                description=I18nObject(
+                    en_US=tool.summary or "", zh_Hans=tool.summary or ""
+                ),
                 parameters=tool.parameters,
                 labels=labels,
             )

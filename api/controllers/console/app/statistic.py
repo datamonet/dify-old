@@ -25,8 +25,12 @@ class DailyMessageStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -68,7 +72,9 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "message_count": i.message_count})
+                response_data.append(
+                    {"date": str(i.date), "message_count": i.message_count}
+                )
 
         return jsonify({"data": response_data})
 
@@ -82,8 +88,12 @@ class DailyConversationStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -125,7 +135,9 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "conversation_count": i.conversation_count})
+                response_data.append(
+                    {"date": str(i.date), "conversation_count": i.conversation_count}
+                )
 
         return jsonify({"data": response_data})
 
@@ -139,8 +151,12 @@ class DailyTerminalsStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -182,7 +198,9 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "terminal_count": i.terminal_count})
+                response_data.append(
+                    {"date": str(i.date), "terminal_count": i.terminal_count}
+                )
 
         return jsonify({"data": response_data})
 
@@ -196,8 +214,12 @@ class DailyTokenCostStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -241,7 +263,12 @@ WHERE
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
                 response_data.append(
-                    {"date": str(i.date), "token_count": i.token_count, "total_price": i.total_price, "currency": "USD"}
+                    {
+                        "date": str(i.date),
+                        "token_count": i.token_count,
+                        "total_price": i.total_price,
+                        "currency": "USD",
+                    }
                 )
 
         return jsonify({"data": response_data})
@@ -256,8 +283,12 @@ class AverageSessionInteractionStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -318,7 +349,10 @@ ORDER BY
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
                 response_data.append(
-                    {"date": str(i.date), "interactions": float(i.interactions.quantize(Decimal("0.01")))}
+                    {
+                        "date": str(i.date),
+                        "interactions": float(i.interactions.quantize(Decimal("0.01"))),
+                    }
                 )
 
         return jsonify({"data": response_data})
@@ -333,8 +367,12 @@ class UserSatisfactionRateStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -383,7 +421,12 @@ WHERE
                 response_data.append(
                     {
                         "date": str(i.date),
-                        "rate": round((i.feedback_count * 1000 / i.message_count) if i.message_count > 0 else 0, 2),
+                        "rate": round(
+                            (i.feedback_count * 1000 / i.message_count)
+                            if i.message_count > 0
+                            else 0,
+                            2,
+                        ),
                     }
                 )
 
@@ -399,8 +442,12 @@ class AverageResponseTimeStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -442,7 +489,9 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "latency": round(i.latency * 1000, 4)})
+                response_data.append(
+                    {"date": str(i.date), "latency": round(i.latency * 1000, 4)}
+                )
 
         return jsonify({"data": response_data})
 
@@ -456,8 +505,12 @@ class TokensPerSecondStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
-        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument(
+            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
+        parser.add_argument(
+            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
+        )
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -502,16 +555,32 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append({"date": str(i.date), "tps": round(i.tokens_per_second, 4)})
+                response_data.append(
+                    {"date": str(i.date), "tps": round(i.tokens_per_second, 4)}
+                )
 
         return jsonify({"data": response_data})
 
 
 api.add_resource(DailyMessageStatistic, "/apps/<uuid:app_id>/statistics/daily-messages")
-api.add_resource(DailyConversationStatistic, "/apps/<uuid:app_id>/statistics/daily-conversations")
-api.add_resource(DailyTerminalsStatistic, "/apps/<uuid:app_id>/statistics/daily-end-users")
+api.add_resource(
+    DailyConversationStatistic, "/apps/<uuid:app_id>/statistics/daily-conversations"
+)
+api.add_resource(
+    DailyTerminalsStatistic, "/apps/<uuid:app_id>/statistics/daily-end-users"
+)
 api.add_resource(DailyTokenCostStatistic, "/apps/<uuid:app_id>/statistics/token-costs")
-api.add_resource(AverageSessionInteractionStatistic, "/apps/<uuid:app_id>/statistics/average-session-interactions")
-api.add_resource(UserSatisfactionRateStatistic, "/apps/<uuid:app_id>/statistics/user-satisfaction-rate")
-api.add_resource(AverageResponseTimeStatistic, "/apps/<uuid:app_id>/statistics/average-response-time")
-api.add_resource(TokensPerSecondStatistic, "/apps/<uuid:app_id>/statistics/tokens-per-second")
+api.add_resource(
+    AverageSessionInteractionStatistic,
+    "/apps/<uuid:app_id>/statistics/average-session-interactions",
+)
+api.add_resource(
+    UserSatisfactionRateStatistic,
+    "/apps/<uuid:app_id>/statistics/user-satisfaction-rate",
+)
+api.add_resource(
+    AverageResponseTimeStatistic, "/apps/<uuid:app_id>/statistics/average-response-time"
+)
+api.add_resource(
+    TokensPerSecondStatistic, "/apps/<uuid:app_id>/statistics/tokens-per-second"
+)

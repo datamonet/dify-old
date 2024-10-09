@@ -12,7 +12,11 @@ class AgentConfigManager:
 
         :param config: model config args
         """
-        if "agent_mode" in config and config["agent_mode"] and "enabled" in config["agent_mode"]:
+        if (
+            "agent_mode" in config
+            and config["agent_mode"]
+            and "enabled" in config["agent_mode"]
+        ):
             agent_dict = config.get("agent_mode", {})
             agent_strategy = agent_dict.get("strategy", "cot")
 
@@ -43,7 +47,9 @@ class AgentConfigManager:
 
                     agent_tools.append(AgentToolEntity(**agent_tool_properties))
 
-            if "strategy" in config["agent_mode"] and config["agent_mode"]["strategy"] not in {
+            if "strategy" in config["agent_mode"] and config["agent_mode"][
+                "strategy"
+            ] not in {
                 "react_router",
                 "router",
             }:
@@ -53,19 +59,27 @@ class AgentConfigManager:
                 if model_mode == "completion":
                     agent_prompt_entity = AgentPromptEntity(
                         first_prompt=agent_prompt.get(
-                            "first_prompt", REACT_PROMPT_TEMPLATES["english"]["completion"]["prompt"]
+                            "first_prompt",
+                            REACT_PROMPT_TEMPLATES["english"]["completion"]["prompt"],
                         ),
                         next_iteration=agent_prompt.get(
-                            "next_iteration", REACT_PROMPT_TEMPLATES["english"]["completion"]["agent_scratchpad"]
+                            "next_iteration",
+                            REACT_PROMPT_TEMPLATES["english"]["completion"][
+                                "agent_scratchpad"
+                            ],
                         ),
                     )
                 else:
                     agent_prompt_entity = AgentPromptEntity(
                         first_prompt=agent_prompt.get(
-                            "first_prompt", REACT_PROMPT_TEMPLATES["english"]["chat"]["prompt"]
+                            "first_prompt",
+                            REACT_PROMPT_TEMPLATES["english"]["chat"]["prompt"],
                         ),
                         next_iteration=agent_prompt.get(
-                            "next_iteration", REACT_PROMPT_TEMPLATES["english"]["chat"]["agent_scratchpad"]
+                            "next_iteration",
+                            REACT_PROMPT_TEMPLATES["english"]["chat"][
+                                "agent_scratchpad"
+                            ],
                         ),
                     )
 

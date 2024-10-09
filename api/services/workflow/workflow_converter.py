@@ -33,7 +33,13 @@ class WorkflowConverter:
     """
 
     def convert_to_workflow(
-        self, app_model: App, account: Account, name: str, icon_type: str, icon: str, icon_background: str
+        self,
+        app_model: App,
+        account: Account,
+        name: str,
+        icon_type: str,
+        icon: str,
+        icon_background: str,
     ):
         """
         Convert app to workflow
@@ -57,14 +63,20 @@ class WorkflowConverter:
             raise ValueError("App model config is required")
 
         workflow = self.convert_app_model_config_to_workflow(
-            app_model=app_model, app_model_config=app_model.app_model_config, account_id=account.id
+            app_model=app_model,
+            app_model_config=app_model.app_model_config,
+            account_id=account.id,
         )
 
         # create new app
         new_app = App()
         new_app.tenant_id = app_model.tenant_id
         new_app.name = name or app_model.name + "(workflow)"
-        new_app.mode = AppMode.ADVANCED_CHAT.value if app_model.mode == AppMode.CHAT.value else AppMode.WORKFLOW.value
+        new_app.mode = (
+            AppMode.ADVANCED_CHAT.value
+            if app_model.mode == AppMode.CHAT.value
+            else AppMode.WORKFLOW.value
+        )
         new_app.icon_type = icon_type or app_model.icon_type
         new_app.icon = icon or app_model.icon
         new_app.icon_background = icon_background or app_model.icon_background
@@ -87,7 +99,9 @@ class WorkflowConverter:
 
         return new_app
 
-    def convert_app_model_config_to_workflow(self, app_model: App, app_model_config: AppModelConfig, account_id: str):
+    def convert_app_model_config_to_workflow(
+        self, app_model: App, app_model_config: AppModelConfig, account_id: str
+    ):
         """
         Convert app model config to workflow mode
         :param app_model: App instance
@@ -98,7 +112,9 @@ class WorkflowConverter:
         new_app_mode = self._get_new_app_mode(app_model)
 
         # convert app model config
-        app_config = self._convert_to_app_config(app_model=app_model, app_model_config=app_model_config)
+        app_config = self._convert_to_app_config(
+            app_model=app_model, app_model_config=app_model_config
+        )
 
         # init workflow graph
         graph = {"nodes": [], "edges": []}
@@ -120,10 +136,12 @@ class WorkflowConverter:
         # convert to http request node
         external_data_variable_node_mapping = {}
         if app_config.external_data_variables:
-            http_request_nodes, external_data_variable_node_mapping = self._convert_to_http_request_node(
-                app_model=app_model,
-                variables=app_config.variables,
-                external_data_variables=app_config.external_data_variables,
+            http_request_nodes, external_data_variable_node_mapping = (
+                self._convert_to_http_request_node(
+                    app_model=app_model,
+                    variables=app_config.variables,
+                    external_data_variables=app_config.external_data_variables,
+                )
             )
 
             for http_request_node in http_request_nodes:
@@ -132,7 +150,9 @@ class WorkflowConverter:
         # convert to knowledge retrieval node
         if app_config.dataset:
             knowledge_retrieval_node = self._convert_to_knowledge_retrieval_node(
-                new_app_mode=new_app_mode, dataset_config=app_config.dataset, model_config=app_config.model
+                new_app_mode=new_app_mode,
+                dataset_config=app_config.dataset,
+                model_config=app_config.model,
             )
 
             if knowledge_retrieval_node:
@@ -166,18 +186,24 @@ class WorkflowConverter:
             features = {
                 "opening_statement": app_model_config_dict.get("opening_statement"),
                 "suggested_questions": app_model_config_dict.get("suggested_questions"),
-                "suggested_questions_after_answer": app_model_config_dict.get("suggested_questions_after_answer"),
+                "suggested_questions_after_answer": app_model_config_dict.get(
+                    "suggested_questions_after_answer"
+                ),
                 "speech_to_text": app_model_config_dict.get("speech_to_text"),
                 "text_to_speech": app_model_config_dict.get("text_to_speech"),
                 "file_upload": app_model_config_dict.get("file_upload"),
-                "sensitive_word_avoidance": app_model_config_dict.get("sensitive_word_avoidance"),
+                "sensitive_word_avoidance": app_model_config_dict.get(
+                    "sensitive_word_avoidance"
+                ),
                 "retriever_resource": app_model_config_dict.get("retriever_resource"),
             }
         else:
             features = {
                 "text_to_speech": app_model_config_dict.get("text_to_speech"),
                 "file_upload": app_model_config_dict.get("file_upload"),
-                "sensitive_word_avoidance": app_model_config_dict.get("sensitive_word_avoidance"),
+                "sensitive_word_avoidance": app_model_config_dict.get(
+                    "sensitive_word_avoidance"
+                ),
             }
 
         # create workflow record
@@ -198,7 +224,9 @@ class WorkflowConverter:
 
         return workflow
 
-    def _convert_to_app_config(self, app_model: App, app_model_config: AppModelConfig) -> EasyUIBasedAppConfig:
+    def _convert_to_app_config(
+        self, app_model: App, app_model_config: AppModelConfig
+    ) -> EasyUIBasedAppConfig:
         app_mode = AppMode.value_of(app_model.mode)
         if app_mode == AppMode.AGENT_CHAT or app_model.is_agent:
             app_model.mode = AppMode.AGENT_CHAT.value
@@ -206,7 +234,9 @@ class WorkflowConverter:
                 app_model=app_model, app_model_config=app_model_config
             )
         elif app_mode == AppMode.CHAT:
-            app_config = ChatAppConfigManager.get_app_config(app_model=app_model, app_model_config=app_model_config)
+            app_config = ChatAppConfigManager.get_app_config(
+                app_model=app_model, app_model_config=app_model_config
+            )
         elif app_mode == AppMode.COMPLETION:
             app_config = CompletionAppConfigManager.get_app_config(
                 app_model=app_model, app_model_config=app_model_config
@@ -233,7 +263,10 @@ class WorkflowConverter:
         }
 
     def _convert_to_http_request_node(
-        self, app_model: App, variables: list[VariableEntity], external_data_variables: list[ExternalDataVariableEntity]
+        self,
+        app_model: App,
+        variables: list[VariableEntity],
+        external_data_variables: list[ExternalDataVariableEntity],
     ) -> tuple[list[dict], dict[str, str]]:
         """
         Convert API Based Extension to HTTP Request Node
@@ -265,7 +298,9 @@ class WorkflowConverter:
             )
 
             # decrypt api_key
-            api_key = encrypter.decrypt_token(tenant_id=tenant_id, token=api_based_extension.api_key)
+            api_key = encrypter.decrypt_token(
+                tenant_id=tenant_id, token=api_based_extension.api_key
+            )
 
             inputs = {}
             for v in variables:
@@ -277,12 +312,16 @@ class WorkflowConverter:
                     "app_id": app_model.id,
                     "tool_variable": tool_variable,
                     "inputs": inputs,
-                    "query": "{{#sys.query#}}" if app_model.mode == AppMode.CHAT.value else "",
+                    "query": "{{#sys.query#}}"
+                    if app_model.mode == AppMode.CHAT.value
+                    else "",
                 },
             }
 
             request_body_json = json.dumps(request_body)
-            request_body_json = request_body_json.replace(r"\{\{", "{{").replace(r"\}\}", "}}")
+            request_body_json = request_body_json.replace(r"\{\{", "{{").replace(
+                r"\}\}", "}}"
+            )
 
             http_request_node = {
                 "id": f"http_request_{index}",
@@ -292,7 +331,10 @@ class WorkflowConverter:
                     "type": NodeType.HTTP_REQUEST.value,
                     "method": "post",
                     "url": api_based_extension.api_endpoint,
-                    "authorization": {"type": "api-key", "config": {"type": "bearer", "api_key": api_key}},
+                    "authorization": {
+                        "type": "api-key",
+                        "config": {"type": "bearer", "api_key": api_key},
+                    },
                     "headers": "",
                     "params": "",
                     "body": {"type": "json", "data": request_body_json},
@@ -308,7 +350,12 @@ class WorkflowConverter:
                 "data": {
                     "title": f"Parse {api_based_extension.name} Response",
                     "type": NodeType.CODE.value,
-                    "variables": [{"variable": "response_json", "value_selector": [http_request_node["id"], "body"]}],
+                    "variables": [
+                        {
+                            "variable": "response_json",
+                            "value_selector": [http_request_node["id"], "body"],
+                        }
+                    ],
                     "code_language": "python3",
                     "code": "import json\n\ndef main(response_json: str) -> str:\n    response_body = json.loads("
                     'response_json)\n    return {\n        "result": response_body["result"]\n    }',
@@ -318,13 +365,18 @@ class WorkflowConverter:
 
             nodes.append(code_node)
 
-            external_data_variable_node_mapping[external_data_variable.variable] = code_node["id"]
+            external_data_variable_node_mapping[external_data_variable.variable] = (
+                code_node["id"]
+            )
             index += 1
 
         return nodes, external_data_variable_node_mapping
 
     def _convert_to_knowledge_retrieval_node(
-        self, new_app_mode: AppMode, dataset_config: DatasetEntity, model_config: ModelConfigEntity
+        self,
+        new_app_mode: AppMode,
+        dataset_config: DatasetEntity,
+        model_config: ModelConfigEntity,
     ) -> Optional[dict]:
         """
         Convert datasets to Knowledge Retrieval Node
@@ -362,14 +414,16 @@ class WorkflowConverter:
                         },
                     }
                 }
-                if retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
+                if retrieve_config.retrieve_strategy
+                == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
                 else None,
                 "multiple_retrieval_config": {
                     "top_k": retrieve_config.top_k,
                     "score_threshold": retrieve_config.score_threshold,
                     "reranking_model": retrieve_config.reranking_model,
                 }
-                if retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE
+                if retrieve_config.retrieve_strategy
+                == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE
                 else None,
             },
         }
@@ -395,9 +449,15 @@ class WorkflowConverter:
         :param external_data_variable_node_mapping: external data variable node mapping
         """
         # fetch start and knowledge retrieval node
-        start_node = next(filter(lambda n: n["data"]["type"] == NodeType.START.value, graph["nodes"]))
+        start_node = next(
+            filter(lambda n: n["data"]["type"] == NodeType.START.value, graph["nodes"])
+        )
         knowledge_retrieval_node = next(
-            filter(lambda n: n["data"]["type"] == NodeType.KNOWLEDGE_RETRIEVAL.value, graph["nodes"]), None
+            filter(
+                lambda n: n["data"]["type"] == NodeType.KNOWLEDGE_RETRIEVAL.value,
+                graph["nodes"],
+            ),
+            None,
         )
 
         role_prefix = None
@@ -423,19 +483,25 @@ class WorkflowConverter:
                     prompts = []
                 else:
                     template = self._replace_template_variables(
-                        template, start_node["data"]["variables"], external_data_variable_node_mapping
+                        template,
+                        start_node["data"]["variables"],
+                        external_data_variable_node_mapping,
                     )
 
                     prompts = [{"role": "user", "text": template}]
             else:
-                advanced_chat_prompt_template = prompt_template.advanced_chat_prompt_template
+                advanced_chat_prompt_template = (
+                    prompt_template.advanced_chat_prompt_template
+                )
 
                 prompts = []
                 if advanced_chat_prompt_template:
                     for m in advanced_chat_prompt_template.messages:
                         text = m.text
                         text = self._replace_template_variables(
-                            text, start_node["data"]["variables"], external_data_variable_node_mapping
+                            text,
+                            start_node["data"]["variables"],
+                            external_data_variable_node_mapping,
                         )
 
                         prompts.append({"role": m.role.value, "text": text})
@@ -470,7 +536,9 @@ class WorkflowConverter:
                     "assistant": prompt_rules.get("assistant_prefix", "Assistant"),
                 }
             else:
-                advanced_completion_prompt_template = prompt_template.advanced_completion_prompt_template
+                advanced_completion_prompt_template = (
+                    prompt_template.advanced_completion_prompt_template
+                )
                 if advanced_completion_prompt_template:
                     text = advanced_completion_prompt_template.prompt
                     text = self._replace_template_variables(
@@ -487,7 +555,10 @@ class WorkflowConverter:
                     "text": text,
                 }
 
-                if advanced_completion_prompt_template and advanced_completion_prompt_template.role_prefix:
+                if (
+                    advanced_completion_prompt_template
+                    and advanced_completion_prompt_template.role_prefix
+                ):
                     role_prefix = {
                         "user": advanced_completion_prompt_template.role_prefix.user,
                         "assistant": advanced_completion_prompt_template.role_prefix.assistant,
@@ -521,7 +592,9 @@ class WorkflowConverter:
                 },
                 "vision": {
                     "enabled": file_upload is not None,
-                    "variable_selector": ["sys", "files"] if file_upload is not None else None,
+                    "variable_selector": ["sys", "files"]
+                    if file_upload is not None
+                    else None,
                     "configs": {"detail": file_upload.image_config["detail"]}
                     if file_upload is not None and file_upload.image_config is not None
                     else None,
@@ -530,7 +603,10 @@ class WorkflowConverter:
         }
 
     def _replace_template_variables(
-        self, template: str, variables: list[dict], external_data_variable_node_mapping: dict[str, str] | None = None
+        self,
+        template: str,
+        variables: list[dict],
+        external_data_variable_node_mapping: dict[str, str] | None = None,
     ) -> str:
         """
         Replace Template Variables
@@ -540,11 +616,15 @@ class WorkflowConverter:
         :return:
         """
         for v in variables:
-            template = template.replace("{{" + v["variable"] + "}}", "{{#start." + v["variable"] + "#}}")
+            template = template.replace(
+                "{{" + v["variable"] + "}}", "{{#start." + v["variable"] + "#}}"
+            )
 
         if external_data_variable_node_mapping:
             for variable, code_node_id in external_data_variable_node_mapping.items():
-                template = template.replace("{{" + variable + "}}", "{{#" + code_node_id + ".result#}}")
+                template = template.replace(
+                    "{{" + variable + "}}", "{{#" + code_node_id + ".result#}}"
+                )
 
         return template
 
@@ -573,7 +653,11 @@ class WorkflowConverter:
         return {
             "id": "answer",
             "position": None,
-            "data": {"title": "ANSWER", "type": NodeType.ANSWER.value, "answer": "{{#llm.text#}}"},
+            "data": {
+                "title": "ANSWER",
+                "type": NodeType.ANSWER.value,
+                "answer": "{{#llm.text#}}",
+            },
         }
 
     def _create_edge(self, source: str, target: str) -> dict:
@@ -618,11 +702,16 @@ class WorkflowConverter:
         """
         api_based_extension = (
             db.session.query(APIBasedExtension)
-            .filter(APIBasedExtension.tenant_id == tenant_id, APIBasedExtension.id == api_based_extension_id)
+            .filter(
+                APIBasedExtension.tenant_id == tenant_id,
+                APIBasedExtension.id == api_based_extension_id,
+            )
             .first()
         )
 
         if not api_based_extension:
-            raise ValueError(f"API Based Extension not found, id: {api_based_extension_id}")
+            raise ValueError(
+                f"API Based Extension not found, id: {api_based_extension_id}"
+            )
 
         return api_based_extension

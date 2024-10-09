@@ -23,7 +23,11 @@ class StartNode(BaseNode):
         for var in system_inputs:
             node_inputs[SYSTEM_VARIABLE_NODE_ID + "." + var] = system_inputs[var]
 
-        return NodeRunResult(status=WorkflowNodeExecutionStatus.SUCCEEDED, inputs=node_inputs, outputs=node_inputs)
+        return NodeRunResult(
+            status=WorkflowNodeExecutionStatus.SUCCEEDED,
+            inputs=node_inputs,
+            outputs=node_inputs,
+        )
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(

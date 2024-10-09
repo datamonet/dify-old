@@ -13,7 +13,12 @@ class TagService:
     @staticmethod
     def get_tags(tag_type: str, current_tenant_id: str, keyword: str = None) -> list:
         query = (
-            db.session.query(Tag.id, Tag.type, Tag.name, func.count(TagBinding.id).label("binding_count"))
+            db.session.query(
+                Tag.id,
+                Tag.type,
+                Tag.name,
+                func.count(TagBinding.id).label("binding_count"),
+            )
             .outerjoin(TagBinding, Tag.id == TagBinding.tag_id)
             .filter(Tag.type == tag_type, Tag.tenant_id == current_tenant_id)
         )
@@ -24,10 +29,16 @@ class TagService:
         return results
 
     @staticmethod
-    def get_target_ids_by_tag_ids(tag_type: str, current_tenant_id: str, tag_ids: list) -> list:
+    def get_target_ids_by_tag_ids(
+        tag_type: str, current_tenant_id: str, tag_ids: list
+    ) -> list:
         tags = (
             db.session.query(Tag)
-            .filter(Tag.id.in_(tag_ids), Tag.tenant_id == current_tenant_id, Tag.type == tag_type)
+            .filter(
+                Tag.id.in_(tag_ids),
+                Tag.tenant_id == current_tenant_id,
+                Tag.type == tag_type,
+            )
             .all()
         )
         if not tags:
@@ -35,7 +46,10 @@ class TagService:
         tag_ids = [tag.id for tag in tags]
         tag_bindings = (
             db.session.query(TagBinding.target_id)
-            .filter(TagBinding.tag_id.in_(tag_ids), TagBinding.tenant_id == current_tenant_id)
+            .filter(
+                TagBinding.tag_id.in_(tag_ids),
+                TagBinding.tenant_id == current_tenant_id,
+            )
             .all()
         )
         if not tag_bindings:
@@ -44,7 +58,9 @@ class TagService:
         return results
 
     @staticmethod
-    def get_tags_by_target_id(tag_type: str, current_tenant_id: str, target_id: str) -> list:
+    def get_tags_by_target_id(
+        tag_type: str, current_tenant_id: str, target_id: str
+    ) -> list:
         tags = (
             db.session.query(Tag)
             .join(TagBinding, Tag.id == TagBinding.tag_id)
@@ -93,7 +109,9 @@ class TagService:
             raise NotFound("Tag not found")
         db.session.delete(tag)
         # delete tag binding
-        tag_bindings = db.session.query(TagBinding).filter(TagBinding.tag_id == tag_id).all()
+        tag_bindings = (
+            db.session.query(TagBinding).filter(TagBinding.tag_id == tag_id).all()
+        )
         if tag_bindings:
             for tag_binding in tag_bindings:
                 db.session.delete(tag_binding)
@@ -107,7 +125,10 @@ class TagService:
         for tag_id in args["tag_ids"]:
             tag_binding = (
                 db.session.query(TagBinding)
-                .filter(TagBinding.tag_id == tag_id, TagBinding.target_id == args["target_id"])
+                .filter(
+                    TagBinding.tag_id == tag_id,
+                    TagBinding.target_id == args["target_id"],
+                )
                 .first()
             )
             if tag_binding:
@@ -128,7 +149,10 @@ class TagService:
         # delete tag binding
         tag_bindings = (
             db.session.query(TagBinding)
-            .filter(TagBinding.target_id == args["target_id"], TagBinding.tag_id == (args["tag_id"]))
+            .filter(
+                TagBinding.target_id == args["target_id"],
+                TagBinding.tag_id == (args["tag_id"]),
+            )
             .first()
         )
         if tag_bindings:
@@ -140,7 +164,10 @@ class TagService:
         if type == "knowledge":
             dataset = (
                 db.session.query(Dataset)
-                .filter(Dataset.tenant_id == current_user.current_tenant_id, Dataset.id == target_id)
+                .filter(
+                    Dataset.tenant_id == current_user.current_tenant_id,
+                    Dataset.id == target_id,
+                )
                 .first()
             )
             if not dataset:
@@ -148,7 +175,9 @@ class TagService:
         elif type == "app":
             app = (
                 db.session.query(App)
-                .filter(App.tenant_id == current_user.current_tenant_id, App.id == target_id)
+                .filter(
+                    App.tenant_id == current_user.current_tenant_id, App.id == target_id
+                )
                 .first()
             )
             if not app:

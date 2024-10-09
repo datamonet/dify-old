@@ -18,13 +18,16 @@ class StableDiffusionTool(BuiltinTool, BaseStabilityAuthorization):
         "core": "https://api.stability.ai/v2beta/stable-image/generate/core",
     }
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invoke the tool.
         """
         payload = {
             "prompt": tool_parameters.get("prompt", ""),
-            "aspect_ratio": tool_parameters.get("aspect_ratio", "16:9") or tool_parameters.get("aspect_radio", "16:9"),
+            "aspect_ratio": tool_parameters.get("aspect_ratio", "16:9")
+            or tool_parameters.get("aspect_radio", "16:9"),
             "mode": "text-to-image",
             "seed": tool_parameters.get("seed", 0),
             "output_format": "png",
@@ -52,5 +55,7 @@ class StableDiffusionTool(BuiltinTool, BaseStabilityAuthorization):
             raise Exception(response.text)
 
         return self.create_blob_message(
-            blob=response.content, meta={"mime_type": "image/png"}, save_as=self.VariableKey.IMAGE.value
+            blob=response.content,
+            meta={"mime_type": "image/png"},
+            save_as=self.VariableKey.IMAGE.value,
         )

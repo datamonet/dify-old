@@ -6,7 +6,14 @@ from email.mime.text import MIMEText
 
 class SMTPClient:
     def __init__(
-        self, server: str, port: int, username: str, password: str, _from: str, use_tls=False, opportunistic_tls=False
+        self,
+        server: str,
+        port: int,
+        username: str,
+        password: str,
+        _from: str,
+        use_tls=False,
+        opportunistic_tls=False,
     ):
         self.server = server
         self.port = port

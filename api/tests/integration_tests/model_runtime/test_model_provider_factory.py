@@ -2,8 +2,15 @@ import logging
 import os
 
 from core.model_runtime.entities.model_entities import ModelType
-from core.model_runtime.entities.provider_entities import ProviderConfig, ProviderEntity, SimpleProviderEntity
-from core.model_runtime.model_providers.model_provider_factory import ModelProviderExtension, ModelProviderFactory
+from core.model_runtime.entities.provider_entities import (
+    ProviderConfig,
+    ProviderEntity,
+    SimpleProviderEntity,
+)
+from core.model_runtime.model_providers.model_provider_factory import (
+    ModelProviderExtension,
+    ModelProviderFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +31,10 @@ def test_get_models():
     providers = factory.get_models(
         model_type=ModelType.LLM,
         provider_configs=[
-            ProviderConfig(provider="openai", credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")})
+            ProviderConfig(
+                provider="openai",
+                credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")},
+            )
         ],
     )
 
@@ -41,7 +51,10 @@ def test_get_models():
     providers = factory.get_models(
         provider="openai",
         provider_configs=[
-            ProviderConfig(provider="openai", credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")})
+            ProviderConfig(
+                provider="openai",
+                credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")},
+            )
         ],
     )
 
@@ -53,7 +66,8 @@ def test_get_models():
 def test_provider_credentials_validate():
     factory = ModelProviderFactory()
     factory.provider_credentials_validate(
-        provider="openai", credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")}
+        provider="openai",
+        credentials={"openai_api_key": os.environ.get("OPENAI_API_KEY")},
     )
 
 

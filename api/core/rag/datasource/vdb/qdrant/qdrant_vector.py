@@ -66,10 +66,18 @@ class QdrantConfig(BaseModel):
 
 
 class QdrantVector(BaseVector):
-    def __init__(self, collection_name: str, group_id: str, config: QdrantConfig, distance_func: str = "Cosine"):
+    def __init__(
+        self,
+        collection_name: str,
+        group_id: str,
+        config: QdrantConfig,
+        distance_func: str = "Cosine",
+    ):
         super().__init__(collection_name)
         self._client_config = config
-        self._client = qdrant_client.QdrantClient(**self._client_config.to_qdrant_params())
+        self._client = qdrant_client.QdrantClient(
+            **self._client_config.to_qdrant_params()
+        )
         self._distance_func = distance_func.upper()
         self._group_id = group_id
 
@@ -77,7 +85,10 @@ class QdrantVector(BaseVector):
         return VectorType.QDRANT
 
     def to_index_struct(self) -> dict:
-        return {"type": self.get_type(), "vector_store": {"class_prefix": self._collection_name}}
+        return {
+            "type": self.get_type(),
+            "vector_store": {"class_prefix": self._collection_name},
+        }
 
     def create(self, texts: list[Document], embeddings: list[list[float]], **kwargs):
         if texts:
@@ -93,7 +104,9 @@ class QdrantVector(BaseVector):
     def create_collection(self, collection_name: str, vector_size: int):
         lock_name = "vector_indexing_lock_{}".format(collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
+            collection_exist_cache_key = "vector_indexing_{}".format(
+                self._collection_name
+            )
             if redis_client.get(collection_exist_cache_key):
                 return
             collection_name = collection_name or uuid.uuid4().hex
@@ -126,11 +139,15 @@ class QdrantVector(BaseVector):
 
                 # create group_id payload index
                 self._client.create_payload_index(
-                    collection_name, Field.GROUP_KEY.value, field_schema=PayloadSchemaType.KEYWORD
+                    collection_name,
+                    Field.GROUP_KEY.value,
+                    field_schema=PayloadSchemaType.KEYWORD,
                 )
                 # create doc_id payload index
                 self._client.create_payload_index(
-                    collection_name, Field.DOC_ID.value, field_schema=PayloadSchemaType.KEYWORD
+                    collection_name,
+                    Field.DOC_ID.value,
+                    field_schema=PayloadSchemaType.KEYWORD,
                 )
                 # create full text index
                 text_index_params = TextIndexParams(
@@ -141,17 +158,23 @@ class QdrantVector(BaseVector):
                     lowercase=True,
                 )
                 self._client.create_payload_index(
-                    collection_name, Field.CONTENT_KEY.value, field_schema=text_index_params
+                    collection_name,
+                    Field.CONTENT_KEY.value,
+                    field_schema=text_index_params,
                 )
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         uuids = self._get_uuids(documents)
         texts = [d.page_content for d in documents]
         metadatas = [d.metadata for d in documents]
 
         added_ids = []
-        for batch_ids, points in self._generate_rest_batches(texts, embeddings, metadatas, uuids, 64, self._group_id):
+        for batch_ids, points in self._generate_rest_batches(
+            texts, embeddings, metadatas, uuids, 64, self._group_id
+        ):
             self._client.upsert(collection_name=self._collection_name, points=points)
             added_ids.extend(batch_ids)
 
@@ -220,7 +243,13 @@ class QdrantVector(BaseVector):
                     "calling .from_texts or .add_texts on Qdrant instance."
                 )
             metadata = metadatas[i] if metadatas is not None else None
-            payloads.append({content_payload_key: text, metadata_payload_key: metadata, group_payload_key: group_id})
+            payloads.append(
+                {
+                    content_payload_key: text,
+                    metadata_payload_key: metadata,
+                    group_payload_key: group_id,
+                }
+            )
 
         return payloads
 
@@ -311,11 +340,15 @@ class QdrantVector(BaseVector):
             all_collection_name.append(collection.name)
         if self._collection_name not in all_collection_name:
             return False
-        response = self._client.retrieve(collection_name=self._collection_name, ids=[id])
+        response = self._client.retrieve(
+            collection_name=self._collection_name, ids=[id]
+        )
 
         return len(response) > 0
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         from qdrant_client.http import models
 
         filter = models.Filter(
@@ -381,7 +414,9 @@ class QdrantVector(BaseVector):
         documents = []
         for result in results:
             if result:
-                document = self._document_from_scored_point(result, Field.CONTENT_KEY.value, Field.METADATA_KEY.value)
+                document = self._document_from_scored_point(
+                    result, Field.CONTENT_KEY.value, Field.METADATA_KEY.value
+                )
                 documents.append(document)
 
         return documents
@@ -406,7 +441,9 @@ class QdrantVector(BaseVector):
 
 
 class QdrantVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> QdrantVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> QdrantVector:
         if dataset.collection_binding_id:
             dataset_collection_binding = (
                 db.session.query(DatasetCollectionBinding)
@@ -419,14 +456,18 @@ class QdrantVectorFactory(AbstractVectorFactory):
                 raise ValueError("Dataset Collection Bindings is not exist!")
         else:
             if dataset.index_struct_dict:
-                class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+                class_prefix: str = dataset.index_struct_dict["vector_store"][
+                    "class_prefix"
+                ]
                 collection_name = class_prefix
             else:
                 dataset_id = dataset.id
                 collection_name = Dataset.gen_collection_name_by_id(dataset_id)
 
         if not dataset.index_struct_dict:
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.QDRANT, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.QDRANT, collection_name)
+            )
 
         config = current_app.config
         return QdrantVector(

@@ -31,19 +31,39 @@ class GitlabCommitsTool(BuiltinTool):
         access_token = self.runtime.credentials.get("access_tokens")
         site_url = self.runtime.credentials.get("site_url")
 
-        if "access_tokens" not in self.runtime.credentials or not self.runtime.credentials.get("access_tokens"):
+        if (
+            "access_tokens" not in self.runtime.credentials
+            or not self.runtime.credentials.get("access_tokens")
+        ):
             return self.create_text_message("Gitlab API Access Tokens is required.")
-        if "site_url" not in self.runtime.credentials or not self.runtime.credentials.get("site_url"):
+        if (
+            "site_url" not in self.runtime.credentials
+            or not self.runtime.credentials.get("site_url")
+        ):
             site_url = "https://gitlab.com"
 
         # Get commit content
         if repository:
             result = self.fetch_commits(
-                site_url, access_token, repository, employee, start_time, end_time, change_type, is_repository=True
+                site_url,
+                access_token,
+                repository,
+                employee,
+                start_time,
+                end_time,
+                change_type,
+                is_repository=True,
             )
         else:
             result = self.fetch_commits(
-                site_url, access_token, project, employee, start_time, end_time, change_type, is_repository=False
+                site_url,
+                access_token,
+                project,
+                employee,
+                start_time,
+                end_time,
+                change_type,
+                is_repository=False,
             )
 
         return [self.create_json_message(item) for item in result]
@@ -67,7 +87,9 @@ class GitlabCommitsTool(BuiltinTool):
             if is_repository:
                 # URL encode the repository path
                 encoded_identifier = urllib.parse.quote(identifier, safe="")
-                commits_url = f"{domain}/api/v4/projects/{encoded_identifier}/repository/commits"
+                commits_url = (
+                    f"{domain}/api/v4/projects/{encoded_identifier}/repository/commits"
+                )
             else:
                 # Get all projects
                 url = f"{domain}/api/v4/projects"
@@ -75,14 +97,18 @@ class GitlabCommitsTool(BuiltinTool):
                 response.raise_for_status()
                 projects = response.json()
 
-                filtered_projects = [p for p in projects if identifier == "*" or p["name"] == identifier]
+                filtered_projects = [
+                    p for p in projects if identifier == "*" or p["name"] == identifier
+                ]
 
                 for project in filtered_projects:
                     project_id = project["id"]
                     project_name = project["name"]
                     print(f"Project: {project_name}")
 
-                    commits_url = f"{domain}/api/v4/projects/{project_id}/repository/commits"
+                    commits_url = (
+                        f"{domain}/api/v4/projects/{project_id}/repository/commits"
+                    )
 
             params = {"since": start_time, "until": end_time}
             if employee:
@@ -117,10 +143,17 @@ class GitlabCommitsTool(BuiltinTool):
                                 [
                                     line[1:]
                                     for line in diff["diff"].split("\n")
-                                    if line.startswith("+") and not line.startswith("+++")
+                                    if line.startswith("+")
+                                    and not line.startswith("+++")
                                 ]
                             )
-                            results.append({"commit_sha": commit_sha, "author_name": author_name, "diff": final_code})
+                            results.append(
+                                {
+                                    "commit_sha": commit_sha,
+                                    "author_name": author_name,
+                                    "diff": final_code,
+                                }
+                            )
                     else:
                         if total_changes > 1:
                             final_code = "".join(
@@ -132,9 +165,15 @@ class GitlabCommitsTool(BuiltinTool):
                                     and not line.startswith("---")
                                 ]
                             )
-                            final_code_escaped = json.dumps(final_code)[1:-1]  # Escape the final code
+                            final_code_escaped = json.dumps(final_code)[
+                                1:-1
+                            ]  # Escape the final code
                             results.append(
-                                {"commit_sha": commit_sha, "author_name": author_name, "diff": final_code_escaped}
+                                {
+                                    "commit_sha": commit_sha,
+                                    "author_name": author_name,
+                                    "diff": final_code_escaped,
+                                }
                             )
         except requests.RequestException as e:
             print(f"Error fetching data from GitLab: {e}")

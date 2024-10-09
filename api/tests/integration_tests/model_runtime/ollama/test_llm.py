@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -52,7 +56,12 @@ def test_invoke_model():
             "max_tokens": 2048,
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
-        model_parameters={"temperature": 1.0, "top_k": 2, "top_p": 0.5, "num_predict": 10},
+        model_parameters={
+            "temperature": 1.0,
+            "top_k": 2,
+            "top_p": 0.5,
+            "num_predict": 10,
+        },
         stop=["How"],
         stream=False,
     )
@@ -78,7 +87,12 @@ def test_invoke_stream_model():
             ),
             UserPromptMessage(content="Who are you?"),
         ],
-        model_parameters={"temperature": 1.0, "top_k": 2, "top_p": 0.5, "num_predict": 10},
+        model_parameters={
+            "temperature": 1.0,
+            "top_k": 2,
+            "top_p": 0.5,
+            "num_predict": 10,
+        },
         stop=["How"],
         stream=True,
     )
@@ -103,7 +117,12 @@ def test_invoke_completion_model():
             "max_tokens": 2048,
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
-        model_parameters={"temperature": 1.0, "top_k": 2, "top_p": 0.5, "num_predict": 10},
+        model_parameters={
+            "temperature": 1.0,
+            "top_k": 2,
+            "top_p": 0.5,
+            "num_predict": 10,
+        },
         stop=["How"],
         stream=False,
     )
@@ -129,7 +148,12 @@ def test_invoke_stream_completion_model():
             ),
             UserPromptMessage(content="Who are you?"),
         ],
-        model_parameters={"temperature": 1.0, "top_k": 2, "top_p": 0.5, "num_predict": 10},
+        model_parameters={
+            "temperature": 1.0,
+            "top_k": 2,
+            "top_p": 0.5,
+            "num_predict": 10,
+        },
         stop=["How"],
         stream=True,
     )

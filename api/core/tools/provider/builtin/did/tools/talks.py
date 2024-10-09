@@ -10,10 +10,15 @@ class TalksTool(BuiltinTool):
     def _invoke(
         self, user_id: str, tool_parameters: dict[str, Any]
     ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
-        app = DIDApp(api_key=self.runtime.credentials["did_api_key"], base_url=self.runtime.credentials["base_url"])
+        app = DIDApp(
+            api_key=self.runtime.credentials["did_api_key"],
+            base_url=self.runtime.credentials["base_url"],
+        )
 
         driver_expressions_str = tool_parameters.get("driver_expressions")
-        driver_expressions = json.loads(driver_expressions_str) if driver_expressions_str else None
+        driver_expressions = (
+            json.loads(driver_expressions_str) if driver_expressions_str else None
+        )
 
         script = {
             "type": tool_parameters.get("script_type") or "text",

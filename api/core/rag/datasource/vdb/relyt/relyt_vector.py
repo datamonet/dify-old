@@ -54,9 +54,7 @@ class RelytVector(BaseVector):
         super().__init__(collection_name)
         self.embedding_dimension = 1536
         self._client_config = config
-        self._url = (
-            f"postgresql+psycopg2://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
-        )
+        self._url = f"postgresql+psycopg2://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
         self.client = create_engine(self._url)
         self._fields = []
         self._group_id = group_id
@@ -74,12 +72,16 @@ class RelytVector(BaseVector):
     def create_collection(self, dimension: int):
         lock_name = "vector_indexing_lock_{}".format(self._collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
+            collection_exist_cache_key = "vector_indexing_{}".format(
+                self._collection_name
+            )
             if redis_client.get(collection_exist_cache_key):
                 return
             index_name = f"{self._collection_name}_embedding_index"
             with Session(self.client) as session:
-                drop_statement = sql_text(f"""DROP TABLE IF EXISTS "{self._collection_name}"; """)
+                drop_statement = sql_text(
+                    f"""DROP TABLE IF EXISTS "{self._collection_name}"; """
+                )
                 session.execute(drop_statement)
                 create_statement = sql_text(f"""
                     CREATE TABLE IF NOT EXISTS "{self._collection_name}" (
@@ -106,7 +108,9 @@ class RelytVector(BaseVector):
                 session.commit()
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         from pgvecto_rs.sqlalchemy import VECTOR
 
         ids = [str(uuid.uuid1()) for _ in documents]
@@ -128,7 +132,9 @@ class RelytVector(BaseVector):
 
         chunks_table_data = []
         with self.client.connect() as conn, conn.begin():
-            for document, metadata, chunk_id, embedding in zip(texts, metadatas, ids, embeddings):
+            for document, metadata, chunk_id, embedding in zip(
+                texts, metadatas, ids, embeddings
+            ):
                 chunks_table_data.append(
                     {
                         "id": chunk_id,
@@ -211,7 +217,9 @@ class RelytVector(BaseVector):
 
     def delete(self) -> None:
         with Session(self.client) as session:
-            session.execute(sql_text(f"""DROP TABLE IF EXISTS "{self._collection_name}";"""))
+            session.execute(
+                sql_text(f"""DROP TABLE IF EXISTS "{self._collection_name}";""")
+            )
             session.commit()
 
     def text_exists(self, id: str) -> bool:
@@ -222,9 +230,13 @@ class RelytVector(BaseVector):
             result = session.execute(select_statement).fetchall()
         return len(result) > 0
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         results = self.similarity_search_with_score_by_vector(
-            k=int(kwargs.get("top_k")), embedding=query_vector, filter=kwargs.get("filter")
+            k=int(kwargs.get("top_k")),
+            embedding=query_vector,
+            filter=kwargs.get("filter"),
         )
 
         # Organize results.
@@ -245,7 +257,9 @@ class RelytVector(BaseVector):
         try:
             from sqlalchemy.engine import Row
         except ImportError:
-            raise ImportError("Could not import Row from sqlalchemy.engine. Please 'pip install sqlalchemy>=1.4'.")
+            raise ImportError(
+                "Could not import Row from sqlalchemy.engine. Please 'pip install sqlalchemy>=1.4'."
+            )
 
         filter_condition = ""
         if filter is not None:
@@ -275,7 +289,9 @@ class RelytVector(BaseVector):
 
         # Execute the query and fetch the results
         with self.client.connect() as conn:
-            results: Sequence[Row] = conn.execute(sql_text(sql_query), params).fetchall()
+            results: Sequence[Row] = conn.execute(
+                sql_text(sql_query), params
+            ).fetchall()
 
         documents_with_scores = [
             (
@@ -295,14 +311,20 @@ class RelytVector(BaseVector):
 
 
 class RelytVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> RelytVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> RelytVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.RELYT, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.RELYT, collection_name)
+            )
 
         return RelytVector(
             collection_name=collection_name,

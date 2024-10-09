@@ -7,7 +7,11 @@ from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 import services
 from controllers.service_api import api
 from controllers.service_api.app.error import NotChatAppError
-from controllers.service_api.wraps import FetchUserArg, WhereisUserArg, validate_app_token
+from controllers.service_api.wraps import (
+    FetchUserArg,
+    WhereisUserArg,
+    validate_app_token,
+)
 from core.app.entities.app_invoke_entities import InvokeFrom
 from fields.conversation_fields import message_file_fields
 from libs.helper import TimestampField, uuid_value
@@ -54,11 +58,16 @@ class MessageListApi(Resource):
     message_fields = {
         "id": fields.String,
         "conversation_id": fields.String,
+        "parent_message_id": fields.String,
         "inputs": fields.Raw,
         "query": fields.String,
         "answer": fields.String(attribute="re_sign_file_url_answer"),
-        "message_files": fields.List(fields.Nested(message_file_fields), attribute="files"),
-        "feedback": fields.Nested(feedback_fields, attribute="user_feedback", allow_null=True),
+        "message_files": fields.List(
+            fields.Nested(message_file_fields), attribute="files"
+        ),
+        "feedback": fields.Nested(
+            feedback_fields, attribute="user_feedback", allow_null=True
+        ),
         "retriever_resources": fields.List(fields.Nested(retriever_resource_fields)),
         "created_at": TimestampField,
         "agent_thoughts": fields.List(fields.Nested(agent_thought_fields)),
@@ -80,14 +89,22 @@ class MessageListApi(Resource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
+        parser.add_argument(
+            "conversation_id", required=True, type=uuid_value, location="args"
+        )
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument(
+            "limit", type=int_range(1, 100), required=False, default=20, location="args"
+        )
         args = parser.parse_args()
 
         try:
             return MessageService.pagination_by_first_id(
-                app_model, end_user, args["conversation_id"], args["first_id"], args["limit"]
+                app_model,
+                end_user,
+                args["conversation_id"],
+                args["first_id"],
+                args["limit"],
             )
         except services.errors.conversation.ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
@@ -96,16 +113,22 @@ class MessageListApi(Resource):
 
 
 class MessageFeedbackApi(Resource):
-    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
+    @validate_app_token(
+        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
+    )
     def post(self, app_model: App, end_user: EndUser, message_id):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
+        parser.add_argument(
+            "rating", type=str, choices=["like", "dislike", None], location="json"
+        )
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(app_model, message_id, end_user, args["rating"])
+            MessageService.create_feedback(
+                app_model, message_id, end_user, args["rating"]
+            )
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 
@@ -113,7 +136,9 @@ class MessageFeedbackApi(Resource):
 
 
 class MessageSuggestedApi(Resource):
-    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.QUERY, required=True))
+    @validate_app_token(
+        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.QUERY, required=True)
+    )
     def get(self, app_model: App, end_user: EndUser, message_id):
         message_id = str(message_id)
         app_mode = AppMode.value_of(app_model.mode)
@@ -122,7 +147,10 @@ class MessageSuggestedApi(Resource):
 
         try:
             questions = MessageService.get_suggested_questions_after_answer(
-                app_model=app_model, user=end_user, message_id=message_id, invoke_from=InvokeFrom.SERVICE_API
+                app_model=app_model,
+                user=end_user,
+                message_id=message_id,
+                invoke_from=InvokeFrom.SERVICE_API,
             )
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")

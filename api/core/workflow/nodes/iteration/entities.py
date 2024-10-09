@@ -1,6 +1,10 @@
 from typing import Any, Optional
 
-from core.workflow.entities.base_node_data_entities import BaseIterationNodeData, BaseIterationState, BaseNodeData
+from core.workflow.entities.base_node_data_entities import (
+    BaseIterationNodeData,
+    BaseIterationState,
+    BaseNodeData,
+)
 
 
 class IterationNodeData(BaseIterationNodeData):

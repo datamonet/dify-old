@@ -44,7 +44,9 @@ class AbstractVectorTest:
     def __init__(self):
         self.vector = None
         self.dataset_id = str(uuid.uuid4())
-        self.collection_name = Dataset.gen_collection_name_by_id(self.dataset_id) + "_test"
+        self.collection_name = (
+            Dataset.gen_collection_name_by_id(self.dataset_id) + "_test"
+        )
         self.example_doc_id = str(uuid.uuid4())
         self.example_embedding = [1.001 * i for i in range(128)]
 
@@ -55,12 +57,16 @@ class AbstractVectorTest:
         )
 
     def search_by_vector(self):
-        hits_by_vector: list[Document] = self.vector.search_by_vector(query_vector=self.example_embedding)
+        hits_by_vector: list[Document] = self.vector.search_by_vector(
+            query_vector=self.example_embedding
+        )
         assert len(hits_by_vector) == 1
         assert hits_by_vector[0].metadata["doc_id"] == self.example_doc_id
 
     def search_by_full_text(self):
-        hits_by_full_text: list[Document] = self.vector.search_by_full_text(query=get_example_text())
+        hits_by_full_text: list[Document] = self.vector.search_by_full_text(
+            query=get_example_text()
+        )
         assert len(hits_by_full_text) == 1
         assert hits_by_full_text[0].metadata["doc_id"] == self.example_doc_id
 
@@ -72,7 +78,9 @@ class AbstractVectorTest:
 
     def add_texts(self) -> list[str]:
         batch_size = 100
-        documents = [get_example_document(doc_id=str(uuid.uuid4())) for _ in range(batch_size)]
+        documents = [
+            get_example_document(doc_id=str(uuid.uuid4())) for _ in range(batch_size)
+        ]
         embeddings = [self.example_embedding] * batch_size
         self.vector.add_texts(documents=documents, embeddings=embeddings)
         return [doc.metadata["doc_id"] for doc in documents]

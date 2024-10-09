@@ -11,7 +11,9 @@ class CreateNewCardOnBoardTool(BuiltinTool):
     Tool for creating a new card on a Trello board.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Union[str, int, bool, None]]) -> ToolInvokeMessage:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Union[str, int, bool, None]]
+    ) -> ToolInvokeMessage:
         """
         Invoke the tool to create a new card on a Trello board.
 
@@ -28,7 +30,9 @@ class CreateNewCardOnBoardTool(BuiltinTool):
 
         # Ensure required parameters are present
         if "name" not in tool_parameters or "idList" not in tool_parameters:
-            return self.create_text_message("Missing required parameters: name or idList.")
+            return self.create_text_message(
+                "Missing required parameters: name or idList."
+            )
 
         url = "https://api.trello.com/1/cards"
         params = {**tool_parameters, "key": api_key, "token": token}

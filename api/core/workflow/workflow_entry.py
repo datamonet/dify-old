@@ -14,7 +14,11 @@ from core.workflow.entities.base_node_data_entities import BaseNodeData
 from core.workflow.entities.node_entities import NodeType, UserFrom
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.errors import WorkflowNodeRunFailedError
-from core.workflow.graph_engine.entities.event import GraphEngineEvent, GraphRunFailedEvent, InNodeEvent
+from core.workflow.graph_engine.entities.event import (
+    GraphEngineEvent,
+    GraphRunFailedEvent,
+    InNodeEvent,
+)
 from core.workflow.graph_engine.entities.graph import Graph
 from core.workflow.graph_engine.entities.graph_init_params import GraphInitParams
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
@@ -65,7 +69,9 @@ class WorkflowEntry:
         # check call depth
         workflow_call_max_depth = dify_config.WORKFLOW_CALL_MAX_DEPTH
         if call_depth > workflow_call_max_depth:
-            raise ValueError("Max workflow call depth {} reached.".format(workflow_call_max_depth))
+            raise ValueError(
+                "Max workflow call depth {} reached.".format(workflow_call_max_depth)
+            )
 
         # init workflow run state
         self.graph_engine = GraphEngine(
@@ -177,14 +183,18 @@ class WorkflowEntry:
                 call_depth=0,
             ),
             graph=graph,
-            graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
+            graph_runtime_state=GraphRuntimeState(
+                variable_pool=variable_pool, start_at=time.perf_counter()
+            ),
         )
 
         try:
             # variable selector to variable mapping
             try:
-                variable_mapping = node_cls.extract_variable_selector_to_variable_mapping(
-                    graph_config=workflow.graph_dict, config=node_config
+                variable_mapping = (
+                    node_cls.extract_variable_selector_to_variable_mapping(
+                        graph_config=workflow.graph_dict, config=node_config
+                    )
                 )
             except NotImplementedError:
                 variable_mapping = {}
@@ -206,7 +216,9 @@ class WorkflowEntry:
             raise WorkflowNodeRunFailedError(node_instance=node_instance, error=str(e))
 
     @classmethod
-    def handle_special_values(cls, value: Optional[Mapping[str, Any]]) -> Optional[dict]:
+    def handle_special_values(
+        cls, value: Optional[Mapping[str, Any]]
+    ) -> Optional[dict]:
         """
         Handle special values
         :param value: value
@@ -250,10 +262,13 @@ class WorkflowEntry:
 
             node_variable_key = ".".join(node_variable_list[1:])
 
-            if (node_variable_key not in user_inputs and node_variable not in user_inputs) and not variable_pool.get(
-                variable_selector
-            ):
-                raise ValueError(f"Variable key {node_variable} not found in user inputs.")
+            if (
+                node_variable_key not in user_inputs
+                and node_variable not in user_inputs
+            ) and not variable_pool.get(variable_selector):
+                raise ValueError(
+                    f"Variable key {node_variable} not found in user inputs."
+                )
 
             # fetch variable node id from variable selector
             variable_node_id = variable_selector[0]
@@ -271,20 +286,34 @@ class WorkflowEntry:
                 if isinstance(input_value, list):
                     node_data = cast(LLMNodeData, node_data)
 
-                    detail = node_data.vision.configs.detail if node_data.vision.configs else None
+                    detail = (
+                        node_data.vision.configs.detail
+                        if node_data.vision.configs
+                        else None
+                    )
 
                     for item in input_value:
-                        if isinstance(item, dict) and "type" in item and item["type"] == "image":
-                            transfer_method = FileTransferMethod.value_of(item.get("transfer_method"))
+                        if (
+                            isinstance(item, dict)
+                            and "type" in item
+                            and item["type"] == "image"
+                        ):
+                            transfer_method = FileTransferMethod.value_of(
+                                item.get("transfer_method")
+                            )
                             file = FileVar(
                                 tenant_id=tenant_id,
                                 type=FileType.IMAGE,
                                 transfer_method=transfer_method,
-                                url=item.get("url") if transfer_method == FileTransferMethod.REMOTE_URL else None,
+                                url=item.get("url")
+                                if transfer_method == FileTransferMethod.REMOTE_URL
+                                else None,
                                 related_id=item.get("upload_file_id")
                                 if transfer_method == FileTransferMethod.LOCAL_FILE
                                 else None,
-                                extra_config=FileExtraConfig(image_config={"detail": detail} if detail else None),
+                                extra_config=FileExtraConfig(
+                                    image_config={"detail": detail} if detail else None
+                                ),
                             )
                             new_value.append(file)
 

@@ -73,7 +73,12 @@ class BraveSearch(BaseModel):
 
     @classmethod
     def from_api_key(
-        cls, api_key: str, base_url: str, search_kwargs: Optional[dict] = None, ensure_ascii: bool = True, **kwargs: Any
+        cls,
+        api_key: str,
+        base_url: str,
+        search_kwargs: Optional[dict] = None,
+        ensure_ascii: bool = True,
+        **kwargs: Any,
     ) -> "BraveSearch":
         """Create a tool from an api key.
 
@@ -86,7 +91,10 @@ class BraveSearch(BaseModel):
             A tool.
         """
         wrapper = BraveSearchWrapper(
-            api_key=api_key, base_url=base_url, search_kwargs=search_kwargs or {}, ensure_ascii=ensure_ascii
+            api_key=api_key,
+            base_url=base_url,
+            search_kwargs=search_kwargs or {},
+            ensure_ascii=ensure_ascii,
         )
         return cls(search_wrapper=wrapper, **kwargs)
 
@@ -103,7 +111,9 @@ class BraveSearchTool(BuiltinTool):
     Tool for performing a search using Brave search engine.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invoke the Brave search tool.
 
@@ -127,7 +137,10 @@ class BraveSearchTool(BuiltinTool):
             return self.create_text_message("Please input query")
 
         tool = BraveSearch.from_api_key(
-            api_key=api_key, base_url=base_url, search_kwargs={"count": count}, ensure_ascii=ensure_ascii
+            api_key=api_key,
+            base_url=base_url,
+            search_kwargs={"count": count},
+            ensure_ascii=ensure_ascii,
         )
 
         results = tool._run(query)

@@ -9,7 +9,11 @@ import boto3
 import requests
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
+from core.model_runtime.entities.model_entities import (
+    AIModelEntity,
+    FetchFrom,
+    ModelType,
+)
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -78,7 +82,13 @@ class SageMakerText2SpeechModel(TTSModel):
         pass
 
     def _detect_lang_code(self, content: str, map_dict: dict = None):
-        map_dict = {"zh": "<|zh|>", "en": "<|en|>", "ja": "<|jp|>", "zh-TW": "<|yue|>", "ko": "<|ko|>"}
+        map_dict = {
+            "zh": "<|zh|>",
+            "en": "<|en|>",
+            "ja": "<|jp|>",
+            "zh-TW": "<|yue|>",
+            "ko": "<|ko|>",
+        }
 
         response = self.comprehend_client.detect_dominant_language(Text=content)
         language_code = response["Languages"][0]["LanguageCode"]
@@ -97,17 +107,39 @@ class SageMakerText2SpeechModel(TTSModel):
         if model_type == TTSModelType.PresetVoice.value and model_role:
             return {"tts_text": content_text, "role": model_role}
         if model_type == TTSModelType.CloneVoice.value and prompt_text and prompt_audio:
-            return {"tts_text": content_text, "prompt_text": prompt_text, "prompt_audio": prompt_audio}
+            return {
+                "tts_text": content_text,
+                "prompt_text": prompt_text,
+                "prompt_audio": prompt_audio,
+            }
         if model_type == TTSModelType.CloneVoice_CrossLingual.value and prompt_audio:
             lang_tag = self._detect_lang_code(content_text)
-            return {"tts_text": f"{content_text}", "prompt_audio": prompt_audio, "lang_tag": lang_tag}
-        if model_type == TTSModelType.InstructVoice.value and instruct_text and model_role:
-            return {"tts_text": content_text, "role": model_role, "instruct_text": instruct_text}
+            return {
+                "tts_text": f"{content_text}",
+                "prompt_audio": prompt_audio,
+                "lang_tag": lang_tag,
+            }
+        if (
+            model_type == TTSModelType.InstructVoice.value
+            and instruct_text
+            and model_role
+        ):
+            return {
+                "tts_text": content_text,
+                "role": model_role,
+                "instruct_text": instruct_text,
+            }
 
         raise RuntimeError(f"Invalid params for {model_type}")
 
     def _invoke(
-        self, model: str, tenant_id: str, credentials: dict, content_text: str, voice: str, user: Optional[str] = None
+        self,
+        model: str,
+        tenant_id: str,
+        credentials: dict,
+        content_text: str,
+        voice: str,
+        user: Optional[str] = None,
     ):
         """
         _invoke text2speech model
@@ -133,7 +165,10 @@ class SageMakerText2SpeechModel(TTSModel):
                         region_name=aws_region,
                     )
                     self.s3_client = boto3.client(
-                        "s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name=aws_region
+                        "s3",
+                        aws_access_key_id=access_key,
+                        aws_secret_access_key=secret_key,
+                        region_name=aws_region,
                     )
                     self.comprehend_client = boto3.client(
                         "comprehend",
@@ -142,9 +177,13 @@ class SageMakerText2SpeechModel(TTSModel):
                         region_name=aws_region,
                     )
                 else:
-                    self.sagemaker_client = boto3.client("sagemaker-runtime", region_name=aws_region)
+                    self.sagemaker_client = boto3.client(
+                        "sagemaker-runtime", region_name=aws_region
+                    )
                     self.s3_client = boto3.client("s3", region_name=aws_region)
-                    self.comprehend_client = boto3.client("comprehend", region_name=aws_region)
+                    self.comprehend_client = boto3.client(
+                        "comprehend", region_name=aws_region
+                    )
             else:
                 self.sagemaker_client = boto3.client("sagemaker-runtime")
                 self.s3_client = boto3.client("s3")
@@ -155,11 +194,15 @@ class SageMakerText2SpeechModel(TTSModel):
         prompt_audio = credentials.get("prompt_audio")
         instruct_text = credentials.get("instruct_text")
         sagemaker_endpoint = credentials.get("sagemaker_endpoint")
-        payload = self._build_tts_payload(model_type, content_text, voice, prompt_text, prompt_audio, instruct_text)
+        payload = self._build_tts_payload(
+            model_type, content_text, voice, prompt_text, prompt_audio, instruct_text
+        )
 
         return self._tts_invoke_streaming(model_type, payload, sagemaker_endpoint)
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """
@@ -204,7 +247,9 @@ class SageMakerText2SpeechModel(TTSModel):
     def _get_model_workers_limit(self, model: str, credentials: dict) -> int:
         return 5
 
-    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
+    def get_tts_model_voices(
+        self, model: str, credentials: dict, language: Optional[str] = None
+    ) -> list:
         audio_model_name = "CosyVoice"
         for key, voices in self.model_voices.items():
             if key in audio_model_name:
@@ -225,7 +270,9 @@ class SageMakerText2SpeechModel(TTSModel):
         json_obj = json.loads(json_str)
         return json_obj
 
-    def _tts_invoke_streaming(self, model_type: str, payload: dict, sagemaker_endpoint: str) -> any:
+    def _tts_invoke_streaming(
+        self, model_type: str, payload: dict, sagemaker_endpoint: str
+    ) -> any:
         """
         _tts_invoke_streaming text2speech model
 
@@ -243,10 +290,14 @@ class SageMakerText2SpeechModel(TTSModel):
             word_limit = self._get_model_word_limit(model="", credentials={})
             content_text = payload.get("tts_text")
             if len(content_text) > word_limit:
-                split_sentences = self._split_text_into_sentences(content_text, max_length=word_limit)
+                split_sentences = self._split_text_into_sentences(
+                    content_text, max_length=word_limit
+                )
                 sentences = [f"{lang_tag}{s}" for s in split_sentences if len(s)]
                 len_sent = len(sentences)
-                executor = concurrent.futures.ThreadPoolExecutor(max_workers=min(4, len_sent))
+                executor = concurrent.futures.ThreadPoolExecutor(
+                    max_workers=min(4, len_sent)
+                )
                 payloads = [copy.deepcopy(payload) for i in range(len_sent)]
                 for idx in range(len_sent):
                     payloads[idx]["tts_text"] = sentences[idx]

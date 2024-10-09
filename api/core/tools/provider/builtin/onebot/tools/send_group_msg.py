@@ -27,13 +27,24 @@ class SendGroupMsg(BuiltinTool):
 
             resp = requests.post(
                 url,
-                json={"group_id": send_group_id, "message": message, "auto_escape": auto_escape},
-                headers={"Authorization": "Bearer " + self.runtime.credentials["access_token"]},
+                json={
+                    "group_id": send_group_id,
+                    "message": message,
+                    "auto_escape": auto_escape,
+                },
+                headers={
+                    "Authorization": "Bearer "
+                    + self.runtime.credentials["access_token"]
+                },
             )
 
             if resp.status_code != 200:
-                return self.create_json_message({"error": f"Failed to send group message: {resp.text}"})
+                return self.create_json_message(
+                    {"error": f"Failed to send group message: {resp.text}"}
+                )
 
             return self.create_json_message({"response": resp.json()})
         except Exception as e:
-            return self.create_json_message({"error": f"Failed to send group message: {e}"})
+            return self.create_json_message(
+                {"error": f"Failed to send group message: {e}"}
+            )

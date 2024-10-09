@@ -11,7 +11,9 @@ from models.dataset import Dataset, Document
 
 
 @shared_task(queue="dataset")
-def delete_segment_from_index_task(segment_id: str, index_node_id: str, dataset_id: str, document_id: str):
+def delete_segment_from_index_task(
+    segment_id: str, index_node_id: str, dataset_id: str, document_id: str
+):
     """
     Async Remove segment from index
     :param segment_id:
@@ -21,22 +23,45 @@ def delete_segment_from_index_task(segment_id: str, index_node_id: str, dataset_
 
     Usage: delete_segment_from_index_task.delay(segment_id)
     """
-    logging.info(click.style("Start delete segment from index: {}".format(segment_id), fg="green"))
+    logging.info(
+        click.style(
+            "Start delete segment from index: {}".format(segment_id), fg="green"
+        )
+    )
     start_at = time.perf_counter()
     indexing_cache_key = "segment_{}_delete_indexing".format(segment_id)
     try:
         dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
         if not dataset:
-            logging.info(click.style("Segment {} has no dataset, pass.".format(segment_id), fg="cyan"))
+            logging.info(
+                click.style(
+                    "Segment {} has no dataset, pass.".format(segment_id), fg="cyan"
+                )
+            )
             return
 
-        dataset_document = db.session.query(Document).filter(Document.id == document_id).first()
+        dataset_document = (
+            db.session.query(Document).filter(Document.id == document_id).first()
+        )
         if not dataset_document:
-            logging.info(click.style("Segment {} has no document, pass.".format(segment_id), fg="cyan"))
+            logging.info(
+                click.style(
+                    "Segment {} has no document, pass.".format(segment_id), fg="cyan"
+                )
+            )
             return
 
-        if not dataset_document.enabled or dataset_document.archived or dataset_document.indexing_status != "completed":
-            logging.info(click.style("Segment {} document status is invalid, pass.".format(segment_id), fg="cyan"))
+        if (
+            not dataset_document.enabled
+            or dataset_document.archived
+            or dataset_document.indexing_status != "completed"
+        ):
+            logging.info(
+                click.style(
+                    "Segment {} document status is invalid, pass.".format(segment_id),
+                    fg="cyan",
+                )
+            )
             return
 
         index_type = dataset_document.doc_form
@@ -45,7 +70,12 @@ def delete_segment_from_index_task(segment_id: str, index_node_id: str, dataset_
 
         end_at = time.perf_counter()
         logging.info(
-            click.style("Segment deleted from index: {} latency: {}".format(segment_id, end_at - start_at), fg="green")
+            click.style(
+                "Segment deleted from index: {} latency: {}".format(
+                    segment_id, end_at - start_at
+                ),
+                fg="green",
+            )
         )
     except Exception:
         logging.exception("delete segment from index failed")

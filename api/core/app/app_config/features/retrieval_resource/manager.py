@@ -22,7 +22,10 @@ class RetrievalResourceConfigManager:
         if not isinstance(config["retriever_resource"], dict):
             raise ValueError("retriever_resource must be of dict type")
 
-        if "enabled" not in config["retriever_resource"] or not config["retriever_resource"]["enabled"]:
+        if (
+            "enabled" not in config["retriever_resource"]
+            or not config["retriever_resource"]["enabled"]
+        ):
             config["retriever_resource"]["enabled"] = False
 
         if not isinstance(config["retriever_resource"]["enabled"], bool):

@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessageTool,
@@ -27,9 +31,14 @@ def test_validate_credentials_for_chat_model(setup_openai_mock):
     model = ChatGLMLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="chatglm2-6b", credentials={"api_base": "invalid_key"})
+        model.validate_credentials(
+            model="chatglm2-6b", credentials={"api_base": "invalid_key"}
+        )
 
-    model.validate_credentials(model="chatglm2-6b", credentials={"api_base": os.environ.get("CHATGLM_API_BASE")})
+    model.validate_credentials(
+        model="chatglm2-6b",
+        credentials={"api_base": os.environ.get("CHATGLM_API_BASE")},
+    )
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["chat"]], indirect=True)
@@ -86,7 +95,11 @@ def test_invoke_stream_model(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["chat"]], indirect=True)
@@ -116,7 +129,10 @@ def test_invoke_stream_model_with_functions(setup_openai_mock):
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
                     },
                     "required": ["location"],
@@ -135,7 +151,11 @@ def test_invoke_stream_model_with_functions(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
         if chunk.delta.message.tool_calls and len(chunk.delta.message.tool_calls) > 0:
             call = chunk
@@ -152,7 +172,9 @@ def test_invoke_model_with_functions(setup_openai_mock):
     response = model.invoke(
         model="chatglm3-6b",
         credentials={"api_base": os.environ.get("CHATGLM_API_BASE")},
-        prompt_messages=[UserPromptMessage(content="What is the weather like in San Francisco?")],
+        prompt_messages=[
+            UserPromptMessage(content="What is the weather like in San Francisco?")
+        ],
         model_parameters={
             "temperature": 0.7,
             "top_p": 1.0,
@@ -167,7 +189,10 @@ def test_invoke_model_with_functions(setup_openai_mock):
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],
@@ -201,7 +226,10 @@ def test_get_num_tokens():
                 parameters={
                     "type": "object",
                     "properties": {
-                        "location": {"type": "string", "description": "The city and state e.g. San Francisco, CA"},
+                        "location": {
+                            "type": "string",
+                            "description": "The city and state e.g. San Francisco, CA",
+                        },
                         "unit": {"type": "string", "enum": ["c", "f"]},
                     },
                     "required": ["location"],

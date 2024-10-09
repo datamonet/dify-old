@@ -11,7 +11,9 @@ class DuckDuckGoAITool(BuiltinTool):
     Tool for performing a search using DuckDuckGo search engine.
     """
 
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> ToolInvokeMessage:
         query_dict = {
             "keywords": tool_parameters.get("query"),
             "model": tool_parameters.get("model"),

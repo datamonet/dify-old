@@ -60,12 +60,18 @@ class MilvusVector(BaseVector):
         return VectorType.MILVUS
 
     def create(self, texts: list[Document], embeddings: list[list[float]], **kwargs):
-        index_params = {"metric_type": "IP", "index_type": "HNSW", "params": {"M": 8, "efConstruction": 64}}
+        index_params = {
+            "metric_type": "IP",
+            "index_type": "HNSW",
+            "params": {"M": 8, "efConstruction": 64},
+        }
         metadatas = [d.metadata for d in texts]
         self.create_collection(embeddings, metadatas, index_params)
         self.add_texts(texts, embeddings)
 
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
+    def add_texts(
+        self, documents: list[Document], embeddings: list[list[float]], **kwargs
+    ):
         insert_dict_list = []
         for i in range(len(documents)):
             insert_dict = {
@@ -83,16 +89,22 @@ class MilvusVector(BaseVector):
             batch_insert_list = insert_dict_list[i : i + 1000]
             # Insert into the collection.
             try:
-                ids = self._client.insert(collection_name=self._collection_name, data=batch_insert_list)
+                ids = self._client.insert(
+                    collection_name=self._collection_name, data=batch_insert_list
+                )
                 pks.extend(ids)
             except MilvusException as e:
-                logger.error("Failed to insert batch starting at entity: %s/%s", i, total_count)
+                logger.error(
+                    "Failed to insert batch starting at entity: %s/%s", i, total_count
+                )
                 raise e
         return pks
 
     def get_ids_by_metadata_field(self, key: str, value: str):
         result = self._client.query(
-            collection_name=self._collection_name, filter=f'metadata["{key}"] == "{value}"', output_fields=["id"]
+            collection_name=self._collection_name,
+            filter=f'metadata["{key}"] == "{value}"',
+            output_fields=["id"],
         )
         if result:
             return [item["id"] for item in result]
@@ -108,7 +120,9 @@ class MilvusVector(BaseVector):
     def delete_by_ids(self, ids: list[str]) -> None:
         if self._client.has_collection(self._collection_name):
             result = self._client.query(
-                collection_name=self._collection_name, filter=f'metadata["doc_id"] in {ids}', output_fields=["id"]
+                collection_name=self._collection_name,
+                filter=f'metadata["doc_id"] in {ids}',
+                output_fields=["id"],
             )
             if result:
                 ids = [item["id"] for item in result]
@@ -123,12 +137,16 @@ class MilvusVector(BaseVector):
             return False
 
         result = self._client.query(
-            collection_name=self._collection_name, filter=f'metadata["doc_id"] == "{id}"', output_fields=["id"]
+            collection_name=self._collection_name,
+            filter=f'metadata["doc_id"] == "{id}"',
+            output_fields=["id"],
         )
 
         return len(result) > 0
 
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
+    def search_by_vector(
+        self, query_vector: list[float], **kwargs: Any
+    ) -> list[Document]:
         # Set search parameters.
         results = self._client.search(
             collection_name=self._collection_name,
@@ -143,7 +161,10 @@ class MilvusVector(BaseVector):
             metadata["score"] = result["distance"]
             score_threshold = float(kwargs.get("score_threshold") or 0.0)
             if result["distance"] > score_threshold:
-                doc = Document(page_content=result["entity"].get(Field.CONTENT_KEY.value), metadata=metadata)
+                doc = Document(
+                    page_content=result["entity"].get(Field.CONTENT_KEY.value),
+                    metadata=metadata,
+                )
                 docs.append(doc)
         return docs
 
@@ -152,11 +173,16 @@ class MilvusVector(BaseVector):
         return []
 
     def create_collection(
-        self, embeddings: list, metadatas: Optional[list[dict]] = None, index_params: Optional[dict] = None
+        self,
+        embeddings: list,
+        metadatas: Optional[list[dict]] = None,
+        index_params: Optional[dict] = None,
     ):
         lock_name = "vector_indexing_lock_{}".format(self._collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
+            collection_exist_cache_key = "vector_indexing_{}".format(
+                self._collection_name
+            )
             if redis_client.get(collection_exist_cache_key):
                 return
             # Grab the existing collection if it exists
@@ -168,14 +194,33 @@ class MilvusVector(BaseVector):
                 dim = len(embeddings[0])
                 fields = []
                 if metadatas:
-                    fields.append(FieldSchema(Field.METADATA_KEY.value, DataType.JSON, max_length=65_535))
+                    fields.append(
+                        FieldSchema(
+                            Field.METADATA_KEY.value, DataType.JSON, max_length=65_535
+                        )
+                    )
 
                 # Create the text field
-                fields.append(FieldSchema(Field.CONTENT_KEY.value, DataType.VARCHAR, max_length=65_535))
+                fields.append(
+                    FieldSchema(
+                        Field.CONTENT_KEY.value, DataType.VARCHAR, max_length=65_535
+                    )
+                )
                 # Create the primary key field
-                fields.append(FieldSchema(Field.PRIMARY_KEY.value, DataType.INT64, is_primary=True, auto_id=True))
+                fields.append(
+                    FieldSchema(
+                        Field.PRIMARY_KEY.value,
+                        DataType.INT64,
+                        is_primary=True,
+                        auto_id=True,
+                    )
+                )
                 # Create the vector field, supports binary or float vectors
-                fields.append(FieldSchema(Field.VECTOR.value, infer_dtype_bydata(embeddings[0]), dim=dim))
+                fields.append(
+                    FieldSchema(
+                        Field.VECTOR.value, infer_dtype_bydata(embeddings[0]), dim=dim
+                    )
+                )
 
                 # Create the schema for the collection
                 schema = CollectionSchema(fields)
@@ -187,7 +232,9 @@ class MilvusVector(BaseVector):
 
                 # Create Index params for the collection
                 index_params_obj = IndexParams()
-                index_params_obj.add_index(field_name=Field.VECTOR.value, **index_params)
+                index_params_obj.add_index(
+                    field_name=Field.VECTOR.value, **index_params
+                )
 
                 # Create the collection
                 collection_name = self._collection_name
@@ -200,19 +247,30 @@ class MilvusVector(BaseVector):
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
     def _init_client(self, config) -> MilvusClient:
-        client = MilvusClient(uri=config.uri, user=config.user, password=config.password, db_name=config.database)
+        client = MilvusClient(
+            uri=config.uri,
+            user=config.user,
+            password=config.password,
+            db_name=config.database,
+        )
         return client
 
 
 class MilvusVectorFactory(AbstractVectorFactory):
-    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> MilvusVector:
+    def init_vector(
+        self, dataset: Dataset, attributes: list, embeddings: Embeddings
+    ) -> MilvusVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
+            class_prefix: str = dataset.index_struct_dict["vector_store"][
+                "class_prefix"
+            ]
             collection_name = class_prefix
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.MILVUS, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.MILVUS, collection_name)
+            )
 
         return MilvusVector(
             collection_name=collection_name,

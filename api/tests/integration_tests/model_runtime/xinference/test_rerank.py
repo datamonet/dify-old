@@ -4,7 +4,9 @@ import pytest
 
 from core.model_runtime.entities.rerank_entities import RerankResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.xinference.rerank.rerank import XinferenceRerankModel
+from core.model_runtime.model_providers.xinference.rerank.rerank import (
+    XinferenceRerankModel,
+)
 
 
 @pytest.mark.parametrize("setup_xinference_mock", [["none"]], indirect=True)
@@ -14,7 +16,10 @@ def test_validate_credentials(setup_xinference_mock):
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
             model="bge-reranker-base",
-            credentials={"server_url": "awdawdaw", "model_uid": os.environ.get("XINFERENCE_RERANK_MODEL_UID")},
+            credentials={
+                "server_url": "awdawdaw",
+                "model_uid": os.environ.get("XINFERENCE_RERANK_MODEL_UID"),
+            },
         )
 
     model.validate_credentials(

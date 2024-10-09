@@ -33,21 +33,32 @@ class BaiduAccessToken:
         try:
             response = post(
                 url=f"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={api_key}&client_secret={secret_key}",
-                headers={"Content-Type": "application/json", "Accept": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
             )
         except Exception as e:
-            raise InvalidAuthenticationError(f"Failed to get access token from Baidu: {e}")
+            raise InvalidAuthenticationError(
+                f"Failed to get access token from Baidu: {e}"
+            )
 
         resp = response.json()
         if "error" in resp:
             if resp["error"] == "invalid_client":
-                raise InvalidAPIKeyError(f'Invalid API key or secret key: {resp["error_description"]}')
+                raise InvalidAPIKeyError(
+                    f'Invalid API key or secret key: {resp["error_description"]}'
+                )
             elif resp["error"] == "unknown_error":
-                raise InternalServerError(f'Internal server error: {resp["error_description"]}')
+                raise InternalServerError(
+                    f'Internal server error: {resp["error_description"]}'
+                )
             elif resp["error"] == "invalid_request":
                 raise BadRequestError(f'Bad request: {resp["error_description"]}')
             elif resp["error"] == "rate_limit_exceeded":
-                raise RateLimitReachedError(f'Rate limit reached: {resp["error_description"]}')
+                raise RateLimitReachedError(
+                    f'Rate limit reached: {resp["error_description"]}'
+                )
             else:
                 raise Exception(f'Unknown error: {resp["error_description"]}')
 
@@ -145,7 +156,10 @@ class _CommonWenxin:
 
     @staticmethod
     def _to_credential_kwargs(credentials: dict) -> dict:
-        credentials_kwargs = {"api_key": credentials["api_key"], "secret_key": credentials["secret_key"]}
+        credentials_kwargs = {
+            "api_key": credentials["api_key"],
+            "secret_key": credentials["secret_key"],
+        }
         return credentials_kwargs
 
     def _handle_error(self, code: int, msg: str):

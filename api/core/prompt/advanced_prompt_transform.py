@@ -12,7 +12,11 @@ from core.model_runtime.entities.message_entities import (
     TextPromptMessageContent,
     UserPromptMessage,
 )
-from core.prompt.entities.advanced_prompt_entities import ChatModelMessage, CompletionModelPromptTemplate, MemoryConfig
+from core.prompt.entities.advanced_prompt_entities import (
+    ChatModelMessage,
+    CompletionModelPromptTemplate,
+    MemoryConfig,
+)
 from core.prompt.prompt_transform import PromptTransform
 from core.prompt.simple_prompt_transform import ModelMode
 from core.prompt.utils.prompt_template_parser import PromptTemplateParser
@@ -88,10 +92,16 @@ class AdvancedPromptTransform(PromptTransform):
         prompt_messages = []
 
         if prompt_template.edition_type == "basic" or not prompt_template.edition_type:
-            prompt_template = PromptTemplateParser(template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl)
-            prompt_inputs = {k: inputs[k] for k in prompt_template.variable_keys if k in inputs}
+            prompt_template = PromptTemplateParser(
+                template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl
+            )
+            prompt_inputs = {
+                k: inputs[k] for k in prompt_template.variable_keys if k in inputs
+            }
 
-            prompt_inputs = self._set_context_variable(context, prompt_template, prompt_inputs)
+            prompt_inputs = self._set_context_variable(
+                context, prompt_template, prompt_inputs
+            )
 
             if memory and memory_config:
                 role_prefix = memory_config.role_prefix
@@ -106,7 +116,9 @@ class AdvancedPromptTransform(PromptTransform):
                 )
 
             if query:
-                prompt_inputs = self._set_query_variable(query, prompt_template, prompt_inputs)
+                prompt_inputs = self._set_query_variable(
+                    query, prompt_template, prompt_inputs
+                )
 
             prompt = prompt_template.format(prompt_inputs)
         else:
@@ -149,10 +161,16 @@ class AdvancedPromptTransform(PromptTransform):
             raw_prompt = prompt_item.text
 
             if prompt_item.edition_type == "basic" or not prompt_item.edition_type:
-                prompt_template = PromptTemplateParser(template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl)
-                prompt_inputs = {k: inputs[k] for k in prompt_template.variable_keys if k in inputs}
+                prompt_template = PromptTemplateParser(
+                    template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl
+                )
+                prompt_inputs = {
+                    k: inputs[k] for k in prompt_template.variable_keys if k in inputs
+                }
 
-                prompt_inputs = self._set_context_variable(context, prompt_template, prompt_inputs)
+                prompt_inputs = self._set_context_variable(
+                    context, prompt_template, prompt_inputs
+                )
 
                 prompt = prompt_template.format(prompt_inputs)
             elif prompt_item.edition_type == "jinja2":
@@ -172,24 +190,33 @@ class AdvancedPromptTransform(PromptTransform):
 
         if query and query_prompt_template:
             prompt_template = PromptTemplateParser(
-                template=query_prompt_template, with_variable_tmpl=self.with_variable_tmpl
+                template=query_prompt_template,
+                with_variable_tmpl=self.with_variable_tmpl,
             )
-            prompt_inputs = {k: inputs[k] for k in prompt_template.variable_keys if k in inputs}
+            prompt_inputs = {
+                k: inputs[k] for k in prompt_template.variable_keys if k in inputs
+            }
             prompt_inputs["#sys.query#"] = query
 
-            prompt_inputs = self._set_context_variable(context, prompt_template, prompt_inputs)
+            prompt_inputs = self._set_context_variable(
+                context, prompt_template, prompt_inputs
+            )
 
             query = prompt_template.format(prompt_inputs)
 
         if memory and memory_config:
-            prompt_messages = self._append_chat_histories(memory, memory_config, prompt_messages, model_config)
+            prompt_messages = self._append_chat_histories(
+                memory, memory_config, prompt_messages, model_config
+            )
 
             if files:
                 prompt_message_contents = [TextPromptMessageContent(data=query)]
                 for file in files:
                     prompt_message_contents.append(file.prompt_message_content)
 
-                prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
+                prompt_messages.append(
+                    UserPromptMessage(content=prompt_message_contents)
+                )
             else:
                 prompt_messages.append(UserPromptMessage(content=query))
         elif files:
@@ -198,29 +225,39 @@ class AdvancedPromptTransform(PromptTransform):
                 last_message = prompt_messages[-1] if prompt_messages else None
                 if last_message and last_message.role == PromptMessageRole.USER:
                     # get last user message content and add files
-                    prompt_message_contents = [TextPromptMessageContent(data=last_message.content)]
+                    prompt_message_contents = [
+                        TextPromptMessageContent(data=last_message.content)
+                    ]
                     for file in files:
                         prompt_message_contents.append(file.prompt_message_content)
 
                     last_message.content = prompt_message_contents
                 else:
-                    prompt_message_contents = [TextPromptMessageContent(data="")]  # not for query
+                    prompt_message_contents = [
+                        TextPromptMessageContent(data="")
+                    ]  # not for query
                     for file in files:
                         prompt_message_contents.append(file.prompt_message_content)
 
-                    prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
+                    prompt_messages.append(
+                        UserPromptMessage(content=prompt_message_contents)
+                    )
             else:
                 prompt_message_contents = [TextPromptMessageContent(data=query)]
                 for file in files:
                     prompt_message_contents.append(file.prompt_message_content)
 
-                prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
+                prompt_messages.append(
+                    UserPromptMessage(content=prompt_message_contents)
+                )
         elif query:
             prompt_messages.append(UserPromptMessage(content=query))
 
         return prompt_messages
 
-    def _set_context_variable(self, context: str, prompt_template: PromptTemplateParser, prompt_inputs: dict) -> dict:
+    def _set_context_variable(
+        self, context: str, prompt_template: PromptTemplateParser, prompt_inputs: dict
+    ) -> dict:
         if "#context#" in prompt_template.variable_keys:
             if context:
                 prompt_inputs["#context#"] = context
@@ -229,7 +266,9 @@ class AdvancedPromptTransform(PromptTransform):
 
         return prompt_inputs
 
-    def _set_query_variable(self, query: str, prompt_template: PromptTemplateParser, prompt_inputs: dict) -> dict:
+    def _set_query_variable(
+        self, query: str, prompt_template: PromptTemplateParser, prompt_inputs: dict
+    ) -> dict:
         if "#query#" in prompt_template.variable_keys:
             if query:
                 prompt_inputs["#query#"] = query
@@ -251,11 +290,19 @@ class AdvancedPromptTransform(PromptTransform):
         if "#histories#" in prompt_template.variable_keys:
             if memory:
                 inputs = {"#histories#": "", **prompt_inputs}
-                prompt_template = PromptTemplateParser(template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl)
-                prompt_inputs = {k: inputs[k] for k in prompt_template.variable_keys if k in inputs}
-                tmp_human_message = UserPromptMessage(content=prompt_template.format(prompt_inputs))
+                prompt_template = PromptTemplateParser(
+                    template=raw_prompt, with_variable_tmpl=self.with_variable_tmpl
+                )
+                prompt_inputs = {
+                    k: inputs[k] for k in prompt_template.variable_keys if k in inputs
+                }
+                tmp_human_message = UserPromptMessage(
+                    content=prompt_template.format(prompt_inputs)
+                )
 
-                rest_tokens = self._calculate_rest_token([tmp_human_message], model_config)
+                rest_tokens = self._calculate_rest_token(
+                    [tmp_human_message], model_config
+                )
 
                 histories = self._get_history_messages_from_memory(
                     memory=memory,

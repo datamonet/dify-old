@@ -3,7 +3,11 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     SystemPromptMessage,
@@ -18,7 +22,8 @@ def test_validate_credentials():
 
     with pytest.raises(CredentialsValidateFailedError):
         model.validate_credentials(
-            model="meta-llama/llama-3-8b-instruct", credentials={"api_key": "invalid_key", "mode": "chat"}
+            model="meta-llama/llama-3-8b-instruct",
+            credentials={"api_key": "invalid_key", "mode": "chat"},
         )
 
     model.validate_credentials(
@@ -65,7 +70,12 @@ def test_invoke_stream_model():
             ),
             UserPromptMessage(content="Who are you?"),
         ],
-        model_parameters={"temperature": 1.0, "top_k": 2, "top_p": 0.5, "max_tokens": 100},
+        model_parameters={
+            "temperature": 1.0,
+            "top_k": 2,
+            "top_p": 0.5,
+            "max_tokens": 100,
+        },
         stream=True,
         user="novita",
     )

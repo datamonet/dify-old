@@ -13,19 +13,30 @@ from openai import (
     RateLimitError,
     UnprocessableEntityError,
 )
-from openai.types.chat import ChatCompletion, ChatCompletionChunk, ChatCompletionMessageToolCall
-from openai.types.chat.chat_completion_chunk import ChoiceDeltaFunctionCall, ChoiceDeltaToolCall
+from openai.types.chat import (
+    ChatCompletion,
+    ChatCompletionChunk,
+    ChatCompletionMessageToolCall,
+)
+from openai.types.chat.chat_completion_chunk import (
+    ChoiceDeltaFunctionCall,
+    ChoiceDeltaToolCall,
+)
 from openai.types.chat.chat_completion_message import FunctionCall
 from openai.types.completion import Completion
 from xinference_client.client.restful.restful_client import (
     Client,
-    RESTfulChatglmCppChatModelHandle,
     RESTfulChatModelHandle,
     RESTfulGenerateModelHandle,
 )
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.llm_entities import (
+    LLMMode,
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -56,10 +67,13 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.model_runtime.model_providers.xinference.xinference_helper import (
     XinferenceHelper,
     XinferenceModelExtraParameter,
+    validate_model_uid,
 )
 from core.model_runtime.utils import helper
 
@@ -115,8 +129,10 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         }
         """
         try:
-            if "/" in credentials["model_uid"] or "?" in credentials["model_uid"] or "#" in credentials["model_uid"]:
-                raise CredentialsValidateFailedError("model_uid should not contain /, ?, or #")
+            if not validate_model_uid(credentials):
+                raise CredentialsValidateFailedError(
+                    "model_uid should not contain /, ?, or #"
+                )
 
             extra_param = XinferenceHelper.get_xinference_extra_parameter(
                 server_url=credentials["server_url"],
@@ -144,9 +160,13 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
                 credentials["context_length"] = extra_param.context_length
 
         except RuntimeError as e:
-            raise CredentialsValidateFailedError(f"Xinference credentials validate failed: {e}")
+            raise CredentialsValidateFailedError(
+                f"Xinference credentials validate failed: {e}"
+            )
         except KeyError as e:
-            raise CredentialsValidateFailedError(f"Xinference credentials validate failed: {e}")
+            raise CredentialsValidateFailedError(
+                f"Xinference credentials validate failed: {e}"
+            )
         except Exception as e:
             raise e
 
@@ -166,7 +186,10 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         return self._num_tokens_from_messages(prompt_messages, tools)
 
     def _num_tokens_from_messages(
-        self, messages: list[PromptMessage], tools: list[PromptMessageTool], is_completion_model: bool = False
+        self,
+        messages: list[PromptMessage],
+        tools: list[PromptMessageTool],
+        is_completion_model: bool = False,
     ) -> int:
         def tokens(text: str):
             return self._get_num_tokens_by_gpt2(text)
@@ -273,10 +296,14 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         """
         text = ""
         for item in message:
-            if isinstance(item, UserPromptMessage | SystemPromptMessage | AssistantPromptMessage):
+            if isinstance(
+                item, UserPromptMessage | SystemPromptMessage | AssistantPromptMessage
+            ):
                 text += item.content
             else:
-                raise NotImplementedError(f"PromptMessage type {type(item)} is not supported")
+                raise NotImplementedError(
+                    f"PromptMessage type {type(item)} is not supported"
+                )
         return text
 
     def _convert_prompt_message_to_dict(self, message: PromptMessage) -> dict:
@@ -292,13 +319,21 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
                 for message_content in message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
                         message_content = cast(PromptMessageContent, message_content)
-                        sub_message_dict = {"type": "text", "text": message_content.data}
+                        sub_message_dict = {
+                            "type": "text",
+                            "text": message_content.data,
+                        }
                         sub_messages.append(sub_message_dict)
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(ImagePromptMessageContent, message_content)
+                        message_content = cast(
+                            ImagePromptMessageContent, message_content
+                        )
                         sub_message_dict = {
                             "type": "image_url",
-                            "image_url": {"url": message_content.data, "detail": message_content.detail.value},
+                            "image_url": {
+                                "url": message_content.data,
+                                "detail": message_content.detail.value,
+                            },
                         }
                         sub_messages.append(sub_message_dict)
                 message_dict = {"role": "user", "content": sub_messages}
@@ -315,13 +350,19 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             message_dict = {"role": "system", "content": message.content}
         elif isinstance(message, ToolPromptMessage):
             message = cast(ToolPromptMessage, message)
-            message_dict = {"tool_call_id": message.tool_call_id, "role": "tool", "content": message.content}
+            message_dict = {
+                "tool_call_id": message.tool_call_id,
+                "role": "tool",
+                "content": message.content,
+            }
         else:
             raise ValueError(f"Unknown message type {type(message)}")
 
         return message_dict
 
-    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity | None:
+    def get_customizable_model_schema(
+        self, model: str, credentials: dict
+    ) -> AIModelEntity | None:
         """
         used to define customizable model schema
         """
@@ -398,7 +439,9 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             elif credentials["completion_type"] == "completion":
                 completion_type = LLMMode.COMPLETION.value
             else:
-                raise ValueError(f'completion_type {credentials["completion_type"]} is not supported')
+                raise ValueError(
+                    f'completion_type {credentials["completion_type"]} is not supported'
+                )
         else:
             extra_args = XinferenceHelper.get_xinference_extra_parameter(
                 server_url=credentials["server_url"],
@@ -411,7 +454,9 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             elif "generate" in extra_args.model_ability:
                 completion_type = LLMMode.COMPLETION.value
             else:
-                raise ValueError(f"xinference model ability {extra_args.model_ability} is not supported")
+                raise ValueError(
+                    f"xinference model ability {extra_args.model_ability} is not supported"
+                )
 
         features = []
 
@@ -431,7 +476,10 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_type=ModelType.LLM,
             features=features,
-            model_properties={ModelPropertyKey.MODE: completion_type, ModelPropertyKey.CONTEXT_SIZE: context_length},
+            model_properties={
+                ModelPropertyKey.MODE: completion_type,
+                ModelPropertyKey.CONTEXT_SIZE: context_length,
+            },
             parameter_rules=rules,
         )
 
@@ -457,7 +505,9 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         extra_model_kwargs can be got by `XinferenceHelper.get_xinference_extra_parameter`
         """
         if "server_url" not in credentials:
-            raise CredentialsValidateFailedError("server_url is required in credentials")
+            raise CredentialsValidateFailedError(
+                "server_url is required in credentials"
+            )
 
         credentials["server_url"] = credentials["server_url"].removesuffix("/")
 
@@ -489,24 +539,40 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             generate_config["stop"] = stop
 
         if tools and len(tools) > 0:
-            generate_config["tools"] = [{"type": "function", "function": helper.dump_model(tool)} for tool in tools]
+            generate_config["tools"] = [
+                {"type": "function", "function": helper.dump_model(tool)}
+                for tool in tools
+            ]
         vision = credentials.get("support_vision", False)
-        if isinstance(xinference_model, RESTfulChatModelHandle | RESTfulChatglmCppChatModelHandle):
+        if isinstance(xinference_model, RESTfulChatModelHandle):
             resp = client.chat.completions.create(
                 model=credentials["model_uid"],
-                messages=[self._convert_prompt_message_to_dict(message) for message in prompt_messages],
+                messages=[
+                    self._convert_prompt_message_to_dict(message)
+                    for message in prompt_messages
+                ],
                 stream=stream,
                 user=user,
                 **generate_config,
             )
             if stream:
                 if tools and len(tools) > 0:
-                    raise InvokeBadRequestError("xinference tool calls does not support stream mode")
+                    raise InvokeBadRequestError(
+                        "xinference tool calls does not support stream mode"
+                    )
                 return self._handle_chat_stream_response(
-                    model=model, credentials=credentials, prompt_messages=prompt_messages, tools=tools, resp=resp
+                    model=model,
+                    credentials=credentials,
+                    prompt_messages=prompt_messages,
+                    tools=tools,
+                    resp=resp,
                 )
             return self._handle_chat_generate_response(
-                model=model, credentials=credentials, prompt_messages=prompt_messages, tools=tools, resp=resp
+                model=model,
+                credentials=credentials,
+                prompt_messages=prompt_messages,
+                tools=tools,
+                resp=resp,
             )
         elif isinstance(xinference_model, RESTfulGenerateModelHandle):
             resp = client.completions.create(
@@ -518,16 +584,27 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             )
             if stream:
                 return self._handle_completion_stream_response(
-                    model=model, credentials=credentials, prompt_messages=prompt_messages, tools=tools, resp=resp
+                    model=model,
+                    credentials=credentials,
+                    prompt_messages=prompt_messages,
+                    tools=tools,
+                    resp=resp,
                 )
             return self._handle_completion_generate_response(
-                model=model, credentials=credentials, prompt_messages=prompt_messages, tools=tools, resp=resp
+                model=model,
+                credentials=credentials,
+                prompt_messages=prompt_messages,
+                tools=tools,
+                resp=resp,
             )
         else:
-            raise NotImplementedError(f"xinference model handle type {type(xinference_model)} is not supported")
+            raise NotImplementedError(
+                f"xinference model handle type {type(xinference_model)} is not supported"
+            )
 
     def _extract_response_tool_calls(
-        self, response_tool_calls: list[ChatCompletionMessageToolCall | ChoiceDeltaToolCall]
+        self,
+        response_tool_calls: list[ChatCompletionMessageToolCall | ChoiceDeltaToolCall],
     ) -> list[AssistantPromptMessage.ToolCall]:
         """
         Extract tool calls from response
@@ -539,11 +616,14 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         if response_tool_calls:
             for response_tool_call in response_tool_calls:
                 function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                    name=response_tool_call.function.name, arguments=response_tool_call.function.arguments
+                    name=response_tool_call.function.name,
+                    arguments=response_tool_call.function.arguments,
                 )
 
                 tool_call = AssistantPromptMessage.ToolCall(
-                    id=response_tool_call.id, type=response_tool_call.type, function=function
+                    id=response_tool_call.id,
+                    type=response_tool_call.type,
+                    function=function,
                 )
                 tool_calls.append(tool_call)
 
@@ -561,7 +641,8 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         tool_call = None
         if response_function_call:
             function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                name=response_function_call.name, arguments=response_function_call.arguments
+                name=response_function_call.name,
+                arguments=response_function_call.arguments,
             )
 
             tool_call = AssistantPromptMessage.ToolCall(
@@ -588,21 +669,33 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
 
         # convert tool call to assistant message tool call
         tool_calls = assistant_message.tool_calls
-        assistant_prompt_message_tool_calls = self._extract_response_tool_calls(tool_calls or [])
+        assistant_prompt_message_tool_calls = self._extract_response_tool_calls(
+            tool_calls or []
+        )
         function_call = assistant_message.function_call
         if function_call:
-            assistant_prompt_message_tool_calls += [self._extract_response_function_call(function_call)]
+            assistant_prompt_message_tool_calls += [
+                self._extract_response_function_call(function_call)
+            ]
 
         # transform assistant message to prompt message
         assistant_prompt_message = AssistantPromptMessage(
-            content=assistant_message.content, tool_calls=assistant_prompt_message_tool_calls
+            content=assistant_message.content,
+            tool_calls=assistant_prompt_message_tool_calls,
         )
 
-        prompt_tokens = self._num_tokens_from_messages(messages=prompt_messages, tools=tools)
-        completion_tokens = self._num_tokens_from_messages(messages=[assistant_prompt_message], tools=tools)
+        prompt_tokens = self._num_tokens_from_messages(
+            messages=prompt_messages, tools=tools
+        )
+        completion_tokens = self._num_tokens_from_messages(
+            messages=[assistant_prompt_message], tools=tools
+        )
 
         usage = self._calc_response_usage(
-            model=model, credentials=credentials, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens
+            model=model,
+            credentials=credentials,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
         )
 
         response = LLMResult(
@@ -634,7 +727,9 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
 
             delta = chunk.choices[0]
 
-            if delta.finish_reason is None and (delta.delta.content is None or delta.delta.content == ""):
+            if delta.finish_reason is None and (
+                delta.delta.content is None or delta.delta.content == ""
+            ):
                 continue
 
             # check if there is a tool call in the response
@@ -647,11 +742,14 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
 
             assistant_message_tool_calls = self._extract_response_tool_calls(tool_calls)
             if function_call:
-                assistant_message_tool_calls += [self._extract_response_function_call(function_call)]
+                assistant_message_tool_calls += [
+                    self._extract_response_function_call(function_call)
+                ]
 
             # transform assistant message to prompt message
             assistant_prompt_message = AssistantPromptMessage(
-                content=delta.delta.content or "", tool_calls=assistant_message_tool_calls
+                content=delta.delta.content or "",
+                tool_calls=assistant_message_tool_calls,
             )
 
             if delta.finish_reason is not None:
@@ -660,8 +758,12 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
                     content=full_response, tool_calls=assistant_message_tool_calls
                 )
 
-                prompt_tokens = self._num_tokens_from_messages(messages=prompt_messages, tools=tools)
-                completion_tokens = self._num_tokens_from_messages(messages=[temp_assistant_prompt_message], tools=[])
+                prompt_tokens = self._num_tokens_from_messages(
+                    messages=prompt_messages, tools=tools
+                )
+                completion_tokens = self._num_tokens_from_messages(
+                    messages=[temp_assistant_prompt_message], tools=[]
+                )
 
                 usage = self._calc_response_usage(
                     model=model,
@@ -675,7 +777,10 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     system_fingerprint=chunk.system_fingerprint,
                     delta=LLMResultChunkDelta(
-                        index=0, message=assistant_prompt_message, finish_reason=delta.finish_reason, usage=usage
+                        index=0,
+                        message=assistant_prompt_message,
+                        finish_reason=delta.finish_reason,
+                        usage=usage,
                     ),
                 )
             else:
@@ -708,14 +813,21 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
         assistant_message = resp.choices[0].text
 
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(content=assistant_message, tool_calls=[])
+        assistant_prompt_message = AssistantPromptMessage(
+            content=assistant_message, tool_calls=[]
+        )
 
-        prompt_tokens = self._get_num_tokens_by_gpt2(self._convert_prompt_message_to_text(prompt_messages))
+        prompt_tokens = self._get_num_tokens_by_gpt2(
+            self._convert_prompt_message_to_text(prompt_messages)
+        )
         completion_tokens = self._num_tokens_from_messages(
             messages=[assistant_prompt_message], tools=[], is_completion_model=True
         )
         usage = self._calc_response_usage(
-            model=model, credentials=credentials, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens
+            model=model,
+            credentials=credentials,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
         )
 
         response = LLMResult(
@@ -748,15 +860,23 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
             delta = chunk.choices[0]
 
             # transform assistant message to prompt message
-            assistant_prompt_message = AssistantPromptMessage(content=delta.text or "", tool_calls=[])
+            assistant_prompt_message = AssistantPromptMessage(
+                content=delta.text or "", tool_calls=[]
+            )
 
             if delta.finish_reason is not None:
                 # temp_assistant_prompt_message is used to calculate usage
-                temp_assistant_prompt_message = AssistantPromptMessage(content=full_response, tool_calls=[])
+                temp_assistant_prompt_message = AssistantPromptMessage(
+                    content=full_response, tool_calls=[]
+                )
 
-                prompt_tokens = self._get_num_tokens_by_gpt2(self._convert_prompt_message_to_text(prompt_messages))
+                prompt_tokens = self._get_num_tokens_by_gpt2(
+                    self._convert_prompt_message_to_text(prompt_messages)
+                )
                 completion_tokens = self._num_tokens_from_messages(
-                    messages=[temp_assistant_prompt_message], tools=[], is_completion_model=True
+                    messages=[temp_assistant_prompt_message],
+                    tools=[],
+                    is_completion_model=True,
                 )
                 usage = self._calc_response_usage(
                     model=model,
@@ -770,7 +890,10 @@ class XinferenceAILargeLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     system_fingerprint=chunk.system_fingerprint,
                     delta=LLMResultChunkDelta(
-                        index=0, message=assistant_prompt_message, finish_reason=delta.finish_reason, usage=usage
+                        index=0,
+                        message=assistant_prompt_message,
+                        finish_reason=delta.finish_reason,
+                        usage=usage,
                     ),
                 )
             else:

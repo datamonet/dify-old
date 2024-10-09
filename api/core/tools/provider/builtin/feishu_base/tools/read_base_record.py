@@ -36,7 +36,9 @@ class ReadBaseRecordTool(BuiltinTool):
 
         try:
             res = httpx.get(
-                url.format(app_token=app_token, table_id=table_id, record_id=record_id), headers=headers, timeout=30
+                url.format(app_token=app_token, table_id=table_id, record_id=record_id),
+                headers=headers,
+                timeout=30,
             )
             res_json = res.json()
             if res.is_success:

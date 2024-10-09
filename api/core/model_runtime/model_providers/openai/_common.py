@@ -50,7 +50,10 @@ class _CommonOpenAI:
             InvokeConnectionError: [openai.APIConnectionError, openai.APITimeoutError],
             InvokeServerUnavailableError: [openai.InternalServerError],
             InvokeRateLimitError: [openai.RateLimitError],
-            InvokeAuthorizationError: [openai.AuthenticationError, openai.PermissionDeniedError],
+            InvokeAuthorizationError: [
+                openai.AuthenticationError,
+                openai.PermissionDeniedError,
+            ],
             InvokeBadRequestError: [
                 openai.BadRequestError,
                 openai.NotFoundError,

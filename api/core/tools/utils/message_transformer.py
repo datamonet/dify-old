@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 class ToolFileMessageTransformer:
     @classmethod
     def transform_tool_invoke_messages(
-        cls, messages: list[ToolInvokeMessage], user_id: str, tenant_id: str, conversation_id: str
+        cls,
+        messages: list[ToolInvokeMessage],
+        user_id: str,
+        tenant_id: str,
+        conversation_id: str,
     ) -> list[ToolInvokeMessage]:
         """
         Transform tool message and handle file download
@@ -19,13 +23,19 @@ class ToolFileMessageTransformer:
         result = []
 
         for message in messages:
-            if message.type in {ToolInvokeMessage.MessageType.TEXT, ToolInvokeMessage.MessageType.LINK}:
+            if message.type in {
+                ToolInvokeMessage.MessageType.TEXT,
+                ToolInvokeMessage.MessageType.LINK,
+            }:
                 result.append(message)
             elif message.type == ToolInvokeMessage.MessageType.IMAGE:
                 # try to download image
                 try:
                     file = ToolFileManager.create_file_by_url(
-                        user_id=user_id, tenant_id=tenant_id, conversation_id=conversation_id, file_url=message.message
+                        user_id=user_id,
+                        tenant_id=tenant_id,
+                        conversation_id=conversation_id,
+                        file_url=message.message,
                     )
 
                     url = f'/files/tools/{file.id}{guess_extension(file.mimetype) or ".png"}'
@@ -35,7 +45,9 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy() if message.meta is not None else {},
+                            meta=message.meta.copy()
+                            if message.meta is not None
+                            else {},
                         )
                     )
                 except Exception as e:
@@ -44,7 +56,9 @@ class ToolFileMessageTransformer:
                         ToolInvokeMessage(
                             type=ToolInvokeMessage.MessageType.TEXT,
                             message=f"Failed to download image: {message.message}, please try to download it manually.",
-                            meta=message.meta.copy() if message.meta is not None else {},
+                            meta=message.meta.copy()
+                            if message.meta is not None
+                            else {},
                             save_as=message.save_as,
                         )
                     )
@@ -72,7 +86,9 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy() if message.meta is not None else {},
+                            meta=message.meta.copy()
+                            if message.meta is not None
+                            else {},
                         )
                     )
                 else:
@@ -81,21 +97,27 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy() if message.meta is not None else {},
+                            meta=message.meta.copy()
+                            if message.meta is not None
+                            else {},
                         )
                     )
             elif message.type == ToolInvokeMessage.MessageType.FILE_VAR:
                 file_var = message.meta.get("file_var")
                 if file_var:
                     if file_var.transfer_method == FileTransferMethod.TOOL_FILE:
-                        url = cls.get_tool_file_url(file_var.related_id, file_var.extension)
+                        url = cls.get_tool_file_url(
+                            file_var.related_id, file_var.extension
+                        )
                         if file_var.type == FileType.IMAGE:
                             result.append(
                                 ToolInvokeMessage(
                                     type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                                     message=url,
                                     save_as=message.save_as,
-                                    meta=message.meta.copy() if message.meta is not None else {},
+                                    meta=message.meta.copy()
+                                    if message.meta is not None
+                                    else {},
                                 )
                             )
                         else:
@@ -104,7 +126,9 @@ class ToolFileMessageTransformer:
                                     type=ToolInvokeMessage.MessageType.LINK,
                                     message=url,
                                     save_as=message.save_as,
-                                    meta=message.meta.copy() if message.meta is not None else {},
+                                    meta=message.meta.copy()
+                                    if message.meta is not None
+                                    else {},
                                 )
                             )
             else:

@@ -11,7 +11,9 @@ from core.model_runtime.entities.message_entities import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.__base.large_language_model import (
+    LargeLanguageModel,
+)
 from core.prompt.agent_history_prompt_transform import AgentHistoryPromptTransform
 from models.model import Conversation
 
@@ -41,7 +43,9 @@ def test_get_prompt():
         return len(args[2])
 
     large_language_model_mock = MagicMock(spec=LargeLanguageModel)
-    large_language_model_mock.get_num_tokens = MagicMock(side_effect=side_effect_get_num_tokens)
+    large_language_model_mock.get_num_tokens = MagicMock(
+        side_effect=side_effect_get_num_tokens
+    )
 
     provider_model_bundle_mock = MagicMock(spec=ProviderModelBundle)
     provider_model_bundle_mock.model_type_instance = large_language_model_mock
@@ -51,7 +55,9 @@ def test_get_prompt():
     model_config_mock.credentials = {}
     model_config_mock.provider_model_bundle = provider_model_bundle_mock
 
-    memory = TokenBufferMemory(conversation=Conversation(), model_instance=model_config_mock)
+    memory = TokenBufferMemory(
+        conversation=Conversation(), model_instance=model_config_mock
+    )
 
     transform = AgentHistoryPromptTransform(
         model_config=model_config_mock,

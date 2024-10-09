@@ -3,8 +3,16 @@ from collections.abc import Generator
 
 import pytest
 
-from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
-from core.model_runtime.entities.message_entities import AssistantPromptMessage, SystemPromptMessage, UserPromptMessage
+from core.model_runtime.entities.llm_entities import (
+    LLMResult,
+    LLMResultChunk,
+    LLMResultChunkDelta,
+)
+from core.model_runtime.entities.message_entities import (
+    AssistantPromptMessage,
+    SystemPromptMessage,
+    UserPromptMessage,
+)
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.tongyi.llm.llm import TongyiLargeLanguageModel
 
@@ -13,10 +21,13 @@ def test_validate_credentials():
     model = TongyiLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(model="qwen-turbo", credentials={"dashscope_api_key": "invalid_key"})
+        model.validate_credentials(
+            model="qwen-turbo", credentials={"dashscope_api_key": "invalid_key"}
+        )
 
     model.validate_credentials(
-        model="qwen-turbo", credentials={"dashscope_api_key": os.environ.get("TONGYI_DASHSCOPE_API_KEY")}
+        model="qwen-turbo",
+        credentials={"dashscope_api_key": os.environ.get("TONGYI_DASHSCOPE_API_KEY")},
     )
 
 
@@ -55,7 +66,11 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
+        assert (
+            len(chunk.delta.message.content) > 0
+            if chunk.delta.finish_reason is None
+            else True
+        )
 
 
 def test_get_num_tokens():

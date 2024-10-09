@@ -2,7 +2,9 @@ from collections.abc import Mapping, Sequence
 from typing import Any, cast
 
 from core.workflow.entities.node_entities import NodeRunResult, NodeType
-from core.workflow.nodes.answer.answer_stream_generate_router import AnswerStreamGeneratorRouter
+from core.workflow.nodes.answer.answer_stream_generate_router import (
+    AnswerStreamGeneratorRouter,
+)
 from core.workflow.nodes.answer.entities import (
     AnswerNodeData,
     GenerateRouteChunk,
@@ -27,7 +29,9 @@ class AnswerNode(BaseNode):
         node_data = cast(AnswerNodeData, node_data)
 
         # generate routes
-        generate_routes = AnswerStreamGeneratorRouter.extract_generate_route_from_node_data(node_data)
+        generate_routes = (
+            AnswerStreamGeneratorRouter.extract_generate_route_from_node_data(node_data)
+        )
 
         answer = ""
         for part in generate_routes:
@@ -42,7 +46,9 @@ class AnswerNode(BaseNode):
                 part = cast(TextGenerateRouteChunk, part)
                 answer += part.text
 
-        return NodeRunResult(status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs={"answer": answer})
+        return NodeRunResult(
+            status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs={"answer": answer}
+        )
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
@@ -63,6 +69,8 @@ class AnswerNode(BaseNode):
 
         variable_mapping = {}
         for variable_selector in variable_selectors:
-            variable_mapping[node_id + "." + variable_selector.variable] = variable_selector.value_selector
+            variable_mapping[node_id + "." + variable_selector.variable] = (
+                variable_selector.value_selector
+            )
 
         return variable_mapping

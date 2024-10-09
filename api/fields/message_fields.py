@@ -62,10 +62,13 @@ retriever_resource_fields = {
 message_fields = {
     "id": fields.String,
     "conversation_id": fields.String,
+    "parent_message_id": fields.String,
     "inputs": fields.Raw,
     "query": fields.String,
     "answer": fields.String(attribute="re_sign_file_url_answer"),
-    "feedback": fields.Nested(feedback_fields, attribute="user_feedback", allow_null=True),
+    "feedback": fields.Nested(
+        feedback_fields, attribute="user_feedback", allow_null=True
+    ),
     "retriever_resources": fields.List(fields.Nested(retriever_resource_fields)),
     "created_at": TimestampField,
     "agent_thoughts": fields.List(fields.Nested(agent_thought_fields)),

@@ -13,7 +13,9 @@ from core.prompt.simple_prompt_transform import ModelMode
 
 class PromptMessageUtil:
     @staticmethod
-    def prompt_messages_to_prompt_for_saving(model_mode: str, prompt_messages: list[PromptMessage]) -> list[dict]:
+    def prompt_messages_to_prompt_for_saving(
+        model_mode: str, prompt_messages: list[PromptMessage]
+    ) -> list[dict]:
         """
         Prompt messages to prompt for saving.
         :param model_mode: model mode
@@ -59,7 +61,9 @@ class PromptMessageUtil:
                             files.append(
                                 {
                                     "type": "image",
-                                    "data": content.data[:10] + "...[TRUNCATED]..." + content.data[-10:],
+                                    "data": content.data[:10]
+                                    + "...[TRUNCATED]..."
+                                    + content.data[-10:],
                                     "detail": content.detail.value,
                                 }
                             )
@@ -86,7 +90,9 @@ class PromptMessageUtil:
                         files.append(
                             {
                                 "type": "image",
-                                "data": content.data[:10] + "...[TRUNCATED]..." + content.data[-10:],
+                                "data": content.data[:10]
+                                + "...[TRUNCATED]..."
+                                + content.data[-10:],
                                 "detail": content.detail.value,
                             }
                         )
