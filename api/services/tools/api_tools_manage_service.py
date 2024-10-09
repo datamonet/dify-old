@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Optional
 
 from httpx import get
 
@@ -98,9 +99,7 @@ class ApiToolManageService:
             raise ValueError(f"invalid schema: {str(e)}")
 
     @staticmethod
-    def convert_schema_to_tool_bundles(
-        schema: str, extra_info: dict = None
-    ) -> list[ApiToolBundle]:
+    def convert_schema_to_tool_bundles(schema: str, extra_info: Optional[dict] = None) -> list[ApiToolBundle]:
         """
         convert schema to tool bundles
 

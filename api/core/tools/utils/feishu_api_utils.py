@@ -1,3 +1,5 @@
+from typing import Optional
+
 import httpx
 
 from core.tools.errors import ToolProviderCredentialValidationError
@@ -40,8 +42,8 @@ class FeishuRequest:
         url: str,
         method: str = "post",
         require_token: bool = True,
-        payload: dict = None,
-        params: dict = None,
+        payload: Optional[dict] = None,
+        params: Optional[dict] = None,
     ):
         headers = {
             "Content-Type": "application/json",

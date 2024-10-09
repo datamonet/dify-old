@@ -81,14 +81,8 @@ class SageMakerText2SpeechModel(TTSModel):
         """
         pass
 
-    def _detect_lang_code(self, content: str, map_dict: dict = None):
-        map_dict = {
-            "zh": "<|zh|>",
-            "en": "<|en|>",
-            "ja": "<|jp|>",
-            "zh-TW": "<|yue|>",
-            "ko": "<|ko|>",
-        }
+    def _detect_lang_code(self, content: str, map_dict: Optional[dict] = None):
+        map_dict = {"zh": "<|zh|>", "en": "<|en|>", "ja": "<|jp|>", "zh-TW": "<|yue|>", "ko": "<|ko|>"}
 
         response = self.comprehend_client.detect_dominant_language(Text=content)
         language_code = response["Languages"][0]["LanguageCode"]

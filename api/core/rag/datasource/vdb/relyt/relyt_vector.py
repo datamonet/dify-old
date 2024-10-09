@@ -168,7 +168,7 @@ class RelytVector(BaseVector):
         else:
             return None
 
-    def delete_by_uuids(self, ids: list[str] = None):
+    def delete_by_uuids(self, ids: Optional[list[str]] = None):
         """Delete by vector IDs.
 
         Args:

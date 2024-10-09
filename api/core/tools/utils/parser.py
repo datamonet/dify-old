@@ -3,6 +3,7 @@ import uuid
 from json import dumps as json_dumps
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
+from typing import Optional
 
 from requests import get
 from yaml import YAMLError, safe_load
@@ -20,7 +21,7 @@ from core.tools.errors import (
 class ApiBasedToolSchemaParser:
     @staticmethod
     def parse_openapi_to_tool_bundle(
-        openapi: dict, extra_info: dict = None, warning: dict = None
+        openapi: dict, extra_info: Optional[dict], warning: Optional[dict]
     ) -> list[ApiToolBundle]:
         warning = warning if warning is not None else {}
         extra_info = extra_info if extra_info is not None else {}
@@ -202,7 +203,7 @@ class ApiBasedToolSchemaParser:
 
     @staticmethod
     def parse_openapi_yaml_to_tool_bundle(
-        yaml: str, extra_info: dict = None, warning: dict = None
+        yaml: str, extra_info: Optional[dict], warning: Optional[dict]
     ) -> list[ApiToolBundle]:
         """
         parse openapi yaml to tool bundle
@@ -221,9 +222,7 @@ class ApiBasedToolSchemaParser:
         )
 
     @staticmethod
-    def parse_swagger_to_openapi(
-        swagger: dict, extra_info: dict = None, warning: dict = None
-    ) -> dict:
+    def parse_swagger_to_openapi(swagger: dict, extra_info: Optional[dict], warning: Optional[dict]) -> dict:
         """
         parse swagger to openapi
 
@@ -293,7 +292,7 @@ class ApiBasedToolSchemaParser:
 
     @staticmethod
     def parse_openai_plugin_json_to_tool_bundle(
-        json: str, extra_info: dict = None, warning: dict = None
+        json: str, extra_info: Optional[dict], warning: Optional[dict]
     ) -> list[ApiToolBundle]:
         """
         parse openapi plugin yaml to tool bundle
@@ -331,7 +330,7 @@ class ApiBasedToolSchemaParser:
 
     @staticmethod
     def auto_parse_to_tool_bundle(
-        content: str, extra_info: dict = None, warning: dict = None
+        content: str, extra_info: Optional[dict], warning: Optional[dict]
     ) -> tuple[list[ApiToolBundle], str]:
         """
         auto parse to tool bundle
