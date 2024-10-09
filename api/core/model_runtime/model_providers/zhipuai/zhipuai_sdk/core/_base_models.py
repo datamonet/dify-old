@@ -13,6 +13,7 @@ from typing import (
     TypeGuard,
     TypeVar,
     cast,
+    runtime_checkable,
 )
 
 import pydantic
@@ -22,7 +23,6 @@ from typing_extensions import (
     ParamSpec,
     Protocol,
     override,
-    runtime_checkable,
 )
 
 from ._base_compat import (

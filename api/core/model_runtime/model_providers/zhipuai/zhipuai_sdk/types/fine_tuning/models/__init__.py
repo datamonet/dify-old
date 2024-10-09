@@ -1,1 +1,1 @@
-from .fine_tuned_models import FineTunedModelsStatus
+from .fine_tuned_models import FineTunedModelsStatus as FineTunedModelsStatus

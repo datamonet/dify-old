@@ -49,7 +49,7 @@ else:
         from pydantic.v1.datetime_parse import (
             parse_date as parse_date,
             parse_datetime as parse_datetime,
-        )  # noqa: PLC0414
+        )
     else:
         from pydantic.typing import (  # noqa: I001
             get_args as get_args,  # noqa: PLC0414
@@ -61,7 +61,7 @@ else:
         from pydantic.datetime_parse import (
             parse_date as parse_date,
             parse_datetime as parse_datetime,
-        )  # noqa: PLC0414
+        )
 
 
 # refactored config

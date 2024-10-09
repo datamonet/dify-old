@@ -3,7 +3,6 @@ from ._base_compat import (
     PYDANTIC_V2,
     ConfigDict,
     GenericModel,
-    cached_property,
     field_get_default,
     get_args,
     get_model_config,
@@ -12,6 +11,9 @@ from ._base_compat import (
     is_literal_type,
     is_union,
     parse_obj,
+)
+from ._base_compat import (
+    cached_property as cached_property,
 )
 from ._base_models import BaseModel, construct_type
 from ._base_type import (
@@ -31,7 +33,6 @@ from ._constants import (
 )
 from ._errors import (
     APIAuthenticationError,
-    APIConnectionError,
     APIInternalError,
     APIReachLimitError,
     APIRequestFailedError,
@@ -42,12 +43,14 @@ from ._errors import (
     APITimeoutError,
     ZhipuAIError,
 )
+from ._errors import (
+    APIConnectionError as APIConnectionError,
+)
 from ._files import is_file_content
 from ._http_client import HttpClient, make_request_options
 from ._sse_client import StreamResponse
 from ._utils import (
     deepcopy_minimal,
-    drop_prefix_image_data,
     extract_files,
     is_given,
     is_list,
@@ -55,6 +58,9 @@ from ._utils import (
     maybe_transform,
     parse_date,
     parse_datetime,
+)
+from ._utils import (
+    drop_prefix_image_data as drop_prefix_image_data,
 )
 
 __all__ = [

@@ -7,4 +7,4 @@ from .deduct_quota_when_message_created import handle
 from .delete_tool_parameters_cache_when_sync_draft_workflow import handle
 from .update_app_dataset_join_when_app_model_config_updated import handle
 from .update_app_dataset_join_when_app_published_workflow_updated import handle
-from .update_provider_last_used_at_when_message_created import handle
+from .update_provider_last_used_at_when_message_created import handle as handle
