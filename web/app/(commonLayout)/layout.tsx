@@ -19,11 +19,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <GA gaType={GaType.admin} />
-      <SwrInitor
-        token={
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZmF5ZSIsImVtYWlsIjoiaGFycnlqd2FuZ0BnbWFpbC5jb20iLCJpYXQiOjE3MjI5Mzc1Nzh9.UHG-N-3jpGeDh5Rgc5jqHhmA1G6u6kF-7lnuvBZtgb8"
-        }
-      >
+      <SwrInitor token={token?.value}>
         <AppContextProvider>
           <EventEmitterContextProvider>
             <ProviderContextProvider>
