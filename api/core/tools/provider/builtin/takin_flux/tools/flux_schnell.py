@@ -39,6 +39,7 @@ class FluxSchnellTool(BuiltinTool):
                 "num_inference_steps": num_inference_steps,
                 "seed": random.randint(1, 100) if seed == 0 else seed,
                 "output_format": "png",
+                "num_inference_steps":4
             },
         )
 
