@@ -14,7 +14,8 @@ const AppList = async () => {
       <footer className='px-12 py-6 grow-0 shrink-0'>
         <div className={'flex items-center full'}>
           <div className='flex items-center pr-3 space-x-3 h-8 text-xs text-gray-400'>
-            <span className='uppercase'>{t('chat.powerBy')}</span>
+            {/* <span className='uppercase'>{t('chat.powerBy')}</span> */}
+            <span className='uppercase'>Powered by</span>
             <LogoSite/>
             <a className={style.socialMediaLink} target='_blank' rel='noopener noreferrer'
               href='https://github.com/langgenius/dify'><span
