@@ -76,7 +76,7 @@ class DallE3Tool(BuiltinTool):
             blob_message = self.create_blob_message(
                 blob=blob_image,
                 meta={"mime_type": mime_type},
-                save_as=self.VARIABLE_KEY.IMAGE.value,
+                save_as=self.VariableKey.IMAGE.value,
             )
             result.append(blob_message)
             # takin command:需要增加附加参数，方便扣费的计算

@@ -65,7 +65,7 @@ class DallE2Tool(BuiltinTool):
                     meta={
                         "mime_type": "image/png",
                     },
-                    save_as=self.VARIABLE_KEY.IMAGE.value,
+                    save_as=self.VariableKey.IMAGE.value,
                 )
             )
             # takin command:需要增加附加参数，方便扣费的计算
