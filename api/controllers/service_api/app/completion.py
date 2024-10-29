@@ -36,9 +36,7 @@ from services.app_generate_service import AppGenerateService
 
 
 class CompletionApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser):
         if app_model.mode != "completion":
             raise AppUnavailableError()
@@ -53,9 +51,7 @@ class CompletionApi(Resource):
             choices=["blocking", "streaming"],
             location="json",
         )
-        parser.add_argument(
-            "retriever_from", type=str, required=False, default="dev", location="json"
-        )
+        parser.add_argument("retriever_from", type=str, required=False, default="dev", location="json")
 
         args = parser.parse_args()
 
@@ -96,9 +92,7 @@ class CompletionApi(Resource):
 
 
 class CompletionStopApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser, task_id):
         if app_model.mode != "completion":
             raise AppUnavailableError()
@@ -109,9 +103,7 @@ class CompletionStopApi(Resource):
 
 
 class ChatApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser):
         app_mode = AppMode.value_of(app_model.mode)
         if app_mode not in {AppMode.CHAT, AppMode.AGENT_CHAT, AppMode.ADVANCED_CHAT}:
@@ -128,9 +120,7 @@ class ChatApi(Resource):
             location="json",
         )
         parser.add_argument("conversation_id", type=uuid_value, location="json")
-        parser.add_argument(
-            "retriever_from", type=str, required=False, default="dev", location="json"
-        )
+        parser.add_argument("retriever_from", type=str, required=False, default="dev", location="json")
         parser.add_argument(
             "auto_generate_name",
             type=bool,
@@ -183,9 +173,7 @@ class ChatApi(Resource):
 
 
 class ChatStopApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser, task_id):
         app_mode = AppMode.value_of(app_model.mode)
         if app_mode not in {AppMode.CHAT, AppMode.AGENT_CHAT, AppMode.ADVANCED_CHAT}:

@@ -1,8 +1,6 @@
 import re
 
-REGEX = re.compile(
-    r"\{\{([a-zA-Z_][a-zA-Z0-9_]{0,29}|#histories#|#query#|#context#)\}\}"
-)
+REGEX = re.compile(r"\{\{([a-zA-Z_][a-zA-Z0-9_]{0,29}|#histories#|#query#|#context#)\}\}")
 WITH_VARIABLE_TMPL_REGEX = re.compile(
     r"\{\{([a-zA-Z_][a-zA-Z0-9_]{0,29}|#[a-zA-Z0-9_]{1,50}\.[a-zA-Z0-9_\.]{1,100}#|#histories#|#query#|#context#)\}\}"
 )
@@ -33,9 +31,7 @@ class PromptTemplateParser:
     def format(self, inputs: dict, remove_template_variables: bool = True) -> str:
         def replacer(match):
             key = match.group(1)
-            value = inputs.get(
-                key, match.group(0)
-            )  # return original matched string if key not found
+            value = inputs.get(key, match.group(0))  # return original matched string if key not found
 
             if remove_template_variables and isinstance(value, str):
                 return PromptTemplateParser.remove_template_variables(value, self.with_variable_tmpl)
@@ -46,6 +42,4 @@ class PromptTemplateParser:
 
     @classmethod
     def remove_template_variables(cls, text: str, with_variable_tmpl: bool = False):
-        return re.sub(
-            WITH_VARIABLE_TMPL_REGEX if with_variable_tmpl else REGEX, r"{\1}", text
-        )
+        return re.sub(WITH_VARIABLE_TMPL_REGEX if with_variable_tmpl else REGEX, r"{\1}", text)

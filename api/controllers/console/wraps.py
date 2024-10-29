@@ -67,18 +67,12 @@ def cloud_edition_billing_resource_check(resource: str):
                         403,
                         "The number of apps has reached the limit of your subscription.",
                     )
-                elif (
-                    resource == "vector_space"
-                    and 0 < vector_space.limit <= vector_space.size
-                ):
+                elif resource == "vector_space" and 0 < vector_space.limit <= vector_space.size:
                     abort(
                         403,
                         "The capacity of the vector space has reached the limit of your subscription.",
                     )
-                elif (
-                    resource == "documents"
-                    and 0 < documents_upload_quota.limit <= documents_upload_quota.size
-                ):
+                elif resource == "documents" and 0 < documents_upload_quota.limit <= documents_upload_quota.size:
                     # The api of file upload is used in the multiple places,
                     # so we need to check the source of the request from datasets
                     source = request.args.get("source")
@@ -94,10 +88,7 @@ def cloud_edition_billing_resource_check(resource: str):
                         403,
                         "The workspace custom feature has reached the limit of your subscription.",
                     )
-                elif (
-                    resource == "annotation"
-                    and 0 < annotation_quota_limit.limit < annotation_quota_limit.size
-                ):
+                elif resource == "annotation" and 0 < annotation_quota_limit.limit < annotation_quota_limit.size:
                     abort(
                         403,
                         "The annotation quota has reached the limit of your subscription.",
@@ -145,9 +136,7 @@ def cloud_utm_record(view):
 
                 if utm_info:
                     utm_info = json.loads(utm_info)
-                    OperationService.record_utm(
-                        current_user.current_tenant_id, utm_info
-                    )
+                    OperationService.record_utm(current_user.current_tenant_id, utm_info)
         except Exception:
             pass
         return view(*args, **kwargs)

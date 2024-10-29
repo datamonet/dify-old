@@ -16,9 +16,7 @@ def test_validate_provider_credentials(setup_fishaudio_mock):
         provider.validate_provider_credentials(
             credentials={
                 "api_key": "bad_api_key",
-                "api_base": os.environ.get(
-                    "FISH_AUDIO_API_BASE", "https://api.fish.audio"
-                ),
+                "api_base": os.environ.get("FISH_AUDIO_API_BASE", "https://api.fish.audio"),
                 "use_public_models": "false",
                 "latency": "normal",
             }

@@ -18,7 +18,7 @@ mock_user = type(
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def app():
     app = create_app()
     dify_config.LOGIN_DISABLED = True

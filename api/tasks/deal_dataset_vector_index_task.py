@@ -19,11 +19,7 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
     :param action: action
     Usage: deal_dataset_vector_index_task.delay(dataset_id, action)
     """
-    logging.info(
-        click.style(
-            "Start deal dataset vector index: {}".format(dataset_id), fg="green"
-        )
-    )
+    logging.info(click.style("Start deal dataset vector index: {}".format(dataset_id), fg="green"))
     start_at = time.perf_counter()
 
     try:
@@ -49,9 +45,9 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
 
             if dataset_documents:
                 dataset_documents_ids = [doc.id for doc in dataset_documents]
-                db.session.query(DatasetDocument).filter(
-                    DatasetDocument.id.in_(dataset_documents_ids)
-                ).update({"indexing_status": "indexing"}, synchronize_session=False)
+                db.session.query(DatasetDocument).filter(DatasetDocument.id.in_(dataset_documents_ids)).update(
+                    {"indexing_status": "indexing"}, synchronize_session=False
+                )
                 db.session.commit()
 
                 for dataset_document in dataset_documents:
@@ -81,19 +77,13 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
 
                                 documents.append(document)
                             # save vector index
-                            index_processor.load(
-                                dataset, documents, with_keywords=False
-                            )
-                        db.session.query(DatasetDocument).filter(
-                            DatasetDocument.id == dataset_document.id
-                        ).update(
+                            index_processor.load(dataset, documents, with_keywords=False)
+                        db.session.query(DatasetDocument).filter(DatasetDocument.id == dataset_document.id).update(
                             {"indexing_status": "completed"}, synchronize_session=False
                         )
                         db.session.commit()
                     except Exception as e:
-                        db.session.query(DatasetDocument).filter(
-                            DatasetDocument.id == dataset_document.id
-                        ).update(
+                        db.session.query(DatasetDocument).filter(DatasetDocument.id == dataset_document.id).update(
                             {"indexing_status": "error", "error": str(e)},
                             synchronize_session=False,
                         )
@@ -113,9 +103,9 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
             if dataset_documents:
                 # update document status
                 dataset_documents_ids = [doc.id for doc in dataset_documents]
-                db.session.query(DatasetDocument).filter(
-                    DatasetDocument.id.in_(dataset_documents_ids)
-                ).update({"indexing_status": "indexing"}, synchronize_session=False)
+                db.session.query(DatasetDocument).filter(DatasetDocument.id.in_(dataset_documents_ids)).update(
+                    {"indexing_status": "indexing"}, synchronize_session=False
+                )
                 db.session.commit()
 
                 # clean index
@@ -148,19 +138,13 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
 
                                 documents.append(document)
                             # save vector index
-                            index_processor.load(
-                                dataset, documents, with_keywords=False
-                            )
-                        db.session.query(DatasetDocument).filter(
-                            DatasetDocument.id == dataset_document.id
-                        ).update(
+                            index_processor.load(dataset, documents, with_keywords=False)
+                        db.session.query(DatasetDocument).filter(DatasetDocument.id == dataset_document.id).update(
                             {"indexing_status": "completed"}, synchronize_session=False
                         )
                         db.session.commit()
                     except Exception as e:
-                        db.session.query(DatasetDocument).filter(
-                            DatasetDocument.id == dataset_document.id
-                        ).update(
+                        db.session.query(DatasetDocument).filter(DatasetDocument.id == dataset_document.id).update(
                             {"indexing_status": "error", "error": str(e)},
                             synchronize_session=False,
                         )
@@ -169,9 +153,7 @@ def deal_dataset_vector_index_task(dataset_id: str, action: str):
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Deal dataset vector index: {} latency: {}".format(
-                    dataset_id, end_at - start_at
-                ),
+                "Deal dataset vector index: {} latency: {}".format(dataset_id, end_at - start_at),
                 fg="green",
             )
         )

@@ -49,9 +49,7 @@ class ModelInvocationUtils:
             raise InvokeModelError("Model not found")
 
         llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-        schema = llm_model.get_model_schema(
-            model_instance.model, model_instance.credentials
-        )
+        schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
 
         if not schema:
             raise InvokeModelError("No model schema found")
@@ -70,9 +68,7 @@ class ModelInvocationUtils:
 
         # get model instance
         model_manager = ModelManager()
-        model_instance = model_manager.get_default_model_instance(
-            tenant_id=tenant_id, model_type=ModelType.LLM
-        )
+        model_instance = model_manager.get_default_model_instance(tenant_id=tenant_id, model_type=ModelType.LLM)
 
         if not model_instance:
             raise InvokeModelError("Model not found")

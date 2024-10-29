@@ -101,9 +101,7 @@ class OpsTraceManager:
         return encrypted_config.model_dump()
 
     @classmethod
-    def decrypt_tracing_config(
-        cls, tenant_id: str, tracing_provider: str, tracing_config: dict
-    ):
+    def decrypt_tracing_config(cls, tenant_id: str, tracing_provider: str, tracing_config: dict):
         """
         Decrypt tracing config
         :param tenant_id: tenant id
@@ -127,9 +125,7 @@ class OpsTraceManager:
         return config_class(**new_config).model_dump()
 
     @classmethod
-    def obfuscated_decrypt_token(
-        cls, tracing_provider: str, decrypt_tracing_config: dict
-    ):
+    def obfuscated_decrypt_token(cls, tracing_provider: str, decrypt_tracing_config: dict):
         """
         Decrypt tracing config
         :param tracing_provider: tracing provider
@@ -210,9 +206,7 @@ class OpsTraceManager:
             return None
 
         # decrypt_token
-        decrypt_trace_config = cls.get_decrypted_tracing_config(
-            app_id, tracing_provider
-        )
+        decrypt_trace_config = cls.get_decrypted_tracing_config(app_id, tracing_provider)
         if app_ops_trace_config.get("enabled"):
             trace_instance, config_class = (
                 provider_config_map[tracing_provider]["trace_instance"],
@@ -226,15 +220,9 @@ class OpsTraceManager:
     @classmethod
     def get_app_config_through_message_id(cls, message_id: str):
         app_model_config = None
-        message_data = (
-            db.session.query(Message).filter(Message.id == message_id).first()
-        )
+        message_data = db.session.query(Message).filter(Message.id == message_id).first()
         conversation_id = message_data.conversation_id
-        conversation_data = (
-            db.session.query(Conversation)
-            .filter(Conversation.id == conversation_id)
-            .first()
-        )
+        conversation_data = db.session.query(Conversation).filter(Conversation.id == conversation_id).first()
 
         if conversation_data.app_model_config_id:
             app_model_config = (
@@ -242,18 +230,13 @@ class OpsTraceManager:
                 .filter(AppModelConfig.id == conversation_data.app_model_config_id)
                 .first()
             )
-        elif (
-            conversation_data.app_model_config_id is None
-            and conversation_data.override_model_configs
-        ):
+        elif conversation_data.app_model_config_id is None and conversation_data.override_model_configs:
             app_model_config = conversation_data.override_model_configs
 
         return app_model_config
 
     @classmethod
-    def update_app_tracing_config(
-        cls, app_id: str, enabled: bool, tracing_provider: str
-    ):
+    def update_app_tracing_config(cls, app_id: str, enabled: bool, tracing_provider: str):
         """
         Update app tracing config
         :param app_id: app id
@@ -360,25 +343,19 @@ class TraceTask:
 
     def preprocess(self):
         preprocess_map = {
-            TraceTaskName.CONVERSATION_TRACE: lambda: self.conversation_trace(
-                **self.kwargs
-            ),
+            TraceTaskName.CONVERSATION_TRACE: lambda: self.conversation_trace(**self.kwargs),
             TraceTaskName.WORKFLOW_TRACE: lambda: self.workflow_trace(
                 self.workflow_run, self.conversation_id, self.user_id
             ),
             TraceTaskName.MESSAGE_TRACE: lambda: self.message_trace(self.message_id),
-            TraceTaskName.MODERATION_TRACE: lambda: self.moderation_trace(
-                self.message_id, self.timer, **self.kwargs
-            ),
+            TraceTaskName.MODERATION_TRACE: lambda: self.moderation_trace(self.message_id, self.timer, **self.kwargs),
             TraceTaskName.SUGGESTED_QUESTION_TRACE: lambda: self.suggested_question_trace(
                 self.message_id, self.timer, **self.kwargs
             ),
             TraceTaskName.DATASET_RETRIEVAL_TRACE: lambda: self.dataset_retrieval_trace(
                 self.message_id, self.timer, **self.kwargs
             ),
-            TraceTaskName.TOOL_TRACE: lambda: self.tool_trace(
-                self.message_id, self.timer, **self.kwargs
-            ),
+            TraceTaskName.TOOL_TRACE: lambda: self.tool_trace(self.message_id, self.timer, **self.kwargs),
             TraceTaskName.GENERATE_NAME_TRACE: lambda: self.generate_name_trace(
                 self.conversation_id, self.timer, **self.kwargs
             ),
@@ -404,11 +381,7 @@ class TraceTask:
         total_tokens = workflow_run.total_tokens
 
         file_list = workflow_run_inputs.get("sys.file") or []
-        query = (
-            workflow_run_inputs.get("query")
-            or workflow_run_inputs.get("sys.query")
-            or ""
-        )
+        query = workflow_run_inputs.get("query") or workflow_run_inputs.get("sys.query") or ""
 
         # get workflow_app_log_id
         workflow_app_log_data = (
@@ -420,9 +393,7 @@ class TraceTask:
             )
             .first()
         )
-        workflow_app_log_id = (
-            str(workflow_app_log_data.id) if workflow_app_log_data else None
-        )
+        workflow_app_log_id = str(workflow_app_log_data.id) if workflow_app_log_data else None
         # get message_id
         message_data = (
             db.session.query(Message.id)
@@ -473,26 +444,16 @@ class TraceTask:
         message_data = get_message_data(message_id)
         if not message_data:
             return {}
-        conversation_mode = (
-            db.session.query(Conversation.mode)
-            .filter_by(id=message_data.conversation_id)
-            .first()
-        )
+        conversation_mode = db.session.query(Conversation.mode).filter_by(id=message_data.conversation_id).first()
         conversation_mode = conversation_mode[0]
         created_at = message_data.created_at
         inputs = message_data.message
 
         # get message file data
-        message_file_data = (
-            db.session.query(MessageFile).filter_by(message_id=message_id).first()
-        )
+        message_file_data = db.session.query(MessageFile).filter_by(message_id=message_id).first()
         file_list = []
         if message_file_data and message_file_data.url is not None:
-            file_url = (
-                f"{self.file_base_url}/{message_file_data.url}"
-                if message_file_data
-                else ""
-            )
+            file_url = f"{self.file_base_url}/{message_file_data.url}" if message_file_data else ""
             file_list.append(file_url)
 
         metadata = {
@@ -522,8 +483,7 @@ class TraceTask:
             outputs=message_data.answer,
             file_list=file_list,
             start_time=created_at,
-            end_time=created_at
-            + timedelta(seconds=message_data.provider_response_latency),
+            end_time=created_at + timedelta(seconds=message_data.provider_response_latency),
             metadata=metadata,
             message_file_data=message_file_data,
             conversation_mode=conversation_mode,
@@ -548,13 +508,9 @@ class TraceTask:
         workflow_app_log_id = None
         if message_data.workflow_run_id:
             workflow_app_log_data = (
-                db.session.query(WorkflowAppLog)
-                .filter_by(workflow_run_id=message_data.workflow_run_id)
-                .first()
+                db.session.query(WorkflowAppLog).filter_by(workflow_run_id=message_data.workflow_run_id).first()
             )
-            workflow_app_log_id = (
-                str(workflow_app_log_data.id) if workflow_app_log_data else None
-            )
+            workflow_app_log_id = str(workflow_app_log_data.id) if workflow_app_log_data else None
 
         moderation_trace_info = ModerationTraceInfo(
             message_id=workflow_app_log_id or message_id,
@@ -592,13 +548,9 @@ class TraceTask:
         workflow_app_log_id = None
         if message_data.workflow_run_id:
             workflow_app_log_data = (
-                db.session.query(WorkflowAppLog)
-                .filter_by(workflow_run_id=message_data.workflow_run_id)
-                .first()
+                db.session.query(WorkflowAppLog).filter_by(workflow_run_id=message_data.workflow_run_id).first()
             )
-            workflow_app_log_id = (
-                str(workflow_app_log_data.id) if workflow_app_log_data else None
-            )
+            workflow_app_log_id = str(workflow_app_log_data.id) if workflow_app_log_data else None
 
         suggested_question_trace_info = SuggestedQuestionTraceInfo(
             message_id=workflow_app_log_id or message_id,
@@ -688,9 +640,7 @@ class TraceTask:
         }
 
         file_url = ""
-        message_file_data = (
-            db.session.query(MessageFile).filter_by(message_id=message_id).first()
-        )
+        message_file_data = db.session.query(MessageFile).filter_by(message_id=message_id).first()
         if message_file_data:
             message_file_id = message_file_data.id if message_file_data else None
             type = message_file_data.type

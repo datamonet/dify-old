@@ -73,9 +73,7 @@ class AppListApi(Resource):
 
         # get app list
         app_service = AppService()
-        app_pagination = app_service.get_paginate_apps(
-            current_user.current_tenant_id, current_user.id, args
-        )
+        app_pagination = app_service.get_paginate_apps(current_user.current_tenant_id, current_user.id, args)
         if not app_pagination:
             return {"data": [], "total": 0, "page": 1, "limit": 20, "has_more": False}
 
@@ -91,9 +89,7 @@ class AppListApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=True, location="json")
         parser.add_argument("description", type=str, location="json")
-        parser.add_argument(
-            "mode", type=str, choices=ALLOW_CREATE_APP_MODES, location="json"
-        )
+        parser.add_argument("mode", type=str, choices=ALLOW_CREATE_APP_MODES, location="json")
         parser.add_argument("icon_type", type=str, location="json")
         parser.add_argument("icon", type=str, location="json")
         parser.add_argument("icon_background", type=str, location="json")
@@ -125,9 +121,7 @@ class AppImportApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "data", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("data", type=str, required=True, nullable=False, location="json")
         parser.add_argument("name", type=str, location="json")
         parser.add_argument("description", type=str, location="json")
         parser.add_argument("icon_type", type=str, location="json")
@@ -158,9 +152,7 @@ class AppImportFromUrlApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "url", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("url", type=str, required=True, nullable=False, location="json")
         parser.add_argument("name", type=str, location="json")
         parser.add_argument("description", type=str, location="json")
         parser.add_argument("icon", type=str, location="json")
@@ -203,9 +195,7 @@ class AppApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "name", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("name", type=str, required=True, nullable=False, location="json")
         parser.add_argument("description", type=str, location="json")
         parser.add_argument("icon_type", type=str, location="json")
         parser.add_argument("icon", type=str, location="json")
@@ -279,16 +269,10 @@ class AppExportApi(Resource):
 
         # Add include_secret params
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "include_secret", type=inputs.boolean, default=False, location="args"
-        )
+        parser.add_argument("include_secret", type=inputs.boolean, default=False, location="args")
         args = parser.parse_args()
 
-        return {
-            "data": AppDslService.export_dsl(
-                app_model=app_model, include_secret=args["include_secret"]
-            )
-        }
+        return {"data": AppDslService.export_dsl(app_model=app_model, include_secret=args["include_secret"])}
 
 
 class AppNameApi(Resource):
@@ -329,9 +313,7 @@ class AppIconApi(Resource):
         args = parser.parse_args()
 
         app_service = AppService()
-        app_model = app_service.update_app_icon(
-            app_model, args.get("icon"), args.get("icon_background")
-        )
+        app_model = app_service.update_app_icon(app_model, args.get("icon"), args.get("icon_background"))
 
         return app_model
 
@@ -352,9 +334,7 @@ class AppSiteStatus(Resource):
         args = parser.parse_args()
 
         app_service = AppService()
-        app_model = app_service.update_app_site_status(
-            app_model, args.get("enable_site")
-        )
+        app_model = app_service.update_app_site_status(app_model, args.get("enable_site"))
 
         return app_model
 
@@ -399,9 +379,7 @@ class AppTraceApi(Resource):
             raise Forbidden()
         parser = reqparse.RequestParser()
         parser.add_argument("enabled", type=bool, required=True, location="json")
-        parser.add_argument(
-            "tracing_provider", type=str, required=True, location="json"
-        )
+        parser.add_argument("tracing_provider", type=str, required=True, location="json")
         args = parser.parse_args()
 
         OpsTraceManager.update_app_tracing_config(

@@ -16,9 +16,7 @@ class FluxSchnellTool(BuiltinTool):
         """
         invoke tools
         """
-        client = replicate.Client(
-            api_token=self.runtime.credentials["replicate_api_key"]
-        )
+        client = replicate.Client(api_token=self.runtime.credentials["replicate_api_key"])
 
         # prompt
         prompt = tool_parameters.get("prompt", "")
@@ -39,7 +37,7 @@ class FluxSchnellTool(BuiltinTool):
                 "num_inference_steps": num_inference_steps,
                 "seed": random.randint(1, 100) if seed == 0 else seed,
                 "output_format": "png",
-                "num_inference_steps": 4
+                "num_inference_steps": 4,
             },
         )
 

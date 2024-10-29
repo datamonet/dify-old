@@ -23,9 +23,7 @@ class APIBasedExtensionService:
     def save(cls, extension_data: APIBasedExtension) -> APIBasedExtension:
         cls._validation(extension_data)
 
-        extension_data.api_key = encrypt_token(
-            extension_data.tenant_id, extension_data.api_key
-        )
+        extension_data.api_key = encrypt_token(extension_data.tenant_id, extension_data.api_key)
 
         db.session.add(extension_data)
         db.session.commit()
@@ -37,9 +35,7 @@ class APIBasedExtensionService:
         db.session.commit()
 
     @staticmethod
-    def get_with_tenant_id(
-        tenant_id: str, api_based_extension_id: str
-    ) -> APIBasedExtension:
+    def get_with_tenant_id(tenant_id: str, api_based_extension_id: str) -> APIBasedExtension:
         extension = (
             db.session.query(APIBasedExtension)
             .filter_by(tenant_id=tenant_id)
@@ -101,9 +97,7 @@ class APIBasedExtensionService:
     @staticmethod
     def _ping_connection(extension_data: APIBasedExtension) -> None:
         try:
-            client = APIBasedExtensionRequestor(
-                extension_data.api_endpoint, extension_data.api_key
-            )
+            client = APIBasedExtensionRequestor(extension_data.api_endpoint, extension_data.api_key)
             resp = client.request(point=APIBasedExtensionPoint.PING, params={})
             if resp.get("result") != "pong":
                 raise ValueError(resp)

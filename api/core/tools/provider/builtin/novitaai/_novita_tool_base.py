@@ -58,17 +58,12 @@ class NovitaAiToolBase:
         refiner = Txt2ImgV3Refiner(switch_at=float(switch_at))
         return refiner
 
-    def _is_hit_nsfw_detection(
-        self, image: V3TaskImage, confidence_threshold: float
-    ) -> bool:
+    def _is_hit_nsfw_detection(self, image: V3TaskImage, confidence_threshold: float) -> bool:
         """
         is hit nsfw
         """
         if image.nsfw_detection_result is None:
             return False
-        if (
-            image.nsfw_detection_result.valid
-            and image.nsfw_detection_result.confidence >= confidence_threshold
-        ):
+        if image.nsfw_detection_result.valid and image.nsfw_detection_result.confidence >= confidence_threshold:
             return True
         return False

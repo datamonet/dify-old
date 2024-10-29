@@ -5,9 +5,7 @@ import requests
 
 class EnterpriseRequest:
     base_url = os.environ.get("ENTERPRISE_API_URL", "ENTERPRISE_API_URL")
-    secret_key = os.environ.get(
-        "ENTERPRISE_API_SECRET_KEY", "ENTERPRISE_API_SECRET_KEY"
-    )
+    secret_key = os.environ.get("ENTERPRISE_API_SECRET_KEY", "ENTERPRISE_API_SECRET_KEY")
 
     @classmethod
     def send_request(cls, method, endpoint, json=None, params=None):

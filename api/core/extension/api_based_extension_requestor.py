@@ -51,9 +51,7 @@ class APIBasedExtensionRequestor:
 
         if response.status_code != 200:
             raise ValueError(
-                "request error, status_code: {}, content: {}".format(
-                    response.status_code, response.text[:100]
-                )
+                "request error, status_code: {}, content: {}".format(response.status_code, response.text[:100])
             )
 
         return response.json()

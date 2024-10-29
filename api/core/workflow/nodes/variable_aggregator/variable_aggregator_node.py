@@ -35,9 +35,7 @@ class VariableAggregatorNode(BaseNode[VariableAssignerNodeData]):
                         inputs[".".join(selector[1:])] = variable.to_object()
                         break
 
-        return NodeRunResult(
-            status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs=outputs, inputs=inputs
-        )
+        return NodeRunResult(status=WorkflowNodeExecutionStatus.SUCCEEDED, outputs=outputs, inputs=inputs)
 
     @classmethod
     def _extract_variable_selector_to_variable_mapping(

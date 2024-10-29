@@ -24,9 +24,7 @@ def test_validate_credentials(setup_anthropic_mock):
     model = AnthropicLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="claude-instant-1.2", credentials={"anthropic_api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="claude-instant-1.2", credentials={"anthropic_api_key": "invalid_key"})
 
     model.validate_credentials(
         model="claude-instant-1.2",
@@ -84,11 +82,7 @@ def test_invoke_stream_model(setup_anthropic_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():

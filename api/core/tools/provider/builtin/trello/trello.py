@@ -26,15 +26,9 @@ class TrelloProvider(BuiltinToolProviderController):
         except requests.exceptions.HTTPError:
             if response.status_code == 401:
                 # Unauthorized, indicating invalid credentials
-                raise ToolProviderCredentialValidationError(
-                    "Invalid Trello credentials: Unauthorized."
-                )
+                raise ToolProviderCredentialValidationError("Invalid Trello credentials: Unauthorized.")
             # Handle other potential HTTP errors
-            raise ToolProviderCredentialValidationError(
-                "Error validating Trello credentials"
-            )
+            raise ToolProviderCredentialValidationError("Error validating Trello credentials")
         except requests.exceptions.RequestException:
             # Handle other exceptions, such as connection errors
-            raise ToolProviderCredentialValidationError(
-                "Error validating Trello credentials"
-            )
+            raise ToolProviderCredentialValidationError("Error validating Trello credentials")

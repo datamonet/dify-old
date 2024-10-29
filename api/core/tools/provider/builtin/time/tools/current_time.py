@@ -20,9 +20,7 @@ class CurrentTimeTool(BuiltinTool):
         tz = tool_parameters.get("timezone", "UTC")
         fm = tool_parameters.get("format") or "%Y-%m-%d %H:%M:%S %Z"
         if tz == "UTC":
-            return self.create_text_message(
-                f"{datetime.now(timezone.utc).strftime(fm)}"
-            )
+            return self.create_text_message(f"{datetime.now(timezone.utc).strftime(fm)}")
 
         try:
             tz = pytz_timezone(tz)

@@ -30,15 +30,10 @@ class AnswerStreamProcessor(StreamProcessor):
             self.route_position[answer_node_id] = 0
         self.current_stream_chunk_generating_node_ids: dict[str, list[str]] = {}
 
-    def process(
-        self, generator: Generator[GraphEngineEvent, None, None]
-    ) -> Generator[GraphEngineEvent, None, None]:
+    def process(self, generator: Generator[GraphEngineEvent, None, None]) -> Generator[GraphEngineEvent, None, None]:
         for event in generator:
             if isinstance(event, NodeRunStartedEvent):
-                if (
-                    event.route_node_state.node_id == self.graph.root_node_id
-                    and not self.rest_node_ids
-                ):
+                if event.route_node_state.node_id == self.graph.root_node_id and not self.rest_node_ids:
                     self.reset()
 
                 yield event
@@ -47,40 +42,26 @@ class AnswerStreamProcessor(StreamProcessor):
                     yield event
                     continue
 
-                if (
-                    event.route_node_state.node_id
-                    in self.current_stream_chunk_generating_node_ids
-                ):
-                    stream_out_answer_node_ids = (
-                        self.current_stream_chunk_generating_node_ids[
-                            event.route_node_state.node_id
-                        ]
-                    )
-                else:
-                    stream_out_answer_node_ids = self._get_stream_out_answer_node_ids(
-                        event
-                    )
-                    self.current_stream_chunk_generating_node_ids[
+                if event.route_node_state.node_id in self.current_stream_chunk_generating_node_ids:
+                    stream_out_answer_node_ids = self.current_stream_chunk_generating_node_ids[
                         event.route_node_state.node_id
-                    ] = stream_out_answer_node_ids
+                    ]
+                else:
+                    stream_out_answer_node_ids = self._get_stream_out_answer_node_ids(event)
+                    self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id] = (
+                        stream_out_answer_node_ids
+                    )
 
                 for _ in stream_out_answer_node_ids:
                     yield event
             elif isinstance(event, NodeRunSucceededEvent):
                 yield event
-                if (
-                    event.route_node_state.node_id
-                    in self.current_stream_chunk_generating_node_ids
-                ):
+                if event.route_node_state.node_id in self.current_stream_chunk_generating_node_ids:
                     # update self.route_position after all stream event finished
-                    for answer_node_id in self.current_stream_chunk_generating_node_ids[
-                        event.route_node_state.node_id
-                    ]:
+                    for answer_node_id in self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id]:
                         self.route_position[answer_node_id] += 1
 
-                    del self.current_stream_chunk_generating_node_ids[
-                        event.route_node_state.node_id
-                    ]
+                    del self.current_stream_chunk_generating_node_ids[event.route_node_state.node_id]
 
                 # remove unreachable nodes
                 self._remove_unreachable_nodes(event)
@@ -114,17 +95,13 @@ class AnswerStreamProcessor(StreamProcessor):
                 answer_node_id not in self.rest_node_ids
                 or not all(
                     dep_id not in self.rest_node_ids
-                    for dep_id in self.generate_routes.answer_dependencies[
-                        answer_node_id
-                    ]
+                    for dep_id in self.generate_routes.answer_dependencies[answer_node_id]
                 )
             ):
                 continue
 
             route_position = self.route_position[answer_node_id]
-            route_chunks = self.generate_routes.answer_generate_route[answer_node_id][
-                route_position:
-            ]
+            route_chunks = self.generate_routes.answer_generate_route[answer_node_id][route_position:]
 
             for route_chunk in route_chunks:
                 if route_chunk.type == GenerateRouteChunk.ChunkType.TEXT:
@@ -168,9 +145,7 @@ class AnswerStreamProcessor(StreamProcessor):
 
                 self.route_position[answer_node_id] += 1
 
-    def _get_stream_out_answer_node_ids(
-        self, event: NodeRunStreamChunkEvent
-    ) -> list[str]:
+    def _get_stream_out_answer_node_ids(self, event: NodeRunStreamChunkEvent) -> list[str]:
         """
         Is stream out support
         :param event: queue text chunk event
@@ -190,17 +165,12 @@ class AnswerStreamProcessor(StreamProcessor):
 
             # all depends on answer node id not in rest node ids
             if all(
-                dep_id not in self.rest_node_ids
-                for dep_id in self.generate_routes.answer_dependencies[answer_node_id]
+                dep_id not in self.rest_node_ids for dep_id in self.generate_routes.answer_dependencies[answer_node_id]
             ):
-                if route_position >= len(
-                    self.generate_routes.answer_generate_route[answer_node_id]
-                ):
+                if route_position >= len(self.generate_routes.answer_generate_route[answer_node_id]):
                     continue
 
-                route_chunk = self.generate_routes.answer_generate_route[
-                    answer_node_id
-                ][route_position]
+                route_chunk = self.generate_routes.answer_generate_route[answer_node_id][route_position]
 
                 if route_chunk.type != GenerateRouteChunk.ChunkType.VAR:
                     continue

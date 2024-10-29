@@ -114,11 +114,7 @@ def test_invoke_stream_completion_model(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 @pytest.mark.parametrize("setup_openai_mock", [["chat"]], indirect=True)
@@ -263,9 +259,7 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 description="Get the current stock price",
                 parameters={
                     "type": "object",
-                    "properties": {
-                        "symbol": {"type": "string", "description": "The stock symbol"}
-                    },
+                    "properties": {"symbol": {"type": "string", "description": "The stock symbol"}},
                     "required": ["symbol"],
                 },
             ),

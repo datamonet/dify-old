@@ -29,24 +29,18 @@ class VariableAssignerNode(BaseNode[VariableAssignerData]):
                 income_value = self.graph_runtime_state.variable_pool.get(self.node_data.input_variable_selector)
                 if not income_value:
                     raise VariableAssignerNodeError("input value not found")
-                updated_variable = original_variable.model_copy(
-                    update={"value": income_value.value}
-                )
+                updated_variable = original_variable.model_copy(update={"value": income_value.value})
 
             case WriteMode.APPEND:
                 income_value = self.graph_runtime_state.variable_pool.get(self.node_data.input_variable_selector)
                 if not income_value:
                     raise VariableAssignerNodeError("input value not found")
                 updated_value = original_variable.value + [income_value.value]
-                updated_variable = original_variable.model_copy(
-                    update={"value": updated_value}
-                )
+                updated_variable = original_variable.model_copy(update={"value": updated_value})
 
             case WriteMode.CLEAR:
                 income_value = get_zero_value(original_variable.value_type)
-                updated_variable = original_variable.model_copy(
-                    update={"value": income_value.to_object()}
-                )
+                updated_variable = original_variable.model_copy(update={"value": income_value.to_object()})
 
             case _:
                 raise VariableAssignerNodeError(f"unsupported write mode: {self.node_data.write_mode}")
@@ -56,14 +50,10 @@ class VariableAssignerNode(BaseNode[VariableAssignerData]):
 
         # TODO: Move database operation to the pipeline.
         # Update conversation variable.
-        conversation_id = self.graph_runtime_state.variable_pool.get(
-            ["sys", "conversation_id"]
-        )
+        conversation_id = self.graph_runtime_state.variable_pool.get(["sys", "conversation_id"])
         if not conversation_id:
             raise VariableAssignerNodeError("conversation_id not found")
-        update_conversation_variable(
-            conversation_id=conversation_id.text, variable=updated_variable
-        )
+        update_conversation_variable(conversation_id=conversation_id.text, variable=updated_variable)
 
         return NodeRunResult(
             status=WorkflowNodeExecutionStatus.SUCCEEDED,
@@ -81,9 +71,7 @@ def update_conversation_variable(conversation_id: str, variable: Variable):
     with Session(db.engine) as session:
         row = session.scalar(stmt)
         if not row:
-            raise VariableAssignerNodeError(
-                "conversation variable not found in the database"
-            )
+            raise VariableAssignerNodeError("conversation variable not found in the database")
         row.data = variable.model_dump_json()
         session.commit()
 

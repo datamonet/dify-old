@@ -9,9 +9,7 @@ from models import App
 from models.model import AppMode
 
 
-def get_app_model(
-    view: Optional[Callable] = None, *, mode: Union[AppMode, list[AppMode]] = None
-):
+def get_app_model(view: Optional[Callable] = None, *, mode: Union[AppMode, list[AppMode]] = None):
     def decorator(view_func):
         @wraps(view_func)
         def decorated_view(*args, **kwargs):
@@ -48,9 +46,7 @@ def get_app_model(
 
                 if app_mode not in modes:
                     mode_values = {m.value for m in modes}
-                    raise AppNotFoundError(
-                        f"App mode is not in the supported list: {mode_values}"
-                    )
+                    raise AppNotFoundError(f"App mode is not in the supported list: {mode_values}")
 
             kwargs["app_model"] = app_model
 

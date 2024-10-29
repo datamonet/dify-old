@@ -72,28 +72,19 @@ class ProviderConfiguration(BaseModel):
         if self.provider.provider not in original_provider_configurate_methods:
             original_provider_configurate_methods[self.provider.provider] = []
             for configurate_method in self.provider.configurate_methods:
-                original_provider_configurate_methods[self.provider.provider].append(
-                    configurate_method
-                )
+                original_provider_configurate_methods[self.provider.provider].append(configurate_method)
 
-        if original_provider_configurate_methods[self.provider.provider] == [
-            ConfigurateMethod.CUSTOMIZABLE_MODEL
-        ]:
+        if original_provider_configurate_methods[self.provider.provider] == [ConfigurateMethod.CUSTOMIZABLE_MODEL]:
             if (
                 any(
                     len(quota_configuration.restrict_models) > 0
                     for quota_configuration in self.system_configuration.quota_configurations
                 )
-                and ConfigurateMethod.PREDEFINED_MODEL
-                not in self.provider.configurate_methods
+                and ConfigurateMethod.PREDEFINED_MODEL not in self.provider.configurate_methods
             ):
-                self.provider.configurate_methods.append(
-                    ConfigurateMethod.PREDEFINED_MODEL
-                )
+                self.provider.configurate_methods.append(ConfigurateMethod.PREDEFINED_MODEL)
 
-    def get_current_credentials(
-        self, model_type: ModelType, model: str
-    ) -> Optional[dict]:
+    def get_current_credentials(self, model_type: ModelType, model: str) -> Optional[dict]:
         """
         Get current credentials.
 
@@ -104,20 +95,14 @@ class ProviderConfiguration(BaseModel):
         if self.model_settings:
             # check if model is disabled by admin
             for model_setting in self.model_settings:
-                if (
-                    model_setting.model_type == model_type
-                    and model_setting.model == model
-                ):
+                if model_setting.model_type == model_type and model_setting.model == model:
                     if not model_setting.enabled:
                         raise ValueError(f"Model {model} is disabled.")
 
         if self.using_provider_type == ProviderType.SYSTEM:
             restrict_models = []
             for quota_configuration in self.system_configuration.quota_configurations:
-                if (
-                    self.system_configuration.current_quota_type
-                    != quota_configuration.quota_type
-                ):
+                if self.system_configuration.current_quota_type != quota_configuration.quota_type:
                     continue
 
                 restrict_models = quota_configuration.restrict_models
@@ -130,19 +115,14 @@ class ProviderConfiguration(BaseModel):
                         and restrict_model.model == model
                         and restrict_model.base_model_name
                     ):
-                        copy_credentials["base_model_name"] = (
-                            restrict_model.base_model_name
-                        )
+                        copy_credentials["base_model_name"] = restrict_model.base_model_name
 
             return copy_credentials
         else:
             credentials = None
             if self.custom_configuration.models:
                 for model_configuration in self.custom_configuration.models:
-                    if (
-                        model_configuration.model_type == model_type
-                        and model_configuration.model == model
-                    ):
+                    if model_configuration.model_type == model_type and model_configuration.model == model:
                         credentials = model_configuration.credentials
                         break
 
@@ -161,11 +141,7 @@ class ProviderConfiguration(BaseModel):
 
         current_quota_type = self.system_configuration.current_quota_type
         current_quota_configuration = next(
-            (
-                q
-                for q in self.system_configuration.quota_configurations
-                if q.quota_type == current_quota_type
-            ),
+            (q for q in self.system_configuration.quota_configurations if q.quota_type == current_quota_type),
             None,
         )
 
@@ -180,10 +156,7 @@ class ProviderConfiguration(BaseModel):
         Check custom configuration available.
         :return:
         """
-        return (
-            self.custom_configuration.provider is not None
-            or len(self.custom_configuration.models) > 0
-        )
+        return self.custom_configuration.provider is not None or len(self.custom_configuration.models) > 0
 
     def get_custom_credentials(self, obfuscated: bool = False) -> Optional[dict]:
         """
@@ -236,13 +209,9 @@ class ProviderConfiguration(BaseModel):
                 # fix origin data
                 if provider_record.encrypted_config:
                     if not provider_record.encrypted_config.startswith("{"):
-                        original_credentials = {
-                            "openai_api_key": provider_record.encrypted_config
-                        }
+                        original_credentials = {"openai_api_key": provider_record.encrypted_config}
                     else:
-                        original_credentials = json.loads(
-                            provider_record.encrypted_config
-                        )
+                        original_credentials = json.loads(provider_record.encrypted_config)
                 else:
                     original_credentials = {}
             except JSONDecodeError:
@@ -253,9 +222,7 @@ class ProviderConfiguration(BaseModel):
                 if key in provider_credential_secret_variables:
                     # if send [__HIDDEN__] in secret input, it will be same as original value
                     if value == HIDDEN_VALUE and key in original_credentials:
-                        credentials[key] = encrypter.decrypt_token(
-                            self.tenant_id, original_credentials[key]
-                        )
+                        credentials[key] = encrypter.decrypt_token(self.tenant_id, original_credentials[key])
 
         credentials = model_provider_factory.provider_credentials_validate(
             provider=self.provider.provider, credentials=credentials
@@ -281,9 +248,7 @@ class ProviderConfiguration(BaseModel):
         if provider_record:
             provider_record.encrypted_config = json.dumps(credentials)
             provider_record.is_valid = True
-            provider_record.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            provider_record.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             provider_record = Provider(
@@ -352,10 +317,7 @@ class ProviderConfiguration(BaseModel):
             return None
 
         for model_configuration in self.custom_configuration.models:
-            if (
-                model_configuration.model_type == model_type
-                and model_configuration.model == model
-            ):
+            if model_configuration.model_type == model_type and model_configuration.model == model:
                 credentials = model_configuration.credentials
                 if not obfuscated:
                     return credentials
@@ -403,9 +365,7 @@ class ProviderConfiguration(BaseModel):
         if provider_model_record:
             try:
                 original_credentials = (
-                    json.loads(provider_model_record.encrypted_config)
-                    if provider_model_record.encrypted_config
-                    else {}
+                    json.loads(provider_model_record.encrypted_config) if provider_model_record.encrypted_config else {}
                 )
             except JSONDecodeError:
                 original_credentials = {}
@@ -415,9 +375,7 @@ class ProviderConfiguration(BaseModel):
                 if key in provider_credential_secret_variables:
                     # if send [__HIDDEN__] in secret input, it will be same as original value
                     if value == HIDDEN_VALUE and key in original_credentials:
-                        credentials[key] = encrypter.decrypt_token(
-                            self.tenant_id, original_credentials[key]
-                        )
+                        credentials[key] = encrypter.decrypt_token(self.tenant_id, original_credentials[key])
 
         credentials = model_provider_factory.model_credentials_validate(
             provider=self.provider.provider,
@@ -432,9 +390,7 @@ class ProviderConfiguration(BaseModel):
 
         return provider_model_record, credentials
 
-    def add_or_update_custom_model_credentials(
-        self, model_type: ModelType, model: str, credentials: dict
-    ) -> None:
+    def add_or_update_custom_model_credentials(self, model_type: ModelType, model: str, credentials: dict) -> None:
         """
         Add or update custom model credentials.
 
@@ -444,18 +400,14 @@ class ProviderConfiguration(BaseModel):
         :return:
         """
         # validate custom model config
-        provider_model_record, credentials = self.custom_model_credentials_validate(
-            model_type, model, credentials
-        )
+        provider_model_record, credentials = self.custom_model_credentials_validate(model_type, model, credentials)
 
         # save provider model
         # Note: Do not switch the preferred provider, which allows users to use quotas first
         if provider_model_record:
             provider_model_record.encrypted_config = json.dumps(credentials)
             provider_model_record.is_valid = True
-            provider_model_record.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            provider_model_record.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             provider_model_record = ProviderModel(
@@ -477,9 +429,7 @@ class ProviderConfiguration(BaseModel):
 
         provider_model_credentials_cache.delete()
 
-    def delete_custom_model_credentials(
-        self, model_type: ModelType, model: str
-    ) -> None:
+    def delete_custom_model_credentials(self, model_type: ModelType, model: str) -> None:
         """
         Delete custom model credentials.
         :param model_type: model type
@@ -531,9 +481,7 @@ class ProviderConfiguration(BaseModel):
 
         if model_setting:
             model_setting.enabled = True
-            model_setting.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            model_setting.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             model_setting = ProviderModelSetting(
@@ -568,9 +516,7 @@ class ProviderConfiguration(BaseModel):
 
         if model_setting:
             model_setting.enabled = False
-            model_setting.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            model_setting.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             model_setting = ProviderModelSetting(
@@ -585,9 +531,7 @@ class ProviderConfiguration(BaseModel):
 
         return model_setting
 
-    def get_provider_model_setting(
-        self, model_type: ModelType, model: str
-    ) -> Optional[ProviderModelSetting]:
+    def get_provider_model_setting(self, model_type: ModelType, model: str) -> Optional[ProviderModelSetting]:
         """
         Get provider model setting.
         :param model_type: model type
@@ -605,9 +549,7 @@ class ProviderConfiguration(BaseModel):
             .first()
         )
 
-    def enable_model_load_balancing(
-        self, model_type: ModelType, model: str
-    ) -> ProviderModelSetting:
+    def enable_model_load_balancing(self, model_type: ModelType, model: str) -> ProviderModelSetting:
         """
         Enable model load balancing.
         :param model_type: model type
@@ -619,8 +561,7 @@ class ProviderConfiguration(BaseModel):
             .filter(
                 LoadBalancingModelConfig.tenant_id == self.tenant_id,
                 LoadBalancingModelConfig.provider_name == self.provider.provider,
-                LoadBalancingModelConfig.model_type
-                == model_type.to_origin_model_type(),
+                LoadBalancingModelConfig.model_type == model_type.to_origin_model_type(),
                 LoadBalancingModelConfig.model_name == model,
             )
             .count()
@@ -642,9 +583,7 @@ class ProviderConfiguration(BaseModel):
 
         if model_setting:
             model_setting.load_balancing_enabled = True
-            model_setting.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            model_setting.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             model_setting = ProviderModelSetting(
@@ -659,9 +598,7 @@ class ProviderConfiguration(BaseModel):
 
         return model_setting
 
-    def disable_model_load_balancing(
-        self, model_type: ModelType, model: str
-    ) -> ProviderModelSetting:
+    def disable_model_load_balancing(self, model_type: ModelType, model: str) -> ProviderModelSetting:
         """
         Disable model load balancing.
         :param model_type: model type
@@ -681,9 +618,7 @@ class ProviderConfiguration(BaseModel):
 
         if model_setting:
             model_setting.load_balancing_enabled = False
-            model_setting.updated_at = datetime.datetime.now(
-                datetime.timezone.utc
-            ).replace(tzinfo=None)
+            model_setting.updated_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             db.session.commit()
         else:
             model_setting = ProviderModelSetting(
@@ -727,10 +662,7 @@ class ProviderConfiguration(BaseModel):
         if provider_type == self.preferred_provider_type:
             return
 
-        if (
-            provider_type == ProviderType.SYSTEM
-            and not self.system_configuration.enabled
-        ):
+        if provider_type == ProviderType.SYSTEM and not self.system_configuration.enabled:
             return
 
         # get preferred provider
@@ -755,9 +687,7 @@ class ProviderConfiguration(BaseModel):
 
         db.session.commit()
 
-    def extract_secret_variables(
-        self, credential_form_schemas: list[CredentialFormSchema]
-    ) -> list[str]:
+    def extract_secret_variables(self, credential_form_schemas: list[CredentialFormSchema]) -> list[str]:
         """
         Extract secret input form variables.
 
@@ -771,9 +701,7 @@ class ProviderConfiguration(BaseModel):
 
         return secret_input_form_variables
 
-    def obfuscated_credentials(
-        self, credentials: dict, credential_form_schemas: list[CredentialFormSchema]
-    ) -> dict:
+    def obfuscated_credentials(self, credentials: dict, credential_form_schemas: list[CredentialFormSchema]) -> dict:
         """
         Obfuscated credentials.
 
@@ -782,9 +710,7 @@ class ProviderConfiguration(BaseModel):
         :return:
         """
         # Get provider credential secret variables
-        credential_secret_variables = self.extract_secret_variables(
-            credential_form_schemas
-        )
+        credential_secret_variables = self.extract_secret_variables(credential_form_schemas)
 
         # Obfuscate provider credentials
         copy_credentials = credentials.copy()
@@ -832,9 +758,7 @@ class ProviderConfiguration(BaseModel):
         # Group model settings by model type and model
         model_setting_map = defaultdict(dict)
         for model_setting in self.model_settings:
-            model_setting_map[model_setting.model_type][model_setting.model] = (
-                model_setting
-            )
+            model_setting_map[model_setting.model_type][model_setting.model] = model_setting
 
         if self.using_provider_type == ProviderType.SYSTEM:
             provider_models = self._get_system_provider_models(
@@ -850,9 +774,7 @@ class ProviderConfiguration(BaseModel):
             )
 
         if only_active:
-            provider_models = [
-                m for m in provider_models if m.status == ModelStatus.ACTIVE
-            ]
+            provider_models = [m for m in provider_models if m.status == ModelStatus.ACTIVE]
 
         # resort provider_models
         return sorted(provider_models, key=lambda x: x.model_type.value)
@@ -875,10 +797,7 @@ class ProviderConfiguration(BaseModel):
         for model_type in model_types:
             for m in provider_instance.models(model_type):
                 status = ModelStatus.ACTIVE
-                if (
-                    m.model_type in model_setting_map
-                    and m.model in model_setting_map[m.model_type]
-                ):
+                if m.model_type in model_setting_map and m.model in model_setting_map[m.model_type]:
                     model_setting = model_setting_map[m.model_type][m.model]
                     if model_setting.enabled is False:
                         status = ModelStatus.DISABLED
@@ -899,24 +818,15 @@ class ProviderConfiguration(BaseModel):
 
         if self.provider.provider not in original_provider_configurate_methods:
             original_provider_configurate_methods[self.provider.provider] = []
-            for (
-                configurate_method
-            ) in provider_instance.get_provider_schema().configurate_methods:
-                original_provider_configurate_methods[self.provider.provider].append(
-                    configurate_method
-                )
+            for configurate_method in provider_instance.get_provider_schema().configurate_methods:
+                original_provider_configurate_methods[self.provider.provider].append(configurate_method)
 
         should_use_custom_model = False
-        if original_provider_configurate_methods[self.provider.provider] == [
-            ConfigurateMethod.CUSTOMIZABLE_MODEL
-        ]:
+        if original_provider_configurate_methods[self.provider.provider] == [ConfigurateMethod.CUSTOMIZABLE_MODEL]:
             should_use_custom_model = True
 
         for quota_configuration in self.system_configuration.quota_configurations:
-            if (
-                self.system_configuration.current_quota_type
-                != quota_configuration.quota_type
-            ):
+            if self.system_configuration.current_quota_type != quota_configuration.quota_type:
                 continue
 
             restrict_models = quota_configuration.restrict_models
@@ -931,16 +841,12 @@ class ProviderConfiguration(BaseModel):
                     for restrict_model in restrict_models:
                         copy_credentials = self.system_configuration.credentials.copy()
                         if restrict_model.base_model_name:
-                            copy_credentials["base_model_name"] = (
-                                restrict_model.base_model_name
-                            )
+                            copy_credentials["base_model_name"] = restrict_model.base_model_name
 
                         try:
                             custom_model_schema = provider_instance.get_model_instance(
                                 restrict_model.model_type
-                            ).get_customizable_model_schema_from_credentials(
-                                restrict_model.model, copy_credentials
-                            )
+                            ).get_customizable_model_schema_from_credentials(restrict_model.model, copy_credentials)
                         except Exception as ex:
                             logger.warning(f"get custom model schema failed, {ex}")
                             continue
@@ -954,12 +860,9 @@ class ProviderConfiguration(BaseModel):
                         status = ModelStatus.ACTIVE
                         if (
                             custom_model_schema.model_type in model_setting_map
-                            and custom_model_schema.model
-                            in model_setting_map[custom_model_schema.model_type]
+                            and custom_model_schema.model in model_setting_map[custom_model_schema.model_type]
                         ):
-                            model_setting = model_setting_map[
-                                custom_model_schema.model_type
-                            ][custom_model_schema.model]
+                            model_setting = model_setting_map[custom_model_schema.model_type][custom_model_schema.model]
                             if model_setting.enabled is False:
                                 status = ModelStatus.DISABLED
 
@@ -980,10 +883,7 @@ class ProviderConfiguration(BaseModel):
             # if llm name not in restricted llm list, remove it
             restrict_model_names = [rm.model for rm in restrict_models]
             for m in provider_models:
-                if (
-                    m.model_type == ModelType.LLM
-                    and m.model not in restrict_model_names
-                ):
+                if m.model_type == ModelType.LLM and m.model not in restrict_model_names:
                     m.status = ModelStatus.NO_PERMISSION
                 elif not quota_configuration.is_valid:
                     m.status = ModelStatus.QUOTA_EXCEEDED
@@ -1018,10 +918,7 @@ class ProviderConfiguration(BaseModel):
             for m in models:
                 status = ModelStatus.ACTIVE if credentials else ModelStatus.NO_CONFIGURE
                 load_balancing_enabled = False
-                if (
-                    m.model_type in model_setting_map
-                    and m.model in model_setting_map[m.model_type]
-                ):
+                if m.model_type in model_setting_map and m.model in model_setting_map[m.model_type]:
                     model_setting = model_setting_map[m.model_type][m.model]
                     if model_setting.enabled is False:
                         status = ModelStatus.DISABLED
@@ -1066,12 +963,9 @@ class ProviderConfiguration(BaseModel):
             load_balancing_enabled = False
             if (
                 custom_model_schema.model_type in model_setting_map
-                and custom_model_schema.model
-                in model_setting_map[custom_model_schema.model_type]
+                and custom_model_schema.model in model_setting_map[custom_model_schema.model_type]
             ):
-                model_setting = model_setting_map[custom_model_schema.model_type][
-                    custom_model_schema.model
-                ]
+                model_setting = model_setting_map[custom_model_schema.model_type][custom_model_schema.model]
                 if model_setting.enabled is False:
                     status = ModelStatus.DISABLED
 
@@ -1147,9 +1041,7 @@ class ProviderConfigurations(BaseModel):
             if provider and provider_configuration.provider.provider != provider:
                 continue
 
-            all_models.extend(
-                provider_configuration.get_provider_models(model_type, only_active)
-            )
+            all_models.extend(provider_configuration.get_provider_models(model_type, only_active))
 
         return all_models
 

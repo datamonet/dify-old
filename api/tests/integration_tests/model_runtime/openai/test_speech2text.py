@@ -13,9 +13,7 @@ def test_validate_credentials(setup_openai_mock):
     model = OpenAISpeech2TextModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="whisper-1", credentials={"openai_api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="whisper-1", credentials={"openai_api_key": "invalid_key"})
 
     model.validate_credentials(
         model="whisper-1",

@@ -77,9 +77,7 @@ class AppGeneratorTTSPublisher:
 
     def _runtime(self):
         future_queue = queue.Queue()
-        threading.Thread(
-            target=_process_future, args=(future_queue, self._audio_queue)
-        ).start()
+        threading.Thread(target=_process_future, args=(future_queue, self._audio_queue)).start()
         while True:
             try:
                 message = self._msg_queue.get()
@@ -94,9 +92,7 @@ class AppGeneratorTTSPublisher:
                         )
                         future_queue.put(futures_result)
                     break
-                elif isinstance(
-                    message.event, QueueAgentMessageEvent | QueueLLMChunkEvent
-                ):
+                elif isinstance(message.event, QueueAgentMessageEvent | QueueLLMChunkEvent):
                     self.msg_text += message.event.chunk.delta.message.content
                 elif isinstance(message.event, QueueTextChunkEvent):
                     self.msg_text += message.event.text

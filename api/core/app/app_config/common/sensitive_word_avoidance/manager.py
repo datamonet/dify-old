@@ -29,10 +29,7 @@ class SensitiveWordAvoidanceConfigManager:
         if not isinstance(config["sensitive_word_avoidance"], dict):
             raise ValueError("sensitive_word_avoidance must be of dict type")
 
-        if (
-            "enabled" not in config["sensitive_word_avoidance"]
-            or not config["sensitive_word_avoidance"]["enabled"]
-        ):
+        if "enabled" not in config["sensitive_word_avoidance"] or not config["sensitive_word_avoidance"]["enabled"]:
             config["sensitive_word_avoidance"]["enabled"] = False
 
         if config["sensitive_word_avoidance"]["enabled"]:
@@ -41,9 +38,7 @@ class SensitiveWordAvoidanceConfigManager:
 
             if not only_structure_validate:
                 typ = config["sensitive_word_avoidance"]["type"]
-                sensitive_word_avoidance_config = config["sensitive_word_avoidance"][
-                    "config"
-                ]
+                sensitive_word_avoidance_config = config["sensitive_word_avoidance"]["config"]
 
                 ModerationFactory.validate_config(
                     name=typ,

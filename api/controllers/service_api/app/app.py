@@ -68,12 +68,8 @@ class AppParameterApi(Resource):
             ),
             "speech_to_text": features_dict.get("speech_to_text", {"enabled": False}),
             "text_to_speech": features_dict.get("text_to_speech", {"enabled": False}),
-            "retriever_resource": features_dict.get(
-                "retriever_resource", {"enabled": False}
-            ),
-            "annotation_reply": features_dict.get(
-                "annotation_reply", {"enabled": False}
-            ),
+            "retriever_resource": features_dict.get("retriever_resource", {"enabled": False}),
+            "annotation_reply": features_dict.get("annotation_reply", {"enabled": False}),
             "more_like_this": features_dict.get("more_like_this", {"enabled": False}),
             "user_input_form": user_input_form,
             "sensitive_word_avoidance": features_dict.get(

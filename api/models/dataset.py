@@ -58,13 +58,9 @@ class Dataset(db.Model):
     indexing_technique = db.Column(db.String(255), nullable=True)
     index_struct = db.Column(db.Text, nullable=True)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     updated_by = db.Column(StringUUID, nullable=True)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     embedding_model = db.Column(db.String(255), nullable=True)
     embedding_model_provider = db.Column(db.String(255), nullable=True)
     collection_binding_id = db.Column(StringUUID, nullable=True)
@@ -73,9 +69,7 @@ class Dataset(db.Model):
     @property
     def dataset_keyword_table(self):
         dataset_keyword_table = (
-            db.session.query(DatasetKeywordTable)
-            .filter(DatasetKeywordTable.dataset_id == self.id)
-            .first()
+            db.session.query(DatasetKeywordTable).filter(DatasetKeywordTable.dataset_id == self.id).first()
         )
         if dataset_keyword_table:
             return dataset_keyword_table
@@ -110,19 +104,13 @@ class Dataset(db.Model):
     def app_count(self):
         return (
             db.session.query(func.count(AppDatasetJoin.id))
-            .filter(
-                AppDatasetJoin.dataset_id == self.id, App.id == AppDatasetJoin.app_id
-            )
+            .filter(AppDatasetJoin.dataset_id == self.id, App.id == AppDatasetJoin.app_id)
             .scalar()
         )
 
     @property
     def document_count(self):
-        return (
-            db.session.query(func.count(Document.id))
-            .filter(Document.dataset_id == self.id)
-            .scalar()
-        )
+        return db.session.query(func.count(Document.id)).filter(Document.dataset_id == self.id).scalar()
 
     @property
     def available_document_count(self):
@@ -159,9 +147,7 @@ class Dataset(db.Model):
 
     @property
     def doc_form(self):
-        document = (
-            db.session.query(Document).filter(Document.dataset_id == self.id).first()
-        )
+        document = db.session.query(Document).filter(Document.dataset_id == self.id).first()
         if document:
             return document.doc_form
         return None
@@ -201,18 +187,13 @@ class Dataset(db.Model):
         if self.provider != "external":
             return None
         external_knowledge_binding = (
-            db.session.query(ExternalKnowledgeBindings)
-            .filter(ExternalKnowledgeBindings.dataset_id == self.id)
-            .first()
+            db.session.query(ExternalKnowledgeBindings).filter(ExternalKnowledgeBindings.dataset_id == self.id).first()
         )
         if not external_knowledge_binding:
             return None
         external_knowledge_api = (
             db.session.query(ExternalKnowledgeApis)
-            .filter(
-                ExternalKnowledgeApis.id
-                == external_knowledge_binding.external_knowledge_api_id
-            )
+            .filter(ExternalKnowledgeApis.id == external_knowledge_binding.external_knowledge_api_id)
             .first()
         )
         if not external_knowledge_api:
@@ -221,9 +202,7 @@ class Dataset(db.Model):
             "external_knowledge_id": external_knowledge_binding.external_knowledge_id,
             "external_knowledge_api_id": external_knowledge_api.id,
             "external_knowledge_api_name": external_knowledge_api.name,
-            "external_knowledge_api_endpoint": json.loads(
-                external_knowledge_api.settings
-            ).get("endpoint", ""),
+            "external_knowledge_api_endpoint": json.loads(external_knowledge_api.settings).get("endpoint", ""),
         }
 
     @staticmethod
@@ -239,9 +218,7 @@ class DatasetProcessRule(db.Model):
         db.Index("dataset_process_rule_dataset_id_idx", "dataset_id"),
     )
 
-    id = db.Column(
-        StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
     dataset_id = db.Column(StringUUID, nullable=False)
     mode = db.Column(
         db.String(255),
@@ -250,9 +227,7 @@ class DatasetProcessRule(db.Model):
     )
     rules = db.Column(db.Text, nullable=True)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
     MODES = ["automatic", "custom"]
     PRE_PROCESSING_RULES = [
@@ -296,9 +271,7 @@ class Document(db.Model):
     )
 
     # initial fields
-    id = db.Column(
-        StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
     tenant_id = db.Column(StringUUID, nullable=False)
     dataset_id = db.Column(StringUUID, nullable=False)
     position = db.Column(db.Integer, nullable=False)
@@ -310,9 +283,7 @@ class Document(db.Model):
     created_from = db.Column(db.String(255), nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
     created_api_request_id = db.Column(StringUUID, nullable=True)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
     # start processing
     processing_started_at = db.Column(db.DateTime, nullable=True)
@@ -355,9 +326,7 @@ class Document(db.Model):
     archived_reason = db.Column(db.String(255), nullable=True)
     archived_by = db.Column(StringUUID, nullable=True)
     archived_at = db.Column(db.DateTime, nullable=True)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     doc_type = db.Column(db.String(40), nullable=True)
     doc_metadata = db.Column(db.JSON, nullable=True)
     doc_form = db.Column(
@@ -374,10 +343,7 @@ class Document(db.Model):
         status = None
         if self.indexing_status == "waiting":
             status = "queuing"
-        elif (
-            self.indexing_status not in {"completed", "error", "waiting"}
-            and self.is_paused
-        ):
+        elif self.indexing_status not in {"completed", "error", "waiting"} and self.is_paused:
             status = "paused"
         elif self.indexing_status in {"parsing", "cleaning", "splitting", "indexing"}:
             status = "indexing"
@@ -385,11 +351,7 @@ class Document(db.Model):
             status = "error"
         elif self.indexing_status == "completed" and not self.archived and self.enabled:
             status = "available"
-        elif (
-            self.indexing_status == "completed"
-            and not self.archived
-            and not self.enabled
-        ):
+        elif self.indexing_status == "completed" and not self.archived and not self.enabled:
             status = "disabled"
         elif self.indexing_status == "completed" and self.archived:
             status = "archived"
@@ -434,12 +396,7 @@ class Document(db.Model):
 
     @property
     def average_segment_length(self):
-        if (
-            self.word_count
-            and self.word_count != 0
-            and self.segment_count
-            and self.segment_count != 0
-        ):
+        if self.word_count and self.word_count != 0 and self.segment_count and self.segment_count != 0:
             return self.word_count // self.segment_count
         return 0
 
@@ -451,24 +408,16 @@ class Document(db.Model):
 
     @property
     def dataset(self):
-        return (
-            db.session.query(Dataset)
-            .filter(Dataset.id == self.dataset_id)
-            .one_or_none()
-        )
+        return db.session.query(Dataset).filter(Dataset.id == self.dataset_id).one_or_none()
 
     @property
     def segment_count(self):
-        return DocumentSegment.query.filter(
-            DocumentSegment.document_id == self.id
-        ).count()
+        return DocumentSegment.query.filter(DocumentSegment.document_id == self.id).count()
 
     @property
     def hit_count(self):
         return (
-            DocumentSegment.query.with_entities(
-                func.coalesce(func.sum(DocumentSegment.hit_count))
-            )
+            DocumentSegment.query.with_entities(func.coalesce(func.sum(DocumentSegment.hit_count)))
             .filter(DocumentSegment.document_id == self.id)
             .scalar()
         )
@@ -518,9 +467,7 @@ class Document(db.Model):
             "display_status": self.display_status,
             "data_source_info_dict": self.data_source_info_dict,
             "average_segment_length": self.average_segment_length,
-            "dataset_process_rule": self.dataset_process_rule.to_dict()
-            if self.dataset_process_rule
-            else None,
+            "dataset_process_rule": self.dataset_process_rule.to_dict() if self.dataset_process_rule else None,
             "dataset": self.dataset.to_dict() if self.dataset else None,
             "segment_count": self.segment_count,
             "hit_count": self.hit_count,
@@ -585,9 +532,7 @@ class DocumentSegment(db.Model):
     )
 
     # initial fields
-    id = db.Column(
-        StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
     tenant_id = db.Column(StringUUID, nullable=False)
     dataset_id = db.Column(StringUUID, nullable=False)
     document_id = db.Column(StringUUID, nullable=False)
@@ -613,13 +558,9 @@ class DocumentSegment(db.Model):
         server_default=db.text("'waiting'::character varying"),
     )
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     updated_by = db.Column(StringUUID, nullable=True)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     indexing_at = db.Column(db.DateTime, nullable=True)
     completed_at = db.Column(db.DateTime, nullable=True)
     error = db.Column(db.Text, nullable=True)
@@ -631,9 +572,7 @@ class DocumentSegment(db.Model):
 
     @property
     def document(self):
-        return (
-            db.session.query(Document).filter(Document.id == self.document_id).first()
-        )
+        return db.session.query(Document).filter(Document.id == self.document_id).first()
 
     @property
     def previous_segment(self):
@@ -669,9 +608,7 @@ class DocumentSegment(db.Model):
             nonce = os.urandom(16).hex()
             timestamp = str(int(time.time()))
             data_to_sign = f"image-preview|{upload_file_id}|{timestamp}|{nonce}"
-            secret_key = (
-                dify_config.SECRET_KEY.encode() if dify_config.SECRET_KEY else b""
-            )
+            secret_key = dify_config.SECRET_KEY.encode() if dify_config.SECRET_KEY else b""
             sign = hmac.new(secret_key, data_to_sign.encode(), hashlib.sha256).digest()
             encoded_sign = base64.urlsafe_b64encode(sign).decode()
 
@@ -719,9 +656,7 @@ class AppDatasetJoin(db.Model):
     )
     app_id = db.Column(StringUUID, nullable=False)
     dataset_id = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.func.current_timestamp()
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
 
     @property
     def app(self):
@@ -747,9 +682,7 @@ class DatasetQuery(db.Model):
     source_app_id = db.Column(StringUUID, nullable=True)
     created_by_role = db.Column(db.String, nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.func.current_timestamp()
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
 
 
 class DatasetKeywordTable(db.Model):
@@ -759,9 +692,7 @@ class DatasetKeywordTable(db.Model):
         db.Index("dataset_keyword_table_dataset_id_idx", "dataset_id"),
     )
 
-    id = db.Column(
-        StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()"))
     dataset_id = db.Column(StringUUID, nullable=False, unique=True)
     keyword_table = db.Column(db.Text, nullable=False)
     data_source_type = db.Column(
@@ -788,21 +719,13 @@ class DatasetKeywordTable(db.Model):
         if not dataset:
             return None
         if self.data_source_type == "database":
-            return (
-                json.loads(self.keyword_table, cls=SetDecoder)
-                if self.keyword_table
-                else None
-            )
+            return json.loads(self.keyword_table, cls=SetDecoder) if self.keyword_table else None
         else:
-            file_key = (
-                "keyword_files/" + dataset.tenant_id + "/" + self.dataset_id + ".txt"
-            )
+            file_key = "keyword_files/" + dataset.tenant_id + "/" + self.dataset_id + ".txt"
             try:
                 keyword_table_text = storage.load_once(file_key)
                 if keyword_table_text:
-                    return json.loads(
-                        keyword_table_text.decode("utf-8"), cls=SetDecoder
-                    )
+                    return json.loads(keyword_table_text.decode("utf-8"), cls=SetDecoder)
                 return None
             except Exception as e:
                 logging.exception(str(e))
@@ -813,15 +736,11 @@ class Embedding(db.Model):
     __tablename__ = "embeddings"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="embedding_pkey"),
-        db.UniqueConstraint(
-            "model_name", "hash", "provider_name", name="embedding_hash_idx"
-        ),
+        db.UniqueConstraint("model_name", "hash", "provider_name", name="embedding_hash_idx"),
         db.Index("created_at_idx", "created_at"),
     )
 
-    id = db.Column(
-        StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()"))
     model_name = db.Column(
         db.String(255),
         nullable=False,
@@ -829,12 +748,8 @@ class Embedding(db.Model):
     )
     hash = db.Column(db.String(64), nullable=False)
     embedding = db.Column(db.LargeBinary, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
-    provider_name = db.Column(
-        db.String(255), nullable=False, server_default=db.text("''::character varying")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    provider_name = db.Column(db.String(255), nullable=False, server_default=db.text("''::character varying"))
 
     def set_embedding(self, embedding_data: list[float]):
         self.embedding = pickle.dumps(embedding_data, protocol=pickle.HIGHEST_PROTOCOL)
@@ -850,9 +765,7 @@ class DatasetCollectionBinding(db.Model):
         db.Index("provider_model_name_idx", "provider_name", "model_name"),
     )
 
-    id = db.Column(
-        StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, primary_key=True, server_default=db.text("uuid_generate_v4()"))
     provider_name = db.Column(db.String(40), nullable=False)
     model_name = db.Column(db.String(255), nullable=False)
     type = db.Column(
@@ -861,9 +774,7 @@ class DatasetCollectionBinding(db.Model):
         nullable=False,
     )
     collection_name = db.Column(db.String(64), nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
 
 class TidbAuthBinding(db.Model):
@@ -907,18 +818,12 @@ class DatasetPermission(db.Model):
         db.Index("idx_dataset_permissions_tenant_id", "tenant_id"),
     )
 
-    id = db.Column(
-        StringUUID, server_default=db.text("uuid_generate_v4()"), primary_key=True
-    )
+    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"), primary_key=True)
     dataset_id = db.Column(StringUUID, nullable=False)
     account_id = db.Column(StringUUID, nullable=False)
     tenant_id = db.Column(StringUUID, nullable=False)
-    has_permission = db.Column(
-        db.Boolean, nullable=False, server_default=db.text("true")
-    )
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    has_permission = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
 
 class ExternalKnowledgeApis(db.Model):
@@ -929,21 +834,15 @@ class ExternalKnowledgeApis(db.Model):
         db.Index("external_knowledge_apis_name_idx", "name"),
     )
 
-    id = db.Column(
-        StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
     tenant_id = db.Column(StringUUID, nullable=False)
     settings = db.Column(db.Text, nullable=True)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     updated_by = db.Column(StringUUID, nullable=True)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
     def to_dict(self):
         return {
@@ -996,18 +895,12 @@ class ExternalKnowledgeBindings(db.Model):
         ),
     )
 
-    id = db.Column(
-        StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()")
-    )
+    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
     tenant_id = db.Column(StringUUID, nullable=False)
     external_knowledge_api_id = db.Column(StringUUID, nullable=False)
     dataset_id = db.Column(StringUUID, nullable=False)
     external_knowledge_id = db.Column(db.Text, nullable=False)
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     updated_by = db.Column(StringUUID, nullable=True)
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))

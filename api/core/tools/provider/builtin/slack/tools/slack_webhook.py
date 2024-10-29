@@ -43,6 +43,4 @@ class SlackWebhookTool(BuiltinTool):
                     f"Failed to send the text message, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message(
-                "Failed to send message through webhook. {}".format(e)
-            )
+            return self.create_text_message("Failed to send message through webhook. {}".format(e))

@@ -28,6 +28,4 @@ def test_validate_provider_credentials():
         }
         mock_response.status_code = 200
         mock_post.return_value = mock_response
-        provider.validate_provider_credentials(
-            credentials={"api_key": os.environ.get("VOYAGE_API_KEY")}
-        )
+        provider.validate_provider_credentials(credentials={"api_key": os.environ.get("VOYAGE_API_KEY")})

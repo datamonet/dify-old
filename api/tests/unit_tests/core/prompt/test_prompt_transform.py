@@ -49,9 +49,7 @@ def test__calculate_rest_token():
     prompt_transform = PromptTransform()
 
     prompt_messages = [UserPromptMessage(content="Hello, how are you?")]
-    rest_tokens = prompt_transform._calculate_rest_token(
-        prompt_messages, model_config_mock
-    )
+    rest_tokens = prompt_transform._calculate_rest_token(prompt_messages, model_config_mock)
 
     # Validate based on the mock configuration and expected logic
     expected_rest_tokens = (

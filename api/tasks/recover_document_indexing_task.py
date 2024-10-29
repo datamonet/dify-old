@@ -22,11 +22,7 @@ def recover_document_indexing_task(dataset_id: str, document_id: str):
     logging.info(click.style("Recover document: {}".format(document_id), fg="green"))
     start_at = time.perf_counter()
 
-    document = (
-        db.session.query(Document)
-        .filter(Document.id == document_id, Document.dataset_id == dataset_id)
-        .first()
-    )
+    document = db.session.query(Document).filter(Document.id == document_id, Document.dataset_id == dataset_id).first()
 
     if not document:
         raise NotFound("Document not found")
@@ -42,9 +38,7 @@ def recover_document_indexing_task(dataset_id: str, document_id: str):
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Processed document: {} latency: {}".format(
-                    document.id, end_at - start_at
-                ),
+                "Processed document: {} latency: {}".format(document.id, end_at - start_at),
                 fg="green",
             )
         )

@@ -85,13 +85,9 @@ class MessageListApi(Resource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "conversation_id", required=True, type=uuid_value, location="args"
-        )
+        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
 
         try:
@@ -109,22 +105,16 @@ class MessageListApi(Resource):
 
 
 class MessageFeedbackApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser, message_id):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "rating", type=str, choices=["like", "dislike", None], location="json"
-        )
+        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(
-                app_model, message_id, end_user, args["rating"]
-            )
+            MessageService.create_feedback(app_model, message_id, end_user, args["rating"])
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 
@@ -132,9 +122,7 @@ class MessageFeedbackApi(Resource):
 
 
 class MessageSuggestedApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.QUERY, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.QUERY, required=True))
     def get(self, app_model: App, end_user: EndUser, message_id):
         message_id = str(message_id)
         app_mode = AppMode.value_of(app_model.mode)

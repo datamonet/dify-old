@@ -21,13 +21,8 @@ class NovitaAiTxt2ImgTool(BuiltinTool, NovitaAiToolBase):
         """
         invoke tools
         """
-        if (
-            "api_key" not in self.runtime.credentials
-            or not self.runtime.credentials.get("api_key")
-        ):
-            raise ToolProviderCredentialValidationError(
-                "Novita AI API Key is required."
-            )
+        if "api_key" not in self.runtime.credentials or not self.runtime.credentials.get("api_key"):
+            raise ToolProviderCredentialValidationError("Novita AI API Key is required.")
 
         api_key = self.runtime.credentials.get("api_key")
 
@@ -36,9 +31,7 @@ class NovitaAiTxt2ImgTool(BuiltinTool, NovitaAiToolBase):
         client_result = client.txt2img_v3(**param)
 
         results = []
-        for image_encoded, image in zip(
-            client_result.images_encoded, client_result.images
-        ):
+        for image_encoded, image in zip(client_result.images_encoded, client_result.images):
             if self._is_hit_nsfw_detection(image, 0.8):
                 results = self.create_text_message(text="NSFW detected!")
                 break
@@ -67,22 +60,15 @@ class NovitaAiTxt2ImgTool(BuiltinTool, NovitaAiToolBase):
         if "clip_skip" in res_parameters and res_parameters.get("clip_skip") == 0:
             del res_parameters["clip_skip"]
 
-        if (
-            "refiner_switch_at" in res_parameters
-            and res_parameters.get("refiner_switch_at") == 0
-        ):
+        if "refiner_switch_at" in res_parameters and res_parameters.get("refiner_switch_at") == 0:
             del res_parameters["refiner_switch_at"]
 
         if "enabled_enterprise_plan" in res_parameters:
-            res_parameters["enterprise_plan"] = {
-                "enabled": res_parameters["enabled_enterprise_plan"]
-            }
+            res_parameters["enterprise_plan"] = {"enabled": res_parameters["enabled_enterprise_plan"]}
             del res_parameters["enabled_enterprise_plan"]
 
         if "nsfw_detection_level" in res_parameters:
-            res_parameters["nsfw_detection_level"] = int(
-                res_parameters["nsfw_detection_level"]
-            )
+            res_parameters["nsfw_detection_level"] = int(res_parameters["nsfw_detection_level"])
 
         # process loras
         if "loras" in res_parameters:
@@ -90,21 +76,15 @@ class NovitaAiTxt2ImgTool(BuiltinTool, NovitaAiToolBase):
 
         # process embeddings
         if "embeddings" in res_parameters:
-            res_parameters["embeddings"] = self._extract_embeddings(
-                res_parameters.get("embeddings")
-            )
+            res_parameters["embeddings"] = self._extract_embeddings(res_parameters.get("embeddings"))
 
         # process hires_fix
         if "hires_fix" in res_parameters:
-            res_parameters["hires_fix"] = self._extract_hires_fix(
-                res_parameters.get("hires_fix")
-            )
+            res_parameters["hires_fix"] = self._extract_hires_fix(res_parameters.get("hires_fix"))
 
         # process refiner
         if "refiner_switch_at" in res_parameters:
-            res_parameters["refiner"] = self._extract_refiner(
-                res_parameters.get("refiner_switch_at")
-            )
+            res_parameters["refiner"] = self._extract_refiner(res_parameters.get("refiner_switch_at"))
             del res_parameters["refiner_switch_at"]
 
         return res_parameters

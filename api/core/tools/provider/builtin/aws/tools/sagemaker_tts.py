@@ -52,11 +52,7 @@ class SageMakerTTSTool(BuiltinTool):
                 "prompt_audio": prompt_audio,
                 "lang_tag": lang_tag,
             }
-        if (
-            model_type == TTSModelType.InstructVoice.value
-            and instruct_text
-            and model_role
-        ):
+        if model_type == TTSModelType.InstructVoice.value and instruct_text and model_role:
             return {
                 "tts_text": content_text,
                 "role": model_role,
@@ -87,13 +83,9 @@ class SageMakerTTSTool(BuiltinTool):
             if not self.sagemaker_client:
                 aws_region = tool_parameters.get("aws_region")
                 if aws_region:
-                    self.sagemaker_client = boto3.client(
-                        "sagemaker-runtime", region_name=aws_region
-                    )
+                    self.sagemaker_client = boto3.client("sagemaker-runtime", region_name=aws_region)
                     self.s3_client = boto3.client("s3", region_name=aws_region)
-                    self.comprehend_client = boto3.client(
-                        "comprehend", region_name=aws_region
-                    )
+                    self.comprehend_client = boto3.client("comprehend", region_name=aws_region)
                 else:
                     self.sagemaker_client = boto3.client("sagemaker-runtime")
                     self.s3_client = boto3.client("s3")

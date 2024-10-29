@@ -82,9 +82,7 @@ class AgentChatAppRunner(AppRunner):
                 model=application_generate_entity.model_conf.model,
             )
 
-            memory = TokenBufferMemory(
-                conversation=conversation, model_instance=model_instance
-            )
+            memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
 
         # organize all inputs and template to prompt messages
         # Include: prompt template, inputs, query(optional), files(optional)
@@ -132,9 +130,7 @@ class AgentChatAppRunner(AppRunner):
 
             if annotation_reply:
                 queue_manager.publish(
-                    QueueAnnotationReplyEvent(
-                        message_annotation_id=annotation_reply.id
-                    ),
+                    QueueAnnotationReplyEvent(message_annotation_id=annotation_reply.id),
                     PublishFrom.APPLICATION_MANAGER,
                 )
 
@@ -191,9 +187,7 @@ class AgentChatAppRunner(AppRunner):
         )
 
         # convert db variables to tool variables
-        tool_variables = self._convert_db_variables_to_tool_variables(
-            tool_conversation_variables
-        )
+        tool_variables = self._convert_db_variables_to_tool_variables(tool_conversation_variables)
 
         # init model instance
         model_instance = ModelInstance(
@@ -212,40 +206,24 @@ class AgentChatAppRunner(AppRunner):
 
         # change function call strategy based on LLM model
         llm_model = cast(LargeLanguageModel, model_instance.model_type_instance)
-        model_schema = llm_model.get_model_schema(
-            model_instance.model, model_instance.credentials
-        )
+        model_schema = llm_model.get_model_schema(model_instance.model, model_instance.credentials)
 
-        if {ModelFeature.MULTI_TOOL_CALL, ModelFeature.TOOL_CALL}.intersection(
-            model_schema.features or []
-        ):
+        if {ModelFeature.MULTI_TOOL_CALL, ModelFeature.TOOL_CALL}.intersection(model_schema.features or []):
             agent_entity.strategy = AgentEntity.Strategy.FUNCTION_CALLING
 
-        conversation = (
-            db.session.query(Conversation)
-            .filter(Conversation.id == conversation.id)
-            .first()
-        )
+        conversation = db.session.query(Conversation).filter(Conversation.id == conversation.id).first()
         message = db.session.query(Message).filter(Message.id == message.id).first()
         db.session.close()
 
         # start agent runner
         if agent_entity.strategy == AgentEntity.Strategy.CHAIN_OF_THOUGHT:
             # check LLM mode
-            if (
-                model_schema.model_properties.get(ModelPropertyKey.MODE)
-                == LLMMode.CHAT.value
-            ):
+            if model_schema.model_properties.get(ModelPropertyKey.MODE) == LLMMode.CHAT.value:
                 runner_cls = CotChatAgentRunner
-            elif (
-                model_schema.model_properties.get(ModelPropertyKey.MODE)
-                == LLMMode.COMPLETION.value
-            ):
+            elif model_schema.model_properties.get(ModelPropertyKey.MODE) == LLMMode.COMPLETION.value:
                 runner_cls = CotCompletionAgentRunner
             else:
-                raise ValueError(
-                    f"Invalid LLM mode: {model_schema.model_properties.get(ModelPropertyKey.MODE)}"
-                )
+                raise ValueError(f"Invalid LLM mode: {model_schema.model_properties.get(ModelPropertyKey.MODE)}")
         elif agent_entity.strategy == AgentEntity.Strategy.FUNCTION_CALLING:
             runner_cls = FunctionCallAgentRunner
         else:
@@ -282,9 +260,7 @@ class AgentChatAppRunner(AppRunner):
             agent=True,
         )
 
-    def _load_tool_variables(
-        self, conversation_id: str, user_id: str, tenant_id: str
-    ) -> ToolConversationVariables:
+    def _load_tool_variables(self, conversation_id: str, user_id: str, tenant_id: str) -> ToolConversationVariables:
         """
         load tool variables from database
         """
@@ -338,9 +314,7 @@ class AgentChatAppRunner(AppRunner):
         :return:
         """
         agent_thoughts = (
-            db.session.query(MessageAgentThought)
-            .filter(MessageAgentThought.message_id == message.id)
-            .all()
+            db.session.query(MessageAgentThought).filter(MessageAgentThought.message_id == message.id).all()
         )
 
         all_message_tokens = 0

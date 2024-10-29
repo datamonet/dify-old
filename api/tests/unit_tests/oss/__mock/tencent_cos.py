@@ -66,7 +66,7 @@ class MockTencentCosClass:
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_tencent_cos_mock(monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(CosS3Client, "__init__", MockTencentCosClass.__init__)

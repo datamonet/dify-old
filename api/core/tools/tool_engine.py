@@ -66,16 +66,12 @@ class ToolEngine:
             if parameters and len(parameters) == 1:
                 tool_parameters = {parameters[0].name: tool_parameters}
             else:
-                raise ValueError(
-                    f"tool_parameters should be a dict, but got a string: {tool_parameters}"
-                )
+                raise ValueError(f"tool_parameters should be a dict, but got a string: {tool_parameters}")
 
         # invoke the tool
         try:
             # hit the callback handler
-            agent_tool_callback.on_tool_start(
-                tool_name=tool.identity.name, tool_inputs=tool_parameters
-            )
+            agent_tool_callback.on_tool_start(tool_name=tool.identity.name, tool_inputs=tool_parameters)
 
             meta, response = ToolEngine._invoke(tool, tool_parameters, user_id)
             response = ToolFileMessageTransformer.transform_tool_invoke_messages(
@@ -173,9 +169,7 @@ class ToolEngine:
             raise e
 
     @staticmethod
-    def _invoke(
-        tool: Tool, tool_parameters: dict, user_id: str
-    ) -> tuple[ToolInvokeMeta, list[ToolInvokeMessage]]:
+    def _invoke(tool: Tool, tool_parameters: dict, user_id: str) -> tuple[ToolInvokeMeta, list[ToolInvokeMessage]]:
         """
         Invoke the tool with the given arguments.
         """
@@ -212,9 +206,7 @@ class ToolEngine:
             if response.type == ToolInvokeMessage.MessageType.TEXT:
                 result += response.message
             elif response.type == ToolInvokeMessage.MessageType.LINK:
-                result += (
-                    f"result link: {response.message}. please tell user to check it."
-                )
+                result += f"result link: {response.message}. please tell user to check it."
             elif response.type in {
                 ToolInvokeMessage.MessageType.IMAGE_LINK,
                 ToolInvokeMessage.MessageType.IMAGE,

@@ -21,9 +21,7 @@ class ToolProvider(db.Model):
     __tablename__ = "tool_providers"
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="tool_provider_pkey"),
-        db.UniqueConstraint(
-            "tenant_id", "tool_name", name="unique_tool_provider_tool_name"
-        ),
+        db.UniqueConstraint("tenant_id", "tool_name", name="unique_tool_provider_tool_name"),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -31,12 +29,8 @@ class ToolProvider(db.Model):
     tool_name = db.Column(db.String(40), nullable=False)
     encrypted_credentials = db.Column(db.Text, nullable=True)
     is_enabled = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
-    updated_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
+    updated_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def credentials_is_set(self):
@@ -50,8 +44,4 @@ class ToolProvider(db.Model):
         """
         Returns the decrypted config.
         """
-        return (
-            json.loads(self.encrypted_credentials)
-            if self.encrypted_credentials is not None
-            else None
-        )
+        return json.loads(self.encrypted_credentials) if self.encrypted_credentials is not None else None

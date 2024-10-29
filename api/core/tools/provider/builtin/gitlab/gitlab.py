@@ -9,12 +9,8 @@ from core.tools.provider.builtin_tool_provider import BuiltinToolProviderControl
 class GitlabProvider(BuiltinToolProviderController):
     def _validate_credentials(self, credentials: dict[str, Any]) -> None:
         try:
-            if "access_tokens" not in credentials or not credentials.get(
-                "access_tokens"
-            ):
-                raise ToolProviderCredentialValidationError(
-                    "Gitlab Access Tokens is required."
-                )
+            if "access_tokens" not in credentials or not credentials.get("access_tokens"):
+                raise ToolProviderCredentialValidationError("Gitlab Access Tokens is required.")
 
             if "site_url" not in credentials or not credentials.get("site_url"):
                 site_url = "https://gitlab.com"
@@ -29,12 +25,8 @@ class GitlabProvider(BuiltinToolProviderController):
 
                 response = requests.get(url=f"{site_url}/api/v4/user", headers=headers)
                 if response.status_code != 200:
-                    raise ToolProviderCredentialValidationError(
-                        (response.json()).get("message")
-                    )
+                    raise ToolProviderCredentialValidationError((response.json()).get("message"))
             except Exception as e:
-                raise ToolProviderCredentialValidationError(
-                    "Gitlab Access Tokens is invalid. {}".format(e)
-                )
+                raise ToolProviderCredentialValidationError("Gitlab Access Tokens is invalid. {}".format(e))
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

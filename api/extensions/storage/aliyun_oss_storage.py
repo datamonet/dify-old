@@ -32,9 +32,7 @@ class AliyunOssStorage(BaseStorage):
         self.client.put_object(self.__wrapper_folder_filename(filename), data)
 
     def load_once(self, filename: str) -> bytes:
-        with closing(
-            self.client.get_object(self.__wrapper_folder_filename(filename))
-        ) as obj:
+        with closing(self.client.get_object(self.__wrapper_folder_filename(filename))) as obj:
             data = obj.read()
         return data
 
@@ -44,9 +42,7 @@ class AliyunOssStorage(BaseStorage):
             yield chunk
 
     def download(self, filename, target_filepath):
-        self.client.get_object_to_file(
-            self.__wrapper_folder_filename(filename), target_filepath
-        )
+        self.client.get_object_to_file(self.__wrapper_folder_filename(filename), target_filepath)
 
     def exists(self, filename):
         return self.client.object_exists(self.__wrapper_folder_filename(filename))

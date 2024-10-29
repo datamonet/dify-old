@@ -16,9 +16,7 @@ class FluxProTool(BuiltinTool):
         """
         invoke tools
         """
-        client = replicate.Client(
-            api_token=self.runtime.credentials["replicate_api_key"]
-        )
+        client = replicate.Client(api_token=self.runtime.credentials["replicate_api_key"])
 
         # prompt
         prompt = tool_parameters.get("prompt", "")

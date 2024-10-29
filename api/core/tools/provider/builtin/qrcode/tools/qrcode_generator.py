@@ -59,9 +59,7 @@ class QRCodeGeneratorTool(BuiltinTool):
             logging.exception(f"Failed to generate QR code for content: {content}")
             return self.create_text_message("Failed to generate QR code")
 
-    def _generate_qrcode(
-        self, content: str, border: int, error_correction: str
-    ) -> BaseImage:
+    def _generate_qrcode(self, content: str, border: int, error_correction: str) -> BaseImage:
         qr = QRCode(
             image_factory=PyPNGImage,
             error_correction=self.error_correction_levels.get(error_correction),

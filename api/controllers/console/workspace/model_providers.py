@@ -35,9 +35,7 @@ class ModelProviderListApi(Resource):
         args = parser.parse_args()
 
         model_provider_service = ModelProviderService()
-        provider_list = model_provider_service.get_provider_list(
-            tenant_id=tenant_id, model_type=args.get("model_type")
-        )
+        provider_list = model_provider_service.get_provider_list(tenant_id=tenant_id, model_type=args.get("model_type"))
 
         return jsonable_encoder({"data": provider_list})
 
@@ -50,9 +48,7 @@ class ModelProviderCredentialApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         model_provider_service = ModelProviderService()
-        credentials = model_provider_service.get_provider_credentials(
-            tenant_id=tenant_id, provider=provider
-        )
+        credentials = model_provider_service.get_provider_credentials(tenant_id=tenant_id, provider=provider)
 
         return {"credentials": credentials}
 
@@ -63,9 +59,7 @@ class ModelProviderValidateApi(Resource):
     @account_initialization_required
     def post(self, provider: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "credentials", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         tenant_id = current_user.current_tenant_id
@@ -100,9 +94,7 @@ class ModelProviderApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "credentials", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         model_provider_service = ModelProviderService()
@@ -126,9 +118,7 @@ class ModelProviderApi(Resource):
             raise Forbidden()
 
         model_provider_service = ModelProviderService()
-        model_provider_service.remove_provider_credentials(
-            tenant_id=current_user.current_tenant_id, provider=provider
-        )
+        model_provider_service.remove_provider_credentials(tenant_id=current_user.current_tenant_id, provider=provider)
 
         return {"result": "success"}, 204
 
@@ -204,9 +194,7 @@ class ModelProviderFreeQuotaSubmitApi(Resource):
     @account_initialization_required
     def post(self, provider: str):
         model_provider_service = ModelProviderService()
-        result = model_provider_service.free_quota_submit(
-            tenant_id=current_user.current_tenant_id, provider=provider
-        )
+        result = model_provider_service.free_quota_submit(tenant_id=current_user.current_tenant_id, provider=provider)
 
         return result
 
@@ -217,9 +205,7 @@ class ModelProviderFreeQuotaQualificationVerifyApi(Resource):
     @account_initialization_required
     def get(self, provider: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "token", type=str, required=False, nullable=True, location="args"
-        )
+        parser.add_argument("token", type=str, required=False, nullable=True, location="args")
         args = parser.parse_args()
 
         model_provider_service = ModelProviderService()
@@ -242,9 +228,7 @@ api.add_resource(
     ModelProviderValidateApi,
     "/workspaces/current/model-providers/<string:provider>/credentials/validate",
 )
-api.add_resource(
-    ModelProviderApi, "/workspaces/current/model-providers/<string:provider>"
-)
+api.add_resource(ModelProviderApi, "/workspaces/current/model-providers/<string:provider>")
 api.add_resource(
     ModelProviderIconApi,
     "/workspaces/current/model-providers/<string:provider>/<string:icon_type>/<string:lang>",

@@ -21,9 +21,7 @@ from models.workflow import WorkflowRun
 
 
 class TokenBufferMemory:
-    def __init__(
-        self, conversation: Conversation, model_instance: ModelInstance
-    ) -> None:
+    def __init__(self, conversation: Conversation, model_instance: ModelInstance) -> None:
         self.conversation = conversation
         self.model_instance = model_instance
 
@@ -68,11 +66,7 @@ class TokenBufferMemory:
 
         prompt_messages = []
         for message in messages:
-            files = (
-                db.session.query(MessageFile)
-                .filter(MessageFile.message_id == message.id)
-                .all()
-            )
+            files = db.session.query(MessageFile).filter(MessageFile.message_id == message.id).all()
             if files:
                 file_extra_config = None
                 if self.conversation.mode not in {AppMode.ADVANCED_CHAT, AppMode.WORKFLOW}:
@@ -80,9 +74,7 @@ class TokenBufferMemory:
                 else:
                     if message.workflow_run_id:
                         workflow_run = (
-                            db.session.query(WorkflowRun)
-                            .filter(WorkflowRun.id == message.workflow_run_id)
-                            .first()
+                            db.session.query(WorkflowRun).filter(WorkflowRun.id == message.workflow_run_id).first()
                         )
 
                         if workflow_run:
@@ -107,9 +99,7 @@ class TokenBufferMemory:
                             prompt_message = file_manager.to_prompt_message_content(file_obj)
                             prompt_message_contents.append(prompt_message)
 
-                    prompt_messages.append(
-                        UserPromptMessage(content=prompt_message_contents)
-                    )
+                    prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
             else:
                 prompt_messages.append(UserPromptMessage(content=message.query))
 
@@ -125,9 +115,7 @@ class TokenBufferMemory:
             pruned_memory = []
             while curr_message_tokens > max_token_limit and len(prompt_messages) > 1:
                 pruned_memory.append(prompt_messages.pop(0))
-                curr_message_tokens = self.model_instance.get_llm_num_tokens(
-                    prompt_messages
-                )
+                curr_message_tokens = self.model_instance.get_llm_num_tokens(prompt_messages)
 
         return prompt_messages
 
@@ -146,9 +134,7 @@ class TokenBufferMemory:
         :param message_limit: message limit
         :return:
         """
-        prompt_messages = self.get_history_prompt_messages(
-            max_token_limit=max_token_limit, message_limit=message_limit
-        )
+        prompt_messages = self.get_history_prompt_messages(max_token_limit=max_token_limit, message_limit=message_limit)
 
         string_messages = []
         for m in prompt_messages:

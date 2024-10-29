@@ -12,9 +12,7 @@ class FirecrawlAuth(ApiKeyAuthBase):
         if auth_type != "bearer":
             raise ValueError("Invalid auth type, Firecrawl auth type must be Bearer")
         self.api_key = credentials.get("config").get("api_key", None)
-        self.base_url = credentials.get("config").get(
-            "base_url", "https://api.firecrawl.dev"
-        )
+        self.base_url = credentials.get("config").get("base_url", "https://api.firecrawl.dev")
 
         if not self.api_key:
             raise ValueError("No API key provided")
@@ -44,17 +42,9 @@ class FirecrawlAuth(ApiKeyAuthBase):
     def _handle_error(self, response):
         if response.status_code in {402, 409, 500}:
             error_message = response.json().get("error", "Unknown error occurred")
-            raise Exception(
-                f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}"
-            )
+            raise Exception(f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}")
         else:
             if response.text:
-                error_message = json.loads(response.text).get(
-                    "error", "Unknown error occurred"
-                )
-                raise Exception(
-                    f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}"
-                )
-            raise Exception(
-                f"Unexpected error occurred while trying to authorize. Status code: {response.status_code}"
-            )
+                error_message = json.loads(response.text).get("error", "Unknown error occurred")
+                raise Exception(f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}")
+            raise Exception(f"Unexpected error occurred while trying to authorize. Status code: {response.status_code}")

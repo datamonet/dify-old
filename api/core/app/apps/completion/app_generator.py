@@ -88,9 +88,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
         conversation = None
 
         # get app model config
-        app_model_config = self._get_app_model_config(
-            app_model=app_model, conversation=conversation
-        )
+        app_model_config = self._get_app_model_config(app_model=app_model, conversation=conversation)
 
         # validate override model config
         override_model_config_dict = None
@@ -146,9 +144,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
         )
 
         # init generate records
-        (conversation, message) = self._init_generate_records(
-            application_generate_entity
-        )
+        (conversation, message) = self._init_generate_records(application_generate_entity)
 
         # init queue manager
         queue_manager = MessageBasedAppQueueManager(
@@ -183,9 +179,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
             stream=stream,
         )
 
-        return CompletionAppGenerateResponseConverter.convert(
-            response=response, invoke_from=invoke_from
-        )
+        return CompletionAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
 
     def _generate_worker(
         self,
@@ -225,10 +219,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
                 logger.exception("Validation Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except (ValueError, InvokeError) as e:
-                if (
-                    os.environ.get("DEBUG")
-                    and os.environ.get("DEBUG").lower() == "true"
-                ):
+                if os.environ.get("DEBUG") and os.environ.get("DEBUG").lower() == "true":
                     logger.exception("Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except Exception as e:
@@ -259,12 +250,9 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
             .filter(
                 Message.id == message_id,
                 Message.app_id == app_model.id,
-                Message.from_source
-                == ("api" if isinstance(user, EndUser) else "console"),
-                Message.from_end_user_id
-                == (user.id if isinstance(user, EndUser) else None),
-                Message.from_account_id
-                == (user.id if isinstance(user, Account) else None),
+                Message.from_source == ("api" if isinstance(user, EndUser) else "console"),
+                Message.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
+                Message.from_account_id == (user.id if isinstance(user, Account) else None),
             )
             .first()
         )
@@ -275,10 +263,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
         current_app_model_config = app_model.app_model_config
         more_like_this = current_app_model_config.more_like_this_dict
 
-        if (
-            not current_app_model_config.more_like_this
-            or more_like_this.get("enabled", False) is False
-        ):
+        if not current_app_model_config.more_like_this or more_like_this.get("enabled", False) is False:
             raise MoreLikeThisDisabledError()
 
         app_model_config = message.app_model_config
@@ -325,9 +310,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
         )
 
         # init generate records
-        (conversation, message) = self._init_generate_records(
-            application_generate_entity
-        )
+        (conversation, message) = self._init_generate_records(application_generate_entity)
 
         # init queue manager
         queue_manager = MessageBasedAppQueueManager(
@@ -362,6 +345,4 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
             stream=stream,
         )
 
-        return CompletionAppGenerateResponseConverter.convert(
-            response=response, invoke_from=invoke_from
-        )
+        return CompletionAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)

@@ -91,7 +91,5 @@ class WebSearchTool(BuiltinTool):
         location = tool_parameters.get("location", "None")
 
         api_key = self.runtime.credentials["serply_api_key"]
-        result = SerplyApi(api_key).run(
-            query=query, num=num, gl=gl, hl=hl, location=location
-        )
+        result = SerplyApi(api_key).run(query=query, num=num, gl=gl, hl=hl, location=location)
         return self.create_text_message(text=result)

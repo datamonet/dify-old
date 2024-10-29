@@ -11,9 +11,7 @@ class SearXNGSearchTool(BuiltinTool):
     Tool for performing a search using SearXNG engine.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invoke the SearXNG search tool.
 
@@ -43,8 +41,6 @@ class SearXNGSearchTool(BuiltinTool):
 
         res = response.json().get("results", [])
         if not res:
-            return self.create_text_message(
-                f"No results found, get response: {response.content}"
-            )
+            return self.create_text_message(f"No results found, get response: {response.content}")
 
         return [self.create_json_message(item) for item in res]

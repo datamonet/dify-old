@@ -15,9 +15,7 @@ def create_embedding(texts: list[str], model: str, **kwargs: Any) -> dict:
     foo_embedding_sample = 0.123456
 
     combined = {
-        "embeddings": [
-            [foo_embedding_sample for _ in range(768)] for _ in range(texts_len)
-        ],
+        "embeddings": [[foo_embedding_sample for _ in range(768)] for _ in range(texts_len)],
         "usage": {"prompt_tokens": texts_len, "total_tokens": texts_len},
         "model": model,
         "inference_mode": "remote",

@@ -10,9 +10,7 @@ from extensions.ext_mail import mail
 
 
 @shared_task(queue="mail")
-def send_invite_member_mail_task(
-    language: str, to: str, token: str, inviter_name: str, workspace_name: str
-):
+def send_invite_member_mail_task(language: str, to: str, token: str, inviter_name: str, workspace_name: str):
     """
     Async Send invite member mail
     :param language
@@ -28,9 +26,7 @@ def send_invite_member_mail_task(
 
     logging.info(
         click.style(
-            "Start send invite member mail to {} in workspace {}".format(
-                to, workspace_name
-            ),
+            "Start send invite member mail to {} in workspace {}".format(to, workspace_name),
             fg="green",
         )
     )
@@ -61,9 +57,7 @@ def send_invite_member_mail_task(
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Send invite member mail to {} succeeded: latency: {}".format(
-                    to, end_at - start_at
-                ),
+                "Send invite member mail to {} succeeded: latency: {}".format(to, end_at - start_at),
                 fg="green",
             )
         )

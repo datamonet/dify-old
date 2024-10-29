@@ -40,9 +40,7 @@ def retry_document_indexing_task(dataset_id: str, document_ids: list[str]):
                     )
         except Exception as e:
             document = (
-                db.session.query(Document)
-                .filter(Document.id == document_id, Document.dataset_id == dataset_id)
-                .first()
+                db.session.query(Document).filter(Document.id == document_id, Document.dataset_id == dataset_id).first()
             )
             if document:
                 document.indexing_status = "error"
@@ -53,26 +51,16 @@ def retry_document_indexing_task(dataset_id: str, document_ids: list[str]):
             redis_client.delete(retry_indexing_cache_key)
             return
 
-        logging.info(
-            click.style("Start retry document: {}".format(document_id), fg="green")
-        )
+        logging.info(click.style("Start retry document: {}".format(document_id), fg="green"))
         document = (
-            db.session.query(Document)
-            .filter(Document.id == document_id, Document.dataset_id == dataset_id)
-            .first()
+            db.session.query(Document).filter(Document.id == document_id, Document.dataset_id == dataset_id).first()
         )
         try:
             if document:
                 # clean old data
-                index_processor = IndexProcessorFactory(
-                    document.doc_form
-                ).init_index_processor()
+                index_processor = IndexProcessorFactory(document.doc_form).init_index_processor()
 
-                segments = (
-                    db.session.query(DocumentSegment)
-                    .filter(DocumentSegment.document_id == document_id)
-                    .all()
-                )
+                segments = db.session.query(DocumentSegment).filter(DocumentSegment.document_id == document_id).all()
                 if segments:
                     index_node_ids = [segment.index_node_id for segment in segments]
                     # delete from vector index

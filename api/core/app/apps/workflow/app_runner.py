@@ -56,11 +56,7 @@ class WorkflowAppRunner(WorkflowBasedAppRunner):
             InvokeFrom.WEB_APP,
             InvokeFrom.SERVICE_API,
         }:
-            end_user = (
-                db.session.query(EndUser)
-                .filter(EndUser.id == self.application_generate_entity.user_id)
-                .first()
-            )
+            end_user = db.session.query(EndUser).filter(EndUser.id == self.application_generate_entity.user_id).first()
             if end_user:
                 user_id = end_user.session_id
         else:
@@ -70,9 +66,7 @@ class WorkflowAppRunner(WorkflowBasedAppRunner):
         if not app_record:
             raise ValueError("App not found")
 
-        workflow = self.get_workflow(
-            app_model=app_record, workflow_id=app_config.workflow_id
-        )
+        workflow = self.get_workflow(app_model=app_record, workflow_id=app_config.workflow_id)
         if not workflow:
             raise ValueError("Workflow not initialized")
 
@@ -85,12 +79,10 @@ class WorkflowAppRunner(WorkflowBasedAppRunner):
         # if only single iteration run is requested
         if self.application_generate_entity.single_iteration_run:
             # if only single iteration run is requested
-            graph, variable_pool = (
-                self._get_graph_and_variable_pool_of_single_iteration(
-                    workflow=workflow,
-                    node_id=self.application_generate_entity.single_iteration_run.node_id,
-                    user_inputs=self.application_generate_entity.single_iteration_run.inputs,
-                )
+            graph, variable_pool = self._get_graph_and_variable_pool_of_single_iteration(
+                workflow=workflow,
+                node_id=self.application_generate_entity.single_iteration_run.node_id,
+                user_inputs=self.application_generate_entity.single_iteration_run.inputs,
             )
         else:
             inputs = self.application_generate_entity.inputs
@@ -123,8 +115,7 @@ class WorkflowAppRunner(WorkflowBasedAppRunner):
             user_id=self.application_generate_entity.user_id,
             user_from=(
                 UserFrom.ACCOUNT
-                if self.application_generate_entity.invoke_from
-                in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
+                if self.application_generate_entity.invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
                 else UserFrom.END_USER
             ),
             invoke_from=self.application_generate_entity.invoke_from,

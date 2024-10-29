@@ -26,26 +26,16 @@ class GitlabFilesTool(BuiltinTool):
         access_token = self.runtime.credentials.get("access_tokens")
         site_url = self.runtime.credentials.get("site_url")
 
-        if (
-            "access_tokens" not in self.runtime.credentials
-            or not self.runtime.credentials.get("access_tokens")
-        ):
+        if "access_tokens" not in self.runtime.credentials or not self.runtime.credentials.get("access_tokens"):
             return self.create_text_message("Gitlab API Access Tokens is required.")
-        if (
-            "site_url" not in self.runtime.credentials
-            or not self.runtime.credentials.get("site_url")
-        ):
+        if "site_url" not in self.runtime.credentials or not self.runtime.credentials.get("site_url"):
             site_url = "https://gitlab.com"
 
         # Get file content
         if repository:
-            result = self.fetch_files(
-                site_url, access_token, repository, branch, path, is_repository=True
-            )
+            result = self.fetch_files(site_url, access_token, repository, branch, path, is_repository=True)
         else:
-            result = self.fetch_files(
-                site_url, access_token, project, branch, path, is_repository=False
-            )
+            result = self.fetch_files(site_url, access_token, project, branch, path, is_repository=False)
 
         return [self.create_json_message(item) for item in result]
 
@@ -71,9 +61,7 @@ class GitlabFilesTool(BuiltinTool):
                 # Get project ID from project name
                 project_id = self.get_project_id(site_url, access_token, identifier)
                 if not project_id:
-                    return self.create_text_message(
-                        f"Project '{identifier}' not found."
-                    )
+                    return self.create_text_message(f"Project '{identifier}' not found.")
                 tree_url = f"{domain}/api/v4/projects/{project_id}/repository/tree?path={path}&ref={branch}"
 
             response = requests.get(tree_url, headers=headers)
@@ -100,22 +88,20 @@ class GitlabFilesTool(BuiltinTool):
                             f"/{item_path}/raw?ref={branch}"
                         )
                     else:
-                        file_url = f"{domain}/api/v4/projects/{project_id}/repository/files/{item_path}/raw?ref={branch}"
+                        file_url = (
+                            f"{domain}/api/v4/projects/{project_id}/repository/files/{item_path}/raw?ref={branch}"
+                        )
 
                     file_response = requests.get(file_url, headers=headers)
                     file_response.raise_for_status()
                     file_content = file_response.text
-                    results.append(
-                        {"path": item_path, "branch": branch, "content": file_content}
-                    )
+                    results.append({"path": item_path, "branch": branch, "content": file_content})
         except requests.RequestException as e:
             print(f"Error fetching data from GitLab: {e}")
 
         return results
 
-    def get_project_id(
-        self, site_url: str, access_token: str, project_name: str
-    ) -> Union[str, None]:
+    def get_project_id(self, site_url: str, access_token: str, project_name: str) -> Union[str, None]:
         headers = {"PRIVATE-TOKEN": access_token}
         try:
             url = f"{site_url}/api/v4/projects?search={project_name}"

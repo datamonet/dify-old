@@ -35,31 +35,21 @@ class DatasetListApi(DatasetApiResource):
         search = request.args.get("keyword", default=None, type=str)
         tag_ids = request.args.getlist("tag_ids")
 
-        datasets, total = DatasetService.get_datasets(
-            page, limit, tenant_id, current_user, search, tag_ids
-        )
+        datasets, total = DatasetService.get_datasets(page, limit, tenant_id, current_user, search, tag_ids)
         # check embedding setting
         provider_manager = ProviderManager()
-        configurations = provider_manager.get_configurations(
-            tenant_id=current_user.current_tenant_id
-        )
+        configurations = provider_manager.get_configurations(tenant_id=current_user.current_tenant_id)
 
-        embedding_models = configurations.get_models(
-            model_type=ModelType.TEXT_EMBEDDING, only_active=True
-        )
+        embedding_models = configurations.get_models(model_type=ModelType.TEXT_EMBEDDING, only_active=True)
 
         model_names = []
         for embedding_model in embedding_models:
-            model_names.append(
-                f"{embedding_model.model}:{embedding_model.provider.provider}"
-            )
+            model_names.append(f"{embedding_model.model}:{embedding_model.provider.provider}")
 
         data = marshal(datasets, dataset_detail_fields)
         for item in data:
             if item["indexing_technique"] == "high_quality":
-                item_model = (
-                    f"{item['embedding_model']}:{item['embedding_model_provider']}"
-                )
+                item_model = f"{item['embedding_model']}:{item['embedding_model_provider']}"
                 if item_model in model_names:
                     item["embedding_available"] = True
                 else:

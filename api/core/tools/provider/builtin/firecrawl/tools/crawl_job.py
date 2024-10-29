@@ -6,9 +6,7 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class CrawlJobTool(BuiltinTool):
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
         app = FirecrawlApp(
             api_key=self.runtime.credentials["firecrawl_api_key"],
             base_url=self.runtime.credentials["base_url"],

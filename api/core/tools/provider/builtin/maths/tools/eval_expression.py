@@ -26,9 +26,5 @@ class EvaluateExpressionTool(BuiltinTool):
             result_str = str(result)
         except Exception as e:
             logging.exception(f"Error evaluating expression: {expression}")
-            return self.create_text_message(
-                f"Invalid expression: {expression}, error: {str(e)}"
-            )
-        return self.create_text_message(
-            f'The result of the expression "{expression}" is {result_str}'
-        )
+            return self.create_text_message(f"Invalid expression: {expression}, error: {str(e)}")
+        return self.create_text_message(f'The result of the expression "{expression}" is {result_str}')

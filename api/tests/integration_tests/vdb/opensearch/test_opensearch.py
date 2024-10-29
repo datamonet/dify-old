@@ -65,9 +65,7 @@ class TestOpenSearchVector:
             ({"hits": {"total": {"value": 0}, "hits": []}}, 0, None),
         ],
     )
-    def test_search_by_full_text(
-        self, search_response, expected_length, expected_doc_id
-    ):
+    def test_search_by_full_text(self, search_response, expected_length, expected_doc_id):
         self.vector._client.search.return_value = search_response
 
         hits_by_full_text = self.vector.search_by_full_text(query=get_example_text())
@@ -84,9 +82,7 @@ class TestOpenSearchVector:
                     {
                         "_source": {
                             Field.CONTENT_KEY.value: get_example_text(),
-                            Field.METADATA_KEY.value: {
-                                "document_id": self.example_doc_id
-                            },
+                            Field.METADATA_KEY.value: {"document_id": self.example_doc_id},
                         },
                         "_score": 1.0,
                     }
@@ -104,9 +100,7 @@ class TestOpenSearchVector:
             hits_by_vector[0].metadata["document_id"] if hits_by_vector else "No hits",
         )
 
-        assert (
-            len(hits_by_vector) > 0
-        ), f"Expected at least one hit, got {len(hits_by_vector)}"
+        assert len(hits_by_vector) > 0, f"Expected at least one hit, got {len(hits_by_vector)}"
         assert (
             hits_by_vector[0].metadata["document_id"] == self.example_doc_id
         ), f"Expected document ID {self.example_doc_id}, got {hits_by_vector[0].metadata['document_id']}"
@@ -115,27 +109,21 @@ class TestOpenSearchVector:
         mock_response = {"hits": {"total": {"value": 1}, "hits": [{"_id": "mock_id"}]}}
         self.vector._client.search.return_value = mock_response
 
-        doc = Document(
-            page_content="Test content", metadata={"document_id": self.example_doc_id}
-        )
+        doc = Document(page_content="Test content", metadata={"document_id": self.example_doc_id})
         embedding = [0.1] * 128
 
         with patch("opensearchpy.helpers.bulk") as mock_bulk:
             mock_bulk.return_value = ([], [])
             self.vector.add_texts([doc], [embedding])
 
-        ids = self.vector.get_ids_by_metadata_field(
-            key="document_id", value=self.example_doc_id
-        )
+        ids = self.vector.get_ids_by_metadata_field(key="document_id", value=self.example_doc_id)
         assert len(ids) == 1
         assert ids[0] == "mock_id"
 
     def test_add_texts(self):
         self.vector._client.index.return_value = {"result": "created"}
 
-        doc = Document(
-            page_content="Test content", metadata={"document_id": self.example_doc_id}
-        )
+        doc = Document(page_content="Test content", metadata={"document_id": self.example_doc_id})
         embedding = [0.1] * 128
 
         with patch("opensearchpy.helpers.bulk") as mock_bulk:
@@ -145,9 +133,7 @@ class TestOpenSearchVector:
         mock_response = {"hits": {"total": {"value": 1}, "hits": [{"_id": "mock_id"}]}}
         self.vector._client.search.return_value = mock_response
 
-        ids = self.vector.get_ids_by_metadata_field(
-            key="document_id", value=self.example_doc_id
-        )
+        ids = self.vector.get_ids_by_metadata_field(key="document_id", value=self.example_doc_id)
         assert len(ids) == 1
         assert ids[0] == "mock_id"
 
@@ -174,9 +160,7 @@ class TestOpenSearchVectorWithRedis:
         }
         expected_length = 1
         expected_doc_id = "example_doc_id"
-        self.tester.test_search_by_full_text(
-            search_response, expected_length, expected_doc_id
-        )
+        self.tester.test_search_by_full_text(search_response, expected_length, expected_doc_id)
 
     def test_get_ids_by_metadata_field(self):
         self.tester.setup_method()

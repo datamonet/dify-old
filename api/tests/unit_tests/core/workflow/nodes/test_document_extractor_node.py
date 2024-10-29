@@ -16,7 +16,7 @@ from core.workflow.nodes.enums import NodeType
 from models.workflow import WorkflowNodeExecutionStatus
 
 
-@pytest.fixture
+@pytest.fixture()
 def document_extractor_node():
     node_data = DocumentExtractorNodeData(
         title="Test Document Extractor",
@@ -31,7 +31,7 @@ def document_extractor_node():
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_graph_runtime_state():
     return Mock()
 

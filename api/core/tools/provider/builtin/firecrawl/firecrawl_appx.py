@@ -92,9 +92,7 @@ class FirecrawlApp:
         endpoint = f"{self.base_url}/v1/crawl/{job_id}"
         response = self._request("GET", endpoint)
         if response is None:
-            raise HTTPError(
-                f"Failed to check status for job {job_id} after multiple retries"
-            )
+            raise HTTPError(f"Failed to check status for job {job_id} after multiple retries")
         return response
 
     def cancel_crawl_job(self, job_id: str):

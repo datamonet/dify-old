@@ -28,9 +28,7 @@ def process_trace_tasks(tasks_data):
     if trace_info.get("message_data"):
         trace_info["message_data"] = Message.from_dict(data=trace_info["message_data"])
     if trace_info.get("workflow_data"):
-        trace_info["workflow_data"] = WorkflowRun.from_dict(
-            data=trace_info["workflow_data"]
-        )
+        trace_info["workflow_data"] = WorkflowRun.from_dict(data=trace_info["workflow_data"])
     if trace_info.get("documents"):
         trace_info["documents"] = [Document(**doc) for doc in trace_info["documents"]]
 

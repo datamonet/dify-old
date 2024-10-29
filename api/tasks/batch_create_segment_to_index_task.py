@@ -36,9 +36,7 @@ def batch_create_segment_to_index_task(
 
     Usage: batch_create_segment_to_index_task.delay(segment_id)
     """
-    logging.info(
-        click.style("Start batch create segment jobId: {}".format(job_id), fg="green")
-    )
+    logging.info(click.style("Start batch create segment jobId: {}".format(job_id), fg="green"))
     start_at = time.perf_counter()
 
     indexing_cache_key = "segment_batch_import_{}".format(job_id)
@@ -48,17 +46,11 @@ def batch_create_segment_to_index_task(
         if not dataset:
             raise ValueError("Dataset not exist.")
 
-        dataset_document = (
-            db.session.query(Document).filter(Document.id == document_id).first()
-        )
+        dataset_document = db.session.query(Document).filter(Document.id == document_id).first()
         if not dataset_document:
             raise ValueError("Document not exist.")
 
-        if (
-            not dataset_document.enabled
-            or dataset_document.archived
-            or dataset_document.indexing_status != "completed"
-        ):
+        if not dataset_document.enabled or dataset_document.archived or dataset_document.indexing_status != "completed":
             raise ValueError("Document is not available.")
         document_segments = []
         embedding_model = None
@@ -76,11 +68,7 @@ def batch_create_segment_to_index_task(
             doc_id = str(uuid.uuid4())
             segment_hash = helper.generate_text_hash(content)
             # calc embedding use tokens
-            tokens = (
-                embedding_model.get_text_embedding_num_tokens(texts=[content])
-                if embedding_model
-                else 0
-            )
+            tokens = embedding_model.get_text_embedding_num_tokens(texts=[content]) if embedding_model else 0
             max_position = (
                 db.session.query(func.max(DocumentSegment.position))
                 .filter(DocumentSegment.document_id == dataset_document.id)
@@ -97,13 +85,9 @@ def batch_create_segment_to_index_task(
                 word_count=len(content),
                 tokens=tokens,
                 created_by=user_id,
-                indexing_at=datetime.datetime.now(datetime.timezone.utc).replace(
-                    tzinfo=None
-                ),
+                indexing_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
                 status="completed",
-                completed_at=datetime.datetime.now(datetime.timezone.utc).replace(
-                    tzinfo=None
-                ),
+                completed_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
             )
             if dataset_document.doc_form == "qa_model":
                 segment_document.answer = segment["answer"]
@@ -117,9 +101,7 @@ def batch_create_segment_to_index_task(
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Segment batch created job: {} latency: {}".format(
-                    job_id, end_at - start_at
-                ),
+                "Segment batch created job: {} latency: {}".format(job_id, end_at - start_at),
                 fg="green",
             )
         )

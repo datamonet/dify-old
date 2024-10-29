@@ -36,10 +36,8 @@ class ExternalApiTemplateListApi(Resource):
         limit = request.args.get("limit", default=20, type=int)
         search = request.args.get("keyword", default=None, type=str)
 
-        external_knowledge_apis, total = (
-            ExternalDatasetService.get_external_knowledge_apis(
-                page, limit, current_user.current_tenant_id, search
-            )
+        external_knowledge_apis, total = ExternalDatasetService.get_external_knowledge_apis(
+            page, limit, current_user.current_tenant_id, search
         )
         response = {
             "data": [item.to_dict() for item in external_knowledge_apis],
@@ -78,12 +76,10 @@ class ExternalApiTemplateListApi(Resource):
             raise Forbidden()
 
         try:
-            external_knowledge_api = (
-                ExternalDatasetService.create_external_knowledge_api(
-                    tenant_id=current_user.current_tenant_id,
-                    user_id=current_user.id,
-                    args=args,
-                )
+            external_knowledge_api = ExternalDatasetService.create_external_knowledge_api(
+                tenant_id=current_user.current_tenant_id,
+                user_id=current_user.id,
+                args=args,
             )
         except services.errors.dataset.DatasetNameDuplicateError:
             raise DatasetNameDuplicateError()
@@ -97,9 +93,7 @@ class ExternalApiTemplateApi(Resource):
     @account_initialization_required
     def get(self, external_knowledge_api_id):
         external_knowledge_api_id = str(external_knowledge_api_id)
-        external_knowledge_api = ExternalDatasetService.get_external_knowledge_api(
-            external_knowledge_api_id
-        )
+        external_knowledge_api = ExternalDatasetService.get_external_knowledge_api(external_knowledge_api_id)
         if external_knowledge_api is None:
             raise NotFound("API template not found.")
 
@@ -148,9 +142,7 @@ class ExternalApiTemplateApi(Resource):
         if not current_user.is_editor or current_user.is_dataset_operator:
             raise Forbidden()
 
-        ExternalDatasetService.delete_external_knowledge_api(
-            current_user.current_tenant_id, external_knowledge_api_id
-        )
+        ExternalDatasetService.delete_external_knowledge_api(current_user.current_tenant_id, external_knowledge_api_id)
         return {"result": "success"}, 200
 
 
@@ -161,10 +153,8 @@ class ExternalApiUseCheckApi(Resource):
     def get(self, external_knowledge_api_id):
         external_knowledge_api_id = str(external_knowledge_api_id)
 
-        external_knowledge_api_is_using, count = (
-            ExternalDatasetService.external_knowledge_api_use_check(
-                external_knowledge_api_id
-            )
+        external_knowledge_api_is_using, count = ExternalDatasetService.external_knowledge_api_use_check(
+            external_knowledge_api_id
         )
         return {"is_using": external_knowledge_api_is_using, "count": count}, 200
 
@@ -200,12 +190,8 @@ class ExternalDatasetCreateApi(Resource):
             help="name is required. Name must be between 1 to 100 characters.",
             type=_validate_name,
         )
-        parser.add_argument(
-            "description", type=str, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "external_retrieval_model", type=dict, required=False, location="json"
-        )
+        parser.add_argument("description", type=str, required=False, nullable=True, location="json")
+        parser.add_argument("external_retrieval_model", type=dict, required=False, location="json")
 
         args = parser.parse_args()
 
@@ -242,9 +228,7 @@ class ExternalKnowledgeHitTestingApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("query", type=str, location="json")
-        parser.add_argument(
-            "external_retrieval_model", type=dict, required=False, location="json"
-        )
+        parser.add_argument("external_retrieval_model", type=dict, required=False, location="json")
         args = parser.parse_args()
 
         HitTestingService.hit_testing_args_check(args)
@@ -262,9 +246,7 @@ class ExternalKnowledgeHitTestingApi(Resource):
             raise InternalServerError(str(e))
 
 
-api.add_resource(
-    ExternalKnowledgeHitTestingApi, "/datasets/<uuid:dataset_id>/external-hit-testing"
-)
+api.add_resource(ExternalKnowledgeHitTestingApi, "/datasets/<uuid:dataset_id>/external-hit-testing")
 api.add_resource(ExternalDatasetCreateApi, "/datasets/external")
 api.add_resource(ExternalApiTemplateListApi, "/datasets/external-knowledge-api")
 api.add_resource(

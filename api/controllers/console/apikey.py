@@ -25,9 +25,7 @@ api_key_list = {"data": fields.List(fields.Nested(api_key_fields), attribute="it
 
 
 def _get_resource(resource_id, tenant_id, resource_model):
-    resource = resource_model.query.filter_by(
-        id=resource_id, tenant_id=tenant_id
-    ).first()
+    resource = resource_model.query.filter_by(id=resource_id, tenant_id=tenant_id).first()
 
     if resource is None:
         flask_restful.abort(404, message=f"{resource_model.__name__} not found.")
@@ -182,10 +180,6 @@ class DatasetApiKeyResource(BaseApiKeyResource):
 
 
 api.add_resource(AppApiKeyListResource, "/apps/<uuid:resource_id>/api-keys")
-api.add_resource(
-    AppApiKeyResource, "/apps/<uuid:resource_id>/api-keys/<uuid:api_key_id>"
-)
+api.add_resource(AppApiKeyResource, "/apps/<uuid:resource_id>/api-keys/<uuid:api_key_id>")
 api.add_resource(DatasetApiKeyListResource, "/datasets/<uuid:resource_id>/api-keys")
-api.add_resource(
-    DatasetApiKeyResource, "/datasets/<uuid:resource_id>/api-keys/<uuid:api_key_id>"
-)
+api.add_resource(DatasetApiKeyResource, "/datasets/<uuid:resource_id>/api-keys/<uuid:api_key_id>")

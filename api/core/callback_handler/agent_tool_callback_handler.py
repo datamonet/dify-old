@@ -23,9 +23,7 @@ def get_colored_text(text: str, color: str) -> str:
     return f"\u001b[{color_str}m\033[1;3m{text}\u001b[0m"
 
 
-def print_text(
-    text: str, color: Optional[str] = None, end: str = "", file: Optional[TextIO] = None
-) -> None:
+def print_text(text: str, color: Optional[str] = None, end: str = "", file: Optional[TextIO] = None) -> None:
     """Print text with highlighting and no end characters."""
     text_to_print = get_colored_text(text, color) if color else text
     print(text_to_print, end=end, file=file)
@@ -54,11 +52,7 @@ class DifyAgentCallbackHandler(BaseModel):
         """Do nothing."""
         if dify_config.DEBUG:
             print_text(
-                "\n[on_tool_start] ToolCall:"
-                + tool_name
-                + "\n"
-                + str(tool_inputs)
-                + "\n",
+                "\n[on_tool_start] ToolCall:" + tool_name + "\n" + str(tool_inputs) + "\n",
                 color=self.color,
             )
 
@@ -91,9 +85,7 @@ class DifyAgentCallbackHandler(BaseModel):
                 )
             )
 
-    def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
-    ) -> None:
+    def on_tool_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> None:
         """Do nothing."""
         if dify_config.DEBUG:
             print_text("\n[on_tool_error] Error: " + str(error) + "\n", color="red")
@@ -103,18 +95,12 @@ class DifyAgentCallbackHandler(BaseModel):
         if dify_config.DEBUG:
             if thought:
                 print_text(
-                    "\n[on_agent_start] \nCurrent Loop: "
-                    + str(self.current_loop)
-                    + "\nThought: "
-                    + thought
-                    + "\n",
+                    "\n[on_agent_start] \nCurrent Loop: " + str(self.current_loop) + "\nThought: " + thought + "\n",
                     color=self.color,
                 )
             else:
                 print_text(
-                    "\n[on_agent_start] \nCurrent Loop: "
-                    + str(self.current_loop)
-                    + "\n",
+                    "\n[on_agent_start] \nCurrent Loop: " + str(self.current_loop) + "\n",
                     color=self.color,
                 )
 

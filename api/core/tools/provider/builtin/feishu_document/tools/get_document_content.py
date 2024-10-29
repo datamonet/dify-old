@@ -6,9 +6,7 @@ from core.tools.utils.feishu_api_utils import FeishuRequest
 
 
 class GetDocumentRawContentTool(BuiltinTool):
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
         app_id = self.runtime.credentials.get("app_id")
         app_secret = self.runtime.credentials.get("app_secret")
         client = FeishuRequest(app_id, app_secret)

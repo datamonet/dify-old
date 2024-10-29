@@ -32,9 +32,7 @@ class ParameterConfig(BaseModel):
         if not value:
             raise ValueError("Parameter name is required")
         if value in {"__reason", "__is_success"}:
-            raise ValueError(
-                "Invalid parameter name, __reason and __is_success are reserved"
-            )
+            raise ValueError("Invalid parameter name, __reason and __is_success are reserved")
         return value
 
 

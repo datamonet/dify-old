@@ -99,9 +99,7 @@ class ArxivSearchTool(BuiltinTool):
     A tool for searching articles on Arxiv.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invokes the Arxiv search tool with the given user ID and tool parameters.
 

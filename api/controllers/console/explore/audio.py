@@ -40,9 +40,7 @@ class ChatAudioApi(InstalledAppResource):
         file = request.files["file"]
 
         try:
-            response = AudioService.transcript_asr(
-                app_model=app_model, file=file, end_user=None
-            )
+            response = AudioService.transcript_asr(app_model=app_model, file=file, end_user=None)
 
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
@@ -95,14 +93,10 @@ class ChatTextApi(InstalledAppResource):
                 voice = args.get("voice") or text_to_speech.get("voice")
             else:
                 try:
-                    voice = args.get(
-                        "voice"
-                    ) or app_model.app_model_config.text_to_speech_dict.get("voice")
+                    voice = args.get("voice") or app_model.app_model_config.text_to_speech_dict.get("voice")
                 except Exception:
                     voice = None
-            response = AudioService.transcript_tts(
-                app_model=app_model, message_id=message_id, voice=voice, text=text
-            )
+            response = AudioService.transcript_tts(app_model=app_model, message_id=message_id, voice=voice, text=text)
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
             logging.exception("App model config broken.")

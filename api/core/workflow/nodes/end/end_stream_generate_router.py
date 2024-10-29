@@ -25,12 +25,8 @@ class EndStreamGeneratorRouter:
                 continue
 
             # get generate route for stream output
-            stream_variable_selectors = cls._extract_stream_variable_selector(
-                node_id_config_mapping, node_config
-            )
-            end_stream_variable_selectors_mapping[end_node_id] = (
-                stream_variable_selectors
-            )
+            stream_variable_selectors = cls._extract_stream_variable_selector(node_id_config_mapping, node_config)
+            end_stream_variable_selectors_mapping[end_node_id] = stream_variable_selectors
 
         # fetch end dependencies
         end_node_ids = list(end_stream_variable_selectors_mapping.keys())
@@ -86,9 +82,7 @@ class EndStreamGeneratorRouter:
         :return:
         """
         node_data = EndNodeData(**config.get("data", {}))
-        return cls.extract_stream_variable_selector_from_node_data(
-            node_id_config_mapping, node_data
-        )
+        return cls.extract_stream_variable_selector_from_node_data(node_id_config_mapping, node_data)
 
     @classmethod
     def _fetch_ends_dependencies(
@@ -141,9 +135,7 @@ class EndStreamGeneratorRouter:
         reverse_edges = reverse_edge_mapping.get(current_node_id, [])
         for edge in reverse_edges:
             source_node_id = edge.source_node_id
-            source_node_type = (
-                node_id_config_mapping[source_node_id].get("data", {}).get("type")
-            )
+            source_node_type = node_id_config_mapping[source_node_id].get("data", {}).get("type")
             if source_node_type in {
                 NodeType.IF_ELSE.value,
                 NodeType.QUESTION_CLASSIFIER,

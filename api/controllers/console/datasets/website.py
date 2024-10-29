@@ -22,12 +22,8 @@ class WebsiteCrawlApi(Resource):
             nullable=True,
             location="json",
         )
-        parser.add_argument(
-            "url", type=str, required=True, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "options", type=dict, required=True, nullable=True, location="json"
-        )
+        parser.add_argument("url", type=str, required=True, nullable=True, location="json")
+        parser.add_argument("options", type=dict, required=True, nullable=True, location="json")
         args = parser.parse_args()
         WebsiteService.document_create_args_validate(args)
         # crawl url

@@ -51,9 +51,7 @@ class Invoices(Resource):
     @only_edition_cloud
     def get(self):
         BillingService.is_tenant_owner_or_admin(current_user)
-        return BillingService.get_invoices(
-            current_user.email, current_user.current_tenant_id
-        )
+        return BillingService.get_invoices(current_user.email, current_user.current_tenant_id)
 
 
 api.add_resource(Subscription, "/billing/subscription")

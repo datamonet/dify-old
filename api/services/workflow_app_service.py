@@ -25,9 +25,7 @@ class WorkflowAppService:
         status = WorkflowRunStatus.value_of(args.get("status", "")) if args.get("status") else None
         keyword = args["keyword"]
         if keyword or status:
-            query = query.join(
-                WorkflowRun, WorkflowRun.id == WorkflowAppLog.workflow_run_id
-            )
+            query = query.join(WorkflowRun, WorkflowRun.id == WorkflowAppLog.workflow_run_id)
 
         if keyword:
             keyword_like_val = f"%{args['keyword'][:30]}%"
@@ -57,9 +55,7 @@ class WorkflowAppService:
 
         query = query.order_by(WorkflowAppLog.created_at.desc())
 
-        pagination = db.paginate(
-            query, page=args["page"], per_page=args["limit"], error_out=False
-        )
+        pagination = db.paginate(query, page=args["page"], per_page=args["limit"], error_out=False)
 
         return pagination
 

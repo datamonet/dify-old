@@ -40,9 +40,7 @@ class InstalledAppsListApi(Resource):
             .all()
         )
 
-        current_user.role = TenantService.get_user_role(
-            current_user, current_user.current_tenant
-        )
+        current_user.role = TenantService.get_user_role(current_user, current_user.current_tenant)
         installed_apps = [
             {
                 "id": installed_app.id,
@@ -60,9 +58,7 @@ class InstalledAppsListApi(Resource):
             key=lambda app: (
                 -app["is_pinned"],
                 app["last_used_at"] is None,
-                -app["last_used_at"].timestamp()
-                if app["last_used_at"] is not None
-                else 0,
+                -app["last_used_at"].timestamp() if app["last_used_at"] is not None else 0,
             )
         )
 
@@ -76,9 +72,7 @@ class InstalledAppsListApi(Resource):
         parser.add_argument("app_id", type=str, required=True, help="Invalid app_id")
         args = parser.parse_args()
 
-        recommended_app = RecommendedApp.query.filter(
-            RecommendedApp.app_id == args["app_id"]
-        ).first()
+        recommended_app = RecommendedApp.query.filter(RecommendedApp.app_id == args["app_id"]).first()
         if recommended_app is None:
             raise NotFound("App not found")
 

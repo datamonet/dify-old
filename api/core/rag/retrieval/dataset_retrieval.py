@@ -120,43 +120,25 @@ class DatasetRetrieval:
         planning_strategy = PlanningStrategy.REACT_ROUTER
         features = model_schema.features
         if features:
-            if (
-                ModelFeature.TOOL_CALL in features
-                or ModelFeature.MULTI_TOOL_CALL in features
-            ):
+            if ModelFeature.TOOL_CALL in features or ModelFeature.MULTI_TOOL_CALL in features:
                 planning_strategy = PlanningStrategy.ROUTER
         available_datasets = []
         for dataset_id in dataset_ids:
             # get dataset from dataset id
-            dataset = (
-                db.session.query(Dataset)
-                .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-                .first()
-            )
+            dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
             # pass if dataset is not available
             if not dataset:
                 continue
 
             # pass if dataset is not available
-            if (
-                dataset
-                and dataset.available_document_count == 0
-                and dataset.provider != "external"
-            ):
+            if dataset and dataset.available_document_count == 0 and dataset.provider != "external":
                 continue
 
             available_datasets.append(dataset)
         all_documents = []
-        user_from = (
-            "account"
-            if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
-            else "end_user"
-        )
-        if (
-            retrieve_config.retrieve_strategy
-            == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
-        ):
+        user_from = "account" if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER} else "end_user"
+        if retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE:
             all_documents = self.single_retrieve(
                 app_id,
                 tenant_id,
@@ -169,10 +151,7 @@ class DatasetRetrieval:
                 planning_strategy,
                 message_id,
             )
-        elif (
-            retrieve_config.retrieve_strategy
-            == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE
-        ):
+        elif retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE:
             all_documents = self.multiple_retrieve(
                 app_id,
                 tenant_id,
@@ -190,18 +169,12 @@ class DatasetRetrieval:
             )
 
         dify_documents = [item for item in all_documents if item.provider == "dify"]
-        external_documents = [
-            item for item in all_documents if item.provider == "external"
-        ]
+        external_documents = [item for item in all_documents if item.provider == "external"]
         document_context_list = []
         retrieval_resource_list = []
         # deal with external documents
         for item in external_documents:
-            document_context_list.append(
-                DocumentContext(
-                    content=item.page_content, score=item.metadata.get("score")
-                )
-            )
+            document_context_list.append(DocumentContext(content=item.page_content, score=item.metadata.get("score")))
             source = {
                 "dataset_id": item.metadata.get("dataset_id"),
                 "dataset_name": item.metadata.get("dataset_name"),
@@ -217,13 +190,9 @@ class DatasetRetrieval:
         if dify_documents:
             for item in dify_documents:
                 if item.metadata.get("score"):
-                    document_score_list[item.metadata["doc_id"]] = item.metadata[
-                        "score"
-                    ]
+                    document_score_list[item.metadata["doc_id"]] = item.metadata["score"]
 
-            index_node_ids = [
-                document.metadata["doc_id"] for document in dify_documents
-            ]
+            index_node_ids = [document.metadata["doc_id"] for document in dify_documents]
             segments = DocumentSegment.query.filter(
                 DocumentSegment.dataset_id.in_(dataset_ids),
                 DocumentSegment.status == "completed",
@@ -232,32 +201,24 @@ class DatasetRetrieval:
             ).all()
 
             if segments:
-                index_node_id_to_position = {
-                    id: position for position, id in enumerate(index_node_ids)
-                }
+                index_node_id_to_position = {id: position for position, id in enumerate(index_node_ids)}
                 sorted_segments = sorted(
                     segments,
-                    key=lambda segment: index_node_id_to_position.get(
-                        segment.index_node_id, float("inf")
-                    ),
+                    key=lambda segment: index_node_id_to_position.get(segment.index_node_id, float("inf")),
                 )
                 for segment in sorted_segments:
                     if segment.answer:
                         document_context_list.append(
                             DocumentContext(
                                 content=f"question:{segment.get_sign_content()} answer:{segment.answer}",
-                                score=document_score_list.get(
-                                    segment.index_node_id, None
-                                ),
+                                score=document_score_list.get(segment.index_node_id, None),
                             )
                         )
                     else:
                         document_context_list.append(
                             DocumentContext(
                                 content=segment.get_sign_content(),
-                                score=document_score_list.get(
-                                    segment.index_node_id, None
-                                ),
+                                score=document_score_list.get(segment.index_node_id, None),
                             )
                         )
                 if show_retrieve_source:
@@ -277,9 +238,7 @@ class DatasetRetrieval:
                                 "data_source_type": document.data_source_type,
                                 "segment_id": segment.id,
                                 "retriever_from": invoke_from.to_source(),
-                                "score": document_score_list.get(
-                                    segment.index_node_id, None
-                                ),
+                                "score": document_score_list.get(segment.index_node_id, None),
                             }
 
                             if invoke_from.to_source() == "dev":
@@ -288,26 +247,15 @@ class DatasetRetrieval:
                                 source["segment_position"] = segment.position
                                 source["index_node_hash"] = segment.index_node_hash
                             if segment.answer:
-                                source["content"] = (
-                                    f"question:{segment.content} \nanswer:{segment.answer}"
-                                )
+                                source["content"] = f"question:{segment.content} \nanswer:{segment.answer}"
                             else:
                                 source["content"] = segment.content
                             retrieval_resource_list.append(source)
         if hit_callback and retrieval_resource_list:
             hit_callback.return_retriever_resource_info(retrieval_resource_list)
         if document_context_list:
-            document_context_list = sorted(
-                document_context_list, key=lambda x: x.score, reverse=True
-            )
-            return str(
-                "\n".join(
-                    [
-                        document_context.content
-                        for document_context in document_context_list
-                    ]
-                )
-            )
+            document_context_list = sorted(document_context_list, key=lambda x: x.score, reverse=True)
+            return str("\n".join([document_context.content for document_context in document_context_list]))
         return ""
 
     def single_retrieve(
@@ -327,10 +275,7 @@ class DatasetRetrieval:
         for dataset in available_datasets:
             description = dataset.description
             if not description:
-                description = (
-                    "useful for when you want to answer queries about the "
-                    + dataset.name
-                )
+                description = "useful for when you want to answer queries about the " + dataset.name
 
             description = description.replace("\n", "").replace("\r", "")
             message_tool = PromptMessageTool(
@@ -352,9 +297,7 @@ class DatasetRetrieval:
 
         elif planning_strategy == PlanningStrategy.ROUTER:
             function_call_router = FunctionCallMultiDatasetRouter()
-            dataset_id = function_call_router.invoke(
-                query, tools, model_config, model_instance
-            )
+            dataset_id = function_call_router.invoke(query, tools, model_config, model_instance)
 
         if dataset_id:
             # get retrieval model config
@@ -362,13 +305,11 @@ class DatasetRetrieval:
             if dataset:
                 results = []
                 if dataset.provider == "external":
-                    external_documents = (
-                        ExternalDatasetService.fetch_external_knowledge_retrieval(
-                            tenant_id=dataset.tenant_id,
-                            dataset_id=dataset_id,
-                            query=query,
-                            external_retrieval_parameters=dataset.retrieval_model,
-                        )
+                    external_documents = ExternalDatasetService.fetch_external_knowledge_retrieval(
+                        tenant_id=dataset.tenant_id,
+                        dataset_id=dataset_id,
+                        query=query,
+                        external_retrieval_parameters=dataset.retrieval_model,
                     )
                     for external_document in external_documents:
                         document = Document(
@@ -382,9 +323,7 @@ class DatasetRetrieval:
                         document.metadata["dataset_name"] = dataset.name
                         results.append(document)
                 else:
-                    retrieval_model_config = (
-                        dataset.retrieval_model or default_retrieval_model
-                    )
+                    retrieval_model_config = dataset.retrieval_model or default_retrieval_model
 
                     # get top k
                     top_k = retrieval_model_config["top_k"]
@@ -401,9 +340,7 @@ class DatasetRetrieval:
                     )
                     # get score threshold
                     score_threshold = 0.0
-                    score_threshold_enabled = retrieval_model_config.get(
-                        "score_threshold_enabled"
-                    )
+                    score_threshold_enabled = retrieval_model_config.get("score_threshold_enabled")
                     if score_threshold_enabled:
                         score_threshold = retrieval_model_config.get("score_threshold")
 
@@ -415,9 +352,7 @@ class DatasetRetrieval:
                             top_k=top_k,
                             score_threshold=score_threshold,
                             reranking_model=reranking_model,
-                            reranking_mode=retrieval_model_config.get(
-                                "reranking_mode", "reranking_model"
-                            ),
+                            reranking_mode=retrieval_model_config.get("reranking_mode", "reranking_model"),
                             weights=retrieval_model_config.get("weights", None),
                         )
                 self._on_query(query, [dataset_id], app_id, user_from, user_id)
@@ -468,9 +403,7 @@ class DatasetRetrieval:
         with measure_time() as timer:
             if reranking_enable:
                 # do rerank for searched documents
-                data_post_processor = DataPostProcessor(
-                    tenant_id, reranking_mode, reranking_model, weights, False
-                )
+                data_post_processor = DataPostProcessor(tenant_id, reranking_mode, reranking_model, weights, False)
 
                 all_documents = data_post_processor.invoke(
                     query=query,
@@ -480,13 +413,9 @@ class DatasetRetrieval:
                 )
             else:
                 if index_type == "economy":
-                    all_documents = self.calculate_keyword_score(
-                        query, all_documents, top_k
-                    )
+                    all_documents = self.calculate_keyword_score(query, all_documents, top_k)
                 elif index_type == "high_quality":
-                    all_documents = self.calculate_vector_score(
-                        all_documents, top_k, score_threshold
-                    )
+                    all_documents = self.calculate_vector_score(all_documents, top_k, score_threshold)
 
         self._on_query(query, dataset_ids, app_id, user_from, user_id)
 
@@ -502,9 +431,7 @@ class DatasetRetrieval:
         timer: Optional[dict] = None,
     ) -> None:
         """Handle retrieval end."""
-        dify_documents = [
-            document for document in documents if document.provider == "dify"
-        ]
+        dify_documents = [document for document in documents if document.provider == "dify"]
         for document in dify_documents:
             query = db.session.query(DocumentSegment).filter(
                 DocumentSegment.index_node_id == document.metadata["doc_id"]
@@ -512,9 +439,7 @@ class DatasetRetrieval:
 
             # if 'dataset_id' in document.metadata:
             if "dataset_id" in document.metadata:
-                query = query.filter(
-                    DocumentSegment.dataset_id == document.metadata["dataset_id"]
-                )
+                query = query.filter(DocumentSegment.dataset_id == document.metadata["dataset_id"])
 
             # add hit count to document segment
             query.update(
@@ -526,9 +451,7 @@ class DatasetRetrieval:
 
         # get tracing instance
         trace_manager: TraceQueueManager = (
-            self.application_generate_entity.trace_manager
-            if self.application_generate_entity
-            else None
+            self.application_generate_entity.trace_manager if self.application_generate_entity else None
         )
         if trace_manager:
             trace_manager.add_trace_task(
@@ -583,13 +506,11 @@ class DatasetRetrieval:
                 return []
 
             if dataset.provider == "external":
-                external_documents = (
-                    ExternalDatasetService.fetch_external_knowledge_retrieval(
-                        tenant_id=dataset.tenant_id,
-                        dataset_id=dataset_id,
-                        query=query,
-                        external_retrieval_parameters=dataset.retrieval_model,
-                    )
+                external_documents = ExternalDatasetService.fetch_external_knowledge_retrieval(
+                    tenant_id=dataset.tenant_id,
+                    dataset_id=dataset_id,
+                    query=query,
+                    external_retrieval_parameters=dataset.retrieval_model,
                 )
                 for external_document in external_documents:
                     document = Document(
@@ -630,8 +551,7 @@ class DatasetRetrieval:
                             reranking_model=retrieval_model.get("reranking_model", None)
                             if retrieval_model["reranking_enable"]
                             else None,
-                            reranking_mode=retrieval_model.get("reranking_mode")
-                            or "reranking_model",
+                            reranking_mode=retrieval_model.get("reranking_mode") or "reranking_model",
                             weights=retrieval_model.get("weights", None),
                         )
 
@@ -659,11 +579,7 @@ class DatasetRetrieval:
         available_datasets = []
         for dataset_id in dataset_ids:
             # get dataset from dataset id
-            dataset = (
-                db.session.query(Dataset)
-                .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-                .first()
-            )
+            dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
             # pass if dataset is not available
             if not dataset:
@@ -675,10 +591,7 @@ class DatasetRetrieval:
 
             available_datasets.append(dataset)
 
-        if (
-            retrieve_config.retrieve_strategy
-            == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
-        ):
+        if retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE:
             # get retrieval model config
             default_retrieval_model = {
                 "search_method": RetrievalMethod.SEMANTIC_SEARCH.value,
@@ -692,18 +605,14 @@ class DatasetRetrieval:
             }
 
             for dataset in available_datasets:
-                retrieval_model_config = (
-                    dataset.retrieval_model or default_retrieval_model
-                )
+                retrieval_model_config = dataset.retrieval_model or default_retrieval_model
 
                 # get top k
                 top_k = retrieval_model_config["top_k"]
 
                 # get score threshold
                 score_threshold = None
-                score_threshold_enabled = retrieval_model_config.get(
-                    "score_threshold_enabled"
-                )
+                score_threshold_enabled = retrieval_model_config.get("score_threshold_enabled")
                 if score_threshold_enabled:
                     score_threshold = retrieval_model_config.get("score_threshold")
 
@@ -717,10 +626,7 @@ class DatasetRetrieval:
                 )
 
                 tools.append(tool)
-        elif (
-            retrieve_config.retrieve_strategy
-            == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE
-        ):
+        elif retrieve_config.retrieve_strategy == DatasetRetrieveConfigEntity.RetrieveStrategy.MULTIPLE:
             tool = DatasetMultiRetrieverTool.from_dataset(
                 dataset_ids=[dataset.id for dataset in available_datasets],
                 tenant_id=tenant_id,
@@ -729,21 +635,15 @@ class DatasetRetrieval:
                 hit_callbacks=[hit_callback],
                 return_resource=return_resource,
                 retriever_from=invoke_from.to_source(),
-                reranking_provider_name=retrieve_config.reranking_model.get(
-                    "reranking_provider_name"
-                ),
-                reranking_model_name=retrieve_config.reranking_model.get(
-                    "reranking_model_name"
-                ),
+                reranking_provider_name=retrieve_config.reranking_model.get("reranking_provider_name"),
+                reranking_model_name=retrieve_config.reranking_model.get("reranking_model_name"),
             )
 
             tools.append(tool)
 
         return tools
 
-    def calculate_keyword_score(
-        self, query: str, documents: list[Document], top_k: int
-    ) -> list[Document]:
+    def calculate_keyword_score(self, query: str, documents: list[Document], top_k: int) -> list[Document]:
         """
         Calculate keywords scores
         :param query: search query
@@ -756,9 +656,7 @@ class DatasetRetrieval:
         documents_keywords = []
         for document in documents:
             # get the document keywords
-            document_keywords = keyword_table_handler.extract_keywords(
-                document.page_content, None
-            )
+            document_keywords = keyword_table_handler.extract_keywords(document.page_content, None)
             document.metadata["keywords"] = document_keywords
             documents_keywords.append(document_keywords)
 
@@ -776,13 +674,9 @@ class DatasetRetrieval:
         keyword_idf = {}
         for keyword in all_keywords:
             # calculate include query keywords' documents
-            doc_count_containing_keyword = sum(
-                1 for doc_keywords in documents_keywords if keyword in doc_keywords
-            )
+            doc_count_containing_keyword = sum(1 for doc_keywords in documents_keywords if keyword in doc_keywords)
             # IDF
-            keyword_idf[keyword] = (
-                math.log((1 + total_documents) / (1 + doc_count_containing_keyword)) + 1
-            )
+            keyword_idf[keyword] = math.log((1 + total_documents) / (1 + doc_count_containing_keyword)) + 1
 
         query_tfidf = {}
 
@@ -836,7 +730,5 @@ class DatasetRetrieval:
 
         if not filter_documents:
             return []
-        filter_documents = sorted(
-            filter_documents, key=lambda x: x.metadata["score"], reverse=True
-        )
+        filter_documents = sorted(filter_documents, key=lambda x: x.metadata["score"], reverse=True)
         return filter_documents[:top_k] if top_k else filter_documents

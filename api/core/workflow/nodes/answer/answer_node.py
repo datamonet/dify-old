@@ -67,8 +67,6 @@ class AnswerNode(BaseNode[AnswerNodeData]):
 
         variable_mapping = {}
         for variable_selector in variable_selectors:
-            variable_mapping[node_id + "." + variable_selector.variable] = (
-                variable_selector.value_selector
-            )
+            variable_mapping[node_id + "." + variable_selector.variable] = variable_selector.value_selector
 
         return variable_mapping

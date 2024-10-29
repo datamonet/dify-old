@@ -5,12 +5,12 @@ from core.variables import FileSegment, StringSegment
 from core.workflow.entities.variable_pool import VariablePool
 
 
-@pytest.fixture
+@pytest.fixture()
 def pool():
     return VariablePool(system_variables={}, user_inputs={})
 
 
-@pytest.fixture
+@pytest.fixture()
 def file():
     return File(
         tenant_id="test_tenant_id",

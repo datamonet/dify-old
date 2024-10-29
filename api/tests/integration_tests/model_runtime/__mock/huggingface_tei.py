@@ -5,18 +5,14 @@ from core.model_runtime.model_providers.huggingface_tei.tei_helper import (
 
 class MockTEIClass:
     @staticmethod
-    def get_tei_extra_parameter(
-        server_url: str, model_name: str
-    ) -> TeiModelExtraParameter:
+    def get_tei_extra_parameter(server_url: str, model_name: str) -> TeiModelExtraParameter:
         # During mock, we don't have a real server to query, so we just return a dummy value
         if "rerank" in model_name:
             model_type = "reranker"
         else:
             model_type = "embedding"
 
-        return TeiModelExtraParameter(
-            model_type=model_type, max_input_length=512, max_client_batch_size=1
-        )
+        return TeiModelExtraParameter(model_type=model_type, max_input_length=512, max_client_batch_size=1)
 
     @staticmethod
     def invoke_tokenize(server_url: str, texts: list[str]) -> list[list[dict]]:

@@ -55,27 +55,13 @@ def clean_dataset_task(
             index_struct=index_struct,
             collection_binding_id=collection_binding_id,
         )
-        documents = (
-            db.session.query(Document).filter(Document.dataset_id == dataset_id).all()
-        )
-        segments = (
-            db.session.query(DocumentSegment)
-            .filter(DocumentSegment.dataset_id == dataset_id)
-            .all()
-        )
+        documents = db.session.query(Document).filter(Document.dataset_id == dataset_id).all()
+        segments = db.session.query(DocumentSegment).filter(DocumentSegment.dataset_id == dataset_id).all()
 
         if documents is None or len(documents) == 0:
-            logging.info(
-                click.style(
-                    "No documents found for dataset: {}".format(dataset_id), fg="green"
-                )
-            )
+            logging.info(click.style("No documents found for dataset: {}".format(dataset_id), fg="green"))
         else:
-            logging.info(
-                click.style(
-                    "Cleaning documents for dataset: {}".format(dataset_id), fg="green"
-                )
-            )
+            logging.info(click.style("Cleaning documents for dataset: {}".format(dataset_id), fg="green"))
             # Specify the index type before initializing the index processor
             if doc_form is None:
                 raise ValueError("Index type must be specified.")
@@ -88,15 +74,9 @@ def clean_dataset_task(
             for segment in segments:
                 db.session.delete(segment)
 
-        db.session.query(DatasetProcessRule).filter(
-            DatasetProcessRule.dataset_id == dataset_id
-        ).delete()
-        db.session.query(DatasetQuery).filter(
-            DatasetQuery.dataset_id == dataset_id
-        ).delete()
-        db.session.query(AppDatasetJoin).filter(
-            AppDatasetJoin.dataset_id == dataset_id
-        ).delete()
+        db.session.query(DatasetProcessRule).filter(DatasetProcessRule.dataset_id == dataset_id).delete()
+        db.session.query(DatasetQuery).filter(DatasetQuery.dataset_id == dataset_id).delete()
+        db.session.query(AppDatasetJoin).filter(AppDatasetJoin.dataset_id == dataset_id).delete()
 
         # delete files
         if documents:
@@ -105,10 +85,7 @@ def clean_dataset_task(
                     if document.data_source_type == "upload_file":
                         if document.data_source_info:
                             data_source_info = document.data_source_info_dict
-                            if (
-                                data_source_info
-                                and "upload_file_id" in data_source_info
-                            ):
+                            if data_source_info and "upload_file_id" in data_source_info:
                                 file_id = data_source_info["upload_file_id"]
                                 file = (
                                     db.session.query(UploadFile)
@@ -129,9 +106,7 @@ def clean_dataset_task(
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Cleaned dataset when dataset deleted: {} latency: {}".format(
-                    dataset_id, end_at - start_at
-                ),
+                "Cleaned dataset when dataset deleted: {} latency: {}".format(dataset_id, end_at - start_at),
                 fg="green",
             )
         )

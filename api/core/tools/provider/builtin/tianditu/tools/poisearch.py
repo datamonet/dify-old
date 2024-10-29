@@ -46,19 +46,13 @@ class PoiSearchTool(BuiltinTool):
             "keyWord": keyword,
             "queryRadius": 5000,
             "queryType": 3,
-            "pointLonlat": base_coords["location"]["lon"]
-            + ","
-            + base_coords["location"]["lat"],
+            "pointLonlat": base_coords["location"]["lon"] + "," + base_coords["location"]["lat"],
             "start": 0,
             "count": 100,
         }
 
         result = requests.get(
-            base_url
-            + "?postStr="
-            + json.dumps(params, ensure_ascii=False)
-            + "&type=query&tk="
-            + tk
+            base_url + "?postStr=" + json.dumps(params, ensure_ascii=False) + "&type=query&tk=" + tk
         ).json()
 
         return self.create_json_message(result)

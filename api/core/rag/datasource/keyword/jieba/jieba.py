@@ -34,12 +34,8 @@ class Jieba(BaseKeyword):
                 keywords = keyword_table_handler.extract_keywords(
                     text.page_content, self._config.max_keywords_per_chunk
                 )
-                self._update_segment_keywords(
-                    self.dataset.id, text.metadata["doc_id"], list(keywords)
-                )
-                keyword_table = self._add_text_to_keyword_table(
-                    keyword_table, text.metadata["doc_id"], list(keywords)
-                )
+                self._update_segment_keywords(self.dataset.id, text.metadata["doc_id"], list(keywords))
+                keyword_table = self._add_text_to_keyword_table(keyword_table, text.metadata["doc_id"], list(keywords))
 
             self._save_dataset_keyword_table(keyword_table)
 
@@ -64,12 +60,8 @@ class Jieba(BaseKeyword):
                     keywords = keyword_table_handler.extract_keywords(
                         text.page_content, self._config.max_keywords_per_chunk
                     )
-                self._update_segment_keywords(
-                    self.dataset.id, text.metadata["doc_id"], list(keywords)
-                )
-                keyword_table = self._add_text_to_keyword_table(
-                    keyword_table, text.metadata["doc_id"], list(keywords)
-                )
+                self._update_segment_keywords(self.dataset.id, text.metadata["doc_id"], list(keywords))
+                keyword_table = self._add_text_to_keyword_table(keyword_table, text.metadata["doc_id"], list(keywords))
 
             self._save_dataset_keyword_table(keyword_table)
 
@@ -126,13 +118,7 @@ class Jieba(BaseKeyword):
                 db.session.delete(dataset_keyword_table)
                 db.session.commit()
                 if dataset_keyword_table.data_source_type != "database":
-                    file_key = (
-                        "keyword_files/"
-                        + self.dataset.tenant_id
-                        + "/"
-                        + self.dataset.id
-                        + ".txt"
-                    )
+                    file_key = "keyword_files/" + self.dataset.tenant_id + "/" + self.dataset.id + ".txt"
                     storage.delete(file_key)
 
     def _save_dataset_keyword_table(self, keyword_table):
@@ -147,23 +133,13 @@ class Jieba(BaseKeyword):
         dataset_keyword_table = self.dataset.dataset_keyword_table
         keyword_data_source_type = dataset_keyword_table.data_source_type
         if keyword_data_source_type == "database":
-            dataset_keyword_table.keyword_table = json.dumps(
-                keyword_table_dict, cls=SetEncoder
-            )
+            dataset_keyword_table.keyword_table = json.dumps(keyword_table_dict, cls=SetEncoder)
             db.session.commit()
         else:
-            file_key = (
-                "keyword_files/"
-                + self.dataset.tenant_id
-                + "/"
-                + self.dataset.id
-                + ".txt"
-            )
+            file_key = "keyword_files/" + self.dataset.tenant_id + "/" + self.dataset.id + ".txt"
             if storage.exists(file_key):
                 storage.delete(file_key)
-            storage.save(
-                file_key, json.dumps(keyword_table_dict, cls=SetEncoder).encode("utf-8")
-            )
+            storage.save(file_key, json.dumps(keyword_table_dict, cls=SetEncoder).encode("utf-8"))
 
     def _get_dataset_keyword_table(self) -> Optional[dict]:
         dataset_keyword_table = self.dataset.dataset_keyword_table
@@ -195,18 +171,14 @@ class Jieba(BaseKeyword):
 
         return {}
 
-    def _add_text_to_keyword_table(
-        self, keyword_table: dict, id: str, keywords: list[str]
-    ) -> dict:
+    def _add_text_to_keyword_table(self, keyword_table: dict, id: str, keywords: list[str]) -> dict:
         for keyword in keywords:
             if keyword not in keyword_table:
                 keyword_table[keyword] = set()
             keyword_table[keyword].add(id)
         return keyword_table
 
-    def _delete_ids_from_keyword_table(
-        self, keyword_table: dict, ids: list[str]
-    ) -> dict:
+    def _delete_ids_from_keyword_table(self, keyword_table: dict, ids: list[str]) -> dict:
         # get set of ids that correspond to node
         node_idxs_to_delete = set(ids)
 
@@ -229,9 +201,7 @@ class Jieba(BaseKeyword):
 
         # go through text chunks in order of most matching keywords
         chunk_indices_count: dict[str, int] = defaultdict(int)
-        keywords = [
-            keyword for keyword in keywords if keyword in set(keyword_table.keys())
-        ]
+        keywords = [keyword for keyword in keywords if keyword in set(keyword_table.keys())]
         for keyword in keywords:
             for node_id in keyword_table[keyword]:
                 chunk_indices_count[node_id] += 1
@@ -244,9 +214,7 @@ class Jieba(BaseKeyword):
 
         return sorted_chunk_indices[:k]
 
-    def _update_segment_keywords(
-        self, dataset_id: str, node_id: str, keywords: list[str]
-    ):
+    def _update_segment_keywords(self, dataset_id: str, node_id: str, keywords: list[str]):
         document_segment = (
             db.session.query(DocumentSegment)
             .filter(
@@ -263,9 +231,7 @@ class Jieba(BaseKeyword):
     def create_segment_keywords(self, node_id: str, keywords: list[str]):
         keyword_table = self._get_dataset_keyword_table()
         self._update_segment_keywords(self.dataset.id, node_id, keywords)
-        keyword_table = self._add_text_to_keyword_table(
-            keyword_table, node_id, keywords
-        )
+        keyword_table = self._add_text_to_keyword_table(keyword_table, node_id, keywords)
         self._save_dataset_keyword_table(keyword_table)
 
     def multi_create_segment_keywords(self, pre_segment_data_list: list):
@@ -279,20 +245,14 @@ class Jieba(BaseKeyword):
                     keyword_table, segment.index_node_id, pre_segment_data["keywords"]
                 )
             else:
-                keywords = keyword_table_handler.extract_keywords(
-                    segment.content, self._config.max_keywords_per_chunk
-                )
+                keywords = keyword_table_handler.extract_keywords(segment.content, self._config.max_keywords_per_chunk)
                 segment.keywords = list(keywords)
-                keyword_table = self._add_text_to_keyword_table(
-                    keyword_table, segment.index_node_id, list(keywords)
-                )
+                keyword_table = self._add_text_to_keyword_table(keyword_table, segment.index_node_id, list(keywords))
         self._save_dataset_keyword_table(keyword_table)
 
     def update_segment_keywords_index(self, node_id: str, keywords: list[str]):
         keyword_table = self._get_dataset_keyword_table()
-        keyword_table = self._add_text_to_keyword_table(
-            keyword_table, node_id, keywords
-        )
+        keyword_table = self._add_text_to_keyword_table(keyword_table, node_id, keywords)
         self._save_dataset_keyword_table(keyword_table)
 
 

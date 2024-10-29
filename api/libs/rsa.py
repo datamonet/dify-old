@@ -48,19 +48,13 @@ def encrypt(text, public_key):
 def get_decrypt_decoding(tenant_id):
     filepath = "privkeys/{tenant_id}".format(tenant_id=tenant_id) + "/private.pem"
 
-    cache_key = "tenant_privkey:{hash}".format(
-        hash=hashlib.sha3_256(filepath.encode()).hexdigest()
-    )
+    cache_key = "tenant_privkey:{hash}".format(hash=hashlib.sha3_256(filepath.encode()).hexdigest())
     private_key = redis_client.get(cache_key)
     if not private_key:
         try:
             private_key = storage.load(filepath)
         except FileNotFoundError:
-            raise PrivkeyNotFoundError(
-                "Private key not found, tenant_id: {tenant_id}".format(
-                    tenant_id=tenant_id
-                )
-            )
+            raise PrivkeyNotFoundError("Private key not found, tenant_id: {tenant_id}".format(tenant_id=tenant_id))
 
         redis_client.setex(cache_key, 120, private_key)
 
@@ -76,9 +70,7 @@ def decrypt_token_with_decoding(encrypted_text, rsa_key, cipher_rsa):
 
         enc_aes_key = encrypted_text[: rsa_key.size_in_bytes()]
         nonce = encrypted_text[rsa_key.size_in_bytes() : rsa_key.size_in_bytes() + 16]
-        tag = encrypted_text[
-            rsa_key.size_in_bytes() + 16 : rsa_key.size_in_bytes() + 32
-        ]
+        tag = encrypted_text[rsa_key.size_in_bytes() + 16 : rsa_key.size_in_bytes() + 32]
         ciphertext = encrypted_text[rsa_key.size_in_bytes() + 32 :]
 
         aes_key = cipher_rsa.decrypt(enc_aes_key)

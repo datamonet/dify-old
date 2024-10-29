@@ -9,9 +9,7 @@ class AppUnavailableError(BaseHTTPException):
 
 class NotCompletionAppError(BaseHTTPException):
     error_code = "not_completion_app"
-    description = (
-        "Please check if your Completion app mode matches the right API route."
-    )
+    description = "Please check if your Completion app mode matches the right API route."
     code = 400
 
 

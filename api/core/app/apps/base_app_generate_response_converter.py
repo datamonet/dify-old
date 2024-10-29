@@ -51,16 +51,12 @@ class AppGenerateResponseConverter(ABC):
 
     @classmethod
     @abstractmethod
-    def convert_blocking_full_response(
-        cls, blocking_response: AppBlockingResponse
-    ) -> dict[str, Any]:
+    def convert_blocking_full_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def convert_blocking_simple_response(
-        cls, blocking_response: AppBlockingResponse
-    ) -> dict[str, Any]:
+    def convert_blocking_simple_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod

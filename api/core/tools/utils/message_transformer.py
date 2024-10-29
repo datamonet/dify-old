@@ -42,9 +42,7 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy()
-                            if message.meta is not None
-                            else {},
+                            meta=message.meta.copy() if message.meta is not None else {},
                         )
                     )
                 except Exception as e:
@@ -53,9 +51,7 @@ class ToolFileMessageTransformer:
                         ToolInvokeMessage(
                             type=ToolInvokeMessage.MessageType.TEXT,
                             message=f"Failed to download image: {message.message}, please try to download it manually.",
-                            meta=message.meta.copy()
-                            if message.meta is not None
-                            else {},
+                            meta=message.meta.copy() if message.meta is not None else {},
                             save_as=message.save_as,
                         )
                     )
@@ -86,9 +82,7 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy()
-                            if message.meta is not None
-                            else {},
+                            meta=message.meta.copy() if message.meta is not None else {},
                         )
                     )
                 else:
@@ -97,9 +91,7 @@ class ToolFileMessageTransformer:
                             type=ToolInvokeMessage.MessageType.LINK,
                             message=url,
                             save_as=message.save_as,
-                            meta=message.meta.copy()
-                            if message.meta is not None
-                            else {},
+                            meta=message.meta.copy() if message.meta is not None else {},
                         )
                     )
             elif message.type == ToolInvokeMessage.MessageType.FILE:
@@ -115,9 +107,7 @@ class ToolFileMessageTransformer:
                                     type=ToolInvokeMessage.MessageType.IMAGE_LINK,
                                     message=url,
                                     save_as=message.save_as,
-                                    meta=message.meta.copy()
-                                    if message.meta is not None
-                                    else {},
+                                    meta=message.meta.copy() if message.meta is not None else {},
                                 )
                             )
                         else:
@@ -126,9 +116,7 @@ class ToolFileMessageTransformer:
                                     type=ToolInvokeMessage.MessageType.LINK,
                                     message=url,
                                     save_as=message.save_as,
-                                    meta=message.meta.copy()
-                                    if message.meta is not None
-                                    else {},
+                                    meta=message.meta.copy() if message.meta is not None else {},
                                 )
                             )
                     else:

@@ -50,9 +50,7 @@ class IfElseNode(BaseNode[IfElseNodeData]):
 
                     # Break if a case passes (logical short-circuit)
                     if final_result:
-                        selected_case_id = (
-                            case.case_id
-                        )  # Capture the ID of the passing case
+                        selected_case_id = case.case_id  # Capture the ID of the passing case
                         break
 
             else:

@@ -19,9 +19,7 @@ class WorkflowAppGenerateResponseConverter(AppGenerateResponseConverter):
     _blocking_response_type = WorkflowAppBlockingResponse
 
     @classmethod
-    def convert_blocking_full_response(
-        cls, blocking_response: WorkflowAppBlockingResponse
-    ) -> dict:
+    def convert_blocking_full_response(cls, blocking_response: WorkflowAppBlockingResponse) -> dict:
         """
         Convert blocking full response.
         :param blocking_response: blocking response
@@ -30,9 +28,7 @@ class WorkflowAppGenerateResponseConverter(AppGenerateResponseConverter):
         return blocking_response.to_dict()
 
     @classmethod
-    def convert_blocking_simple_response(
-        cls, blocking_response: WorkflowAppBlockingResponse
-    ) -> dict:
+    def convert_blocking_simple_response(cls, blocking_response: WorkflowAppBlockingResponse) -> dict:
         """
         Convert blocking simple response.
         :param blocking_response: blocking response
@@ -94,9 +90,7 @@ class WorkflowAppGenerateResponseConverter(AppGenerateResponseConverter):
             if isinstance(sub_stream_response, ErrorStreamResponse):
                 data = cls._error_to_stream_response(sub_stream_response.err)
                 response_chunk.update(data)
-            elif isinstance(
-                sub_stream_response, NodeStartStreamResponse | NodeFinishStreamResponse
-            ):
+            elif isinstance(sub_stream_response, NodeStartStreamResponse | NodeFinishStreamResponse):
                 response_chunk.update(sub_stream_response.to_ignore_detail_dict())
             else:
                 response_chunk.update(sub_stream_response.to_dict())

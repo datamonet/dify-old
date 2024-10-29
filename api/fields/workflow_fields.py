@@ -32,9 +32,7 @@ class EnvironmentVariableField(fields.Raw):
         if isinstance(value, dict):
             value_type = value.get("value_type")
             if value_type not in ENVIRONMENT_VARIABLE_SUPPORTED_TYPES:
-                raise ValueError(
-                    f"Unsupported environment variable value type: {value_type}"
-                )
+                raise ValueError(f"Unsupported environment variable value type: {value_type}")
             return value
 
 
@@ -53,9 +51,7 @@ workflow_fields = {
     "hash": fields.String(attribute="unique_hash"),
     "created_by": fields.Nested(simple_account_fields, attribute="created_by_account"),
     "created_at": TimestampField,
-    "updated_by": fields.Nested(
-        simple_account_fields, attribute="updated_by_account", allow_null=True
-    ),
+    "updated_by": fields.Nested(simple_account_fields, attribute="updated_by_account", allow_null=True),
     "updated_at": TimestampField,
     "tool_published": fields.Boolean,
     "environment_variables": fields.List(EnvironmentVariableField()),

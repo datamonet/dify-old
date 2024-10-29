@@ -11,9 +11,7 @@ class DuckDuckGoImageSearchTool(BuiltinTool):
     Tool for performing an image search using DuckDuckGo search engine.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> list[ToolInvokeMessage]:
         query_dict = {
             "keywords": tool_parameters.get("query"),
             "timelimit": tool_parameters.get("timelimit"),

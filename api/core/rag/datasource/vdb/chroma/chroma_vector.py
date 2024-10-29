@@ -59,25 +59,19 @@ class ChromaVector(BaseVector):
     def create_collection(self, collection_name: str):
         lock_name = "vector_indexing_lock_{}".format(collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(
-                self._collection_name
-            )
+            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
             if redis_client.get(collection_exist_cache_key):
                 return
             self._client.get_or_create_collection(collection_name)
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
-    def add_texts(
-        self, documents: list[Document], embeddings: list[list[float]], **kwargs
-    ):
+    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
         uuids = self._get_uuids(documents)
         texts = [d.page_content for d in documents]
         metadatas = [d.metadata for d in documents]
 
         collection = self._client.get_or_create_collection(self._collection_name)
-        collection.upsert(
-            ids=uuids, documents=texts, embeddings=embeddings, metadatas=metadatas
-        )
+        collection.upsert(ids=uuids, documents=texts, embeddings=embeddings, metadatas=metadatas)
 
     def delete_by_metadata_field(self, key: str, value: str):
         collection = self._client.get_or_create_collection(self._collection_name)
@@ -95,13 +89,9 @@ class ChromaVector(BaseVector):
         response = collection.get(ids=[id])
         return len(response) > 0
 
-    def search_by_vector(
-        self, query_vector: list[float], **kwargs: Any
-    ) -> list[Document]:
+    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
         collection = self._client.get_or_create_collection(self._collection_name)
-        results: QueryResult = collection.query(
-            query_embeddings=query_vector, n_results=kwargs.get("top_k", 4)
-        )
+        results: QueryResult = collection.query(query_embeddings=query_vector, n_results=kwargs.get("top_k", 4))
         score_threshold = float(kwargs.get("score_threshold") or 0.0)
 
         ids: list[str] = results["ids"][0]
@@ -130,13 +120,9 @@ class ChromaVector(BaseVector):
 
 
 class ChromaVectorFactory(AbstractVectorFactory):
-    def init_vector(
-        self, dataset: Dataset, attributes: list, embeddings: Embeddings
-    ) -> BaseVector:
+    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> BaseVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"][
-                "class_prefix"
-            ]
+            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id

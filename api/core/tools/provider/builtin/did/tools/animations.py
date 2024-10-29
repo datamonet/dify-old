@@ -16,9 +16,7 @@ class AnimationsTool(BuiltinTool):
         )
 
         driver_expressions_str = tool_parameters.get("driver_expressions")
-        driver_expressions = (
-            json.loads(driver_expressions_str) if driver_expressions_str else None
-        )
+        driver_expressions = json.loads(driver_expressions_str) if driver_expressions_str else None
 
         config = {
             "stitch": tool_parameters.get("stitch", True),
@@ -39,20 +37,14 @@ class AnimationsTool(BuiltinTool):
 
         if config.get("logo_url"):
             if not config.get("logo_x"):
-                raise ValueError(
-                    "Logo X position is required when logo URL is provided"
-                )
+                raise ValueError("Logo X position is required when logo URL is provided")
             if not config.get("logo_y"):
-                raise ValueError(
-                    "Logo Y position is required when logo URL is provided"
-                )
+                raise ValueError("Logo Y position is required when logo URL is provided")
 
         animations_result = app.animations(params=options, wait=True)
 
         if not isinstance(animations_result, str):
-            animations_result = json.dumps(
-                animations_result, ensure_ascii=False, indent=4
-            )
+            animations_result = json.dumps(animations_result, ensure_ascii=False, indent=4)
 
         if not animations_result:
             return self.create_text_message("D-ID animations request failed.")

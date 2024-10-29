@@ -16,17 +16,13 @@ class LoadBalancingCredentialsValidateApi(Resource):
     @login_required
     @account_initialization_required
     def post(self, provider: str):
-        if not TenantAccountRole.is_privileged_role(
-            current_user.current_tenant.current_role
-        ):
+        if not TenantAccountRole.is_privileged_role(current_user.current_tenant.current_role):
             raise Forbidden()
 
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -35,9 +31,7 @@ class LoadBalancingCredentialsValidateApi(Resource):
             choices=[mt.value for mt in ModelType],
             location="json",
         )
-        parser.add_argument(
-            "credentials", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         # validate model load balancing credentials
@@ -71,17 +65,13 @@ class LoadBalancingConfigCredentialsValidateApi(Resource):
     @login_required
     @account_initialization_required
     def post(self, provider: str, config_id: str):
-        if not TenantAccountRole.is_privileged_role(
-            current_user.current_tenant.current_role
-        ):
+        if not TenantAccountRole.is_privileged_role(current_user.current_tenant.current_role):
             raise Forbidden()
 
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -90,9 +80,7 @@ class LoadBalancingConfigCredentialsValidateApi(Resource):
             choices=[mt.value for mt in ModelType],
             location="json",
         )
-        parser.add_argument(
-            "credentials", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         # validate model load balancing config credentials

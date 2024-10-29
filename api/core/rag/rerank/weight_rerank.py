@@ -50,12 +50,8 @@ class WeightRerankRunner(BaseRerankRunner):
         rerank_documents = []
         query_scores = self._calculate_keyword_score(query, documents)
 
-        query_vector_scores = self._calculate_cosine(
-            self.tenant_id, query, documents, self.weights.vector_setting
-        )
-        for document, query_score, query_vector_score in zip(
-            documents, query_scores, query_vector_scores
-        ):
+        query_vector_scores = self._calculate_cosine(self.tenant_id, query, documents, self.weights.vector_setting)
+        for document, query_score, query_vector_score in zip(documents, query_scores, query_vector_scores):
             # format document
             score = (
                 self.weights.vector_setting.vector_weight * query_vector_score
@@ -65,14 +61,10 @@ class WeightRerankRunner(BaseRerankRunner):
                 continue
             document.metadata["score"] = score
             rerank_documents.append(document)
-        rerank_documents = sorted(
-            rerank_documents, key=lambda x: x.metadata["score"], reverse=True
-        )
+        rerank_documents = sorted(rerank_documents, key=lambda x: x.metadata["score"], reverse=True)
         return rerank_documents[:top_n] if top_n else rerank_documents
 
-    def _calculate_keyword_score(
-        self, query: str, documents: list[Document]
-    ) -> list[float]:
+    def _calculate_keyword_score(self, query: str, documents: list[Document]) -> list[float]:
         """
         Calculate BM25 scores
         :param query: search query
@@ -85,9 +77,7 @@ class WeightRerankRunner(BaseRerankRunner):
         documents_keywords = []
         for document in documents:
             # get the document keywords
-            document_keywords = keyword_table_handler.extract_keywords(
-                document.page_content, None
-            )
+            document_keywords = keyword_table_handler.extract_keywords(document.page_content, None)
             document.metadata["keywords"] = document_keywords
             documents_keywords.append(document_keywords)
 
@@ -105,13 +95,9 @@ class WeightRerankRunner(BaseRerankRunner):
         keyword_idf = {}
         for keyword in all_keywords:
             # calculate include query keywords' documents
-            doc_count_containing_keyword = sum(
-                1 for doc_keywords in documents_keywords if keyword in doc_keywords
-            )
+            doc_count_containing_keyword = sum(1 for doc_keywords in documents_keywords if keyword in doc_keywords)
             # IDF
-            keyword_idf[keyword] = (
-                math.log((1 + total_documents) / (1 + doc_count_containing_keyword)) + 1
-            )
+            keyword_idf[keyword] = math.log((1 + total_documents) / (1 + doc_count_containing_keyword)) + 1
 
         query_tfidf = {}
 

@@ -140,17 +140,13 @@ class FeishuRequest:
         res = self._send_request(url, payload=payload)
         return res.get("data")
 
-    def write_document(
-        self, document_id: str, content: str, position: str = "end"
-    ) -> dict:
+    def write_document(self, document_id: str, content: str, position: str = "end") -> dict:
         url = f"{self.API_BASE_URL}/document/write_document"
         payload = {"document_id": document_id, "content": content, "position": position}
         res = self._send_request(url, payload=payload)
         return res
 
-    def get_document_content(
-        self, document_id: str, mode: str = "markdown", lang: str = "0"
-    ) -> dict:
+    def get_document_content(self, document_id: str, mode: str = "markdown", lang: str = "0") -> dict:
         """
         API url: https://open.larkoffice.com/document/server-docs/docs/docs/docx-v1/document/raw_content
         Example Response:
@@ -191,9 +187,7 @@ class FeishuRequest:
         res = self._send_request(url, method="GET", params=params)
         return res.get("data")
 
-    def send_bot_message(
-        self, receive_id_type: str, receive_id: str, msg_type: str, content: str
-    ) -> dict:
+    def send_bot_message(self, receive_id_type: str, receive_id: str, msg_type: str, content: str) -> dict:
         """
         API url: https://open.larkoffice.com/document/server-docs/im-v1/message/create
         """
@@ -314,9 +308,7 @@ class FeishuRequest:
         res = self._send_request(url, method="DELETE", payload=payload)
         return res
 
-    def add_members(
-        self, task_guid: str, member_phone_or_email: str, member_role: str
-    ) -> dict:
+    def add_members(self, task_guid: str, member_phone_or_email: str, member_role: str) -> dict:
         # 删除任务
         url = f"{self.API_BASE_URL}/task/add_members"
         payload = {
@@ -411,9 +403,7 @@ class FeishuRequest:
         res = self._send_request(url, method="DELETE", params=params)
         return res
 
-    def list_events(
-        self, start_time: str, end_time: str, page_token: str, page_size: int = 50
-    ) -> dict:
+    def list_events(self, start_time: str, end_time: str, page_token: str, page_size: int = 50) -> dict:
         url = f"{self.API_BASE_URL}/calendar/list_events"
         params = {
             "start_time": start_time,

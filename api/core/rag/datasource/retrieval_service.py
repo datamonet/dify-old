@@ -38,11 +38,7 @@ class RetrievalService:
         if not dataset:
             return []
 
-        if (
-            not dataset
-            or dataset.available_document_count == 0
-            or dataset.available_segment_count == 0
-        ):
+        if not dataset or dataset.available_document_count == 0 or dataset.available_segment_count == 0:
             return []
         all_documents = []
         threads = []
@@ -146,15 +142,11 @@ class RetrievalService:
     ):
         with flask_app.app_context():
             try:
-                dataset = (
-                    db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
-                )
+                dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
                 keyword = Keyword(dataset=dataset)
 
-                documents = keyword.search(
-                    cls.escape_query_for_search(query), top_k=top_k
-                )
+                documents = keyword.search(cls.escape_query_for_search(query), top_k=top_k)
                 all_documents.extend(documents)
             except Exception as e:
                 exceptions.append(str(e))
@@ -174,9 +166,7 @@ class RetrievalService:
     ):
         with flask_app.app_context():
             try:
-                dataset = (
-                    db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
-                )
+                dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
                 vector = Vector(dataset=dataset)
 
@@ -230,17 +220,13 @@ class RetrievalService:
     ):
         with flask_app.app_context():
             try:
-                dataset = (
-                    db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
-                )
+                dataset = db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
                 vector_processor = Vector(
                     dataset=dataset,
                 )
 
-                documents = vector_processor.search_by_full_text(
-                    cls.escape_query_for_search(query), top_k=top_k
-                )
+                documents = vector_processor.search_by_full_text(cls.escape_query_for_search(query), top_k=top_k)
                 if documents:
                     if (
                         reranking_model

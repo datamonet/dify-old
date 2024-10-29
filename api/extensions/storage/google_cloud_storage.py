@@ -2,7 +2,6 @@ import base64
 import io
 import json
 from collections.abc import Generator
-from contextlib import closing
 
 from google.cloud import storage as google_cloud_storage
 
@@ -20,14 +19,10 @@ class GoogleCloudStorage(BaseStorage):
         service_account_json_str = dify_config.GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64
         # if service_account_json_str is empty, use Application Default Credentials
         if service_account_json_str:
-            service_account_json = base64.b64decode(service_account_json_str).decode(
-                "utf-8"
-            )
+            service_account_json = base64.b64decode(service_account_json_str).decode("utf-8")
             # convert str to object
             service_account_obj = json.loads(service_account_json)
-            self.client = google_cloud_storage.Client.from_service_account_info(
-                service_account_obj
-            )
+            self.client = google_cloud_storage.Client.from_service_account_info(service_account_obj)
         else:
             self.client = google_cloud_storage.Client()
 

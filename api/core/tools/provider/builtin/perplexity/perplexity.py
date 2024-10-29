@@ -32,9 +32,7 @@ class PerplexityProvider(BuiltinToolProviderController):
             response = requests.post(PERPLEXITY_API_URL, json=payload, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
-            raise ToolProviderCredentialValidationError(
-                f"Failed to validate Perplexity API key: {str(e)}"
-            )
+            raise ToolProviderCredentialValidationError(f"Failed to validate Perplexity API key: {str(e)}")
 
         if response.status_code != 200:
             raise ToolProviderCredentialValidationError(

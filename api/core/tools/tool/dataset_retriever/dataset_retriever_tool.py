@@ -19,9 +19,7 @@ default_retrieval_model = {
 
 
 class DatasetRetrieverToolInput(BaseModel):
-    query: str = Field(
-        ..., description="Query for the dataset to be used to retrieve the dataset."
-    )
+    query: str = Field(..., description="Query for the dataset to be used to retrieve the dataset.")
 
 
 class DatasetRetrieverTool(DatasetRetrieverBaseTool):
@@ -36,9 +34,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
     def from_dataset(cls, dataset: Dataset, **kwargs):
         description = dataset.description
         if not description:
-            description = (
-                "useful for when you want to answer queries about the " + dataset.name
-            )
+            description = "useful for when you want to answer queries about the " + dataset.name
 
         description = description.replace("\n", "").replace("\r", "")
         return cls(
@@ -51,9 +47,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
 
     def _run(self, query: str) -> str:
         dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == self.tenant_id, Dataset.id == self.dataset_id)
-            .first()
+            db.session.query(Dataset).filter(Dataset.tenant_id == self.tenant_id, Dataset.id == self.dataset_id).first()
         )
 
         if not dataset:
@@ -77,9 +71,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
             if self.top_k > 0:
                 # retrieval source
                 documents = RetrievalService.retrieve(
-                    retrieval_method=retrieval_model.get(
-                        "search_method", "semantic_search"
-                    ),
+                    retrieval_method=retrieval_model.get("search_method", "semantic_search"),
                     dataset_id=dataset.id,
                     query=query,
                     top_k=self.top_k,
@@ -89,8 +81,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
                     reranking_model=retrieval_model.get("reranking_model", None)
                     if retrieval_model["reranking_enable"]
                     else None,
-                    reranking_mode=retrieval_model.get("reranking_mode")
-                    or "reranking_model",
+                    reranking_mode=retrieval_model.get("reranking_mode") or "reranking_model",
                     weights=retrieval_model.get("weights", None),
                 )
             else:
@@ -102,9 +93,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
             if dataset.indexing_technique != "economy":
                 for item in documents:
                     if item.metadata.get("score"):
-                        document_score_list[item.metadata["doc_id"]] = item.metadata[
-                            "score"
-                        ]
+                        document_score_list[item.metadata["doc_id"]] = item.metadata["score"]
             document_context_list = []
             index_node_ids = [document.metadata["doc_id"] for document in documents]
             segments = DocumentSegment.query.filter(
@@ -116,20 +105,14 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
             ).all()
 
             if segments:
-                index_node_id_to_position = {
-                    id: position for position, id in enumerate(index_node_ids)
-                }
+                index_node_id_to_position = {id: position for position, id in enumerate(index_node_ids)}
                 sorted_segments = sorted(
                     segments,
-                    key=lambda segment: index_node_id_to_position.get(
-                        segment.index_node_id, float("inf")
-                    ),
+                    key=lambda segment: index_node_id_to_position.get(segment.index_node_id, float("inf")),
                 )
                 for segment in sorted_segments:
                     if segment.answer:
-                        document_context_list.append(
-                            f"question:{segment.get_sign_content()} answer:{segment.answer}"
-                        )
+                        document_context_list.append(f"question:{segment.get_sign_content()} answer:{segment.answer}")
                     else:
                         document_context_list.append(segment.get_sign_content())
                 if self.return_resource:
@@ -152,9 +135,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
                                 "data_source_type": document.data_source_type,
                                 "segment_id": segment.id,
                                 "retriever_from": self.retriever_from,
-                                "score": document_score_list.get(
-                                    segment.index_node_id, None
-                                ),
+                                "score": document_score_list.get(segment.index_node_id, None),
                             }
                             if self.retriever_from == "dev":
                                 source["hit_count"] = segment.hit_count
@@ -162,9 +143,7 @@ class DatasetRetrieverTool(DatasetRetrieverBaseTool):
                                 source["segment_position"] = segment.position
                                 source["index_node_hash"] = segment.index_node_hash
                             if segment.answer:
-                                source["content"] = (
-                                    f"question:{segment.content} \nanswer:{segment.answer}"
-                                )
+                                source["content"] = f"question:{segment.content} \nanswer:{segment.answer}"
                             else:
                                 source["content"] = segment.content
                             context_list.append(source)

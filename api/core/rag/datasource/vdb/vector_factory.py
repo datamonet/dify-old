@@ -16,9 +16,7 @@ from models.dataset import Dataset, Whitelist
 
 class AbstractVectorFactory(ABC):
     @abstractmethod
-    def init_vector(
-        self, dataset: Dataset, attributes: list, embeddings: Embeddings
-    ) -> BaseVector:
+    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> BaseVector:
         raise NotImplementedError
 
     @staticmethod
@@ -58,9 +56,7 @@ class Vector:
             raise ValueError("Vector store must be specified.")
 
         vector_factory_cls = self.get_vector_factory(vector_type)
-        return vector_factory_cls().init_vector(
-            self._dataset, self._attributes, self._embeddings
-        )
+        return vector_factory_cls().init_vector(self._dataset, self._attributes, self._embeddings)
 
     @staticmethod
     def get_vector_factory(vector_type: str) -> type[AbstractVectorFactory]:
@@ -168,18 +164,14 @@ class Vector:
 
     def create(self, texts: Optional[list] = None, **kwargs):
         if texts:
-            embeddings = self._embeddings.embed_documents(
-                [document.page_content for document in texts]
-            )
+            embeddings = self._embeddings.embed_documents([document.page_content for document in texts])
             self._vector_processor.create(texts=texts, embeddings=embeddings, **kwargs)
 
     def add_texts(self, documents: list[Document], **kwargs):
         if kwargs.get("duplicate_check", False):
             documents = self._filter_duplicate_texts(documents)
 
-        embeddings = self._embeddings.embed_documents(
-            [document.page_content for document in documents]
-        )
+        embeddings = self._embeddings.embed_documents([document.page_content for document in documents])
         self._vector_processor.create(texts=documents, embeddings=embeddings, **kwargs)
 
     def text_exists(self, id: str) -> bool:
@@ -202,9 +194,7 @@ class Vector:
         self._vector_processor.delete()
         # delete collection redis cache
         if self._vector_processor.collection_name:
-            collection_exist_cache_key = "vector_indexing_{}".format(
-                self._vector_processor.collection_name
-            )
+            collection_exist_cache_key = "vector_indexing_{}".format(self._vector_processor.collection_name)
             redis_client.delete(collection_exist_cache_key)
 
     def _get_embeddings(self) -> Embeddings:

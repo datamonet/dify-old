@@ -13,9 +13,7 @@ class XinferenceProvider(BuiltinToolProviderController):
             credentials["api_key"] = api_key
         model = credentials.get("model", "")
         if not base_url or not model:
-            raise ToolProviderCredentialValidationError(
-                "Xinference base_url and model is required"
-            )
+            raise ToolProviderCredentialValidationError("Xinference base_url and model is required")
         headers = {"Authorization": f"Bearer {api_key}"}
         res = requests.post(
             f"{base_url}/sdapi/v1/options",

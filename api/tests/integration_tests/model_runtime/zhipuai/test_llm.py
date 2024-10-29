@@ -22,9 +22,7 @@ def test_validate_credentials():
     model = ZhipuAILargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="chatglm_turbo", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="chatglm_turbo", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="chatglm_turbo",
@@ -67,11 +65,7 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():

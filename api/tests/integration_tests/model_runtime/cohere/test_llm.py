@@ -21,9 +21,7 @@ def test_validate_credentials_for_chat_model():
     model = CohereLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="command-light-chat", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="command-light-chat", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="command-light-chat",
@@ -35,13 +33,9 @@ def test_validate_credentials_for_completion_model():
     model = CohereLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="command-light", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="command-light", credentials={"api_key": "invalid_key"})
 
-    model.validate_credentials(
-        model="command-light", credentials={"api_key": os.environ.get("COHERE_API_KEY")}
-    )
+    model.validate_credentials(model="command-light", credentials={"api_key": os.environ.get("COHERE_API_KEY")})
 
 
 def test_invoke_completion_model():
@@ -60,12 +54,7 @@ def test_invoke_completion_model():
 
     assert isinstance(result, LLMResult)
     assert len(result.message.content) > 0
-    assert (
-        model._num_tokens_from_string(
-            "command-light", credentials, result.message.content
-        )
-        == 1
-    )
+    assert model._num_tokens_from_string("command-light", credentials, result.message.content) == 1
 
 
 def test_invoke_stream_completion_model():
@@ -86,11 +75,7 @@ def test_invoke_stream_completion_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_invoke_chat_model():
@@ -144,11 +129,7 @@ def test_invoke_stream_chat_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
         if chunk.delta.finish_reason is not None:
             assert chunk.delta.usage is not None
             assert chunk.delta.usage.completion_tokens > 0

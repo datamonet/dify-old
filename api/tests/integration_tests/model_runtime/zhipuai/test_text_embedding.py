@@ -13,9 +13,7 @@ def test_validate_credentials():
     model = ZhipuAITextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="text_embedding", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="text_embedding", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="text_embedding",

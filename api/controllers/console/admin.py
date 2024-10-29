@@ -23,17 +23,13 @@ def admin_required(view):
             raise Unauthorized("Authorization header is missing.")
 
         if " " not in auth_header:
-            raise Unauthorized(
-                "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
-            )
+            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
 
         auth_scheme, auth_token = auth_header.split(None, 1)
         auth_scheme = auth_scheme.lower()
 
         if auth_scheme != "bearer":
-            raise Unauthorized(
-                "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
-            )
+            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
 
         if dify_config.ADMIN_API_KEY != auth_token:
             raise Unauthorized("API key is invalid.")
@@ -48,9 +44,7 @@ class InsertExploreAppListApi(Resource):
     @admin_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "app_id", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("app_id", type=str, required=True, nullable=False, location="json")
         parser.add_argument("desc", type=str, location="json")
         parser.add_argument("copyright", type=str, location="json")
         parser.add_argument("privacy_policy", type=str, location="json")
@@ -62,12 +56,8 @@ class InsertExploreAppListApi(Resource):
             nullable=False,
             location="json",
         )
-        parser.add_argument(
-            "category", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "position", type=int, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("category", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("position", type=int, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         app = App.query.filter(App.id == args["app_id"]).first()
@@ -84,13 +74,9 @@ class InsertExploreAppListApi(Resource):
             desc = site.description or args["desc"] or ""
             copy_right = site.copyright or args["copyright"] or ""
             privacy_policy = site.privacy_policy or args["privacy_policy"] or ""
-            custom_disclaimer = (
-                site.custom_disclaimer or args["custom_disclaimer"] or ""
-            )
+            custom_disclaimer = site.custom_disclaimer or args["custom_disclaimer"] or ""
 
-        recommended_app = RecommendedApp.query.filter(
-            RecommendedApp.app_id == args["app_id"]
-        ).first()
+        recommended_app = RecommendedApp.query.filter(RecommendedApp.app_id == args["app_id"]).first()
 
         if not recommended_app:
             recommended_app = RecommendedApp(
@@ -130,9 +116,7 @@ class InsertExploreAppApi(Resource):
     @only_edition_cloud
     @admin_required
     def delete(self, app_id):
-        recommended_app = RecommendedApp.query.filter(
-            RecommendedApp.app_id == str(app_id)
-        ).first()
+        recommended_app = RecommendedApp.query.filter(RecommendedApp.app_id == str(app_id)).first()
         if not recommended_app:
             return {"result": "success"}, 204
 

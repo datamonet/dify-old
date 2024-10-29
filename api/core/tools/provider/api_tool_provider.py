@@ -17,18 +17,14 @@ class ApiToolProviderController(ToolProviderController):
     provider_id: str
 
     @staticmethod
-    def from_db(
-        db_provider: ApiToolProvider, auth_type: ApiProviderAuthType
-    ) -> "ApiToolProviderController":
+    def from_db(db_provider: ApiToolProvider, auth_type: ApiProviderAuthType) -> "ApiToolProviderController":
         credentials_schema = {
             "auth_type": ToolProviderCredentials(
                 name="auth_type",
                 required=True,
                 type=ToolProviderCredentials.CredentialsType.SELECT,
                 options=[
-                    ToolCredentialsOption(
-                        value="none", label=I18nObject(en_US="None", zh_Hans="无")
-                    ),
+                    ToolCredentialsOption(value="none", label=I18nObject(en_US="None", zh_Hans="无")),
                     ToolCredentialsOption(
                         value="api_key",
                         label=I18nObject(en_US="api_key", zh_Hans="api_key"),

@@ -77,15 +77,12 @@ class AppRunner:
             model=model_config.model,
         )
 
-        model_context_tokens = model_config.model_schema.model_properties.get(
-            ModelPropertyKey.CONTEXT_SIZE
-        )
+        model_context_tokens = model_config.model_schema.model_properties.get(ModelPropertyKey.CONTEXT_SIZE)
 
         max_tokens = 0
         for parameter_rule in model_config.model_schema.parameter_rules:
             if parameter_rule.name == "max_tokens" or (
-                parameter_rule.use_template
-                and parameter_rule.use_template == "max_tokens"
+                parameter_rule.use_template and parameter_rule.use_template == "max_tokens"
             ):
                 max_tokens = (
                     model_config.parameters.get(parameter_rule.name)
@@ -130,15 +127,12 @@ class AppRunner:
             model=model_config.model,
         )
 
-        model_context_tokens = model_config.model_schema.model_properties.get(
-            ModelPropertyKey.CONTEXT_SIZE
-        )
+        model_context_tokens = model_config.model_schema.model_properties.get(ModelPropertyKey.CONTEXT_SIZE)
 
         max_tokens = 0
         for parameter_rule in model_config.model_schema.parameter_rules:
             if parameter_rule.name == "max_tokens" or (
-                parameter_rule.use_template
-                and parameter_rule.use_template == "max_tokens"
+                parameter_rule.use_template and parameter_rule.use_template == "max_tokens"
             ):
                 max_tokens = (
                     model_config.parameters.get(parameter_rule.name)
@@ -158,8 +152,7 @@ class AppRunner:
 
             for parameter_rule in model_config.model_schema.parameter_rules:
                 if parameter_rule.name == "max_tokens" or (
-                    parameter_rule.use_template
-                    and parameter_rule.use_template == "max_tokens"
+                    parameter_rule.use_template and parameter_rule.use_template == "max_tokens"
                 ):
                     model_config.parameters[parameter_rule.name] = max_tokens
 
@@ -200,18 +193,12 @@ class AppRunner:
                 model_config=model_config,
             )
         else:
-            memory_config = MemoryConfig(
-                window=MemoryConfig.WindowConfig(enabled=False)
-            )
+            memory_config = MemoryConfig(window=MemoryConfig.WindowConfig(enabled=False))
 
             model_mode = ModelMode.value_of(model_config.mode)
             if model_mode == ModelMode.COMPLETION:
-                advanced_completion_prompt_template = (
-                    prompt_template_entity.advanced_completion_prompt_template
-                )
-                prompt_template = CompletionModelPromptTemplate(
-                    text=advanced_completion_prompt_template.prompt
-                )
+                advanced_completion_prompt_template = prompt_template_entity.advanced_completion_prompt_template
+                prompt_template = CompletionModelPromptTemplate(text=advanced_completion_prompt_template.prompt)
 
                 if advanced_completion_prompt_template.role_prefix:
                     memory_config.role_prefix = MemoryConfig.RolePrefix(
@@ -220,12 +207,8 @@ class AppRunner:
                     )
             else:
                 prompt_template = []
-                for (
-                    message
-                ) in prompt_template_entity.advanced_chat_prompt_template.messages:
-                    prompt_template.append(
-                        ChatModelMessage(text=message.text, role=message.role)
-                    )
+                for message in prompt_template_entity.advanced_chat_prompt_template.messages:
+                    prompt_template.append(ChatModelMessage(text=message.text, role=message.role))
 
             prompt_transform = AdvancedPromptTransform()
             prompt_messages = prompt_transform.get_prompt(
@@ -267,14 +250,10 @@ class AppRunner:
                 chunk = LLMResultChunk(
                     model=app_generate_entity.model_conf.model,
                     prompt_messages=prompt_messages,
-                    delta=LLMResultChunkDelta(
-                        index=index, message=AssistantPromptMessage(content=token)
-                    ),
+                    delta=LLMResultChunkDelta(index=index, message=AssistantPromptMessage(content=token)),
                 )
 
-                queue_manager.publish(
-                    QueueLLMChunkEvent(chunk=chunk), PublishFrom.APPLICATION_MANAGER
-                )
+                queue_manager.publish(QueueLLMChunkEvent(chunk=chunk), PublishFrom.APPLICATION_MANAGER)
                 index += 1
                 time.sleep(0.01)
 
@@ -306,13 +285,9 @@ class AppRunner:
         :return:
         """
         if not stream:
-            self._handle_invoke_result_direct(
-                invoke_result=invoke_result, queue_manager=queue_manager, agent=agent
-            )
+            self._handle_invoke_result_direct(invoke_result=invoke_result, queue_manager=queue_manager, agent=agent)
         else:
-            self._handle_invoke_result_stream(
-                invoke_result=invoke_result, queue_manager=queue_manager, agent=agent
-            )
+            self._handle_invoke_result_stream(invoke_result=invoke_result, queue_manager=queue_manager, agent=agent)
 
     def _handle_invoke_result_direct(
         self, invoke_result: LLMResult, queue_manager: AppQueueManager, agent: bool
@@ -347,9 +322,7 @@ class AppRunner:
         usage = None
         for result in invoke_result:
             if not agent:
-                queue_manager.publish(
-                    QueueLLMChunkEvent(chunk=result), PublishFrom.APPLICATION_MANAGER
-                )
+                queue_manager.publish(QueueLLMChunkEvent(chunk=result), PublishFrom.APPLICATION_MANAGER)
             else:
                 queue_manager.publish(
                     QueueAgentMessageEvent(chunk=result),

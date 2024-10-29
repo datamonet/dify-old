@@ -74,9 +74,7 @@ class ChatAppRunner(AppRunner):
                 model=application_generate_entity.model_conf.model,
             )
 
-            memory = TokenBufferMemory(
-                conversation=conversation, model_instance=model_instance
-            )
+            memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
 
         # organize all inputs and template to prompt messages
         # Include: prompt template, inputs, query(optional), files(optional)
@@ -124,9 +122,7 @@ class ChatAppRunner(AppRunner):
 
             if annotation_reply:
                 queue_manager.publish(
-                    QueueAnnotationReplyEvent(
-                        message_annotation_id=annotation_reply.id
-                    ),
+                    QueueAnnotationReplyEvent(message_annotation_id=annotation_reply.id),
                     PublishFrom.APPLICATION_MANAGER,
                 )
 

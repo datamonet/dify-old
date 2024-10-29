@@ -30,20 +30,14 @@ class WorkflowAppLogApi(Resource):
             choices=["succeeded", "failed", "stopped"],
             location="args",
         )
-        parser.add_argument(
-            "page", type=int_range(1, 99999), default=1, location="args"
-        )
-        parser.add_argument(
-            "limit", type=int_range(1, 100), default=20, location="args"
-        )
+        parser.add_argument("page", type=int_range(1, 99999), default=1, location="args")
+        parser.add_argument("limit", type=int_range(1, 100), default=20, location="args")
         args = parser.parse_args()
 
         # get paginate workflow app logs
         workflow_app_service = WorkflowAppService()
-        workflow_app_log_pagination = (
-            workflow_app_service.get_paginate_workflow_app_logs(
-                app_model=app_model, args=args
-            )
+        workflow_app_log_pagination = workflow_app_service.get_paginate_workflow_app_logs(
+            app_model=app_model, args=args
         )
 
         return workflow_app_log_pagination

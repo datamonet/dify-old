@@ -55,9 +55,7 @@ def login_required(func):
         if dify_config.ADMIN_API_KEY_ENABLE:
             if auth_header:
                 if " " not in auth_header:
-                    raise Unauthorized(
-                        "Invalid Authorization header format. Expected 'Bearer <api-key>' format."
-                    )
+                    raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
                 auth_scheme, auth_token = auth_header.split(None, 1)
                 auth_scheme = auth_scheme.lower()
                 if auth_scheme != "bearer":
@@ -77,9 +75,7 @@ def login_required(func):
                             )
                             if tenant_account_join:
                                 tenant, ta = tenant_account_join
-                                account = Account.query.filter_by(
-                                    id=ta.account_id
-                                ).first()
+                                account = Account.query.filter_by(id=ta.account_id).first()
                                 # Login admin
                                 if account:
                                     account.current_tenant = tenant

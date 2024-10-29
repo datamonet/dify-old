@@ -7,12 +7,8 @@ from core.tools.provider.builtin_tool_provider import BuiltinToolProviderControl
 class GithubProvider(BuiltinToolProviderController):
     def _validate_credentials(self, credentials: dict) -> None:
         try:
-            if "access_tokens" not in credentials or not credentials.get(
-                "access_tokens"
-            ):
-                raise ToolProviderCredentialValidationError(
-                    "Github API Access Tokens is required."
-                )
+            if "access_tokens" not in credentials or not credentials.get("access_tokens"):
+                raise ToolProviderCredentialValidationError("Github API Access Tokens is required.")
             if "api_version" not in credentials or not credentials.get("api_version"):
                 api_version = "2022-11-28"
             else:
@@ -26,18 +22,12 @@ class GithubProvider(BuiltinToolProviderController):
                 }
 
                 response = requests.get(
-                    url="https://api.github.com/search/users?q={account}".format(
-                        account="charli117"
-                    ),
+                    url="https://api.github.com/search/users?q={account}".format(account="charli117"),
                     headers=headers,
                 )
                 if response.status_code != 200:
-                    raise ToolProviderCredentialValidationError(
-                        (response.json()).get("message")
-                    )
+                    raise ToolProviderCredentialValidationError((response.json()).get("message"))
             except Exception as e:
-                raise ToolProviderCredentialValidationError(
-                    "Github API Key and Api Version is invalid. {}".format(e)
-                )
+                raise ToolProviderCredentialValidationError("Github API Key and Api Version is invalid. {}".format(e))
         except Exception as e:
             raise ToolProviderCredentialValidationError(str(e))

@@ -86,21 +86,15 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
         query = query.replace("\x00", "")
         inputs = args["inputs"]
 
-        extras = {
-            "auto_generate_conversation_name": args.get("auto_generate_name", True)
-        }
+        extras = {"auto_generate_conversation_name": args.get("auto_generate_name", True)}
 
         # get conversation
         conversation = None
         if args.get("conversation_id"):
-            conversation = self._get_conversation_by_user(
-                app_model, args.get("conversation_id"), user
-            )
+            conversation = self._get_conversation_by_user(app_model, args.get("conversation_id"), user)
 
         # get app model config
-        app_model_config = self._get_app_model_config(
-            app_model=app_model, conversation=conversation
-        )
+        app_model_config = self._get_app_model_config(app_model=app_model, conversation=conversation)
 
         # validate override model config
         override_model_config_dict = None
@@ -164,9 +158,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
         )
 
         # init generate records
-        (conversation, message) = self._init_generate_records(
-            application_generate_entity, conversation
-        )
+        (conversation, message) = self._init_generate_records(application_generate_entity, conversation)
 
         # init queue manager
         queue_manager = MessageBasedAppQueueManager(
@@ -202,9 +194,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
             stream=stream,
         )
 
-        return AgentChatAppGenerateResponseConverter.convert(
-            response=response, invoke_from=invoke_from
-        )
+        return AgentChatAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
 
     def _generate_worker(
         self,
@@ -248,10 +238,7 @@ class AgentChatAppGenerator(MessageBasedAppGenerator):
                 logger.exception("Validation Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except (ValueError, InvokeError) as e:
-                if (
-                    os.environ.get("DEBUG")
-                    and os.environ.get("DEBUG").lower() == "true"
-                ):
+                if os.environ.get("DEBUG") and os.environ.get("DEBUG").lower() == "true":
                     logger.exception("Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except Exception as e:

@@ -111,9 +111,7 @@ class BraveSearchTool(BuiltinTool):
     Tool for performing a search using Brave search engine.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invoke the Brave search tool.
 

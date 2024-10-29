@@ -30,9 +30,7 @@ class ConversationApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         parser.add_argument(
             "sort_by",
             type=str,
@@ -85,9 +83,7 @@ class ConversationRenameApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=False, location="json")
-        parser.add_argument(
-            "auto_generate", type=bool, required=False, default=False, location="json"
-        )
+        parser.add_argument("auto_generate", type=bool, required=False, default=False, location="json")
         args = parser.parse_args()
 
         try:
@@ -108,6 +104,4 @@ api.add_resource(
     endpoint="conversation_name",
 )
 api.add_resource(ConversationApi, "/conversations")
-api.add_resource(
-    ConversationDetailApi, "/conversations/<uuid:c_id>", endpoint="conversation_detail"
-)
+api.add_resource(ConversationDetailApi, "/conversations/<uuid:c_id>", endpoint="conversation_detail")

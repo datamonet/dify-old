@@ -4,9 +4,7 @@ from typing import Any
 
 from core.workflow.entities.variable_entities import VariableSelector
 
-REGEX = re.compile(
-    r"\{\{(#[a-zA-Z0-9_]{1,50}(\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10}#)\}\}"
-)
+REGEX = re.compile(r"\{\{(#[a-zA-Z0-9_]{1,50}(\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10}#)\}\}")
 
 SELECTOR_PATTERN = re.compile(r"\{\{(#[a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10}#)\}\}")
 
@@ -87,9 +85,7 @@ class VariableTemplateParser:
             if len(split_result) < 2:
                 continue
 
-            variable_selectors.append(
-                VariableSelector(variable=variable_key, value_selector=split_result)
-            )
+            variable_selectors.append(VariableSelector(variable=variable_key, value_selector=split_result))
 
         return variable_selectors
 
@@ -107,9 +103,7 @@ class VariableTemplateParser:
 
         def replacer(match):
             key = match.group(1)
-            value = inputs.get(
-                key, match.group(0)
-            )  # return original matched string if key not found
+            value = inputs.get(key, match.group(0))  # return original matched string if key not found
 
             if value is None:
                 value = ""

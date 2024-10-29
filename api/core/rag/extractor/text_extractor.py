@@ -37,9 +37,7 @@ class TextExtractor(BaseExtractor):
                 detected_encodings = detect_file_encodings(self._file_path)
                 for encoding in detected_encodings:
                     try:
-                        text = Path(self._file_path).read_text(
-                            encoding=encoding.encoding
-                        )
+                        text = Path(self._file_path).read_text(encoding=encoding.encoding)
                         break
                     except UnicodeDecodeError:
                         continue

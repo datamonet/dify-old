@@ -229,9 +229,7 @@ class LLMNode(BaseNode[LLMNodeData]):
                 usage = event.usage
 
         # deduct quota
-        self.deduct_llm_quota(
-            tenant_id=self.tenant_id, model_instance=model_instance, usage=usage
-        )
+        self.deduct_llm_quota(tenant_id=self.tenant_id, model_instance=model_instance, usage=usage)
 
     def _handle_invoke_result(self, invoke_result: LLMResult | Generator) -> Generator[NodeEvent, None, None]:
         if isinstance(invoke_result, LLMResult):
@@ -246,9 +244,7 @@ class LLMNode(BaseNode[LLMNodeData]):
             text = result.delta.message.content
             full_text += text
 
-            yield RunStreamChunkEvent(
-                chunk_content=text, from_variable_selector=[self.node_id, "text"]
-            )
+            yield RunStreamChunkEvent(chunk_content=text, from_variable_selector=[self.node_id, "text"])
 
             if not model:
                 model = result.model
@@ -334,13 +330,9 @@ class LLMNode(BaseNode[LLMNodeData]):
         if isinstance(prompt_template, list):
             for prompt in prompt_template:
                 variable_template_parser = VariableTemplateParser(template=prompt.text)
-                variable_selectors.extend(
-                    variable_template_parser.extract_variable_selectors()
-                )
+                variable_selectors.extend(variable_template_parser.extract_variable_selectors())
         elif isinstance(prompt_template, CompletionModelPromptTemplate):
-            variable_template_parser = VariableTemplateParser(
-                template=prompt_template.text
-            )
+            variable_template_parser = VariableTemplateParser(template=prompt_template.text)
             variable_selectors = variable_template_parser.extract_variable_selectors()
 
         for variable_selector in variable_selectors:
@@ -403,9 +395,7 @@ class LLMNode(BaseNode[LLMNodeData]):
 
                         context_str += item["content"] + "\n"
 
-                        retriever_resource = (
-                            self._convert_to_original_retriever_resource(item)
-                        )
+                        retriever_resource = self._convert_to_original_retriever_resource(item)
                         if retriever_resource:
                             original_retriever_resource.append(retriever_resource)
 
@@ -473,13 +463,9 @@ class LLMNode(BaseNode[LLMNodeData]):
             raise ValueError(f"Model {model_name} not exist.")
 
         if provider_model.status == ModelStatus.NO_CONFIGURE:
-            raise ProviderTokenNotInitError(
-                f"Model {model_name} credentials is not initialized."
-            )
+            raise ProviderTokenNotInitError(f"Model {model_name} credentials is not initialized.")
         elif provider_model.status == ModelStatus.NO_PERMISSION:
-            raise ModelCurrentlyNotSupportError(
-                f"Dify Hosted OpenAI {model_name} currently not support."
-            )
+            raise ModelCurrentlyNotSupportError(f"Dify Hosted OpenAI {model_name} currently not support.")
         elif provider_model.status == ModelStatus.QUOTA_EXCEEDED:
             raise QuotaExceededError(f"Model provider {provider_name} quota exceeded.")
 
@@ -495,9 +481,7 @@ class LLMNode(BaseNode[LLMNodeData]):
         if not model_mode:
             raise ValueError("LLM mode is required.")
 
-        model_schema = model_type_instance.get_model_schema(
-            model_name, model_credentials
-        )
+        model_schema = model_type_instance.get_model_schema(model_name, model_credentials)
 
         if not model_schema:
             raise ValueError(f"Model {model_name} not exist.")
@@ -530,18 +514,14 @@ class LLMNode(BaseNode[LLMNodeData]):
         # get conversation
         conversation = (
             db.session.query(Conversation)
-            .filter(
-                Conversation.app_id == self.app_id, Conversation.id == conversation_id
-            )
+            .filter(Conversation.app_id == self.app_id, Conversation.id == conversation_id)
             .first()
         )
 
         if not conversation:
             return None
 
-        memory = TokenBufferMemory(
-            conversation=conversation, model_instance=model_instance
-        )
+        memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
 
         return memory
 
@@ -596,8 +576,7 @@ class LLMNode(BaseNode[LLMNodeData]):
                 if len(prompt_message_content) > 1:
                     prompt_message.content = prompt_message_content
                 elif (
-                    len(prompt_message_content) == 1
-                    and prompt_message_content[0].type == PromptMessageContentType.TEXT
+                    len(prompt_message_content) == 1 and prompt_message_content[0].type == PromptMessageContentType.TEXT
                 ):
                     prompt_message.content = prompt_message_content[0].data
 
@@ -623,10 +602,7 @@ class LLMNode(BaseNode[LLMNodeData]):
 
         quota_unit = None
         for quota_configuration in system_configuration.quota_configurations:
-            if (
-                quota_configuration.quota_type
-                == system_configuration.current_quota_type
-            ):
+            if quota_configuration.quota_type == system_configuration.current_quota_type:
                 quota_unit = quota_configuration.quota_unit
 
                 if quota_configuration.quota_limit == -1:
@@ -683,9 +659,7 @@ class LLMNode(BaseNode[LLMNodeData]):
 
         variable_mapping = {}
         for variable_selector in variable_selectors:
-            variable_mapping[variable_selector.variable] = (
-                variable_selector.value_selector
-            )
+            variable_mapping[variable_selector.variable] = variable_selector.value_selector
 
         memory = node_data.memory
         if memory and memory.query_prompt_template:
@@ -693,9 +667,7 @@ class LLMNode(BaseNode[LLMNodeData]):
                 template=memory.query_prompt_template
             ).extract_variable_selectors()
             for variable_selector in query_variable_selectors:
-                variable_mapping[variable_selector.variable] = (
-                    variable_selector.value_selector
-                )
+                variable_mapping[variable_selector.variable] = variable_selector.value_selector
 
         if node_data.context.enabled:
             variable_mapping["#context#"] = node_data.context.variable_selector
@@ -720,13 +692,9 @@ class LLMNode(BaseNode[LLMNodeData]):
 
             if enable_jinja:
                 for variable_selector in node_data.prompt_config.jinja2_variables or []:
-                    variable_mapping[variable_selector.variable] = (
-                        variable_selector.value_selector
-                    )
+                    variable_mapping[variable_selector.variable] = variable_selector.value_selector
 
-        variable_mapping = {
-            node_id + "." + key: value for key, value in variable_mapping.items()
-        }
+        variable_mapping = {node_id + "." + key: value for key, value in variable_mapping.items()}
 
         return variable_mapping
 

@@ -45,9 +45,7 @@ class AnswerStreamGeneratorRouter:
         )
 
     @classmethod
-    def extract_generate_route_from_node_data(
-        cls, node_data: AnswerNodeData
-    ) -> list[GenerateRouteChunk]:
+    def extract_generate_route_from_node_data(cls, node_data: AnswerNodeData) -> list[GenerateRouteChunk]:
         """
         Extract generate route from node data
         :param node_data: node data object
@@ -57,16 +55,13 @@ class AnswerStreamGeneratorRouter:
         variable_selectors = variable_template_parser.extract_variable_selectors()
 
         value_selector_mapping = {
-            variable_selector.variable: variable_selector.value_selector
-            for variable_selector in variable_selectors
+            variable_selector.variable: variable_selector.value_selector for variable_selector in variable_selectors
         }
 
         variable_keys = list(value_selector_mapping.keys())
 
         # format answer template
-        template_parser = PromptTemplateParser(
-            template=node_data.answer, with_variable_tmpl=True
-        )
+        template_parser = PromptTemplateParser(template=node_data.answer, with_variable_tmpl=True)
         template_variable_keys = template_parser.variable_keys
 
         # Take the intersection of variable_keys and template_variable_keys
@@ -82,18 +77,14 @@ class AnswerStreamGeneratorRouter:
                 if cls._is_variable(part, variable_keys):
                     var_key = part.replace("Ω", "").replace("{{", "").replace("}}", "")
                     value_selector = value_selector_mapping[var_key]
-                    generate_routes.append(
-                        VarGenerateRouteChunk(value_selector=value_selector)
-                    )
+                    generate_routes.append(VarGenerateRouteChunk(value_selector=value_selector))
                 else:
                     generate_routes.append(TextGenerateRouteChunk(text=part))
 
         return generate_routes
 
     @classmethod
-    def _extract_generate_route_selectors(
-        cls, config: dict
-    ) -> list[GenerateRouteChunk]:
+    def _extract_generate_route_selectors(cls, config: dict) -> list[GenerateRouteChunk]:
         """
         Extract generate route selectors
         :param config: node config
@@ -157,9 +148,7 @@ class AnswerStreamGeneratorRouter:
         reverse_edges = reverse_edge_mapping.get(current_node_id, [])
         for edge in reverse_edges:
             source_node_id = edge.source_node_id
-            source_node_type = (
-                node_id_config_mapping[source_node_id].get("data", {}).get("type")
-            )
+            source_node_type = node_id_config_mapping[source_node_id].get("data", {}).get("type")
             if source_node_type in {
                 NodeType.ANSWER,
                 NodeType.IF_ELSE,

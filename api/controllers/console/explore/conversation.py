@@ -31,12 +31,8 @@ class ConversationListApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
-        parser.add_argument(
-            "pinned", type=str, choices=["true", "false", None], location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
+        parser.add_argument("pinned", type=str, choices=["true", "false", None], location="args")
         args = parser.parse_args()
 
         pinned = None
@@ -85,9 +81,7 @@ class ConversationRenameApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=False, location="json")
-        parser.add_argument(
-            "auto_generate", type=bool, required=False, default=False, location="json"
-        )
+        parser.add_argument("auto_generate", type=bool, required=False, default=False, location="json")
         args = parser.parse_args()
 
         try:

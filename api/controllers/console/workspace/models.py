@@ -48,9 +48,7 @@ class DefaultModelApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model_settings", type=list, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model_settings", type=list, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         tenant_id = current_user.current_tenant_id
@@ -58,9 +56,7 @@ class DefaultModelApi(Resource):
         model_provider_service = ModelProviderService()
         model_settings = args["model_settings"]
         for model_setting in model_settings:
-            if "model_type" not in model_setting or model_setting["model_type"] not in [
-                mt.value for mt in ModelType
-            ]:
+            if "model_type" not in model_setting or model_setting["model_type"] not in [mt.value for mt in ModelType]:
                 raise ValueError("invalid model type")
 
             if "provider" not in model_setting:
@@ -91,9 +87,7 @@ class ModelProviderModelApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         model_provider_service = ModelProviderService()
-        models = model_provider_service.get_models_by_provider(
-            tenant_id=tenant_id, provider=provider
-        )
+        models = model_provider_service.get_models_by_provider(tenant_id=tenant_id, provider=provider)
 
         return jsonable_encoder({"data": models})
 
@@ -107,9 +101,7 @@ class ModelProviderModelApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -118,15 +110,9 @@ class ModelProviderModelApi(Resource):
             choices=[mt.value for mt in ModelType],
             location="json",
         )
-        parser.add_argument(
-            "credentials", type=dict, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "load_balancing", type=dict, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "config_from", type=str, required=False, nullable=True, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=False, nullable=True, location="json")
+        parser.add_argument("load_balancing", type=dict, required=False, nullable=True, location="json")
+        parser.add_argument("config_from", type=str, required=False, nullable=True, location="json")
         args = parser.parse_args()
 
         model_load_balancing_service = ModelLoadBalancingService()
@@ -192,9 +178,7 @@ class ModelProviderModelApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -224,9 +208,7 @@ class ModelProviderModelCredentialApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="args"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="args")
         parser.add_argument(
             "model_type",
             type=str,
@@ -246,13 +228,11 @@ class ModelProviderModelCredentialApi(Resource):
         )
 
         model_load_balancing_service = ModelLoadBalancingService()
-        is_load_balancing_enabled, load_balancing_configs = (
-            model_load_balancing_service.get_load_balancing_configs(
-                tenant_id=tenant_id,
-                provider=provider,
-                model=args["model"],
-                model_type=args["model_type"],
-            )
+        is_load_balancing_enabled, load_balancing_configs = model_load_balancing_service.get_load_balancing_configs(
+            tenant_id=tenant_id,
+            provider=provider,
+            model=args["model"],
+            model_type=args["model_type"],
         )
 
         return {
@@ -272,9 +252,7 @@ class ModelProviderModelEnableApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -304,9 +282,7 @@ class ModelProviderModelDisableApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -336,9 +312,7 @@ class ModelProviderModelValidateApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "model_type",
             type=str,
@@ -347,9 +321,7 @@ class ModelProviderModelValidateApi(Resource):
             choices=[mt.value for mt in ModelType],
             location="json",
         )
-        parser.add_argument(
-            "credentials", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("credentials", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         model_provider_service = ModelProviderService()
@@ -383,9 +355,7 @@ class ModelProviderModelParameterRuleApi(Resource):
     @account_initialization_required
     def get(self, provider: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "model", type=str, required=True, nullable=False, location="args"
-        )
+        parser.add_argument("model", type=str, required=True, nullable=False, location="args")
         args = parser.parse_args()
 
         tenant_id = current_user.current_tenant_id
@@ -406,9 +376,7 @@ class ModelProviderAvailableModelApi(Resource):
         tenant_id = current_user.current_tenant_id
 
         model_provider_service = ModelProviderService()
-        models = model_provider_service.get_models_by_model_type(
-            tenant_id=tenant_id, model_type=model_type
-        )
+        models = model_provider_service.get_models_by_model_type(tenant_id=tenant_id, model_type=model_type)
 
         return jsonable_encoder({"data": models})
 

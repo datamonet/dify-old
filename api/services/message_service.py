@@ -52,9 +52,7 @@ class MessageService:
         if first_id:
             first_message = (
                 db.session.query(Message)
-                .filter(
-                    Message.conversation_id == conversation.id, Message.id == first_id
-                )
+                .filter(Message.conversation_id == conversation.id, Message.id == first_id)
                 .first()
             )
 
@@ -100,9 +98,7 @@ class MessageService:
         if order == "asc":
             history_messages = list(reversed(history_messages))
 
-        return InfiniteScrollPagination(
-            data=history_messages, limit=limit, has_more=has_more
-        )
+        return InfiniteScrollPagination(data=history_messages, limit=limit, has_more=has_more)
 
     @classmethod
     def pagination_by_last_id(
@@ -145,9 +141,7 @@ class MessageService:
                 .all()
             )
         else:
-            history_messages = (
-                base_query.order_by(Message.created_at.desc()).limit(limit).all()
-            )
+            history_messages = base_query.order_by(Message.created_at.desc()).limit(limit).all()
 
         has_more = False
         if len(history_messages) == limit:
@@ -160,9 +154,7 @@ class MessageService:
             if rest_count > 0:
                 has_more = True
 
-        return InfiniteScrollPagination(
-            data=history_messages, limit=limit, has_more=has_more
-        )
+        return InfiniteScrollPagination(data=history_messages, limit=limit, has_more=has_more)
 
     @classmethod
     def create_feedback(
@@ -177,11 +169,7 @@ class MessageService:
 
         message = cls.get_message(app_model=app_model, user=user, message_id=message_id)
 
-        feedback = (
-            message.user_feedback
-            if isinstance(user, EndUser)
-            else message.admin_feedback
-        )
+        feedback = message.user_feedback if isinstance(user, EndUser) else message.admin_feedback
 
         if not rating and feedback:
             db.session.delete(feedback)
@@ -206,20 +194,15 @@ class MessageService:
         return feedback
 
     @classmethod
-    def get_message(
-        cls, app_model: App, user: Optional[Union[Account, EndUser]], message_id: str
-    ):
+    def get_message(cls, app_model: App, user: Optional[Union[Account, EndUser]], message_id: str):
         message = (
             db.session.query(Message)
             .filter(
                 Message.id == message_id,
                 Message.app_id == app_model.id,
-                Message.from_source
-                == ("api" if isinstance(user, EndUser) else "console"),
-                Message.from_end_user_id
-                == (user.id if isinstance(user, EndUser) else None),
-                Message.from_account_id
-                == (user.id if isinstance(user, Account) else None),
+                Message.from_source == ("api" if isinstance(user, EndUser) else "console"),
+                Message.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
+                Message.from_account_id == (user.id if isinstance(user, Account) else None),
             )
             .first()
         )
@@ -264,9 +247,7 @@ class MessageService:
             if workflow is None:
                 return []
 
-            app_config = AdvancedChatAppConfigManager.get_app_config(
-                app_model=app_model, workflow=workflow
-            )
+            app_config = AdvancedChatAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
 
             if not app_config.additional_features.suggested_questions_after_answer:
                 raise SuggestedQuestionsAfterAnswerDisabledError()
@@ -285,21 +266,15 @@ class MessageService:
                     .first()
                 )
             else:
-                conversation_override_model_configs = json.loads(
-                    conversation.override_model_configs
-                )
+                conversation_override_model_configs = json.loads(conversation.override_model_configs)
                 app_model_config = AppModelConfig(
                     id=conversation.app_model_config_id,
                     app_id=app_model.id,
                 )
 
-                app_model_config = app_model_config.from_model_config_dict(
-                    conversation_override_model_configs
-                )
+                app_model_config = app_model_config.from_model_config_dict(conversation_override_model_configs)
 
-            suggested_questions_after_answer = (
-                app_model_config.suggested_questions_after_answer_dict
-            )
+            suggested_questions_after_answer = app_model_config.suggested_questions_after_answer_dict
             if suggested_questions_after_answer.get("enabled", False) is False:
                 raise SuggestedQuestionsAfterAnswerDisabledError()
 
@@ -311,9 +286,7 @@ class MessageService:
             )
 
         # get memory of conversation (read-only)
-        memory = TokenBufferMemory(
-            conversation=conversation, model_instance=model_instance
-        )
+        memory = TokenBufferMemory(conversation=conversation, model_instance=model_instance)
 
         histories = memory.get_history_prompt_text(
             max_token_limit=3000,

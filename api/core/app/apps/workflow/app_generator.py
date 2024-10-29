@@ -181,9 +181,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
             stream=stream,
         )
 
-        return WorkflowAppGenerateResponseConverter.convert(
-            response=response, invoke_from=invoke_from
-        )
+        return WorkflowAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
 
     def single_iteration_generate(
         self,
@@ -211,9 +209,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
             raise ValueError("inputs is required")
 
         # convert to app config
-        app_config = WorkflowAppConfigManager.get_app_config(
-            app_model=app_model, workflow=workflow
-        )
+        app_config = WorkflowAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
 
         # init application generate entity
         application_generate_entity = WorkflowAppGenerateEntity(
@@ -279,10 +275,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
                 logger.exception("Validation Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except (ValueError, InvokeError) as e:
-                if (
-                    os.environ.get("DEBUG")
-                    and os.environ.get("DEBUG", "false").lower() == "true"
-                ):
+                if os.environ.get("DEBUG") and os.environ.get("DEBUG", "false").lower() == "true":
                     logger.exception("Error when generating")
                 queue_manager.publish_error(e, PublishFrom.APPLICATION_MANAGER)
             except Exception as e:
@@ -298,9 +291,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
         queue_manager: AppQueueManager,
         user: Union[Account, EndUser],
         stream: bool = False,
-    ) -> Union[
-        WorkflowAppBlockingResponse, Generator[WorkflowAppStreamResponse, None, None]
-    ]:
+    ) -> Union[WorkflowAppBlockingResponse, Generator[WorkflowAppStreamResponse, None, None]]:
         """
         Handle response.
         :param application_generate_entity: application generate entity

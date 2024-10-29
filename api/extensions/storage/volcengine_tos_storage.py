@@ -32,9 +32,7 @@ class VolcengineTosStorage(BaseStorage):
             yield chunk
 
     def download(self, filename, target_filepath):
-        self.client.get_object_to_file(
-            bucket=self.bucket_name, key=filename, file_path=target_filepath
-        )
+        self.client.get_object_to_file(bucket=self.bucket_name, key=filename, file_path=target_filepath)
 
     def exists(self, filename):
         res = self.client.head_object(bucket=self.bucket_name, key=filename)

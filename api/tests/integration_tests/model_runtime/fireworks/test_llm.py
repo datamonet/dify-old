@@ -37,9 +37,7 @@ def test_validate_credentials_for_chat_model(setup_openai_mock):
 
     with pytest.raises(CredentialsValidateFailedError):
         # model name to gpt-3.5-turbo because of mocking
-        model.validate_credentials(
-            model="gpt-3.5-turbo", credentials={"fireworks_api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="gpt-3.5-turbo", credentials={"fireworks_api_key": "invalid_key"})
 
     model.validate_credentials(
         model="accounts/fireworks/models/llama-v3p1-8b-instruct",
@@ -113,9 +111,7 @@ def test_invoke_chat_model_with_tools(setup_openai_mock):
                 description="Get the current stock price",
                 parameters={
                     "type": "object",
-                    "properties": {
-                        "symbol": {"type": "string", "description": "The stock symbol"}
-                    },
+                    "properties": {"symbol": {"type": "string", "description": "The stock symbol"}},
                     "required": ["symbol"],
                 },
             ),
@@ -153,11 +149,7 @@ def test_invoke_stream_chat_model(setup_openai_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
         if chunk.delta.finish_reason is not None:
             assert chunk.delta.usage is not None
             assert chunk.delta.usage.completion_tokens > 0

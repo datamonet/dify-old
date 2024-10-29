@@ -68,19 +68,12 @@ class ExtractProcessor:
         )
         if return_text:
             delimiter = "\n"
-            return delimiter.join(
-                [
-                    document.page_content
-                    for document in cls.extract(extract_setting, is_automatic)
-                ]
-            )
+            return delimiter.join([document.page_content for document in cls.extract(extract_setting, is_automatic)])
         else:
             return cls.extract(extract_setting, is_automatic)
 
     @classmethod
-    def load_from_url(
-        cls, url: str, return_text: bool = False
-    ) -> Union[list[Document], str]:
+    def load_from_url(cls, url: str, return_text: bool = False) -> Union[list[Document], str]:
         response = ssrf_proxy.get(url, headers={"User-Agent": USER_AGENT})
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -91,26 +84,20 @@ class ExtractProcessor:
                     suffix = "." + response.headers.get("Content-Type").split("/")[-1]
                 else:
                     content_disposition = response.headers.get("Content-Disposition")
-                    filename_match = re.search(
-                        r'filename="([^"]+)"', content_disposition
-                    )
+                    filename_match = re.search(r'filename="([^"]+)"', content_disposition)
                     if filename_match:
                         filename = unquote(filename_match.group(1))
                         suffix = "." + re.search(r"\.(\w+)$", filename).group(1)
 
             file_path = f"{temp_dir}/{next(tempfile._get_candidate_names())}{suffix}"
             Path(file_path).write_bytes(response.content)
-            extract_setting = ExtractSetting(
-                datasource_type="upload_file", document_model="text_model"
-            )
+            extract_setting = ExtractSetting(datasource_type="upload_file", document_model="text_model")
             if return_text:
                 delimiter = "\n"
                 return delimiter.join(
                     [
                         document.page_content
-                        for document in cls.extract(
-                            extract_setting=extract_setting, file_path=file_path
-                        )
+                        for document in cls.extract(extract_setting=extract_setting, file_path=file_path)
                     ]
                 )
             else:
@@ -125,9 +112,7 @@ class ExtractProcessor:
                 if not file_path:
                     upload_file: UploadFile = extract_setting.upload_file
                     suffix = Path(upload_file.key).suffix
-                    file_path = (
-                        f"{temp_dir}/{next(tempfile._get_candidate_names())}{suffix}"
-                    )
+                    file_path = f"{temp_dir}/{next(tempfile._get_candidate_names())}{suffix}"
                     storage.download(upload_file.key, file_path)
                 input_file = Path(file_path)
                 file_extension = input_file.suffix.lower()
@@ -148,9 +133,7 @@ class ExtractProcessor:
                     elif file_extension in {".htm", ".html"}:
                         extractor = HtmlExtractor(file_path)
                     elif file_extension == ".docx":
-                        extractor = WordExtractor(
-                            file_path, upload_file.tenant_id, upload_file.created_by
-                        )
+                        extractor = WordExtractor(file_path, upload_file.tenant_id, upload_file.created_by)
                     elif file_extension == ".csv":
                         extractor = CSVExtractor(file_path, autodetect_encoding=True)
                     elif file_extension == ".msg":
@@ -180,15 +163,11 @@ class ExtractProcessor:
                     elif file_extension == ".pdf":
                         extractor = PdfExtractor(file_path)
                     elif file_extension in {".md", ".markdown"}:
-                        extractor = MarkdownExtractor(
-                            file_path, autodetect_encoding=True
-                        )
+                        extractor = MarkdownExtractor(file_path, autodetect_encoding=True)
                     elif file_extension in {".htm", ".html"}:
                         extractor = HtmlExtractor(file_path)
                     elif file_extension == ".docx":
-                        extractor = WordExtractor(
-                            file_path, upload_file.tenant_id, upload_file.created_by
-                        )
+                        extractor = WordExtractor(file_path, upload_file.tenant_id, upload_file.created_by)
                     elif file_extension == ".csv":
                         extractor = CSVExtractor(file_path, autodetect_encoding=True)
                     elif file_extension == ".epub":
@@ -226,10 +205,6 @@ class ExtractProcessor:
                 )
                 return extractor.extract()
             else:
-                raise ValueError(
-                    f"Unsupported website provider: {extract_setting.website_info.provider}"
-                )
+                raise ValueError(f"Unsupported website provider: {extract_setting.website_info.provider}")
         else:
-            raise ValueError(
-                f"Unsupported datasource type: {extract_setting.datasource_type}"
-            )
+            raise ValueError(f"Unsupported datasource type: {extract_setting.datasource_type}")

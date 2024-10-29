@@ -47,20 +47,14 @@ def get_url(url: str, user_agent: Optional[str] = None) -> str:
         headers["User-Agent"] = user_agent
 
     main_content_type = None
-    supported_content_types = extract_processor.SUPPORT_URL_CONTENT_TYPES + [
-        "text/html"
-    ]
-    response = ssrf_proxy.head(
-        url, headers=headers, follow_redirects=True, timeout=(5, 10)
-    )
+    supported_content_types = extract_processor.SUPPORT_URL_CONTENT_TYPES + ["text/html"]
+    response = ssrf_proxy.head(url, headers=headers, follow_redirects=True, timeout=(5, 10))
 
     if response.status_code == 200:
         # check content-type
         content_type = response.headers.get("Content-Type")
         if content_type:
-            main_content_type = (
-                response.headers.get("Content-Type").split(";")[0].strip()
-            )
+            main_content_type = response.headers.get("Content-Type").split(";")[0].strip()
         else:
             content_disposition = response.headers.get("Content-Disposition", "")
             filename_match = re.search(r'filename="([^"]+)"', content_disposition)
@@ -76,15 +70,11 @@ def get_url(url: str, user_agent: Optional[str] = None) -> str:
         if main_content_type in extract_processor.SUPPORT_URL_CONTENT_TYPES:
             return ExtractProcessor.load_from_url(url, return_text=True)
 
-        response = ssrf_proxy.get(
-            url, headers=headers, follow_redirects=True, timeout=(120, 300)
-        )
+        response = ssrf_proxy.get(url, headers=headers, follow_redirects=True, timeout=(120, 300))
     elif response.status_code == 403:
         scraper = cloudscraper.create_scraper()
         scraper.perform_request = ssrf_proxy.make_request
-        response = scraper.get(
-            url, headers=headers, follow_redirects=True, timeout=(120, 300)
-        )
+        response = scraper.get(url, headers=headers, follow_redirects=True, timeout=(120, 300))
 
     if response.status_code != 200:
         return "URL returned status code {}.".format(response.status_code)
@@ -126,9 +116,7 @@ def extract_using_readabilipy(html):
     article_json_path = html_path + ".json"
     jsdir = os.path.join(find_module_path("readabilipy"), "javascript")
     with chdir(jsdir):
-        subprocess.check_call(
-            ["node", "ExtractArticle.js", "-i", html_path, "-o", article_json_path]
-        )
+        subprocess.check_call(["node", "ExtractArticle.js", "-i", html_path, "-o", article_json_path])
 
     # Read output of call to Readability.parse() from JSON file and return as Python dictionary
     input_json = json.loads(Path(article_json_path).read_text(encoding="utf-8"))
@@ -155,17 +143,11 @@ def extract_using_readabilipy(html):
             article_json["date"] = input_json["date"]
         if input_json.get("content"):
             article_json["content"] = input_json["content"]
-            article_json["plain_content"] = plain_content(
-                article_json["content"], False, False
-            )
-            article_json["plain_text"] = extract_text_blocks_as_plain_text(
-                article_json["plain_content"]
-            )
+            article_json["plain_content"] = plain_content(article_json["content"], False, False)
+            article_json["plain_text"] = extract_text_blocks_as_plain_text(article_json["plain_content"])
         if input_json.get("textContent"):
             article_json["plain_text"] = input_json["textContent"]
-            article_json["plain_text"] = re.sub(
-                r"\n\s*\n", "\n", article_json["plain_text"]
-            )
+            article_json["plain_text"] = re.sub(r"\n\s*\n", "\n", article_json["plain_text"])
 
     return article_json
 
@@ -202,10 +184,7 @@ def extract_text_blocks_as_plain_text(paragraph_html):
             list(
                 filter(
                     None,
-                    [
-                        plain_text_leaf_node(li)["text"]
-                        for li in list_element.find_all("li")
-                    ],
+                    [plain_text_leaf_node(li)["text"] for li in list_element.find_all("li")],
                 )
             )
         )
@@ -248,9 +227,7 @@ def plain_content(readability_content, content_digests, node_indexes):
 
 def plain_elements(elements, content_digests, node_indexes):
     # Get plain content versions of all elements
-    elements = [
-        plain_element(element, content_digests, node_indexes) for element in elements
-    ]
+    elements = [plain_element(element, content_digests, node_indexes) for element in elements]
     if content_digests:
         # Add content digest attribute to nodes
         elements = [add_content_digest(element) for element in elements]
@@ -279,9 +256,7 @@ def plain_element(element, content_digests, node_indexes):
             element = type(element)(plain_text)
     else:
         # If not a leaf node or leaf type call recursively on child nodes, replacing
-        element.contents = plain_elements(
-            element.contents, content_digests, node_indexes
-        )
+        element.contents = plain_elements(element.contents, content_digests, node_indexes)
     return element
 
 
@@ -292,9 +267,7 @@ def add_node_indexes(element, node_index="0"):
     # Add index to current element
     element["data-node-index"] = node_index
     # Add index to child elements
-    for local_idx, child in enumerate(
-        [c for c in element.contents if not is_text(c)], start=1
-    ):
+    for local_idx, child in enumerate([c for c in element.contents if not is_text(c)], start=1):
         # Can't add attributes to leaf string types
         child_index = "{stem}.{local}".format(stem=node_index, local=local_idx)
         add_node_indexes(child, node_index=child_index)
@@ -324,10 +297,7 @@ def strip_control_characters(text):
     # Remove non-printing control characters
     return "".join(
         [
-            ""
-            if (unicodedata.category(char) in control_chars)
-            and (char not in retained_chars)
-            else char
+            "" if (unicodedata.category(char) in control_chars) and (char not in retained_chars) else char
             for char in text
         ]
     )
@@ -386,11 +356,7 @@ def content_digest(element):
         else:
             # Build content digest from the "non-empty" digests of child nodes
             digest = hashlib.sha256()
-            child_digests = list(
-                filter(
-                    lambda x: x != "", [content_digest(content) for content in contents]
-                )
-            )
+            child_digests = list(filter(lambda x: x != "", [content_digest(content) for content in contents]))
             for child in child_digests:
                 digest.update(child.encode("utf-8"))
             digest = digest.hexdigest()

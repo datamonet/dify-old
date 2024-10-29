@@ -31,32 +31,19 @@ class YoutubeVideosAnalyticsTool(BuiltinTool):
         else:
             time_range[1] = datetime.now().strftime("%Y-%m-%d")
 
-        if (
-            "google_api_key" not in self.runtime.credentials
-            or not self.runtime.credentials["google_api_key"]
-        ):
+        if "google_api_key" not in self.runtime.credentials or not self.runtime.credentials["google_api_key"]:
             return self.create_text_message("Please input api key")
 
-        youtube = build(
-            "youtube", "v3", developerKey=self.runtime.credentials["google_api_key"]
-        )
+        youtube = build("youtube", "v3", developerKey=self.runtime.credentials["google_api_key"])
 
         # try to get channel id
-        search_results = (
-            youtube.search()
-            .list(q=channel, type="channel", order="relevance", part="id")
-            .execute()
-        )
+        search_results = youtube.search().list(q=channel, type="channel", order="relevance", part="id").execute()
         channel_id = search_results["items"][0]["id"]["channelId"]
 
         start_date, end_date = time_range
 
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # get videos
         time_range_videos = (
@@ -76,11 +63,7 @@ class YoutubeVideosAnalyticsTool(BuiltinTool):
             data = []
             for video in video_list["items"]:
                 video_id = video["id"]["videoId"]
-                video_info = (
-                    youtube.videos()
-                    .list(part="snippet,statistics", id=video_id)
-                    .execute()
-                )
+                video_info = youtube.videos().list(part="snippet,statistics", id=video_id).execute()
                 title = video_info["items"][0]["snippet"]["title"]
                 views = video_info["items"][0]["statistics"]["viewCount"]
                 data.append({"Title": title, "Views": views})

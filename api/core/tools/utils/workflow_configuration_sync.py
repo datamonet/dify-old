@@ -17,9 +17,7 @@ class WorkflowToolConfigurationUtils:
         get workflow graph variables
         """
         nodes = graph.get("nodes", [])
-        start_node = next(
-            filter(lambda x: x.get("data", {}).get("type") == "start", nodes), None
-        )
+        start_node = next(filter(lambda x: x.get("data", {}).get("type") == "start", nodes), None)
 
         if not start_node:
             return []
@@ -40,14 +38,10 @@ class WorkflowToolConfigurationUtils:
         variable_names = [variable.variable for variable in variables]
 
         if len(tool_configurations) != len(variables):
-            raise ValueError(
-                "parameter configuration mismatch, please republish the tool to update"
-            )
+            raise ValueError("parameter configuration mismatch, please republish the tool to update")
 
         for parameter in tool_configurations:
             if parameter.name not in variable_names:
-                raise ValueError(
-                    "parameter configuration mismatch, please republish the tool to update"
-                )
+                raise ValueError("parameter configuration mismatch, please republish the tool to update")
 
         return True

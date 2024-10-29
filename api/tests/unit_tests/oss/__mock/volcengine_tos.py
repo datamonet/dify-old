@@ -74,7 +74,7 @@ class MockVolcengineTosClass:
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_volcengine_tos_mock(monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(TosClientV2, "__init__", MockVolcengineTosClass.__init__)

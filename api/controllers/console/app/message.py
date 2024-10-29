@@ -63,13 +63,9 @@ class ChatMessageListApi(Resource):
     @marshal_with(message_infinite_scroll_pagination_fields)
     def get(self, app_model):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "conversation_id", required=True, type=uuid_value, location="args"
-        )
+        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
 
         conversation = (
@@ -145,21 +141,13 @@ class MessageFeedbackApi(Resource):
     @get_app_model
     def post(self, app_model):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "message_id", required=True, type=uuid_value, location="json"
-        )
-        parser.add_argument(
-            "rating", type=str, choices=["like", "dislike", None], location="json"
-        )
+        parser.add_argument("message_id", required=True, type=uuid_value, location="json")
+        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
         args = parser.parse_args()
 
         message_id = str(args["message_id"])
 
-        message = (
-            db.session.query(Message)
-            .filter(Message.id == message_id, Message.app_id == app_model.id)
-            .first()
-        )
+        message = db.session.query(Message).filter(Message.id == message_id, Message.app_id == app_model.id).first()
 
         if not message:
             raise NotFound("Message Not Exists.")
@@ -200,18 +188,12 @@ class MessageAnnotationApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "message_id", required=False, type=uuid_value, location="json"
-        )
+        parser.add_argument("message_id", required=False, type=uuid_value, location="json")
         parser.add_argument("question", required=True, type=str, location="json")
         parser.add_argument("answer", required=True, type=str, location="json")
-        parser.add_argument(
-            "annotation_reply", required=False, type=dict, location="json"
-        )
+        parser.add_argument("annotation_reply", required=False, type=dict, location="json")
         args = parser.parse_args()
-        annotation = AppAnnotationService.up_insert_app_annotation_from_message(
-            args, app_model.id
-        )
+        annotation = AppAnnotationService.up_insert_app_annotation_from_message(args, app_model.id)
 
         return annotation
 
@@ -222,11 +204,7 @@ class MessageAnnotationCountApi(Resource):
     @account_initialization_required
     @get_app_model
     def get(self, app_model):
-        count = (
-            db.session.query(MessageAnnotation)
-            .filter(MessageAnnotation.app_id == app_model.id)
-            .count()
-        )
+        count = db.session.query(MessageAnnotation).filter(MessageAnnotation.app_id == app_model.id).count()
 
         return {"count": count}
 
@@ -276,11 +254,7 @@ class MessageApi(Resource):
     def get(self, app_model, message_id):
         message_id = str(message_id)
 
-        message = (
-            db.session.query(Message)
-            .filter(Message.id == message_id, Message.app_id == app_model.id)
-            .first()
-        )
+        message = db.session.query(Message).filter(Message.id == message_id, Message.app_id == app_model.id).first()
 
         if not message:
             raise NotFound("Message Not Exists.")

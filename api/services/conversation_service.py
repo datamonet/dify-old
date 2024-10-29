@@ -35,12 +35,9 @@ class ConversationService:
         base_query = db.session.query(Conversation).filter(
             Conversation.is_deleted == False,
             Conversation.app_id == app_model.id,
-            Conversation.from_source
-            == ("api" if isinstance(user, EndUser) else "console"),
-            Conversation.from_end_user_id
-            == (user.id if isinstance(user, EndUser) else None),
-            Conversation.from_account_id
-            == (user.id if isinstance(user, Account) else None),
+            Conversation.from_source == ("api" if isinstance(user, EndUser) else "console"),
+            Conversation.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
+            Conversation.from_account_id == (user.id if isinstance(user, Account) else None),
             or_(
                 Conversation.invoke_from.is_(None),
                 Conversation.invoke_from == invoke_from.value,
@@ -62,14 +59,10 @@ class ConversationService:
                 raise LastConversationNotExistsError()
 
             # build filters based on sorting
-            filter_condition = cls._build_filter_condition(
-                sort_field, sort_direction, last_conversation
-            )
+            filter_condition = cls._build_filter_condition(sort_field, sort_direction, last_conversation)
             base_query = base_query.filter(filter_condition)
 
-        base_query = base_query.order_by(
-            sort_direction(getattr(Conversation, sort_field))
-        )
+        base_query = base_query.order_by(sort_direction(getattr(Conversation, sort_field)))
 
         conversations = base_query.limit(limit).all()
 
@@ -87,9 +80,7 @@ class ConversationService:
             if rest_count > 0:
                 has_more = True
 
-        return InfiniteScrollPagination(
-            data=conversations, limit=limit, has_more=has_more
-        )
+        return InfiniteScrollPagination(data=conversations, limit=limit, has_more=has_more)
 
     @classmethod
     def _get_sort_params(cls, sort_by: str) -> tuple[str, callable]:
@@ -106,9 +97,7 @@ class ConversationService:
         is_next_page: bool = False,
     ):
         field_value = getattr(reference_conversation, sort_field)
-        if (sort_direction == desc and not is_next_page) or (
-            sort_direction == asc and is_next_page
-        ):
+        if (sort_direction == desc and not is_next_page) or (sort_direction == asc and is_next_page):
             return getattr(Conversation, sort_field) < field_value
         else:
             return getattr(Conversation, sort_field) > field_value
@@ -174,12 +163,9 @@ class ConversationService:
             .filter(
                 Conversation.id == conversation_id,
                 Conversation.app_id == app_model.id,
-                Conversation.from_source
-                == ("api" if isinstance(user, EndUser) else "console"),
-                Conversation.from_end_user_id
-                == (user.id if isinstance(user, EndUser) else None),
-                Conversation.from_account_id
-                == (user.id if isinstance(user, Account) else None),
+                Conversation.from_source == ("api" if isinstance(user, EndUser) else "console"),
+                Conversation.from_end_user_id == (user.id if isinstance(user, EndUser) else None),
+                Conversation.from_account_id == (user.id if isinstance(user, Account) else None),
                 Conversation.is_deleted == False,
             )
             .first()

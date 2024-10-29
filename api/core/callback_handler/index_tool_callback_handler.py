@@ -34,9 +34,7 @@ class DatasetIndexToolCallbackHandler:
             source="app",
             source_app_id=self._app_id,
             created_by_role=(
-                "account"
-                if self._invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
-                else "end_user"
+                "account" if self._invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER} else "end_user"
             ),
             created_by=self._user_id,
         )
@@ -52,9 +50,7 @@ class DatasetIndexToolCallbackHandler:
             )
 
             if "dataset_id" in document.metadata:
-                query = query.filter(
-                    DocumentSegment.dataset_id == document.metadata["dataset_id"]
-                )
+                query = query.filter(DocumentSegment.dataset_id == document.metadata["dataset_id"])
 
             # add hit count to document segment
             query.update(
@@ -80,12 +76,8 @@ class DatasetIndexToolCallbackHandler:
                     score=item.get("score") if "score" in item else None,
                     hit_count=item.get("hit_count") if "hit_count" in item else None,
                     word_count=item.get("word_count") if "word_count" in item else None,
-                    segment_position=item.get("segment_position")
-                    if "segment_position" in item
-                    else None,
-                    index_node_hash=item.get("index_node_hash")
-                    if "index_node_hash" in item
-                    else None,
+                    segment_position=item.get("segment_position") if "segment_position" in item else None,
+                    index_node_hash=item.get("index_node_hash") if "index_node_hash" in item else None,
                     content=item.get("content"),
                     retriever_from=item.get("retriever_from"),
                     created_by=self._user_id,

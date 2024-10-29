@@ -37,17 +37,13 @@ class EnhanceRecursiveCharacterTextSplitter(RecursiveCharacterTextSplitter):
                 return 0
 
             if embedding_model_instance:
-                return embedding_model_instance.get_text_embedding_num_tokens(
-                    texts=[text]
-                )
+                return embedding_model_instance.get_text_embedding_num_tokens(texts=[text])
             else:
                 return GPT2Tokenizer.get_num_tokens(text)
 
         if issubclass(cls, TokenTextSplitter):
             extra_kwargs = {
-                "model_name": embedding_model_instance.model
-                if embedding_model_instance
-                else "gpt2",
+                "model_name": embedding_model_instance.model if embedding_model_instance else "gpt2",
                 "allowed_special": allowed_special,
                 "disallowed_special": disallowed_special,
             }
@@ -111,17 +107,13 @@ class FixedRecursiveCharacterTextSplitter(EnhanceRecursiveCharacterTextSplitter)
                 _good_splits_lengths.append(s_len)
             else:
                 if _good_splits:
-                    merged_text = self._merge_splits(
-                        _good_splits, separator, _good_splits_lengths
-                    )
+                    merged_text = self._merge_splits(_good_splits, separator, _good_splits_lengths)
                     final_chunks.extend(merged_text)
                     _good_splits = []
                     _good_splits_lengths = []
                 other_info = self.recursive_split_text(s)
                 final_chunks.extend(other_info)
         if _good_splits:
-            merged_text = self._merge_splits(
-                _good_splits, separator, _good_splits_lengths
-            )
+            merged_text = self._merge_splits(_good_splits, separator, _good_splits_lengths)
             final_chunks.extend(merged_text)
         return final_chunks

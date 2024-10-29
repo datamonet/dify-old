@@ -22,9 +22,7 @@ from core.model_runtime.model_providers.xinference.llm.llm import (
 """FOR MOCK FIXTURES, DO NOT REMOVE"""
 
 
-@pytest.mark.parametrize(
-    ("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True
-)
+@pytest.mark.parametrize(("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True)
 def test_validate_credentials_for_chat_model(setup_openai_mock, setup_xinference_mock):
     model = XinferenceAILargeLanguageModel()
 
@@ -38,9 +36,7 @@ def test_validate_credentials_for_chat_model(setup_openai_mock, setup_xinference
         )
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="aaaaa", credentials={"server_url": "", "model_uid": ""}
-        )
+        model.validate_credentials(model="aaaaa", credentials={"server_url": "", "model_uid": ""})
 
     model.validate_credentials(
         model="ChatGLM3",
@@ -51,9 +47,7 @@ def test_validate_credentials_for_chat_model(setup_openai_mock, setup_xinference
     )
 
 
-@pytest.mark.parametrize(
-    ("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True
-)
+@pytest.mark.parametrize(("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True)
 def test_invoke_chat_model(setup_openai_mock, setup_xinference_mock):
     model = XinferenceAILargeLanguageModel()
 
@@ -83,9 +77,7 @@ def test_invoke_chat_model(setup_openai_mock, setup_xinference_mock):
     assert response.usage.total_tokens > 0
 
 
-@pytest.mark.parametrize(
-    ("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True
-)
+@pytest.mark.parametrize(("setup_openai_mock", "setup_xinference_mock"), [("chat", "none")], indirect=True)
 def test_invoke_stream_chat_model(setup_openai_mock, setup_xinference_mock):
     model = XinferenceAILargeLanguageModel()
 
@@ -115,11 +107,7 @@ def test_invoke_stream_chat_model(setup_openai_mock, setup_xinference_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 """
@@ -255,9 +243,7 @@ def test_invoke_stream_chat_model(setup_openai_mock, setup_xinference_mock):
     [("completion", "none")],
     indirect=True,
 )
-def test_validate_credentials_for_generation_model(
-    setup_openai_mock, setup_xinference_mock
-):
+def test_validate_credentials_for_generation_model(setup_openai_mock, setup_xinference_mock):
     model = XinferenceAILargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
@@ -270,9 +256,7 @@ def test_validate_credentials_for_generation_model(
         )
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="alapaca", credentials={"server_url": "", "model_uid": ""}
-        )
+        model.validate_credentials(model="alapaca", credentials={"server_url": "", "model_uid": ""})
 
     model.validate_credentials(
         model="alapaca",
@@ -341,11 +325,7 @@ def test_invoke_stream_generation_model(setup_openai_mock, setup_xinference_mock
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():

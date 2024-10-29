@@ -40,9 +40,7 @@ class ToolConfigurationManager(BaseModel):
         for field_name, field in fields.items():
             if field.type == ToolProviderCredentials.CredentialsType.SECRET_INPUT:
                 if field_name in credentials:
-                    encrypted = encrypter.encrypt_token(
-                        self.tenant_id, credentials[field_name]
-                    )
+                    encrypted = encrypter.encrypt_token(self.tenant_id, credentials[field_name])
                     credentials[field_name] = encrypted
 
         return credentials
@@ -92,9 +90,7 @@ class ToolConfigurationManager(BaseModel):
             if field.type == ToolProviderCredentials.CredentialsType.SECRET_INPUT:
                 if field_name in credentials:
                     try:
-                        credentials[field_name] = encrypter.decrypt_token(
-                            self.tenant_id, credentials[field_name]
-                        )
+                        credentials[field_name] = encrypter.decrypt_token(self.tenant_id, credentials[field_name])
                     except:
                         pass
 
@@ -140,18 +136,12 @@ class ToolParameterConfigurationManager(BaseModel):
         for runtime_parameter in runtime_parameters:
             found = False
             for index, parameter in enumerate(current_parameters):
-                if (
-                    parameter.name == runtime_parameter.name
-                    and parameter.form == runtime_parameter.form
-                ):
+                if parameter.name == runtime_parameter.name and parameter.form == runtime_parameter.form:
                     current_parameters[index] = runtime_parameter
                     found = True
                     break
 
-            if (
-                not found
-                and runtime_parameter.form == ToolParameter.ToolParameterForm.FORM
-            ):
+            if not found and runtime_parameter.form == ToolParameter.ToolParameterForm.FORM:
                 current_parameters.append(runtime_parameter)
 
         return current_parameters
@@ -180,9 +170,7 @@ class ToolParameterConfigurationManager(BaseModel):
                             + parameters[parameter.name][-2:]
                         )
                     else:
-                        parameters[parameter.name] = "*" * len(
-                            parameters[parameter.name]
-                        )
+                        parameters[parameter.name] = "*" * len(parameters[parameter.name])
 
         return parameters
 
@@ -203,9 +191,7 @@ class ToolParameterConfigurationManager(BaseModel):
                 and parameter.type == ToolParameter.ToolParameterType.SECRET_INPUT
             ):
                 if parameter.name in parameters:
-                    encrypted = encrypter.encrypt_token(
-                        self.tenant_id, parameters[parameter.name]
-                    )
+                    encrypted = encrypter.encrypt_token(self.tenant_id, parameters[parameter.name])
                     parameters[parameter.name] = encrypted
 
         return parameters
@@ -239,9 +225,7 @@ class ToolParameterConfigurationManager(BaseModel):
                 if parameter.name in parameters:
                     try:
                         has_secret_input = True
-                        parameters[parameter.name] = encrypter.decrypt_token(
-                            self.tenant_id, parameters[parameter.name]
-                        )
+                        parameters[parameter.name] = encrypter.decrypt_token(self.tenant_id, parameters[parameter.name])
                     except:
                         pass
 

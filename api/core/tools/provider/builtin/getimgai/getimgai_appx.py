@@ -38,11 +38,7 @@ class GetImgAIApp:
                 response.raise_for_status()
                 return response.json()
             except requests.exceptions.RequestException as e:
-                if (
-                    i < retries - 1
-                    and isinstance(e, HTTPError)
-                    and e.response.status_code >= 500
-                ):
+                if i < retries - 1 and isinstance(e, HTTPError) and e.response.status_code >= 500:
                     time.sleep(backoff_factor * (2**i))
                 else:
                     raise

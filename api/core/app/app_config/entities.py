@@ -85,9 +85,7 @@ class PromptTemplateEntity(BaseModel):
     prompt_type: PromptType
     simple_prompt_template: Optional[str] = None
     advanced_chat_prompt_template: Optional[AdvancedChatPromptTemplateEntity] = None
-    advanced_completion_prompt_template: Optional[
-        AdvancedCompletionPromptTemplateEntity
-    ] = None
+    advanced_completion_prompt_template: Optional[AdvancedCompletionPromptTemplateEntity] = None
 
 
 class VariableEntityType(str, Enum):

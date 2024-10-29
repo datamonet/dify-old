@@ -83,9 +83,7 @@ class RuntimeRouteState(BaseModel):
 
         :param node_id: node id
         """
-        state = RouteNodeState(
-            node_id=node_id, start_at=datetime.now(timezone.utc).replace(tzinfo=None)
-        )
+        state = RouteNodeState(node_id=node_id, start_at=datetime.now(timezone.utc).replace(tzinfo=None))
         self.node_state_mapping[state.id] = state
         return state
 
@@ -101,9 +99,7 @@ class RuntimeRouteState(BaseModel):
 
         self.routes[source_node_state_id].append(target_node_state_id)
 
-    def get_routes_with_node_state_by_source_node_state_id(
-        self, source_node_state_id: str
-    ) -> list[RouteNodeState]:
+    def get_routes_with_node_state_by_source_node_state_id(self, source_node_state_id: str) -> list[RouteNodeState]:
         """
         Get routes with node state by source node id
 
@@ -111,6 +107,5 @@ class RuntimeRouteState(BaseModel):
         :return: routes with node state
         """
         return [
-            self.node_state_mapping[target_state_id]
-            for target_state_id in self.routes.get(source_node_state_id, [])
+            self.node_state_mapping[target_state_id] for target_state_id in self.routes.get(source_node_state_id, [])
         ]

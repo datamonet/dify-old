@@ -71,9 +71,7 @@ class FileService:
             # end_user
             current_tenant_id = user.tenant_id
 
-        file_key = (
-            "upload_files/" + current_tenant_id + "/" + file_uuid + "." + extension
-        )
+        file_key = "upload_files/" + current_tenant_id + "/" + file_uuid + "." + extension
 
         # save file to storage
         storage.save(file_key, file_content)
@@ -89,9 +87,7 @@ class FileService:
             mime_type=file.mimetype,
             created_by_role=(CreatedByRole.ACCOUNT if isinstance(user, Account) else CreatedByRole.END_USER),
             created_by=user.id,
-            created_at=datetime.datetime.now(datetime.timezone.utc).replace(
-                tzinfo=None
-            ),
+            created_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
             used=False,
             hash=hashlib.sha3_256(file_content).hexdigest(),
         )
@@ -107,9 +103,7 @@ class FileService:
             text_name = text_name[:200]
         # user uuid as file name
         file_uuid = str(uuid.uuid4())
-        file_key = (
-            "upload_files/" + current_user.current_tenant_id + "/" + file_uuid + ".txt"
-        )
+        file_key = "upload_files/" + current_user.current_tenant_id + "/" + file_uuid + ".txt"
 
         # save file to storage
         storage.save(file_key, text.encode("utf-8"))
@@ -161,9 +155,7 @@ class FileService:
         if not result:
             raise NotFound("File not found or signature is invalid")
 
-        upload_file = (
-            db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
-        )
+        upload_file = db.session.query(UploadFile).filter(UploadFile.id == file_id).first()
 
         if not upload_file:
             raise NotFound("File not found or signature is invalid")

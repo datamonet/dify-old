@@ -57,14 +57,7 @@ class SearchAPI:
                 toret += res["knowledge_graph"]["description"] + "\n"
             if "organic_results" in res and "snippet" in res["organic_results"][0]:
                 for item in res["organic_results"]:
-                    toret += (
-                        "content: "
-                        + item["snippet"]
-                        + "\n"
-                        + "link: "
-                        + item["link"]
-                        + "\n"
-                    )
+                    toret += "content: " + item["snippet"] + "\n" + "link: " + item["link"] + "\n"
             if toret == "":
                 toret = "No good search result found"
 

@@ -70,9 +70,7 @@ class TiDBVector(BaseVector):
                 "vector",
                 VectorType(dim),
                 nullable=False,
-                comment=""
-                if self._distance_func is None
-                else f"hnsw(distance={self._distance_func})",
+                comment="" if self._distance_func is None else f"hnsw(distance={self._distance_func})",
             ),
             Column("text", TEXT, nullable=False),
             Column("meta", JSON, nullable=False),
@@ -84,9 +82,7 @@ class TiDBVector(BaseVector):
             Column(
                 "update_time",
                 DateTime,
-                server_default=sqlalchemy.text(
-                    "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-                ),
+                server_default=sqlalchemy.text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
             ),
             extend_existing=True,
         )
@@ -109,9 +105,7 @@ class TiDBVector(BaseVector):
         self._dimension = 1536
 
     def create(self, texts: list[Document], embeddings: list[list[float]], **kwargs):
-        logger.info(
-            "create collection and add texts, collection_name: " + self._collection_name
-        )
+        logger.info("create collection and add texts, collection_name: " + self._collection_name)
         self._create_collection(len(embeddings[0]))
         self.add_texts(texts, embeddings)
         self._dimension = len(embeddings[0])
@@ -121,9 +115,7 @@ class TiDBVector(BaseVector):
         logger.info("_create_collection, collection_name " + self._collection_name)
         lock_name = "vector_indexing_lock_{}".format(self._collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(
-                self._collection_name
-            )
+            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
             if redis_client.get(collection_exist_cache_key):
                 return
             with Session(self._engine) as session:
@@ -145,9 +137,7 @@ class TiDBVector(BaseVector):
                 session.commit()
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
-    def add_texts(
-        self, documents: list[Document], embeddings: list[list[float]], **kwargs
-    ):
+    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
         table = self._table(len(embeddings[0]))
         ids = self._get_uuids(documents)
         metas = [d.metadata for d in documents]
@@ -156,9 +146,7 @@ class TiDBVector(BaseVector):
         chunks_table_data = []
         with self._engine.connect() as conn, conn.begin():
             for id, text, meta, embedding in zip(ids, texts, metas, embeddings):
-                chunks_table_data.append(
-                    {"id": id, "vector": embedding, "text": text, "meta": meta}
-                )
+                chunks_table_data.append({"id": id, "vector": embedding, "text": text, "meta": meta})
 
                 # Execute the batch insert when the batch size is reached
                 if len(chunks_table_data) == 500:
@@ -215,9 +203,7 @@ class TiDBVector(BaseVector):
         if ids:
             self._delete_by_ids(ids)
 
-    def search_by_vector(
-        self, query_vector: list[float], **kwargs: Any
-    ) -> list[Document]:
+    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
         top_k = kwargs.get("top_k", 5)
         score_threshold = float(kwargs.get("score_threshold") or 0.0)
         filter = kwargs.get("filter")
@@ -260,27 +246,19 @@ class TiDBVector(BaseVector):
 
     def delete(self) -> None:
         with Session(self._engine) as session:
-            session.execute(
-                sql_text(f"""DROP TABLE IF EXISTS {self._collection_name};""")
-            )
+            session.execute(sql_text(f"""DROP TABLE IF EXISTS {self._collection_name};"""))
             session.commit()
 
 
 class TiDBVectorFactory(AbstractVectorFactory):
-    def init_vector(
-        self, dataset: Dataset, attributes: list, embeddings: Embeddings
-    ) -> TiDBVector:
+    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> TiDBVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"][
-                "class_prefix"
-            ]
+            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id).lower()
-            dataset.index_struct = json.dumps(
-                self.gen_index_struct_dict(VectorType.TIDB_VECTOR, collection_name)
-            )
+            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.TIDB_VECTOR, collection_name))
 
         return TiDBVector(
             collection_name=collection_name,

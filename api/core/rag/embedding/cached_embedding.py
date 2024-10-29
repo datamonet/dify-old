@@ -5,7 +5,6 @@ from typing import Optional, cast
 import numpy as np
 from sqlalchemy.exc import IntegrityError
 
-from configs import dify_config
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.model_entities import ModelPropertyKey
@@ -20,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class CacheEmbedding(Embeddings):
-    def __init__(
-        self, model_instance: ModelInstance, user: Optional[str] = None
-    ) -> None:
+    def __init__(self, model_instance: ModelInstance, user: Optional[str] = None) -> None:
         self._model_instance = model_instance
         self._user = user
 
@@ -50,16 +47,13 @@ class CacheEmbedding(Embeddings):
             embedding_queue_texts = [texts[i] for i in embedding_queue_indices]
             embedding_queue_embeddings = []
             try:
-                model_type_instance = cast(
-                    TextEmbeddingModel, self._model_instance.model_type_instance
-                )
+                model_type_instance = cast(TextEmbeddingModel, self._model_instance.model_type_instance)
                 model_schema = model_type_instance.get_model_schema(
                     self._model_instance.model, self._model_instance.credentials
                 )
                 max_chunks = (
                     model_schema.model_properties[ModelPropertyKey.MAX_CHUNKS]
-                    if model_schema
-                    and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties
+                    if model_schema and ModelPropertyKey.MAX_CHUNKS in model_schema.model_properties
                     else 1
                 )
                 for i in range(0, len(embedding_queue_texts), max_chunks):
@@ -73,9 +67,7 @@ class CacheEmbedding(Embeddings):
 
                     for vector in embedding_result.embeddings:
                         try:
-                            normalized_embedding = (
-                                vector / np.linalg.norm(vector)
-                            ).tolist()
+                            normalized_embedding = (vector / np.linalg.norm(vector)).tolist()
                             embedding_queue_embeddings.append(normalized_embedding)
                         except IntegrityError:
                             db.session.rollback()
@@ -83,9 +75,7 @@ class CacheEmbedding(Embeddings):
                             logging.exception("Failed transform embedding: %s", e)
                 cache_embeddings = []
                 try:
-                    for i, embedding in zip(
-                        embedding_queue_indices, embedding_queue_embeddings
-                    ):
+                    for i, embedding in zip(embedding_queue_indices, embedding_queue_embeddings):
                         text_embeddings[i] = embedding
                         hash = helper.generate_text_hash(texts[i])
                         if hash not in cache_embeddings:
@@ -111,9 +101,7 @@ class CacheEmbedding(Embeddings):
         """Embed query text."""
         # use doc embedding cache or store if not exists
         hash = helper.generate_text_hash(text)
-        embedding_cache_key = (
-            f"{self._model_instance.provider}_{self._model_instance.model}_{hash}"
-        )
+        embedding_cache_key = f"{self._model_instance.provider}_{self._model_instance.model}_{hash}"
         embedding = redis_client.get(embedding_cache_key)
         if embedding:
             redis_client.expire(embedding_cache_key, 600)
@@ -124,9 +112,7 @@ class CacheEmbedding(Embeddings):
             )
 
             embedding_results = embedding_result.embeddings[0]
-            embedding_results = (
-                embedding_results / np.linalg.norm(embedding_results)
-            ).tolist()
+            embedding_results = (embedding_results / np.linalg.norm(embedding_results)).tolist()
         except Exception as ex:
             raise ex
 

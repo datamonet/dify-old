@@ -14,6 +14,4 @@ def test_validate_provider_credentials():
     with pytest.raises(CredentialsValidateFailedError):
         provider.validate_provider_credentials(credentials={})
 
-    provider.validate_provider_credentials(
-        credentials={"api_key": os.environ.get("API_KEY")}
-    )
+    provider.validate_provider_credentials(credentials={"api_key": os.environ.get("API_KEY")})

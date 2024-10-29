@@ -13,6 +13,4 @@ def test_validate_provider_credentials(setup_anthropic_mock):
     with pytest.raises(CredentialsValidateFailedError):
         provider.validate_provider_credentials(credentials={})
 
-    provider.validate_provider_credentials(
-        credentials={"anthropic_api_key": os.environ.get("ANTHROPIC_API_KEY")}
-    )
+    provider.validate_provider_credentials(credentials={"anthropic_api_key": os.environ.get("ANTHROPIC_API_KEY")})

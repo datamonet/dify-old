@@ -73,6 +73,4 @@ document_status_fields = {
     "total_segments": fields.Integer,
 }
 
-document_status_fields_list = {
-    "data": fields.List(fields.Nested(document_status_fields))
-}
+document_status_fields_list = {"data": fields.List(fields.Nested(document_status_fields))}

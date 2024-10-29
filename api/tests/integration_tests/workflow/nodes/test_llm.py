@@ -82,9 +82,7 @@ def init_llm_node(config: dict) -> LLMNode:
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
         config=config,
     )
 
@@ -130,17 +128,13 @@ def test_execute_llm(setup_openai_mock):
             preferred_provider_type=ProviderType.CUSTOM,
             using_provider_type=ProviderType.CUSTOM,
             system_configuration=SystemConfiguration(enabled=False),
-            custom_configuration=CustomConfiguration(
-                provider=CustomProviderConfiguration(credentials=credentials)
-            ),
+            custom_configuration=CustomConfiguration(provider=CustomProviderConfiguration(credentials=credentials)),
             model_settings=[],
         ),
         provider_instance=provider_instance,
         model_type_instance=model_type_instance,
     )
-    model_instance = ModelInstance(
-        provider_model_bundle=provider_model_bundle, model="gpt-3.5-turbo"
-    )
+    model_instance = ModelInstance(provider_model_bundle=provider_model_bundle, model="gpt-3.5-turbo")
     model_schema = model_type_instance.get_model_schema("gpt-3.5-turbo")
     assert model_schema is not None
     model_config = ModelConfigWithCredentialsEntity(
@@ -227,18 +221,14 @@ def test_execute_llm_with_jinja2(setup_code_executor_mock, setup_openai_mock):
             preferred_provider_type=ProviderType.CUSTOM,
             using_provider_type=ProviderType.CUSTOM,
             system_configuration=SystemConfiguration(enabled=False),
-            custom_configuration=CustomConfiguration(
-                provider=CustomProviderConfiguration(credentials=credentials)
-            ),
+            custom_configuration=CustomConfiguration(provider=CustomProviderConfiguration(credentials=credentials)),
             model_settings=[],
         ),
         provider_instance=provider_instance,
         model_type_instance=model_type_instance,
     )
 
-    model_instance = ModelInstance(
-        provider_model_bundle=provider_model_bundle, model="gpt-3.5-turbo"
-    )
+    model_instance = ModelInstance(provider_model_bundle=provider_model_bundle, model="gpt-3.5-turbo")
     model_schema = model_type_instance.get_model_schema("gpt-3.5-turbo")
     assert model_schema is not None
     model_config = ModelConfigWithCredentialsEntity(
@@ -264,6 +254,4 @@ def test_execute_llm_with_jinja2(setup_code_executor_mock, setup_openai_mock):
             assert item.run_result.status == WorkflowNodeExecutionStatus.SUCCEEDED
             assert item.run_result.process_data is not None
             assert "sunny" in json.dumps(item.run_result.process_data)
-            assert "what's the weather today?" in json.dumps(
-                item.run_result.process_data
-            )
+            assert "what's the weather today?" in json.dumps(item.run_result.process_data)

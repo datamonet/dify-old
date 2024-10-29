@@ -42,9 +42,7 @@ def clean_embedding_cache_task():
     end_at = time.perf_counter()
     click.echo(
         click.style(
-            "Cleaned embedding cache from db success latency: {}".format(
-                end_at - start_at
-            ),
+            "Cleaned embedding cache from db success latency: {}".format(end_at - start_at),
             fg="green",
         )
     )

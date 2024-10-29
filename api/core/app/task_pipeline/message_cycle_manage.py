@@ -37,9 +37,7 @@ class MessageCycleManage:
     ]
     _task_state: Union[EasyUITaskState, WorkflowTaskState]
 
-    def _generate_conversation_name(
-        self, conversation: Conversation, query: str
-    ) -> Optional[Thread]:
+    def _generate_conversation_name(self, conversation: Conversation, query: str) -> Optional[Thread]:
         """
         Generate conversation name.
         :param conversation: conversation
@@ -51,9 +49,7 @@ class MessageCycleManage:
 
         is_first_message = self._application_generate_entity.conversation_id is None
         extras = self._application_generate_entity.extras
-        auto_generate_conversation_name = extras.get(
-            "auto_generate_conversation_name", True
-        )
+        auto_generate_conversation_name = extras.get("auto_generate_conversation_name", True)
 
         if auto_generate_conversation_name and is_first_message:
             # start generate thread
@@ -72,16 +68,10 @@ class MessageCycleManage:
 
         return None
 
-    def _generate_conversation_name_worker(
-        self, flask_app: Flask, conversation_id: str, query: str
-    ):
+    def _generate_conversation_name_worker(self, flask_app: Flask, conversation_id: str, query: str):
         with flask_app.app_context():
             # get conversation and message
-            conversation = (
-                db.session.query(Conversation)
-                .filter(Conversation.id == conversation_id)
-                .first()
-            )
+            conversation = db.session.query(Conversation).filter(Conversation.id == conversation_id).first()
 
             if not conversation:
                 return
@@ -93,9 +83,7 @@ class MessageCycleManage:
 
                 # generate conversation name
                 try:
-                    name = LLMGenerator.generate_conversation_name(
-                        app_model.tenant_id, query
-                    )
+                    name = LLMGenerator.generate_conversation_name(app_model.tenant_id, query)
                     conversation.name = name
                 except:
                     pass
@@ -104,17 +92,13 @@ class MessageCycleManage:
                 db.session.commit()
                 db.session.close()
 
-    def _handle_annotation_reply(
-        self, event: QueueAnnotationReplyEvent
-    ) -> Optional[MessageAnnotation]:
+    def _handle_annotation_reply(self, event: QueueAnnotationReplyEvent) -> Optional[MessageAnnotation]:
         """
         Handle annotation reply.
         :param event: event
         :return:
         """
-        annotation = AppAnnotationService.get_annotation_by_id(
-            event.message_annotation_id
-        )
+        annotation = AppAnnotationService.get_annotation_by_id(event.message_annotation_id)
         if annotation:
             account = annotation.account
             self._task_state.metadata["annotation_reply"] = {
@@ -138,19 +122,13 @@ class MessageCycleManage:
         if self._application_generate_entity.app_config.additional_features.show_retrieve_source:
             self._task_state.metadata["retriever_resources"] = event.retriever_resources
 
-    def _message_file_to_stream_response(
-        self, event: QueueMessageFileEvent
-    ) -> Optional[MessageFileStreamResponse]:
+    def _message_file_to_stream_response(self, event: QueueMessageFileEvent) -> Optional[MessageFileStreamResponse]:
         """
         Message file to stream response.
         :param event: event
         :return:
         """
-        message_file = (
-            db.session.query(MessageFile)
-            .filter(MessageFile.id == event.message_file_id)
-            .first()
-        )
+        message_file = db.session.query(MessageFile).filter(MessageFile.id == event.message_file_id).first()
 
         if message_file:
             # get tool file id
@@ -169,9 +147,7 @@ class MessageCycleManage:
             if message_file.url.startswith("http"):
                 url = message_file.url
             else:
-                url = ToolFileManager.sign_file(
-                    tool_file_id=tool_file_id, extension=extension
-                )
+                url = ToolFileManager.sign_file(tool_file_id=tool_file_id, extension=extension)
 
             return MessageFileStreamResponse(
                 task_id=self._application_generate_entity.task_id,
@@ -202,14 +178,10 @@ class MessageCycleManage:
             from_variable_selector=from_variable_selector,
         )
 
-    def _message_replace_to_stream_response(
-        self, answer: str
-    ) -> MessageReplaceStreamResponse:
+    def _message_replace_to_stream_response(self, answer: str) -> MessageReplaceStreamResponse:
         """
         Message replace to stream response.
         :param answer: answer
         :return:
         """
-        return MessageReplaceStreamResponse(
-            task_id=self._application_generate_entity.task_id, answer=answer
-        )
+        return MessageReplaceStreamResponse(task_id=self._application_generate_entity.task_id, answer=answer)

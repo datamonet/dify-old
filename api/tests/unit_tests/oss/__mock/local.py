@@ -39,7 +39,7 @@ class MockLocalFSClass:
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_local_fs_mock(monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(Path, "write_bytes", MockLocalFSClass.write_bytes)

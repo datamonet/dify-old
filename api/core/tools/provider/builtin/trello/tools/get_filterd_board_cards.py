@@ -11,9 +11,7 @@ class GetFilteredBoardCardsTool(BuiltinTool):
     Tool for retrieving filtered cards on a Trello board by its ID and a specified filter.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]) -> ToolInvokeMessage:
         """
         Invoke the tool to retrieve filtered cards on a Trello board by its ID and filter.
 
@@ -31,9 +29,7 @@ class GetFilteredBoardCardsTool(BuiltinTool):
         filter = tool_parameters.get("filter")
 
         if not (api_key and token and board_id and filter):
-            return self.create_text_message(
-                "Missing required parameters: API key, token, board ID, or filter."
-            )
+            return self.create_text_message("Missing required parameters: API key, token, board ID, or filter.")
 
         url = f"https://api.trello.com/1/boards/{board_id}/cards/{filter}?key={api_key}&token={token}"
 
@@ -44,9 +40,7 @@ class GetFilteredBoardCardsTool(BuiltinTool):
         except requests.exceptions.RequestException:
             return self.create_text_message("Failed to retrieve filtered cards")
 
-        card_details = "\n".join(
-            [f"{card['name']} (ID: {card['id']})" for card in filtered_cards]
-        )
+        card_details = "\n".join([f"{card['name']} (ID: {card['id']})" for card in filtered_cards])
         return self.create_text_message(
             text=f"Filtered Cards for Board ID {board_id} with Filter '{filter}':\n{card_details}"
         )

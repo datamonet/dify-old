@@ -38,27 +38,19 @@ class GetWorksheetFieldsTool(BuiltinTool):
             res.raise_for_status()
             res_json = res.json()
             if res_json.get("error_code") != 1:
-                return self.create_text_message(
-                    f"Failed to get the worksheet information. {res_json['error_msg']}"
-                )
+                return self.create_text_message(f"Failed to get the worksheet information. {res_json['error_msg']}")
 
             fields_json, fields_table = self.get_controls(res_json["data"]["controls"])
             result_type = tool_parameters.get("result_type", "table")
             return self.create_text_message(
-                text=json.dumps(fields_json, ensure_ascii=False)
-                if result_type == "json"
-                else fields_table
+                text=json.dumps(fields_json, ensure_ascii=False) if result_type == "json" else fields_table
             )
         except httpx.RequestError as e:
-            return self.create_text_message(
-                f"Failed to get the worksheet information, request error: {e}"
-            )
+            return self.create_text_message(f"Failed to get the worksheet information, request error: {e}")
         except json.JSONDecodeError as e:
             return self.create_text_message(f"Failed to parse JSON response: {e}")
         except Exception as e:
-            return self.create_text_message(
-                f"Failed to get the worksheet information, unexpected error: {e}"
-            )
+            return self.create_text_message(f"Failed to get the worksheet information, unexpected error: {e}")
 
     def get_field_type_by_id(self, field_type_id: int) -> str:
         field_type_map = {
@@ -145,12 +137,7 @@ class GetWorksheetFieldsTool(BuiltinTool):
     def _extract_options(self, control: dict) -> list:
         options = []
         if control["type"] in {9, 10, 11}:
-            options.extend(
-                [
-                    {"key": opt["key"], "value": opt["value"]}
-                    for opt in control.get("options", [])
-                ]
-            )
+            options.extend([{"key": opt["key"], "value": opt["value"]} for opt in control.get("options", [])])
         elif control["type"] in {28, 36}:
             itemnames = control["advancedSetting"].get("itemnames")
             if itemnames and itemnames.startswith("[{"):
@@ -161,12 +148,7 @@ class GetWorksheetFieldsTool(BuiltinTool):
         elif control["type"] == 30:
             source_type = control["sourceControl"]["type"]
             if source_type not in self._get_ignore_types():
-                options.extend(
-                    [
-                        {"key": opt["key"], "value": opt["value"]}
-                        for opt in control.get("options", [])
-                    ]
-                )
+                options.extend([{"key": opt["key"], "value": opt["value"]} for opt in control.get("options", [])])
         return options
 
     def _get_ignore_types(self):

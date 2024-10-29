@@ -49,9 +49,7 @@ def inner_api_user_auth(view):
 
         data_to_sign = f"DIFY {user_id}"
 
-        signature = hmac_new(
-            inner_api_key.encode("utf-8"), data_to_sign.encode("utf-8"), sha1
-        )
+        signature = hmac_new(inner_api_key.encode("utf-8"), data_to_sign.encode("utf-8"), sha1)
         signature = b64encode(signature.digest()).decode("utf-8")
 
         if signature != token:

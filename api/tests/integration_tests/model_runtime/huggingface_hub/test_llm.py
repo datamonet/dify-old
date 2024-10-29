@@ -101,11 +101,7 @@ def test_hosted_inference_api_invoke_stream_model(setup_huggingface_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 @pytest.mark.parametrize("setup_huggingface_mock", [["none"]], indirect=True)
@@ -120,9 +116,7 @@ def test_inference_endpoints_text_generation_validate_credentials(
             credentials={
                 "huggingfacehub_api_type": "inference_endpoints",
                 "huggingfacehub_api_token": "invalid_key",
-                "huggingfacehub_endpoint_url": os.environ.get(
-                    "HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"
-                ),
+                "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"),
                 "task_type": "text-generation",
             },
         )
@@ -132,9 +126,7 @@ def test_inference_endpoints_text_generation_validate_credentials(
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text-generation",
         },
     )
@@ -149,9 +141,7 @@ def test_inference_endpoints_text_generation_invoke_model(setup_huggingface_mock
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text-generation",
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
@@ -180,9 +170,7 @@ def test_inference_endpoints_text_generation_invoke_stream_model(
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text-generation",
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
@@ -202,11 +190,7 @@ def test_inference_endpoints_text_generation_invoke_stream_model(
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 @pytest.mark.parametrize("setup_huggingface_mock", [["none"]], indirect=True)
@@ -221,9 +205,7 @@ def test_inference_endpoints_text2text_generation_validate_credentials(
             credentials={
                 "huggingfacehub_api_type": "inference_endpoints",
                 "huggingfacehub_api_token": "invalid_key",
-                "huggingfacehub_endpoint_url": os.environ.get(
-                    "HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"
-                ),
+                "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"),
                 "task_type": "text2text-generation",
             },
         )
@@ -233,9 +215,7 @@ def test_inference_endpoints_text2text_generation_validate_credentials(
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text2text-generation",
         },
     )
@@ -250,9 +230,7 @@ def test_inference_endpoints_text2text_generation_invoke_model(setup_huggingface
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text2text-generation",
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
@@ -281,9 +259,7 @@ def test_inference_endpoints_text2text_generation_invoke_stream_model(
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text2text-generation",
         },
         prompt_messages=[UserPromptMessage(content="Who are you?")],
@@ -303,11 +279,7 @@ def test_inference_endpoints_text2text_generation_invoke_stream_model(
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():
@@ -318,9 +290,7 @@ def test_get_num_tokens():
         credentials={
             "huggingfacehub_api_type": "inference_endpoints",
             "huggingfacehub_api_token": os.environ.get("HUGGINGFACE_API_KEY"),
-            "huggingfacehub_endpoint_url": os.environ.get(
-                "HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"
-            ),
+            "huggingfacehub_endpoint_url": os.environ.get("HUGGINGFACE_TEXT2TEXT_GEN_ENDPOINT_URL"),
             "task_type": "text2text-generation",
         },
         prompt_messages=[UserPromptMessage(content="Hello World!")],

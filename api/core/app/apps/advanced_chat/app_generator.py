@@ -92,9 +92,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         query = query.replace("\x00", "")
         inputs = args["inputs"]
 
-        extras = {
-            "auto_generate_conversation_name": args.get("auto_generate_name", False)
-        }
+        extras = {"auto_generate_conversation_name": args.get("auto_generate_name", False)}
 
         # get conversation
         conversation = None
@@ -120,9 +118,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             file_objs = []
 
         # convert to app config
-        app_config = AdvancedChatAppConfigManager.get_app_config(
-            app_model=app_model, workflow=workflow
-        )
+        app_config = AdvancedChatAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
 
         # get tracing instance
         trace_manager = TraceQueueManager(
@@ -187,9 +183,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             raise ValueError("inputs is required")
 
         # convert to app config
-        app_config = AdvancedChatAppConfigManager.get_app_config(
-            app_model=app_model, workflow=workflow
-        )
+        app_config = AdvancedChatAppConfigManager.get_app_config(app_model=app_model, workflow=workflow)
 
         # init application generate entity
         application_generate_entity = AdvancedChatAppGenerateEntity(
@@ -243,9 +237,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             is_first_conversation = True
 
         # init generate records
-        (conversation, message) = self._init_generate_records(
-            application_generate_entity, conversation
-        )
+        (conversation, message) = self._init_generate_records(application_generate_entity, conversation)
 
         if is_first_conversation:
             # update conversation features
@@ -289,9 +281,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             stream=stream,
         )
 
-        return AdvancedChatAppGenerateResponseConverter.convert(
-            response=response, invoke_from=invoke_from
-        )
+        return AdvancedChatAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
 
     def _generate_worker(
         self,
@@ -358,9 +348,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         message: Message,
         user: Union[Account, EndUser],
         stream: bool = False,
-    ) -> Union[
-        ChatbotAppBlockingResponse, Generator[ChatbotAppStreamResponse, None, None]
-    ]:
+    ) -> Union[ChatbotAppBlockingResponse, Generator[ChatbotAppStreamResponse, None, None]]:
         """
         Handle response.
         :param application_generate_entity: application generate entity

@@ -14,9 +14,7 @@ def test_validate_credentials():
     model = MixedBreadTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="mxbai-embed-large-v1", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="mxbai-embed-large-v1", credentials={"api_key": "invalid_key"})
     with patch("requests.post") as mock_post:
         mock_response = Mock()
         mock_response.json.return_value = {

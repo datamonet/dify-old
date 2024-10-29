@@ -70,9 +70,7 @@ class OpenSearchVector(BaseVector):
         self.create_collection(embeddings, metadatas)
         self.add_texts(texts, embeddings)
 
-    def add_texts(
-        self, documents: list[Document], embeddings: list[list[float]], **kwargs
-    ):
+    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
         actions = []
         for i in range(len(documents)):
             action = {
@@ -81,9 +79,7 @@ class OpenSearchVector(BaseVector):
                 "_id": uuid4().hex,
                 "_source": {
                     Field.CONTENT_KEY.value: documents[i].page_content,
-                    Field.VECTOR.value: embeddings[
-                        i
-                    ],  # Make sure you pass an array here
+                    Field.VECTOR.value: embeddings[i],  # Make sure you pass an array here
                     Field.METADATA_KEY.value: documents[i].metadata,
                 },
             }
@@ -118,15 +114,10 @@ class OpenSearchVector(BaseVector):
             if es_ids:
                 actual_ids.extend(es_ids)
             else:
-                logger.warning(
-                    f"Document with metadata doc_id {doc_id} not found for deletion"
-                )
+                logger.warning(f"Document with metadata doc_id {doc_id} not found for deletion")
 
         if actual_ids:
-            actions = [
-                {"_op_type": "delete", "_index": index_name, "_id": es_id}
-                for es_id in actual_ids
-            ]
+            actions = [{"_op_type": "delete", "_index": index_name, "_id": es_id} for es_id in actual_ids]
             try:
                 helpers.bulk(self._client, actions)
             except BulkIndexError as e:
@@ -150,9 +141,7 @@ class OpenSearchVector(BaseVector):
         except:
             return False
 
-    def search_by_vector(
-        self, query_vector: list[float], **kwargs: Any
-    ) -> list[Document]:
+    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
         # Make sure query_vector is a list
         if not isinstance(query_vector, list):
             raise ValueError("query_vector should be a list of floats")
@@ -174,9 +163,7 @@ class OpenSearchVector(BaseVector):
         }
 
         try:
-            response = self._client.search(
-                index=self._collection_name.lower(), body=query
-            )
+            response = self._client.search(index=self._collection_name.lower(), body=query)
         except Exception as e:
             logger.error(f"Error executing search: {e}")
             raise
@@ -203,9 +190,7 @@ class OpenSearchVector(BaseVector):
     def search_by_full_text(self, query: str, **kwargs: Any) -> list[Document]:
         full_text_query = {"query": {"match": {Field.CONTENT_KEY.value: query}}}
 
-        response = self._client.search(
-            index=self._collection_name.lower(), body=full_text_query
-        )
+        response = self._client.search(index=self._collection_name.lower(), body=full_text_query)
 
         docs = []
         for hit in response["hits"]["hits"]:
@@ -225,13 +210,9 @@ class OpenSearchVector(BaseVector):
     ):
         lock_name = f"vector_indexing_lock_{self._collection_name.lower()}"
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = (
-                f"vector_indexing_{self._collection_name.lower()}"
-            )
+            collection_exist_cache_key = f"vector_indexing_{self._collection_name.lower()}"
             if redis_client.get(collection_exist_cache_key):
-                logger.info(
-                    f"Collection {self._collection_name.lower()} already exists."
-                )
+                logger.info(f"Collection {self._collection_name.lower()} already exists.")
                 return
 
             if not self._client.indices.exists(index=self._collection_name.lower()):
@@ -242,9 +223,7 @@ class OpenSearchVector(BaseVector):
                             Field.CONTENT_KEY.value: {"type": "text"},
                             Field.VECTOR.value: {
                                 "type": "knn_vector",
-                                "dimension": len(
-                                    embeddings[0]
-                                ),  # Make sure the dimension is correct here
+                                "dimension": len(embeddings[0]),  # Make sure the dimension is correct here
                                 "method": {
                                     "name": "hnsw",
                                     "space_type": "l2",
@@ -255,37 +234,27 @@ class OpenSearchVector(BaseVector):
                             Field.METADATA_KEY.value: {
                                 "type": "object",
                                 "properties": {
-                                    "doc_id": {
-                                        "type": "keyword"
-                                    }  # Map doc_id to keyword type
+                                    "doc_id": {"type": "keyword"}  # Map doc_id to keyword type
                                 },
                             },
                         }
                     },
                 }
 
-                self._client.indices.create(
-                    index=self._collection_name.lower(), body=index_body
-                )
+                self._client.indices.create(index=self._collection_name.lower(), body=index_body)
 
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
 
 class OpenSearchVectorFactory(AbstractVectorFactory):
-    def init_vector(
-        self, dataset: Dataset, attributes: list, embeddings: Embeddings
-    ) -> OpenSearchVector:
+    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> OpenSearchVector:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"][
-                "class_prefix"
-            ]
+            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id).lower()
-            dataset.index_struct = json.dumps(
-                self.gen_index_struct_dict(VectorType.OPENSEARCH, collection_name)
-            )
+            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.OPENSEARCH, collection_name))
 
         open_search_config = OpenSearchConfig(
             host=dify_config.OPENSEARCH_HOST,
@@ -295,6 +264,4 @@ class OpenSearchVectorFactory(AbstractVectorFactory):
             secure=dify_config.OPENSEARCH_SECURE,
         )
 
-        return OpenSearchVector(
-            collection_name=collection_name, config=open_search_config
-        )
+        return OpenSearchVector(collection_name=collection_name, config=open_search_config)

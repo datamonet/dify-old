@@ -189,9 +189,7 @@ class AdvancedPromptTransform(PromptTransform):
             query = parser.format(prompt_inputs)
 
         if memory and memory_config:
-            prompt_messages = self._append_chat_histories(
-                memory, memory_config, prompt_messages, model_config
-            )
+            prompt_messages = self._append_chat_histories(memory, memory_config, prompt_messages, model_config)
 
             if files and query is not None:
                 prompt_message_contents: list[PromptMessageContent] = []
@@ -207,31 +205,23 @@ class AdvancedPromptTransform(PromptTransform):
                 last_message = prompt_messages[-1] if prompt_messages else None
                 if last_message and last_message.role == PromptMessageRole.USER:
                     # get last user message content and add files
-                    prompt_message_contents = [
-                        TextPromptMessageContent(data=last_message.content)
-                    ]
+                    prompt_message_contents = [TextPromptMessageContent(data=last_message.content)]
                     for file in files:
                         prompt_message_contents.append(file_manager.to_prompt_message_content(file))
 
                     last_message.content = prompt_message_contents
                 else:
-                    prompt_message_contents = [
-                        TextPromptMessageContent(data="")
-                    ]  # not for query
+                    prompt_message_contents = [TextPromptMessageContent(data="")]  # not for query
                     for file in files:
                         prompt_message_contents.append(file_manager.to_prompt_message_content(file))
 
-                    prompt_messages.append(
-                        UserPromptMessage(content=prompt_message_contents)
-                    )
+                    prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
             else:
                 prompt_message_contents = [TextPromptMessageContent(data=query)]
                 for file in files:
                     prompt_message_contents.append(file_manager.to_prompt_message_content(file))
 
-                prompt_messages.append(
-                    UserPromptMessage(content=prompt_message_contents)
-                )
+                prompt_messages.append(UserPromptMessage(content=prompt_message_contents))
         elif query:
             prompt_messages.append(UserPromptMessage(content=query))
 
@@ -272,9 +262,7 @@ class AdvancedPromptTransform(PromptTransform):
                 prompt_inputs = {k: inputs[k] for k in parser.variable_keys if k in inputs}
                 tmp_human_message = UserPromptMessage(content=parser.format(prompt_inputs))
 
-                rest_tokens = self._calculate_rest_token(
-                    [tmp_human_message], model_config
-                )
+                rest_tokens = self._calculate_rest_token([tmp_human_message], model_config)
 
                 histories = self._get_history_messages_from_memory(
                     memory=memory,

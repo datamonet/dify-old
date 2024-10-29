@@ -51,7 +51,9 @@ class PGVectoRS(BaseVector):
     def __init__(self, collection_name: str, config: PgvectoRSConfig, dim: int):
         super().__init__(collection_name)
         self._client_config = config
-        self._url = f"postgresql+psycopg2://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+        self._url = (
+            f"postgresql+psycopg2://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+        )
         self._client = create_engine(self._url)
         with Session(self._client) as session:
             session.execute(text("CREATE EXTENSION IF NOT EXISTS vectors"))
@@ -82,9 +84,7 @@ class PGVectoRS(BaseVector):
     def create_collection(self, dimension: int):
         lock_name = "vector_indexing_lock_{}".format(self._collection_name)
         with redis_client.lock(lock_name, timeout=20):
-            collection_exist_cache_key = "vector_indexing_{}".format(
-                self._collection_name
-            )
+            collection_exist_cache_key = "vector_indexing_{}".format(self._collection_name)
             if redis_client.get(collection_exist_cache_key):
                 return
             index_name = f"{self._collection_name}_embedding_index"
@@ -114,9 +114,7 @@ class PGVectoRS(BaseVector):
                 session.commit()
             redis_client.set(collection_exist_cache_key, 1, ex=3600)
 
-    def add_texts(
-        self, documents: list[Document], embeddings: list[list[float]], **kwargs
-    ):
+    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
         pks = []
         with Session(self._client) as session:
             for document, embedding in zip(documents, embeddings):
@@ -137,9 +135,7 @@ class PGVectoRS(BaseVector):
     def get_ids_by_metadata_field(self, key: str, value: str):
         result = None
         with Session(self._client) as session:
-            select_statement = sql_text(
-                f"SELECT id FROM {self._collection_name} WHERE meta->>'{key}' = '{value}'; "
-            )
+            select_statement = sql_text(f"SELECT id FROM {self._collection_name} WHERE meta->>'{key}' = '{value}'; ")
             result = session.execute(select_statement).fetchall()
         if result:
             return [item[0] for item in result]
@@ -150,9 +146,7 @@ class PGVectoRS(BaseVector):
         ids = self.get_ids_by_metadata_field(key, value)
         if ids:
             with Session(self._client) as session:
-                select_statement = sql_text(
-                    f"DELETE FROM {self._collection_name} WHERE id = ANY(:ids)"
-                )
+                select_statement = sql_text(f"DELETE FROM {self._collection_name} WHERE id = ANY(:ids)")
                 session.execute(select_statement, {"ids": ids})
                 session.commit()
 
@@ -166,9 +160,7 @@ class PGVectoRS(BaseVector):
             ids = [item[0] for item in result]
             if ids:
                 with Session(self._client) as session:
-                    select_statement = sql_text(
-                        f"DELETE FROM {self._collection_name} WHERE id = ANY(:ids)"
-                    )
+                    select_statement = sql_text(f"DELETE FROM {self._collection_name} WHERE id = ANY(:ids)")
                     session.execute(select_statement, {"ids": ids})
                     session.commit()
 
@@ -185,9 +177,7 @@ class PGVectoRS(BaseVector):
             result = session.execute(select_statement).fetchall()
         return len(result) > 0
 
-    def search_by_vector(
-        self, query_vector: list[float], **kwargs: Any
-    ) -> list[Document]:
+    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
         with Session(self._client) as session:
             stmt = (
                 select(
@@ -231,13 +221,9 @@ class PGVectoRS(BaseVector):
 
 
 class PGVectoRSFactory(AbstractVectorFactory):
-    def init_vector(
-        self, dataset: Dataset, attributes: list, embeddings: Embeddings
-    ) -> PGVectoRS:
+    def init_vector(self, dataset: Dataset, attributes: list, embeddings: Embeddings) -> PGVectoRS:
         if dataset.index_struct_dict:
-            class_prefix: str = dataset.index_struct_dict["vector_store"][
-                "class_prefix"
-            ]
+            class_prefix: str = dataset.index_struct_dict["vector_store"]["class_prefix"]
             collection_name = class_prefix.lower()
         else:
             dataset_id = dataset.id

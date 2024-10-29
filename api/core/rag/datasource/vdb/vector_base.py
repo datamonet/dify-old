@@ -19,9 +19,7 @@ class BaseVector(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add_texts(
-        self, documents: list[Document], embeddings: list[list[float]], **kwargs
-    ):
+    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
         raise NotImplementedError
 
     @abstractmethod
@@ -40,9 +38,7 @@ class BaseVector(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def search_by_vector(
-        self, query_vector: list[float], **kwargs: Any
-    ) -> list[Document]:
+    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
         raise NotImplementedError
 
     @abstractmethod

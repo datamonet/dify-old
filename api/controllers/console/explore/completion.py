@@ -119,9 +119,7 @@ class ChatApi(InstalledAppResource):
         parser.add_argument("query", type=str, required=True, location="json")
         parser.add_argument("files", type=list, required=False, location="json")
         parser.add_argument("conversation_id", type=uuid_value, location="json")
-        parser.add_argument(
-            "parent_message_id", type=uuid_value, required=False, location="json"
-        )
+        parser.add_argument("parent_message_id", type=uuid_value, required=False, location="json")
         parser.add_argument(
             "retriever_from",
             type=str,

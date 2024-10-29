@@ -78,10 +78,7 @@ def test_get_common_completion_app_prompt_template_with_pcq():
     )
     prompt_rules = prompt_template["prompt_rules"]
     assert prompt_template["prompt_template"].template == (
-        prompt_rules["context_prompt"]
-        + pre_prompt
-        + "\n"
-        + prompt_rules["query_prompt"]
+        prompt_rules["context_prompt"] + pre_prompt + "\n" + prompt_rules["query_prompt"]
     )
     assert prompt_template["special_variable_keys"] == ["#context#", "#query#"]
 
@@ -101,10 +98,7 @@ def test_get_baichuan_completion_app_prompt_template_with_pcq():
     print(prompt_template["prompt_template"].template)
     prompt_rules = prompt_template["prompt_rules"]
     assert prompt_template["prompt_template"].template == (
-        prompt_rules["context_prompt"]
-        + pre_prompt
-        + "\n"
-        + prompt_rules["query_prompt"]
+        prompt_rules["context_prompt"] + pre_prompt + "\n" + prompt_rules["query_prompt"]
     )
     assert prompt_template["special_variable_keys"] == ["#context#", "#query#"]
 
@@ -217,9 +211,7 @@ def test__get_completion_model_prompt_messages():
     model_config_mock.provider = "openai"
     model_config_mock.model = "gpt-3.5-turbo-instruct"
 
-    memory = TokenBufferMemory(
-        conversation=Conversation(), model_instance=model_config_mock
-    )
+    memory = TokenBufferMemory(conversation=Conversation(), model_instance=model_config_mock)
 
     history_prompt_messages = [
         UserPromptMessage(content="Hi"),

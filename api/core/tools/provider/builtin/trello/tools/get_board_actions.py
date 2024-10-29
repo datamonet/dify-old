@@ -11,9 +11,7 @@ class GetBoardActionsTool(BuiltinTool):
     Tool for retrieving actions for a Trello board by its ID.
     """
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Union[str, int, bool]]) -> ToolInvokeMessage:
         """
         Invoke the tool to retrieve actions for a Trello board by its ID.
 
@@ -30,9 +28,7 @@ class GetBoardActionsTool(BuiltinTool):
         board_id = tool_parameters.get("boardId")
 
         if not (api_key and token and board_id):
-            return self.create_text_message(
-                "Missing required parameters: API key, token, or board ID."
-            )
+            return self.create_text_message("Missing required parameters: API key, token, or board ID.")
 
         url = f"https://api.trello.com/1/boards/{board_id}/actions?key={api_key}&token={token}"
 
@@ -44,11 +40,6 @@ class GetBoardActionsTool(BuiltinTool):
             return self.create_text_message("Failed to retrieve board actions")
 
         actions_summary = "\n".join(
-            [
-                f"{action['type']}: {action.get('data', {}).get('text', 'No details available')}"
-                for action in actions
-            ]
+            [f"{action['type']}: {action.get('data', {}).get('text', 'No details available')}" for action in actions]
         )
-        return self.create_text_message(
-            text=f"Actions for Board ID {board_id}:\n{actions_summary}"
-        )
+        return self.create_text_message(text=f"Actions for Board ID {board_id}:\n{actions_summary}")

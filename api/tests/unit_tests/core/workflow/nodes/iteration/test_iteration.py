@@ -84,9 +84,7 @@ def test_run():
                     "template": "{{ arg1 }} 123",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [
-                        {"value_selector": ["sys", "query"], "variable": "arg1"}
-                    ],
+                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
                 },
                 "id": "tt",
             },
@@ -182,9 +180,7 @@ def test_run():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
         config={
             "data": {
                 "iterator_selector": ["pe", "list_output"],
@@ -314,9 +310,7 @@ def test_run_parallel():
                     "template": "{{ arg1 }} 123",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [
-                        {"value_selector": ["sys", "query"], "variable": "arg1"}
-                    ],
+                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
                 },
                 "id": "tt",
             },
@@ -326,9 +320,7 @@ def test_run_parallel():
                     "template": "{{ arg1 }} 321",
                     "title": "template transform",
                     "type": "template-transform",
-                    "variables": [
-                        {"value_selector": ["sys", "query"], "variable": "arg1"}
-                    ],
+                    "variables": [{"value_selector": ["sys", "query"], "variable": "arg1"}],
                 },
                 "id": "tt-2",
             },
@@ -424,9 +416,7 @@ def test_run_parallel():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=pool, start_at=time.perf_counter()),
         config={
             "data": {
                 "iterator_selector": ["pe", "list_output"],

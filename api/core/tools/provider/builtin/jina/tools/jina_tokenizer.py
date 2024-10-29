@@ -18,12 +18,8 @@ class JinaTokenizerTool(BuiltinTool):
 
         headers = {"Content-Type": "application/json"}
 
-        if "api_key" in self.runtime.credentials and self.runtime.credentials.get(
-            "api_key"
-        ):
-            headers["Authorization"] = "Bearer " + self.runtime.credentials.get(
-                "api_key"
-            )
+        if "api_key" in self.runtime.credentials and self.runtime.credentials.get("api_key"):
+            headers["Authorization"] = "Bearer " + self.runtime.credentials.get("api_key")
 
         if tool_parameters.get("return_chunks", False):
             body["return_chunks"] = True

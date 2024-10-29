@@ -32,9 +32,7 @@ class WorkflowToolProviderController(ToolProviderController):
     provider_id: str
 
     @classmethod
-    def from_db(
-        cls, db_provider: WorkflowToolProvider
-    ) -> "WorkflowToolProviderController":
+    def from_db(cls, db_provider: WorkflowToolProvider) -> "WorkflowToolProviderController":
         app = db_provider.app
 
         if not app:
@@ -43,9 +41,7 @@ class WorkflowToolProviderController(ToolProviderController):
         controller = WorkflowToolProviderController.model_validate(
             {
                 "identity": {
-                    "author": db_provider.user.name
-                    if db_provider.user_id and db_provider.user
-                    else "",
+                    "author": db_provider.user.name if db_provider.user_id and db_provider.user else "",
                     "name": db_provider.label,
                     "label": {"en_US": db_provider.label, "zh_Hans": db_provider.label},
                     "description": {
@@ -69,9 +65,7 @@ class WorkflowToolProviderController(ToolProviderController):
     def provider_type(self) -> ToolProviderType:
         return ToolProviderType.WORKFLOW
 
-    def _get_db_provider_tool(
-        self, db_provider: WorkflowToolProvider, app: App
-    ) -> WorkflowTool:
+    def _get_db_provider_tool(self, db_provider: WorkflowToolProvider, app: App) -> WorkflowTool:
         """
         get db provider tool
         :param db_provider: the db provider
@@ -114,9 +108,7 @@ class WorkflowToolProviderController(ToolProviderController):
 
                 if variable.type == VariableEntityType.SELECT and variable.options:
                     options = [
-                        ToolParameterOption(
-                            value=option, label=I18nObject(en_US=option, zh_Hans=option)
-                        )
+                        ToolParameterOption(value=option, label=I18nObject(en_US=option, zh_Hans=option))
                         for option in variable.options
                     ]
 
@@ -124,9 +116,7 @@ class WorkflowToolProviderController(ToolProviderController):
                     ToolParameter(
                         name=parameter.name,
                         label=I18nObject(en_US=variable.label, zh_Hans=variable.label),
-                        human_description=I18nObject(
-                            en_US=parameter.description, zh_Hans=parameter.description
-                        ),
+                        human_description=I18nObject(en_US=parameter.description, zh_Hans=parameter.description),
                         type=parameter_type,
                         form=parameter.form,
                         llm_description=parameter.description,
@@ -158,9 +148,7 @@ class WorkflowToolProviderController(ToolProviderController):
                 icon=db_provider.icon,
             ),
             description=ToolDescription(
-                human=I18nObject(
-                    en_US=db_provider.description, zh_Hans=db_provider.description
-                ),
+                human=I18nObject(en_US=db_provider.description, zh_Hans=db_provider.description),
                 llm=db_provider.description,
             ),
             parameters=workflow_tool_parameters,

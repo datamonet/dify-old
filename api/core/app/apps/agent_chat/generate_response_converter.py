@@ -18,9 +18,7 @@ class AgentChatAppGenerateResponseConverter(AppGenerateResponseConverter):
     _blocking_response_type = ChatbotAppBlockingResponse
 
     @classmethod
-    def convert_blocking_full_response(
-        cls, blocking_response: ChatbotAppBlockingResponse
-    ) -> dict:
+    def convert_blocking_full_response(cls, blocking_response: ChatbotAppBlockingResponse) -> dict:
         """
         Convert blocking full response.
         :param blocking_response: blocking response
@@ -41,9 +39,7 @@ class AgentChatAppGenerateResponseConverter(AppGenerateResponseConverter):
         return response
 
     @classmethod
-    def convert_blocking_simple_response(
-        cls, blocking_response: ChatbotAppBlockingResponse
-    ) -> dict:
+    def convert_blocking_simple_response(cls, blocking_response: ChatbotAppBlockingResponse) -> dict:
         """
         Convert blocking simple response.
         :param blocking_response: blocking response
@@ -114,9 +110,7 @@ class AgentChatAppGenerateResponseConverter(AppGenerateResponseConverter):
             if isinstance(sub_stream_response, MessageEndStreamResponse):
                 sub_stream_response_dict = sub_stream_response.to_dict()
                 metadata = sub_stream_response_dict.get("metadata", {})
-                sub_stream_response_dict["metadata"] = cls._get_simple_metadata(
-                    metadata
-                )
+                sub_stream_response_dict["metadata"] = cls._get_simple_metadata(metadata)
                 response_chunk.update(sub_stream_response_dict)
             if isinstance(sub_stream_response, ErrorStreamResponse):
                 data = cls._error_to_stream_response(sub_stream_response.err)

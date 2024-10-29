@@ -50,9 +50,7 @@ class OutputModeration(BaseModel):
         self.buffer = completion
         self.is_final_chunk = True
 
-        result = self.moderation(
-            tenant_id=self.tenant_id, app_id=self.app_id, moderation_buffer=completion
-        )
+        result = self.moderation(tenant_id=self.tenant_id, app_id=self.app_id, moderation_buffer=completion)
 
         if not result or not result.flagged:
             return completion
@@ -63,9 +61,7 @@ class OutputModeration(BaseModel):
             final_output = result.text
 
         if public_event:
-            self.queue_manager.publish(
-                QueueMessageReplaceEvent(text=final_output), PublishFrom.TASK_PIPELINE
-            )
+            self.queue_manager.publish(QueueMessageReplaceEvent(text=final_output), PublishFrom.TASK_PIPELINE)
 
         return final_output
 
@@ -75,9 +71,7 @@ class OutputModeration(BaseModel):
             target=self.worker,
             kwargs={
                 "flask_app": current_app._get_current_object(),
-                "buffer_size": buffer_size
-                if buffer_size > 0
-                else dify_config.MODERATION_BUFFER_SIZE,
+                "buffer_size": buffer_size if buffer_size > 0 else dify_config.MODERATION_BUFFER_SIZE,
             },
         )
 
@@ -128,9 +122,7 @@ class OutputModeration(BaseModel):
                 if result.action == ModerationAction.DIRECT_OUTPUT:
                     break
 
-    def moderation(
-        self, tenant_id: str, app_id: str, moderation_buffer: str
-    ) -> Optional[ModerationOutputsResult]:
+    def moderation(self, tenant_id: str, app_id: str, moderation_buffer: str) -> Optional[ModerationOutputsResult]:
         try:
             moderation_factory = ModerationFactory(
                 name=self.rule.type,
@@ -139,9 +131,7 @@ class OutputModeration(BaseModel):
                 config=self.rule.config,
             )
 
-            result: ModerationOutputsResult = moderation_factory.moderation_for_outputs(
-                moderation_buffer
-            )
+            result: ModerationOutputsResult = moderation_factory.moderation_for_outputs(moderation_buffer)
             return result
         except Exception as e:
             logger.error("Moderation Output error: %s", e)

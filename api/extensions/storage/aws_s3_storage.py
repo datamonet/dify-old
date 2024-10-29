@@ -50,9 +50,7 @@ class AwsS3Storage(BaseStorage):
     def load_once(self, filename: str) -> bytes:
         try:
             with closing(self.client) as client:
-                data = client.get_object(Bucket=self.bucket_name, Key=filename)[
-                    "Body"
-                ].read()
+                data = client.get_object(Bucket=self.bucket_name, Key=filename)["Body"].read()
         except ClientError as ex:
             if ex.response["Error"]["Code"] == "NoSuchKey":
                 raise FileNotFoundError("File not found")

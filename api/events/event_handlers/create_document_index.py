@@ -18,9 +18,7 @@ def handle(sender, **kwargs):
     documents = []
     start_at = time.perf_counter()
     for document_id in document_ids:
-        logging.info(
-            click.style("Start process document: {}".format(document_id), fg="green")
-        )
+        logging.info(click.style("Start process document: {}".format(document_id), fg="green"))
 
         document = (
             db.session.query(Document)
@@ -35,9 +33,7 @@ def handle(sender, **kwargs):
             raise NotFound("Document not found")
 
         document.indexing_status = "parsing"
-        document.processing_started_at = datetime.datetime.now(
-            datetime.timezone.utc
-        ).replace(tzinfo=None)
+        document.processing_started_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         documents.append(document)
         db.session.add(document)
     db.session.commit()
@@ -48,9 +44,7 @@ def handle(sender, **kwargs):
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Processed dataset: {} latency: {}".format(
-                    dataset_id, end_at - start_at
-                ),
+                "Processed dataset: {} latency: {}".format(dataset_id, end_at - start_at),
                 fg="green",
             )
         )

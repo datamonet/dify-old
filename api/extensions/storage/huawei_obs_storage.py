@@ -20,14 +20,10 @@ class HuaweiObsStorage(BaseStorage):
         )
 
     def save(self, filename, data):
-        self.client.putObject(
-            bucketName=self.bucket_name, objectKey=filename, content=data
-        )
+        self.client.putObject(bucketName=self.bucket_name, objectKey=filename, content=data)
 
     def load_once(self, filename: str) -> bytes:
-        data = self.client.getObject(bucketName=self.bucket_name, objectKey=filename)[
-            "body"
-        ].response.read()
+        data = self.client.getObject(bucketName=self.bucket_name, objectKey=filename)["body"].response.read()
         return data
 
     def load_stream(self, filename: str) -> Generator:
@@ -52,9 +48,7 @@ class HuaweiObsStorage(BaseStorage):
         self.client.deleteObject(bucketName=self.bucket_name, objectKey=filename)
 
     def _get_meta(self, filename):
-        res = self.client.getObjectMetadata(
-            bucketName=self.bucket_name, objectKey=filename
-        )
+        res = self.client.getObjectMetadata(bucketName=self.bucket_name, objectKey=filename)
         if res.status < 300:
             return res
         else:

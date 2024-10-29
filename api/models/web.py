@@ -26,9 +26,7 @@ class SavedMessage(db.Model):
         server_default=db.text("'end_user'::character varying"),
     )
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def message(self):
@@ -57,6 +55,4 @@ class PinnedConversation(db.Model):
         server_default=db.text("'end_user'::character varying"),
     )
     created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)")
-    )
+    created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP(0)"))

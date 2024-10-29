@@ -94,9 +94,7 @@ class FeatureService:
 
         features.billing.enabled = billing_info["enabled"]
         features.billing.subscription.plan = billing_info["subscription"]["plan"]
-        features.billing.subscription.interval = billing_info["subscription"][
-            "interval"
-        ]
+        features.billing.subscription.interval = billing_info["subscription"]["interval"]
 
         if "members" in billing_info:
             features.members.size = billing_info["members"]["size"]
@@ -111,20 +109,12 @@ class FeatureService:
             features.vector_space.limit = billing_info["vector_space"]["limit"]
 
         if "documents_upload_quota" in billing_info:
-            features.documents_upload_quota.size = billing_info[
-                "documents_upload_quota"
-            ]["size"]
-            features.documents_upload_quota.limit = billing_info[
-                "documents_upload_quota"
-            ]["limit"]
+            features.documents_upload_quota.size = billing_info["documents_upload_quota"]["size"]
+            features.documents_upload_quota.limit = billing_info["documents_upload_quota"]["limit"]
 
         if "annotation_quota_limit" in billing_info:
-            features.annotation_quota_limit.size = billing_info[
-                "annotation_quota_limit"
-            ]["size"]
-            features.annotation_quota_limit.limit = billing_info[
-                "annotation_quota_limit"
-            ]["limit"]
+            features.annotation_quota_limit.size = billing_info["annotation_quota_limit"]["size"]
+            features.annotation_quota_limit.limit = billing_info["annotation_quota_limit"]["limit"]
 
         if "docs_processing" in billing_info:
             features.docs_processing = billing_info["docs_processing"]
@@ -133,9 +123,7 @@ class FeatureService:
             features.can_replace_logo = billing_info["can_replace_logo"]
 
         if "model_load_balancing_enabled" in billing_info:
-            features.model_load_balancing_enabled = billing_info[
-                "model_load_balancing_enabled"
-            ]
+            features.model_load_balancing_enabled = billing_info["model_load_balancing_enabled"]
 
     @classmethod
     def _fulfill_params_from_enterprise(cls, features):

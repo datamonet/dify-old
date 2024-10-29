@@ -9,9 +9,7 @@ logger = logging.getLogger(__name__)
 
 class ToolCommonService:
     @staticmethod
-    def list_tool_providers(
-        user_id: str, tenant_id: str, typ: UserToolProviderTypeLiteral = None
-    ):
+    def list_tool_providers(user_id: str, tenant_id: str, typ: UserToolProviderTypeLiteral = None):
         """
         list tool providers
 

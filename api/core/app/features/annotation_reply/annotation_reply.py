@@ -31,9 +31,7 @@ class AnnotationReplyFeature:
         :return:
         """
         annotation_setting = (
-            db.session.query(AppAnnotationSetting)
-            .filter(AppAnnotationSetting.app_id == app_record.id)
-            .first()
+            db.session.query(AppAnnotationSetting).filter(AppAnnotationSetting.app_id == app_record.id).first()
         )
 
         if not annotation_setting:
@@ -46,10 +44,8 @@ class AnnotationReplyFeature:
             embedding_provider_name = collection_binding_detail.provider_name
             embedding_model_name = collection_binding_detail.model_name
 
-            dataset_collection_binding = (
-                DatasetCollectionBindingService.get_dataset_collection_binding(
-                    embedding_provider_name, embedding_model_name, "annotation"
-                )
+            dataset_collection_binding = DatasetCollectionBindingService.get_dataset_collection_binding(
+                embedding_provider_name, embedding_model_name, "annotation"
             )
 
             dataset = Dataset(

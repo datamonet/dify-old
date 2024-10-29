@@ -40,57 +40,33 @@ class BingSearchTool(BuiltinTool):
             raise Exception(f"Error {response.status_code}: {response.text}")
 
         response = response.json()
-        search_results = (
-            response["webPages"]["value"][:limit] if "webPages" in response else []
-        )
-        related_searches = (
-            response["relatedSearches"]["value"]
-            if "relatedSearches" in response
-            else []
-        )
+        search_results = response["webPages"]["value"][:limit] if "webPages" in response else []
+        related_searches = response["relatedSearches"]["value"] if "relatedSearches" in response else []
         entities = response["entities"]["value"] if "entities" in response else []
         news = response["news"]["value"] if "news" in response else []
-        computation = (
-            response["computation"]["value"] if "computation" in response else None
-        )
+        computation = response["computation"]["value"] if "computation" in response else None
 
         if result_type == "link":
             results = []
             if search_results:
                 for result in search_results:
                     url = f': {result["url"]}' if "url" in result else ""
-                    results.append(
-                        self.create_text_message(text=f'{result["name"]}{url}')
-                    )
+                    results.append(self.create_text_message(text=f'{result["name"]}{url}'))
 
             if entities:
                 for entity in entities:
                     url = f': {entity["url"]}' if "url" in entity else ""
-                    results.append(
-                        self.create_text_message(text=f'{entity.get("name", "")}{url}')
-                    )
+                    results.append(self.create_text_message(text=f'{entity.get("name", "")}{url}'))
 
             if news:
                 for news_item in news:
                     url = f': {news_item["url"]}' if "url" in news_item else ""
-                    results.append(
-                        self.create_text_message(
-                            text=f'{news_item.get("name", "")}{url}'
-                        )
-                    )
+                    results.append(self.create_text_message(text=f'{news_item.get("name", "")}{url}'))
 
             if related_searches:
                 for related in related_searches:
-                    url = (
-                        f': {related["displayText"]}'
-                        if "displayText" in related
-                        else ""
-                    )
-                    results.append(
-                        self.create_text_message(
-                            text=f'{related.get("displayText", "")}{url}'
-                        )
-                    )
+                    url = f': {related["displayText"]}' if "displayText" in related else ""
+                    results.append(self.create_text_message(text=f'{related.get("displayText", "")}{url}'))
 
             return results
         else:
@@ -119,20 +95,12 @@ class BingSearchTool(BuiltinTool):
             if related_searches:
                 text += "\n\nRelated Searches:\n"
                 for related in related_searches:
-                    url = (
-                        f'- {related["webSearchUrl"]}'
-                        if "webSearchUrl" in related
-                        else ""
-                    )
+                    url = f'- {related["webSearchUrl"]}' if "webSearchUrl" in related else ""
                     text += f'{related.get("displayText", "")}{url}\n'
 
-            return self.create_text_message(
-                text=self.summary(user_id=user_id, content=text)
-            )
+            return self.create_text_message(text=self.summary(user_id=user_id, content=text))
 
-    def validate_credentials(
-        self, credentials: dict[str, Any], tool_parameters: dict[str, Any]
-    ) -> None:
+    def validate_credentials(self, credentials: dict[str, Any], tool_parameters: dict[str, Any]) -> None:
         key = credentials.get("subscription_key")
         if not key:
             raise Exception("subscription_key is required")

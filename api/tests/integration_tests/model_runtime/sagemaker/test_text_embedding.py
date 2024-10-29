@@ -33,8 +33,6 @@ def test_invoke_model():
 def test_get_num_tokens():
     model = SageMakerEmbeddingModel()
 
-    num_tokens = model.get_num_tokens(
-        model="bge-m3-embedding", credentials={}, texts=[]
-    )
+    num_tokens = model.get_num_tokens(model="bge-m3-embedding", credentials={}, texts=[])
 
     assert num_tokens == 0

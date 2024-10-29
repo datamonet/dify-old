@@ -119,15 +119,10 @@ class MockCompletionsClass:
         ]
         azure_openai_models = ["gpt-35-turbo-instruct"]
 
-        if not re.match(
-            r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)
-        ):
+        if not re.match(r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)):
             raise InvokeAuthorizationError("Invalid base url")
         if model in openai_models + azure_openai_models:
-            if (
-                not re.match(r"sk-[a-zA-Z0-9]{24,}$", self._client.api_key)
-                and type(self._client) == OpenAI
-            ):
+            if not re.match(r"sk-[a-zA-Z0-9]{24,}$", self._client.api_key) and type(self._client) == OpenAI:
                 # sometime, provider use OpenAI compatible API will not have api key or have different api key format
                 # so we only check if model is in openai_models
                 raise InvokeAuthorizationError("Invalid api key")
@@ -137,8 +132,6 @@ class MockCompletionsClass:
         if not prompt:
             raise BadRequestError("Invalid prompt")
         if stream:
-            return MockCompletionsClass.mocked_openai_completion_create_stream(
-                model=model
-            )
+            return MockCompletionsClass.mocked_openai_completion_create_stream(model=model)
 
         return MockCompletionsClass.mocked_openai_completion_create_sync(model=model)

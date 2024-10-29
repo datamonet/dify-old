@@ -13,6 +13,4 @@ def test_validate_provider_credentials(setup_openai_mock):
     with pytest.raises(CredentialsValidateFailedError):
         provider.validate_provider_credentials(credentials={})
 
-    provider.validate_provider_credentials(
-        credentials={"fireworks_api_key": os.environ.get("FIREWORKS_API_KEY")}
-    )
+    provider.validate_provider_credentials(credentials={"fireworks_api_key": os.environ.get("FIREWORKS_API_KEY")})

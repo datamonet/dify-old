@@ -69,9 +69,7 @@ def test_init():
 
     assert graph.root_node_id == start_node_id
     assert graph.edge_mapping.get(start_node_id)[0].target_node_id == "qc"
-    assert {"llm", "http"} == {
-        node.target_node_id for node in graph.edge_mapping.get("qc")
-    }
+    assert {"llm", "http"} == {node.target_node_id for node in graph.edge_mapping.get("qc")}
 
 
 def test__init_iteration_graph():
@@ -163,9 +161,7 @@ def test__init_iteration_graph():
         ],
     }
 
-    graph = Graph.init(
-        graph_config=graph_config, root_node_id="template-transform-in-iteration"
-    )
+    graph = Graph.init(graph_config=graph_config, root_node_id="template-transform-in-iteration")
     graph.add_extra_edge(
         source_node_id="answer-in-iteration",
         target_node_id="template-transform-in-iteration",
@@ -185,18 +181,9 @@ def test__init_iteration_graph():
     #   [template-transform-in-iteration -> llm-in-iteration -> answer-in-iteration]
 
     assert graph.root_node_id == "template-transform-in-iteration"
-    assert (
-        graph.edge_mapping.get("template-transform-in-iteration")[0].target_node_id
-        == "llm-in-iteration"
-    )
-    assert (
-        graph.edge_mapping.get("llm-in-iteration")[0].target_node_id
-        == "answer-in-iteration"
-    )
-    assert (
-        graph.edge_mapping.get("answer-in-iteration")[0].target_node_id
-        == "template-transform-in-iteration"
-    )
+    assert graph.edge_mapping.get("template-transform-in-iteration")[0].target_node_id == "llm-in-iteration"
+    assert graph.edge_mapping.get("llm-in-iteration")[0].target_node_id == "answer-in-iteration"
+    assert graph.edge_mapping.get("answer-in-iteration")[0].target_node_id == "template-transform-in-iteration"
 
 
 def test_parallels_graph():

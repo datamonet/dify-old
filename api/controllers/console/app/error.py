@@ -99,9 +99,7 @@ class DraftWorkflowNotExist(BaseHTTPException):
 
 class DraftWorkflowNotSync(BaseHTTPException):
     error_code = "draft_workflow_not_sync"
-    description = (
-        "Workflow graph might have been modified, please refresh and resubmit."
-    )
+    description = "Workflow graph might have been modified, please refresh and resubmit."
     code = 400
 
 

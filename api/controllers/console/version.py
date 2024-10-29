@@ -31,9 +31,7 @@ class VersionApi(Resource):
             return result
 
         try:
-            response = requests.get(
-                check_update_url, {"current_version": args.get("current_version")}
-            )
+            response = requests.get(check_update_url, {"current_version": args.get("current_version")})
         except Exception as error:
             logging.warning("Check update version error: {}.".format(str(error)))
             result["version"] = args.get("current_version")

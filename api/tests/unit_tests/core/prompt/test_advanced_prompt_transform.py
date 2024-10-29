@@ -26,9 +26,7 @@ def test__get_completion_model_prompt_messages():
     model_config_mock.provider = "openai"
     model_config_mock.model = "gpt-3.5-turbo-instruct"
 
-    prompt_template = (
-        "Context:\n{{#context#}}\n\nHistories:\n{{#histories#}}\n\nyou are {{name}}."
-    )
+    prompt_template = "Context:\n{{#context#}}\n\nHistories:\n{{#histories#}}\n\nyou are {{name}}."
     prompt_template_config = CompletionModelPromptTemplate(text=prompt_template)
 
     memory_config = MemoryConfig(
@@ -40,9 +38,7 @@ def test__get_completion_model_prompt_messages():
     files = []
     context = "I am superman."
 
-    memory = TokenBufferMemory(
-        conversation=Conversation(), model_instance=model_config_mock
-    )
+    memory = TokenBufferMemory(conversation=Conversation(), model_instance=model_config_mock)
 
     history_prompt_messages = [
         UserPromptMessage(content="Hi"),
@@ -64,9 +60,7 @@ def test__get_completion_model_prompt_messages():
     )
 
     assert len(prompt_messages) == 1
-    assert prompt_messages[0].content == PromptTemplateParser(
-        template=prompt_template
-    ).format(
+    assert prompt_messages[0].content == PromptTemplateParser(template=prompt_template).format(
         {
             "#context#": context,
             "#histories#": "\n".join(
@@ -86,9 +80,7 @@ def test__get_chat_model_prompt_messages(get_chat_model_args):
     files = []
     query = "Hi2."
 
-    memory = TokenBufferMemory(
-        conversation=Conversation(), model_instance=model_config_mock
-    )
+    memory = TokenBufferMemory(conversation=Conversation(), model_instance=model_config_mock)
 
     history_prompt_messages = [
         UserPromptMessage(content="Hi1."),
@@ -111,9 +103,9 @@ def test__get_chat_model_prompt_messages(get_chat_model_args):
 
     assert len(prompt_messages) == 6
     assert prompt_messages[0].role == PromptMessageRole.SYSTEM
-    assert prompt_messages[0].content == PromptTemplateParser(
-        template=messages[0].text
-    ).format({**inputs, "#context#": context})
+    assert prompt_messages[0].content == PromptTemplateParser(template=messages[0].text).format(
+        {**inputs, "#context#": context}
+    )
     assert prompt_messages[5].content == query
 
 
@@ -137,9 +129,9 @@ def test__get_chat_model_prompt_messages_no_memory(get_chat_model_args):
 
     assert len(prompt_messages) == 3
     assert prompt_messages[0].role == PromptMessageRole.SYSTEM
-    assert prompt_messages[0].content == PromptTemplateParser(
-        template=messages[0].text
-    ).format({**inputs, "#context#": context})
+    assert prompt_messages[0].content == PromptTemplateParser(template=messages[0].text).format(
+        {**inputs, "#context#": context}
+    )
 
 
 def test__get_chat_model_prompt_messages_with_files_no_memory(get_chat_model_args):
@@ -173,9 +165,9 @@ def test__get_chat_model_prompt_messages_with_files_no_memory(get_chat_model_arg
 
     assert len(prompt_messages) == 4
     assert prompt_messages[0].role == PromptMessageRole.SYSTEM
-    assert prompt_messages[0].content == PromptTemplateParser(
-        template=messages[0].text
-    ).format({**inputs, "#context#": context})
+    assert prompt_messages[0].content == PromptTemplateParser(template=messages[0].text).format(
+        {**inputs, "#context#": context}
+    )
     assert isinstance(prompt_messages[3].content, list)
     assert len(prompt_messages[3].content) == 2
     assert prompt_messages[3].content[1].data == files[0].remote_url

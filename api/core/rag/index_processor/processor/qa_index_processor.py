@@ -41,9 +41,7 @@ class QAIndexProcessor(BaseIndexProcessor):
         all_qa_documents = []
         for document in documents:
             # document clean
-            document_text = CleanProcessor.clean(
-                document.page_content, kwargs.get("process_rule")
-            )
+            document_text = CleanProcessor.clean(document.page_content, kwargs.get("process_rule"))
             document.page_content = document_text
 
             # parse document to nodes
@@ -103,9 +101,7 @@ class QAIndexProcessor(BaseIndexProcessor):
             raise ValueError(str(e))
         return text_docs
 
-    def load(
-        self, dataset: Dataset, documents: list[Document], with_keywords: bool = True
-    ):
+    def load(self, dataset: Dataset, documents: list[Document], with_keywords: bool = True):
         if dataset.indexing_technique == "high_quality":
             vector = Vector(dataset)
             vector.create(documents)
@@ -164,9 +160,7 @@ class QAIndexProcessor(BaseIndexProcessor):
         with flask_app.app_context():
             try:
                 # qa model document
-                response = LLMGenerator.generate_qa_document(
-                    tenant_id, document_node.page_content, document_language
-                )
+                response = LLMGenerator.generate_qa_document(tenant_id, document_node.page_content, document_language)
                 document_qa_list = self._format_split_text(response)
                 qa_documents = []
                 for result in document_qa_list:
@@ -190,8 +184,4 @@ class QAIndexProcessor(BaseIndexProcessor):
         regex = r"Q\d+:\s*(.*?)\s*A\d+:\s*([\s\S]*?)(?=Q\d+:|$)"
         matches = re.findall(regex, text, re.UNICODE)
 
-        return [
-            {"question": q, "answer": re.sub(r"\n\s*", "\n", a.strip())}
-            for q, a in matches
-            if q and a
-        ]
+        return [{"question": q, "answer": re.sub(r"\n\s*", "\n", a.strip())} for q, a in matches if q and a]

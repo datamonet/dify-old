@@ -53,9 +53,7 @@ def mock_openai(
         monkeypatch.undo()
 
     if "completion" in methods:
-        monkeypatch.setattr(
-            Completions, "create", MockCompletionsClass.completion_create
-        )
+        monkeypatch.setattr(Completions, "create", MockCompletionsClass.completion_create)
 
     if "chat" in methods:
         monkeypatch.setattr(ChatCompletions, "create", MockChatClass.chat_create)
@@ -64,14 +62,10 @@ def mock_openai(
         monkeypatch.setattr(Models, "list", MockModelClass.list)
 
     if "moderation" in methods:
-        monkeypatch.setattr(
-            Moderations, "create", MockModerationClass.moderation_create
-        )
+        monkeypatch.setattr(Moderations, "create", MockModerationClass.moderation_create)
 
     if "speech2text" in methods:
-        monkeypatch.setattr(
-            Transcriptions, "create", MockSpeech2TextClass.speech2text_create
-        )
+        monkeypatch.setattr(Transcriptions, "create", MockSpeech2TextClass.speech2text_create)
 
     if "text_embedding" in methods:
         monkeypatch.setattr(Embeddings, "create", MockEmbeddingsClass.create_embeddings)

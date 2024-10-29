@@ -66,9 +66,7 @@ class APIBasedExtensionDetailAPI(Resource):
         api_based_extension_id = str(id)
         tenant_id = current_user.current_tenant_id
 
-        return APIBasedExtensionService.get_with_tenant_id(
-            tenant_id, api_based_extension_id
-        )
+        return APIBasedExtensionService.get_with_tenant_id(tenant_id, api_based_extension_id)
 
     @setup_required
     @login_required
@@ -78,9 +76,7 @@ class APIBasedExtensionDetailAPI(Resource):
         api_based_extension_id = str(id)
         tenant_id = current_user.current_tenant_id
 
-        extension_data_from_db = APIBasedExtensionService.get_with_tenant_id(
-            tenant_id, api_based_extension_id
-        )
+        extension_data_from_db = APIBasedExtensionService.get_with_tenant_id(tenant_id, api_based_extension_id)
 
         parser = reqparse.RequestParser()
         parser.add_argument("name", type=str, required=True, location="json")
@@ -103,9 +99,7 @@ class APIBasedExtensionDetailAPI(Resource):
         api_based_extension_id = str(id)
         tenant_id = current_user.current_tenant_id
 
-        extension_data_from_db = APIBasedExtensionService.get_with_tenant_id(
-            tenant_id, api_based_extension_id
-        )
+        extension_data_from_db = APIBasedExtensionService.get_with_tenant_id(tenant_id, api_based_extension_id)
 
         APIBasedExtensionService.delete(extension_data_from_db)
 

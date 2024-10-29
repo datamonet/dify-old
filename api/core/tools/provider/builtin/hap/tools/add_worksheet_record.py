@@ -42,19 +42,11 @@ class AddWorksheetRecordTool(BuiltinTool):
             res.raise_for_status()
             res_json = res.json()
             if res_json.get("error_code") != 1:
-                return self.create_text_message(
-                    f"Failed to add the new record. {res_json['error_msg']}"
-                )
-            return self.create_text_message(
-                f"New record added successfully. The record ID is {res_json['data']}."
-            )
+                return self.create_text_message(f"Failed to add the new record. {res_json['error_msg']}")
+            return self.create_text_message(f"New record added successfully. The record ID is {res_json['data']}.")
         except httpx.RequestError as e:
-            return self.create_text_message(
-                f"Failed to add the new record, request error: {e}"
-            )
+            return self.create_text_message(f"Failed to add the new record, request error: {e}")
         except json.JSONDecodeError as e:
             return self.create_text_message(f"Failed to parse JSON response: {e}")
         except Exception as e:
-            return self.create_text_message(
-                f"Failed to add the new record, unexpected error: {e}"
-            )
+            return self.create_text_message(f"Failed to add the new record, unexpected error: {e}")

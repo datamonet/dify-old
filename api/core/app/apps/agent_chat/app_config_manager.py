@@ -91,16 +91,14 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
             app_model_config_dict=config_dict,
             model=ModelConfigManager.convert(config=config_dict),
             prompt_template=PromptTemplateConfigManager.convert(config=config_dict),
-            sensitive_word_avoidance=SensitiveWordAvoidanceConfigManager.convert(
-                config=config_dict
-            ),
+            sensitive_word_avoidance=SensitiveWordAvoidanceConfigManager.convert(config=config_dict),
             dataset=DatasetConfigManager.convert(config=config_dict),
             agent=AgentConfigManager.convert(config=config_dict),
             additional_features=cls.convert_features(config_dict, app_mode),
         )
 
-        app_config.variables, app_config.external_data_variables = (
-            BasicVariablesConfigManager.convert(config=config_dict)
+        app_config.variables, app_config.external_data_variables = BasicVariablesConfigManager.convert(
+            config=config_dict
         )
 
         return app_config
@@ -118,77 +116,57 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
         related_config_keys = []
 
         # model
-        config, current_related_config_keys = (
-            ModelConfigManager.validate_and_set_defaults(tenant_id, config)
-        )
+        config, current_related_config_keys = ModelConfigManager.validate_and_set_defaults(tenant_id, config)
         related_config_keys.extend(current_related_config_keys)
 
         # user_input_form
-        config, current_related_config_keys = (
-            BasicVariablesConfigManager.validate_and_set_defaults(tenant_id, config)
-        )
+        config, current_related_config_keys = BasicVariablesConfigManager.validate_and_set_defaults(tenant_id, config)
         related_config_keys.extend(current_related_config_keys)
 
         # file upload validation
-        config, current_related_config_keys = (
-            FileUploadConfigManager.validate_and_set_defaults(config)
-        )
+        config, current_related_config_keys = FileUploadConfigManager.validate_and_set_defaults(config)
         related_config_keys.extend(current_related_config_keys)
 
         # prompt
-        config, current_related_config_keys = (
-            PromptTemplateConfigManager.validate_and_set_defaults(app_mode, config)
-        )
+        config, current_related_config_keys = PromptTemplateConfigManager.validate_and_set_defaults(app_mode, config)
         related_config_keys.extend(current_related_config_keys)
 
         # agent_mode
-        config, current_related_config_keys = cls.validate_agent_mode_and_set_defaults(
-            tenant_id, config
-        )
+        config, current_related_config_keys = cls.validate_agent_mode_and_set_defaults(tenant_id, config)
         related_config_keys.extend(current_related_config_keys)
 
         # opening_statement
-        config, current_related_config_keys = (
-            OpeningStatementConfigManager.validate_and_set_defaults(config)
-        )
+        config, current_related_config_keys = OpeningStatementConfigManager.validate_and_set_defaults(config)
         related_config_keys.extend(current_related_config_keys)
 
         # suggested_questions_after_answer
-        config, current_related_config_keys = (
-            SuggestedQuestionsAfterAnswerConfigManager.validate_and_set_defaults(config)
+        config, current_related_config_keys = SuggestedQuestionsAfterAnswerConfigManager.validate_and_set_defaults(
+            config
         )
         related_config_keys.extend(current_related_config_keys)
 
         # speech_to_text
-        config, current_related_config_keys = (
-            SpeechToTextConfigManager.validate_and_set_defaults(config)
-        )
+        config, current_related_config_keys = SpeechToTextConfigManager.validate_and_set_defaults(config)
         related_config_keys.extend(current_related_config_keys)
 
         # text_to_speech
-        config, current_related_config_keys = (
-            TextToSpeechConfigManager.validate_and_set_defaults(config)
-        )
+        config, current_related_config_keys = TextToSpeechConfigManager.validate_and_set_defaults(config)
         related_config_keys.extend(current_related_config_keys)
 
         # return retriever resource
-        config, current_related_config_keys = (
-            RetrievalResourceConfigManager.validate_and_set_defaults(config)
-        )
+        config, current_related_config_keys = RetrievalResourceConfigManager.validate_and_set_defaults(config)
         related_config_keys.extend(current_related_config_keys)
 
         # dataset configs
         # dataset_query_variable
-        config, current_related_config_keys = (
-            DatasetConfigManager.validate_and_set_defaults(tenant_id, app_mode, config)
+        config, current_related_config_keys = DatasetConfigManager.validate_and_set_defaults(
+            tenant_id, app_mode, config
         )
         related_config_keys.extend(current_related_config_keys)
 
         # moderation validation
-        config, current_related_config_keys = (
-            SensitiveWordAvoidanceConfigManager.validate_and_set_defaults(
-                tenant_id, config
-            )
+        config, current_related_config_keys = SensitiveWordAvoidanceConfigManager.validate_and_set_defaults(
+            tenant_id, config
         )
         related_config_keys.extend(current_related_config_keys)
 
@@ -200,9 +178,7 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
         return filtered_config
 
     @classmethod
-    def validate_agent_mode_and_set_defaults(
-        cls, tenant_id: str, config: dict
-    ) -> tuple[dict, list[str]]:
+    def validate_agent_mode_and_set_defaults(cls, tenant_id: str, config: dict) -> tuple[dict, list[str]]:
         """
         Validate agent_mode and set defaults for agent feature
 
@@ -227,9 +203,7 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
         if config["agent_mode"]["strategy"] not in [
             member.value for member in list(PlanningStrategy.__members__.values())
         ]:
-            raise ValueError(
-                "strategy in agent_mode must be in the specified strategy list"
-            )
+            raise ValueError("strategy in agent_mode must be in the specified strategy list")
 
         if not config["agent_mode"].get("tools"):
             config["agent_mode"]["tools"] = []
@@ -247,9 +221,7 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
                     tool_item["enabled"] = False
 
                 if not isinstance(tool_item["enabled"], bool):
-                    raise ValueError(
-                        "enabled in agent_mode.tools must be of boolean type"
-                    )
+                    raise ValueError("enabled in agent_mode.tools must be of boolean type")
 
                 if key == "dataset":
                     if "id" not in tool_item:
@@ -260,12 +232,8 @@ class AgentChatAppConfigManager(BaseAppConfigManager):
                     except ValueError:
                         raise ValueError("id in dataset must be of UUID type")
 
-                    if not DatasetConfigManager.is_dataset_exists(
-                        tenant_id, tool_item["id"]
-                    ):
-                        raise ValueError(
-                            "Dataset ID does not exist, please check your permission."
-                        )
+                    if not DatasetConfigManager.is_dataset_exists(tenant_id, tool_item["id"]):
+                        raise ValueError("Dataset ID does not exist, please check your permission.")
             else:
                 # latest style, use key-value pair
                 if "enabled" not in tool or not tool["enabled"]:

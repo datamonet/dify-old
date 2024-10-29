@@ -47,10 +47,7 @@ class WolframAlphaTool(BuiltinTool):
             except Exception as e:
                 raise ToolInvokeError(str(e))
 
-            if (
-                "success" not in response_data["queryresult"]
-                or response_data["queryresult"]["success"] != True
-            ):
+            if "success" not in response_data["queryresult"] or response_data["queryresult"]["success"] != True:
                 query_result = response_data.get("queryresult", {})
                 if query_result.get("error"):
                     if "msg" in query_result["error"]:
@@ -71,13 +68,9 @@ class WolframAlphaTool(BuiltinTool):
             else:
                 finished = True
                 if "souces" in response_data["queryresult"]:
-                    return self.create_link_message(
-                        response_data["queryresult"]["sources"]["url"]
-                    )
+                    return self.create_link_message(response_data["queryresult"]["sources"]["url"])
                 elif "pods" in response_data["queryresult"]:
-                    result = response_data["queryresult"]["pods"][0]["subpods"][0][
-                        "plaintext"
-                    ]
+                    result = response_data["queryresult"]["pods"][0]["subpods"][0]["plaintext"]
 
         if not finished or not result:
             return self.create_text_message("No result found")

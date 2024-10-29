@@ -21,13 +21,9 @@ def test_validate_credentials():
     model = ZhinaoLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="360gpt2-pro", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="360gpt2-pro", credentials={"api_key": "invalid_key"})
 
-    model.validate_credentials(
-        model="360gpt2-pro", credentials={"api_key": os.environ.get("ZHINAO_API_KEY")}
-    )
+    model.validate_credentials(model="360gpt2-pro", credentials={"api_key": os.environ.get("ZHINAO_API_KEY")})
 
 
 def test_invoke_model():
@@ -65,11 +61,7 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():

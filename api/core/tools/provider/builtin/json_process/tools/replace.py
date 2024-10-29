@@ -58,9 +58,7 @@ class JSONReplaceTool(BuiltinTool):
             elif replace_model == "key":
                 result = self._replace_key(content, query, replace_value, ensure_ascii)
             elif replace_model == "value":
-                result = self._replace_value(
-                    content, query, replace_value, ensure_ascii, value_decode
-                )
+                result = self._replace_value(content, query, replace_value, ensure_ascii, value_decode)
             return self.create_text_message(str(result))
         except Exception:
             return self.create_text_message("Failed to replace JSON content")
@@ -96,9 +94,7 @@ class JSONReplaceTool(BuiltinTool):
             return str(e)
 
     # Replace key
-    def _replace_key(
-        self, content: str, query: str, replace_value: str, ensure_ascii: bool
-    ) -> str:
+    def _replace_key(self, content: str, query: str, replace_value: str, ensure_ascii: bool) -> str:
         try:
             input_data = json.loads(content)
             expr = parse(query)

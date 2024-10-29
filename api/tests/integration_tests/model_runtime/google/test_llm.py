@@ -24,9 +24,7 @@ def test_validate_credentials(setup_google_mock):
     model = GoogleLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="gemini-pro", credentials={"google_api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="gemini-pro", credentials={"google_api_key": "invalid_key"})
 
     model.validate_credentials(
         model="gemini-pro",
@@ -45,9 +43,7 @@ def test_invoke_model(setup_google_mock):
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",
             ),
-            UserPromptMessage(
-                content="Give me your worst dad joke or i will unplug you"
-            ),
+            UserPromptMessage(content="Give me your worst dad joke or i will unplug you"),
             AssistantPromptMessage(
                 content="Why did the scarecrow win an award? Because he was outstanding in his field!"
             ),
@@ -83,9 +79,7 @@ def test_invoke_stream_model(setup_google_mock):
             SystemPromptMessage(
                 content="You are a helpful AI assistant.",
             ),
-            UserPromptMessage(
-                content="Give me your worst dad joke or i will unplug you"
-            ),
+            UserPromptMessage(content="Give me your worst dad joke or i will unplug you"),
             AssistantPromptMessage(
                 content="Why did the scarecrow win an award? Because he was outstanding in his field!"
             ),
@@ -107,11 +101,7 @@ def test_invoke_stream_model(setup_google_mock):
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 @pytest.mark.parametrize("setup_google_mock", [["none"]], indirect=True)
@@ -165,9 +155,7 @@ def test_invoke_chat_model_with_vision_multi_pics(setup_google_mock):
                     ),
                 ]
             ),
-            AssistantPromptMessage(
-                content="I see a blue letter 'D' with a gradient from light blue to dark blue."
-            ),
+            AssistantPromptMessage(content="I see a blue letter 'D' with a gradient from light blue to dark blue."),
             UserPromptMessage(
                 content=[
                     TextPromptMessageContent(data="what about now?"),
@@ -206,6 +194,4 @@ def test_get_num_tokens():
         ],
     )
 
-    assert (
-        num_tokens > 0
-    )  # The exact number of tokens may vary based on the model's tokenization
+    assert num_tokens > 0  # The exact number of tokens may vary based on the model's tokenization

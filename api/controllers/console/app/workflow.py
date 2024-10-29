@@ -73,20 +73,12 @@ class DraftWorkflowApi(Resource):
 
         if "application/json" in content_type:
             parser = reqparse.RequestParser()
-            parser.add_argument(
-                "graph", type=dict, required=True, nullable=False, location="json"
-            )
-            parser.add_argument(
-                "features", type=dict, required=True, nullable=False, location="json"
-            )
+            parser.add_argument("graph", type=dict, required=True, nullable=False, location="json")
+            parser.add_argument("features", type=dict, required=True, nullable=False, location="json")
             parser.add_argument("hash", type=str, required=False, location="json")
             # TODO: set this to required=True after frontend is updated
-            parser.add_argument(
-                "environment_variables", type=list, required=False, location="json"
-            )
-            parser.add_argument(
-                "conversation_variables", type=list, required=False, location="json"
-            )
+            parser.add_argument("environment_variables", type=list, required=False, location="json")
+            parser.add_argument("conversation_variables", type=list, required=False, location="json")
             args = parser.parse_args()
         elif "text/plain" in content_type:
             try:
@@ -94,9 +86,7 @@ class DraftWorkflowApi(Resource):
                 if "graph" not in data or "features" not in data:
                     raise ValueError("graph or features not found in data")
 
-                if not isinstance(data.get("graph"), dict) or not isinstance(
-                    data.get("features"), dict
-                ):
+                if not isinstance(data.get("graph"), dict) or not isinstance(data.get("features"), dict):
                     raise ValueError("graph or features is not a dict")
 
                 args = {
@@ -137,9 +127,7 @@ class DraftWorkflowApi(Resource):
         return {
             "result": "success",
             "hash": workflow.unique_hash,
-            "updated_at": TimestampField().format(
-                workflow.updated_at or workflow.created_at
-            ),
+            "updated_at": TimestampField().format(workflow.updated_at or workflow.created_at),
         }
 
 
@@ -158,9 +146,7 @@ class DraftWorkflowImportApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "data", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("data", type=str, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         workflow = AppDslService.import_and_overwrite_workflow(
@@ -185,14 +171,10 @@ class AdvancedChatDraftWorkflowRunApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("inputs", type=dict, location="json")
-        parser.add_argument(
-            "query", type=str, required=True, location="json", default=""
-        )
+        parser.add_argument("query", type=str, required=True, location="json", default="")
         parser.add_argument("files", type=list, location="json")
         parser.add_argument("conversation_id", type=uuid_value, location="json")
-        parser.add_argument(
-            "parent_message_id", type=uuid_value, required=False, location="json"
-        )
+        parser.add_argument("parent_message_id", type=uuid_value, required=False, location="json")
 
         args = parser.parse_args()
 
@@ -307,9 +289,7 @@ class DraftWorkflowRunApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "inputs", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
         parser.add_argument("files", type=list, required=False, location="json")
         args = parser.parse_args()
 
@@ -357,9 +337,7 @@ class DraftWorkflowNodeRunApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "inputs", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         workflow_service = WorkflowService()
@@ -407,9 +385,7 @@ class PublishedWorkflowApi(Resource):
             raise Forbidden()
 
         workflow_service = WorkflowService()
-        workflow = workflow_service.publish_workflow(
-            app_model=app_model, account=current_user
-        )
+        workflow = workflow_service.publish_workflow(app_model=app_model, account=current_user)
 
         return {
             "result": "success",
@@ -461,9 +437,7 @@ class DefaultBlockConfigApi(Resource):
 
         # Get default block configs
         workflow_service = WorkflowService()
-        return workflow_service.get_default_block_config(
-            node_type=block_type, filters=filters
-        )
+        return workflow_service.get_default_block_config(node_type=block_type, filters=filters)
 
 
 class ConvertToWorkflowApi(Resource):
@@ -483,15 +457,9 @@ class ConvertToWorkflowApi(Resource):
 
         if request.data:
             parser = reqparse.RequestParser()
-            parser.add_argument(
-                "name", type=str, required=False, nullable=True, location="json"
-            )
-            parser.add_argument(
-                "icon_type", type=str, required=False, nullable=True, location="json"
-            )
-            parser.add_argument(
-                "icon", type=str, required=False, nullable=True, location="json"
-            )
+            parser.add_argument("name", type=str, required=False, nullable=True, location="json")
+            parser.add_argument("icon_type", type=str, required=False, nullable=True, location="json")
+            parser.add_argument("icon", type=str, required=False, nullable=True, location="json")
             parser.add_argument(
                 "icon_background",
                 type=str,
@@ -505,9 +473,7 @@ class ConvertToWorkflowApi(Resource):
 
         # convert to workflow mode
         workflow_service = WorkflowService()
-        new_app_model = workflow_service.convert_to_workflow(
-            app_model=app_model, account=current_user, args=args
-        )
+        new_app_model = workflow_service.convert_to_workflow(app_model=app_model, account=current_user, args=args)
 
         # return app id
         return {
@@ -522,9 +488,7 @@ api.add_resource(
     "/apps/<uuid:app_id>/advanced-chat/workflows/draft/run",
 )
 api.add_resource(DraftWorkflowRunApi, "/apps/<uuid:app_id>/workflows/draft/run")
-api.add_resource(
-    WorkflowTaskStopApi, "/apps/<uuid:app_id>/workflow-runs/tasks/<string:task_id>/stop"
-)
+api.add_resource(WorkflowTaskStopApi, "/apps/<uuid:app_id>/workflow-runs/tasks/<string:task_id>/stop")
 api.add_resource(
     DraftWorkflowNodeRunApi,
     "/apps/<uuid:app_id>/workflows/draft/nodes/<string:node_id>/run",

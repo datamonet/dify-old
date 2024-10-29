@@ -72,9 +72,7 @@ class HostingConfiguration:
             trial_quota = TrialHostingQuota(
                 quota_limit=hosted_quota_limit,
                 restrict_models=[
-                    RestrictModel(
-                        model="gpt-4", base_model_name="gpt-4", model_type=ModelType.LLM
-                    ),
+                    RestrictModel(model="gpt-4", base_model_name="gpt-4", model_type=ModelType.LLM),
                     RestrictModel(
                         model="gpt-4o",
                         base_model_name="gpt-4o",

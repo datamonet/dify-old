@@ -10,9 +10,7 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class ScrapeTool(BuiltinTool):
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> list[ToolInvokeMessage]:
         """
         the api doc:
         https://docs.firecrawl.dev/api-reference/endpoint/scrape

@@ -10,9 +10,7 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class CrawlTool(BuiltinTool):
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
         """
         the api doc:
         https://docs.firecrawl.dev/api-reference/endpoint/crawl
@@ -47,8 +45,6 @@ class CrawlTool(BuiltinTool):
 
         payload = {k: v for k, v in payload.items() if v not in (None, "")}
 
-        crawl_result = app.crawl_url(
-            url=tool_parameters["url"], wait=wait_for_results, **payload
-        )
+        crawl_result = app.crawl_url(url=tool_parameters["url"], wait=wait_for_results, **payload)
 
         return self.create_json_message(crawl_result)

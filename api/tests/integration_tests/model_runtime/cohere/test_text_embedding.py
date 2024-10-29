@@ -13,9 +13,7 @@ def test_validate_credentials():
     model = CohereTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="embed-multilingual-v3.0", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="embed-multilingual-v3.0", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="embed-multilingual-v3.0",

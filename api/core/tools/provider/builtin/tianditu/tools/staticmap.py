@@ -38,18 +38,10 @@ class PoiSearchTool(BuiltinTool):
             + "&tk="
             + tk
         ).json()
-        coords = (
-            keyword_coords["location"]["lon"] + "," + keyword_coords["location"]["lat"]
-        )
+        coords = keyword_coords["location"]["lon"] + "," + keyword_coords["location"]["lat"]
 
         result = requests.get(
-            base_url
-            + "?center="
-            + coords
-            + "&markers="
-            + coords
-            + "&width=400&height=300&zoom=14&tk="
-            + tk
+            base_url + "?center=" + coords + "&markers=" + coords + "&width=400&height=300&zoom=14&tk=" + tk
         ).content
 
         return self.create_blob_message(

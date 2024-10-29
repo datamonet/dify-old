@@ -119,9 +119,7 @@ class ParallelBranchRunFailedEvent(BaseParallelBranchEvent):
 class BaseIterationEvent(GraphEngineEvent):
     iteration_id: str = Field(..., description="iteration node execution id")
     iteration_node_id: str = Field(..., description="iteration node id")
-    iteration_node_type: NodeType = Field(
-        ..., description="node type, iteration or loop"
-    )
+    iteration_node_type: NodeType = Field(..., description="node type, iteration or loop")
     iteration_node_data: BaseNodeData = Field(..., description="node data")
     parallel_id: Optional[str] = None
     """parallel id if node is in parallel"""
@@ -142,9 +140,7 @@ class IterationRunStartedEvent(BaseIterationEvent):
 
 class IterationRunNextEvent(BaseIterationEvent):
     index: int = Field(..., description="index")
-    pre_iteration_output: Optional[Any] = Field(
-        None, description="pre iteration output"
-    )
+    pre_iteration_output: Optional[Any] = Field(None, description="pre iteration output")
 
 
 class IterationRunSucceededEvent(BaseIterationEvent):

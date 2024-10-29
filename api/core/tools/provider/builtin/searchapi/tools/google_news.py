@@ -51,24 +51,10 @@ class SearchAPI:
         if type == "text":
             if "organic_results" in res and "snippet" in res["organic_results"][0]:
                 for item in res["organic_results"]:
-                    toret += (
-                        "content: "
-                        + item["snippet"]
-                        + "\n"
-                        + "link: "
-                        + item["link"]
-                        + "\n"
-                    )
+                    toret += "content: " + item["snippet"] + "\n" + "link: " + item["link"] + "\n"
             if "top_stories" in res and "title" in res["top_stories"][0]:
                 for item in res["top_stories"]:
-                    toret += (
-                        "title: "
-                        + item["title"]
-                        + "\n"
-                        + "link: "
-                        + item["link"]
-                        + "\n"
-                    )
+                    toret += "title: " + item["title"] + "\n" + "link: " + item["link"] + "\n"
             if toret == "":
                 toret = "No good search result found"
 

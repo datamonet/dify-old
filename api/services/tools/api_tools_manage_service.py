@@ -35,11 +35,7 @@ class ApiToolManageService:
         try:
             warnings = {}
             try:
-                tool_bundles, schema_type = (
-                    ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(
-                        schema, warning=warnings
-                    )
-                )
+                tool_bundles, schema_type = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(schema, warning=warnings)
             except Exception as e:
                 raise ValueError(f"invalid schema: {str(e)}")
 
@@ -50,17 +46,13 @@ class ApiToolManageService:
                     required=True,
                     default="none",
                     options=[
-                        ToolCredentialsOption(
-                            value="none", label=I18nObject(en_US="None", zh_Hans="无")
-                        ),
+                        ToolCredentialsOption(value="none", label=I18nObject(en_US="None", zh_Hans="无")),
                         ToolCredentialsOption(
                             value="api_key",
                             label=I18nObject(en_US="Api Key", zh_Hans="Api Key"),
                         ),
                     ],
-                    placeholder=I18nObject(
-                        en_US="Select auth type", zh_Hans="选择认证方式"
-                    ),
+                    placeholder=I18nObject(en_US="Select auth type", zh_Hans="选择认证方式"),
                 ),
                 ToolProviderCredentials(
                     name="api_key_header",
@@ -80,9 +72,7 @@ class ApiToolManageService:
                     name="api_key_value",
                     type=ToolProviderCredentials.CredentialsType.TEXT_INPUT,
                     required=False,
-                    placeholder=I18nObject(
-                        en_US="Enter api key", zh_Hans="输入 api key"
-                    ),
+                    placeholder=I18nObject(en_US="Enter api key", zh_Hans="输入 api key"),
                     default="",
                 ),
             ]
@@ -106,9 +96,7 @@ class ApiToolManageService:
         :return: the list of tool bundles, description
         """
         try:
-            tool_bundles = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(
-                schema, extra_info=extra_info
-            )
+            tool_bundles = ApiBasedToolSchemaParser.auto_parse_to_tool_bundle(schema, extra_info=extra_info)
             return tool_bundles
         except Exception as e:
             raise ValueError(f"invalid schema: {str(e)}")
@@ -148,9 +136,7 @@ class ApiToolManageService:
         # parse openapi to tool bundle
         extra_info = {}
         # extra info like description will be set here
-        tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(
-            schema, extra_info
-        )
+        tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(schema, extra_info)
 
         if len(tool_bundles) > 100:
             raise ValueError("the number of apis should be less than 100")
@@ -182,9 +168,7 @@ class ApiToolManageService:
         provider_controller.load_bundled_tools(tool_bundles)
 
         # encrypt credentials
-        tool_configuration = ToolConfigurationManager(
-            tenant_id=tenant_id, provider_controller=provider_controller
-        )
+        tool_configuration = ToolConfigurationManager(tenant_id=tenant_id, provider_controller=provider_controller)
         encrypted_credentials = tool_configuration.encrypt_tool_credentials(credentials)
         db_provider.credentials_str = json.dumps(encrypted_credentials)
 
@@ -222,9 +206,7 @@ class ApiToolManageService:
         return {"schema": schema}
 
     @staticmethod
-    def list_api_tool_provider_tools(
-        user_id: str, tenant_id: str, provider: str
-    ) -> list[UserTool]:
+    def list_api_tool_provider_tools(user_id: str, tenant_id: str, provider: str) -> list[UserTool]:
         """
         list api tool provider tools
         """
@@ -240,9 +222,7 @@ class ApiToolManageService:
         if provider is None:
             raise ValueError(f"you have not added provider {provider}")
 
-        controller = ToolTransformService.api_provider_to_controller(
-            db_provider=provider
-        )
+        controller = ToolTransformService.api_provider_to_controller(db_provider=provider)
         labels = ToolLabelManager.get_tool_labels(controller)
 
         return [
@@ -290,9 +270,7 @@ class ApiToolManageService:
         # parse openapi to tool bundle
         extra_info = {}
         # extra info like description will be set here
-        tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(
-            schema, extra_info
-        )
+        tool_bundles, schema_type = ApiToolManageService.convert_schema_to_tool_bundles(schema, extra_info)
 
         # update db provider
         provider.name = provider_name
@@ -317,16 +295,10 @@ class ApiToolManageService:
         provider_controller.load_bundled_tools(tool_bundles)
 
         # get original credentials if exists
-        tool_configuration = ToolConfigurationManager(
-            tenant_id=tenant_id, provider_controller=provider_controller
-        )
+        tool_configuration = ToolConfigurationManager(tenant_id=tenant_id, provider_controller=provider_controller)
 
-        original_credentials = tool_configuration.decrypt_tool_credentials(
-            provider.credentials
-        )
-        masked_credentials = tool_configuration.mask_tool_credentials(
-            original_credentials
-        )
+        original_credentials = tool_configuration.decrypt_tool_credentials(provider.credentials)
+        masked_credentials = tool_configuration.mask_tool_credentials(original_credentials)
         # check if the credential has changed, save the original credential
         for name, value in credentials.items():
             if name in masked_credentials and value == masked_credentials[name]:
@@ -397,9 +369,7 @@ class ApiToolManageService:
             raise ValueError("invalid schema")
 
         # get tool bundle
-        tool_bundle = next(
-            filter(lambda tb: tb.operation_id == tool_name, tool_bundles), None
-        )
+        tool_bundle = next(filter(lambda tb: tb.operation_id == tool_name, tool_bundles), None)
         if tool_bundle is None:
             raise ValueError(f"invalid tool name {tool_name}")
 
@@ -439,16 +409,10 @@ class ApiToolManageService:
 
         # decrypt credentials
         if db_provider.id:
-            tool_configuration = ToolConfigurationManager(
-                tenant_id=tenant_id, provider_controller=provider_controller
-            )
-            decrypted_credentials = tool_configuration.decrypt_tool_credentials(
-                credentials
-            )
+            tool_configuration = ToolConfigurationManager(tenant_id=tenant_id, provider_controller=provider_controller)
+            decrypted_credentials = tool_configuration.decrypt_tool_credentials(credentials)
             # check if the credential has changed, save the original credential
-            masked_credentials = tool_configuration.mask_tool_credentials(
-                decrypted_credentials
-            )
+            masked_credentials = tool_configuration.mask_tool_credentials(decrypted_credentials)
             for name, value in credentials.items():
                 if name in masked_credentials and value == masked_credentials[name]:
                     credentials[name] = decrypted_credentials[name]
@@ -476,16 +440,11 @@ class ApiToolManageService:
         """
         # get all api providers
         db_providers: list[ApiToolProvider] = (
-            db.session.query(ApiToolProvider)
-            .filter(ApiToolProvider.tenant_id == tenant_id)
-            .all()
-            or []
+            db.session.query(ApiToolProvider).filter(ApiToolProvider.tenant_id == tenant_id).all() or []
         )
         db_providers: list[ApiToolProvider] = (
             db.session.query(ApiToolProvider)
-            .filter(
-                (ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True)
-            )
+            .filter((ApiToolProvider.user_id == user_id) | (ApiToolProvider.publish == True))
             .all()
             or []
         )
@@ -494,9 +453,7 @@ class ApiToolManageService:
 
         for provider in db_providers:
             # convert provider controller to user provider
-            provider_controller = ToolTransformService.api_provider_to_controller(
-                db_provider=provider
-            )
+            provider_controller = ToolTransformService.api_provider_to_controller(db_provider=provider)
             labels = ToolLabelManager.get_tool_labels(provider_controller)
             user_provider = ToolTransformService.api_provider_to_user_provider(
                 provider_controller, db_provider=provider, decrypt_credentials=True

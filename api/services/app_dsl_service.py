@@ -22,9 +22,7 @@ dsl_to_dify_version_mapping: dict[str, str] = {
 
 class AppDslService:
     @classmethod
-    def import_and_create_new_app_from_url(
-        cls, tenant_id: str, url: str, args: dict, account: Account
-    ) -> App:
+    def import_and_create_new_app_from_url(cls, tenant_id: str, url: str, args: dict, account: Account) -> App:
         """
         Import app dsl from url and create new app
         :param tenant_id: tenant id
@@ -35,9 +33,7 @@ class AppDslService:
         try:
             max_size = 10 * 1024 * 1024  # 10MB
             timeout = httpx.Timeout(10.0)
-            with httpx.stream(
-                "GET", url.strip(), follow_redirects=True, timeout=timeout
-            ) as response:
+            with httpx.stream("GET", url.strip(), follow_redirects=True, timeout=timeout) as response:
                 response.raise_for_status()
                 total_size = 0
                 content = b""
@@ -64,9 +60,7 @@ class AppDslService:
         return cls.import_and_create_new_app(tenant_id, data, args, account)
 
     @classmethod
-    def import_and_create_new_app(
-        cls, tenant_id: str, data: str, args: dict, account: Account
-    ) -> App:
+    def import_and_create_new_app(cls, tenant_id: str, data: str, args: dict, account: Account) -> App:
         """
         Import app dsl and create new app
         :param tenant_id: tenant id
@@ -128,9 +122,7 @@ class AppDslService:
         return app
 
     @classmethod
-    def import_and_overwrite_workflow(
-        cls, app_model: App, data: str, account: Account
-    ) -> Workflow:
+    def import_and_overwrite_workflow(cls, app_model: App, data: str, account: Account) -> Workflow:
         """
         Import app dsl and overwrite workflow
         :param app_model: App instance
@@ -152,14 +144,10 @@ class AppDslService:
         # import dsl and overwrite app
         app_mode = AppMode.value_of(app_data.get("mode"))
         if app_mode not in {AppMode.ADVANCED_CHAT, AppMode.WORKFLOW}:
-            raise ValueError(
-                "Only support import workflow in advanced-chat or workflow app."
-            )
+            raise ValueError("Only support import workflow in advanced-chat or workflow app.")
 
         if app_data.get("mode") != app_model.mode:
-            raise ValueError(
-                f"App mode {app_data.get('mode')} is not matched with current app mode {app_mode.value}"
-            )
+            raise ValueError(f"App mode {app_data.get('mode')} is not matched with current app mode {app_mode.value}")
 
         return cls._import_and_overwrite_workflow_based_app(
             app_model=app_model,
@@ -183,9 +171,7 @@ class AppDslService:
                 "name": app_model.name,
                 "mode": app_model.mode,
                 "icon": "🤖" if app_model.icon_type == "image" else app_model.icon,
-                "icon_background": "#FFEAD5"
-                if app_model.icon_type == "image"
-                else app_model.icon_background,
+                "icon_background": "#FFEAD5" if app_model.icon_type == "image" else app_model.icon_background,
                 "description": app_model.description,
                 "use_icon_as_answer_icon": app_model.use_icon_as_answer_icon,
             },
@@ -254,9 +240,7 @@ class AppDslService:
         :param use_icon_as_answer_icon: use app icon as answer icon
         """
         if not workflow_data:
-            raise ValueError(
-                "Missing workflow in data argument when app mode is advanced-chat or workflow"
-            )
+            raise ValueError("Missing workflow in data argument when app mode is advanced-chat or workflow")
 
         app = cls._create_app(
             tenant_id=tenant_id,
@@ -289,9 +273,7 @@ class AppDslService:
             environment_variables=environment_variables,
             conversation_variables=conversation_variables,
         )
-        workflow_service.publish_workflow(
-            app_model=app, account=account, draft_workflow=draft_workflow
-        )
+        workflow_service.publish_workflow(app_model=app, account=account, draft_workflow=draft_workflow)
 
         return app
 
@@ -307,15 +289,11 @@ class AppDslService:
         :param account: Account instance
         """
         if not workflow_data:
-            raise ValueError(
-                "Missing workflow in data argument when app mode is advanced-chat or workflow"
-            )
+            raise ValueError("Missing workflow in data argument when app mode is advanced-chat or workflow")
 
         # fetch draft workflow by app_model
         workflow_service = WorkflowService()
-        current_draft_workflow = workflow_service.get_draft_workflow(
-            app_model=app_model
-        )
+        current_draft_workflow = workflow_service.get_draft_workflow(app_model=app_model)
         if current_draft_workflow:
             unique_hash = current_draft_workflow.unique_hash
         else:
@@ -369,9 +347,7 @@ class AppDslService:
         :param icon_background: app icon background
         """
         if not model_config_data:
-            raise ValueError(
-                "Missing model_config in data argument when app mode is chat, agent-chat or completion"
-            )
+            raise ValueError("Missing model_config in data argument when app mode is chat, agent-chat or completion")
 
         app = cls._create_app(
             tenant_id=tenant_id,
@@ -455,9 +431,7 @@ class AppDslService:
         return app
 
     @classmethod
-    def _append_workflow_export_data(
-        cls, *, export_data: dict, app_model: App, include_secret: bool
-    ) -> None:
+    def _append_workflow_export_data(cls, *, export_data: dict, app_model: App, include_secret: bool) -> None:
         """
         Append workflow export data
         :param export_data: export data
@@ -471,9 +445,7 @@ class AppDslService:
         export_data["workflow"] = workflow.to_dict(include_secret=include_secret)
 
     @classmethod
-    def _append_model_config_export_data(
-        cls, export_data: dict, app_model: App
-    ) -> None:
+    def _append_model_config_export_data(cls, export_data: dict, app_model: App) -> None:
         """
         Append model config export data
         :param export_data: export data

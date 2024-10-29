@@ -26,9 +26,7 @@ class BuiltinTool(Tool):
     :param meta: the meta data of a tool call processing
     """
 
-    def invoke_model(
-        self, user_id: str, prompt_messages: list[PromptMessage], stop: list[str]
-    ) -> LLMResult:
+    def invoke_model(self, user_id: str, prompt_messages: list[PromptMessage], stop: list[str]) -> LLMResult:
         """
         invoke model
 
@@ -67,17 +65,12 @@ class BuiltinTool(Tool):
         :param prompt_messages: the prompt messages
         :return: the tokens
         """
-        return ModelInvocationUtils.calculate_tokens(
-            tenant_id=self.runtime.tenant_id, prompt_messages=prompt_messages
-        )
+        return ModelInvocationUtils.calculate_tokens(tenant_id=self.runtime.tenant_id, prompt_messages=prompt_messages)
 
     def summary(self, user_id: str, content: str) -> str:
         max_tokens = self.get_max_tokens()
 
-        if (
-            self.get_prompt_tokens(prompt_messages=[UserPromptMessage(content=content)])
-            < max_tokens * 0.6
-        ):
+        if self.get_prompt_tokens(prompt_messages=[UserPromptMessage(content=content)]) < max_tokens * 0.6:
             return content
 
         def get_prompt_tokens(content: str) -> int:
@@ -138,10 +131,7 @@ class BuiltinTool(Tool):
 
         result = "\n".join(summaries)
 
-        if (
-            self.get_prompt_tokens(prompt_messages=[UserPromptMessage(content=result)])
-            > max_tokens * 0.7
-        ):
+        if self.get_prompt_tokens(prompt_messages=[UserPromptMessage(content=result)]) > max_tokens * 0.7:
             return self.summary(user_id=user_id, content=result)
 
         return result

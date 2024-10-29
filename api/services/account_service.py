@@ -67,9 +67,7 @@ class AccountService:
             account.current_tenant_id = current_tenant.tenant_id
         else:
             available_ta = (
-                TenantAccountJoin.query.filter_by(account_id=account.id)
-                .order_by(TenantAccountJoin.id.asc())
-                .first()
+                TenantAccountJoin.query.filter_by(account_id=account.id).order_by(TenantAccountJoin.id.asc()).first()
             )
             if not available_ta:
                 return None
@@ -78,9 +76,7 @@ class AccountService:
             available_ta.current = True
             db.session.commit()
 
-        if datetime.now(timezone.utc).replace(
-            tzinfo=None
-        ) - account.last_active_at > timedelta(minutes=10):
+        if datetime.now(timezone.utc).replace(tzinfo=None) - account.last_active_at > timedelta(minutes=10):
             account.last_active_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db.session.commit()
 
@@ -132,9 +128,7 @@ class AccountService:
     @staticmethod
     def update_account_password(account, password, new_password):
         """update account password"""
-        if account.password and not compare_password(
-            password, account.password, account.password_salt
-        ):
+        if account.password and not compare_password(password, account.password, account.password_salt):
             raise CurrentPasswordIncorrectError("Current password is incorrect.")
 
         # may be raised
@@ -210,19 +204,15 @@ class AccountService:
         """Link account integrate"""
         try:
             # Query whether there is an existing binding record for the same provider
-            account_integrate: Optional[AccountIntegrate] = (
-                AccountIntegrate.query.filter_by(
-                    account_id=account.id, provider=provider
-                ).first()
-            )
+            account_integrate: Optional[AccountIntegrate] = AccountIntegrate.query.filter_by(
+                account_id=account.id, provider=provider
+            ).first()
 
             if account_integrate:
                 # If it exists, update the record
                 account_integrate.open_id = open_id
                 account_integrate.encrypted_token = ""  # todo
-                account_integrate.updated_at = datetime.now(timezone.utc).replace(
-                    tzinfo=None
-                )
+                account_integrate.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
             else:
                 # If it does not exist, create a new record
                 account_integrate = AccountIntegrate(
@@ -236,9 +226,7 @@ class AccountService:
             db.session.commit()
             logging.info(f"Account {account.id} linked {provider} account {open_id}.")
         except Exception as e:
-            logging.exception(
-                f"Failed to link {provider} account {open_id} to Account {account.id}"
-            )
+            logging.exception(f"Failed to link {provider} account {open_id} to Account {account.id}")
             raise LinkAccountIntegrateError("Failed to link account.") from e
 
     @staticmethod
@@ -470,9 +458,7 @@ class TenantService:
     ):
         """Check if user have a workspace or not"""
         available_ta = (
-            TenantAccountJoin.query.filter_by(account_id=account.id)
-            .order_by(TenantAccountJoin.id.asc())
-            .first()
+            TenantAccountJoin.query.filter_by(account_id=account.id).order_by(TenantAccountJoin.id.asc()).first()
         )
 
         if available_ta:
@@ -492,9 +478,7 @@ class TenantService:
         tenant_was_created.send(tenant)
 
     @staticmethod
-    def create_tenant_member(
-        tenant: Tenant, account: Account, role: str = "normal"
-    ) -> TenantAccountJoin:
+    def create_tenant_member(tenant: Tenant, account: Account, role: str = "normal") -> TenantAccountJoin:
         """Create tenant member"""
         if role == TenantAccountJoinRole.OWNER.value:
             if TenantService.has_roles(tenant, [TenantAccountJoinRole.OWNER]):
@@ -531,9 +515,7 @@ class TenantService:
         if not tenant:
             raise TenantNotFoundError("Tenant not found.")
 
-        ta = TenantAccountJoin.query.filter_by(
-            tenant_id=tenant.id, account_id=account.id
-        ).first()
+        ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
         if ta:
             tenant.role = ta.role
         else:
@@ -560,9 +542,7 @@ class TenantService:
         )
 
         if not tenant_account_join:
-            raise AccountNotLinkTenantError(
-                "Tenant not found or account is not a member of the tenant."
-            )
+            raise AccountNotLinkTenantError("Tenant not found or account is not a member of the tenant.")
         else:
             TenantAccountJoin.query.filter(
                 TenantAccountJoin.account_id == account.id,
@@ -629,9 +609,7 @@ class TenantService:
         )
 
     @staticmethod
-    def get_user_role(
-        account: Account, tenant: Tenant
-    ) -> Optional[TenantAccountJoinRole]:
+    def get_user_role(account: Account, tenant: Tenant) -> Optional[TenantAccountJoinRole]:
         """Get the role of the current account for a given tenant"""
         join = (
             db.session.query(TenantAccountJoin)
@@ -649,9 +627,7 @@ class TenantService:
         return db.session.query(func.count(Tenant.id)).scalar()
 
     @staticmethod
-    def check_member_permission(
-        tenant: Tenant, operator: Account, member: Account, action: str
-    ) -> None:
+    def check_member_permission(tenant: Tenant, operator: Account, member: Account, action: str) -> None:
         """Check member permission"""
         perms = {
             "add": [TenantAccountRole.OWNER, TenantAccountRole.ADMIN],
@@ -665,26 +641,18 @@ class TenantService:
             if operator.id == member.id:
                 raise CannotOperateSelfError("Cannot operate self.")
 
-        ta_operator = TenantAccountJoin.query.filter_by(
-            tenant_id=tenant.id, account_id=operator.id
-        ).first()
+        ta_operator = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=operator.id).first()
 
         if not ta_operator or ta_operator.role not in perms[action]:
             raise NoPermissionError(f"No permission to {action} member.")
 
     @staticmethod
-    def remove_member_from_tenant(
-        tenant: Tenant, account: Account, operator: Account
-    ) -> None:
+    def remove_member_from_tenant(tenant: Tenant, account: Account, operator: Account) -> None:
         """Remove member from tenant"""
-        if operator.id == account.id and TenantService.check_member_permission(
-            tenant, operator, account, "remove"
-        ):
+        if operator.id == account.id and TenantService.check_member_permission(tenant, operator, account, "remove"):
             raise CannotOperateSelfError("Cannot operate self.")
 
-        ta = TenantAccountJoin.query.filter_by(
-            tenant_id=tenant.id, account_id=account.id
-        ).first()
+        ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
         if not ta:
             raise MemberNotInTenantError("Member not in tenant.")
 
@@ -692,26 +660,18 @@ class TenantService:
         db.session.commit()
 
     @staticmethod
-    def update_member_role(
-        tenant: Tenant, member: Account, new_role: str, operator: Account
-    ) -> None:
+    def update_member_role(tenant: Tenant, member: Account, new_role: str, operator: Account) -> None:
         """Update member role"""
         TenantService.check_member_permission(tenant, operator, member, "update")
 
-        target_member_join = TenantAccountJoin.query.filter_by(
-            tenant_id=tenant.id, account_id=member.id
-        ).first()
+        target_member_join = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=member.id).first()
 
         if target_member_join.role == new_role:
-            raise RoleAlreadyAssignedError(
-                "The provided role is already assigned to the member."
-            )
+            raise RoleAlreadyAssignedError("The provided role is already assigned to the member.")
 
         if new_role == "owner":
             # Find the current owner and change their role to 'admin'
-            current_owner_join = TenantAccountJoin.query.filter_by(
-                tenant_id=tenant.id, role="owner"
-            ).first()
+            current_owner_join = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, role="owner").first()
             current_owner_join.role = "admin"
 
         # Update the role of the target member
@@ -721,9 +681,7 @@ class TenantService:
     @staticmethod
     def dissolve_tenant(tenant: Tenant, operator: Account) -> None:
         """Dissolve tenant"""
-        if not TenantService.check_member_permission(
-            tenant, operator, operator, "remove"
-        ):
+        if not TenantService.check_member_permission(tenant, operator, operator, "remove"):
             raise NoPermissionError("No permission to dissolve tenant.")
         db.session.query(TenantAccountJoin).filter_by(tenant_id=tenant.id).delete()
         db.session.delete(tenant)
@@ -847,9 +805,7 @@ class RegisterService:
             TenantService.switch_tenant(account, tenant.id)
         else:
             TenantService.check_member_permission(tenant, inviter, account, "add")
-            ta = TenantAccountJoin.query.filter_by(
-                tenant_id=tenant.id, account_id=account.id
-            ).first()
+            ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
 
             if not ta:
                 TenantService.create_tenant_member(tenant, account, role)
@@ -896,26 +852,20 @@ class RegisterService:
     def revoke_token(cls, workspace_id: str, email: str, token: str):
         if workspace_id and email:
             email_hash = sha256(email.encode()).hexdigest()
-            cache_key = "member_invite_token:{}, {}:{}".format(
-                workspace_id, email_hash, token
-            )
+            cache_key = "member_invite_token:{}, {}:{}".format(workspace_id, email_hash, token)
             redis_client.delete(cache_key)
         else:
             redis_client.delete(cls._get_invitation_token_key(token))
 
     @classmethod
-    def get_invitation_if_token_valid(
-        cls, workspace_id: str, email: str, token: str
-    ) -> Optional[dict[str, Any]]:
+    def get_invitation_if_token_valid(cls, workspace_id: str, email: str, token: str) -> Optional[dict[str, Any]]:
         invitation_data = cls._get_invitation_by_token(token, workspace_id, email)
         if not invitation_data:
             return None
 
         tenant = (
             db.session.query(Tenant)
-            .filter(
-                Tenant.id == invitation_data["workspace_id"], Tenant.status == "normal"
-            )
+            .filter(Tenant.id == invitation_data["workspace_id"], Tenant.status == "normal")
             .first()
         )
 

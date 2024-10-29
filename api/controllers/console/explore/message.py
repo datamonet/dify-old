@@ -51,13 +51,9 @@ class MessageListApi(InstalledAppResource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "conversation_id", required=True, type=uuid_value, location="args"
-        )
+        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
 
         try:
@@ -82,15 +78,11 @@ class MessageFeedbackApi(InstalledAppResource):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "rating", type=str, choices=["like", "dislike", None], location="json"
-        )
+        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(
-                app_model, message_id, current_user, args["rating"]
-            )
+            MessageService.create_feedback(app_model, message_id, current_user, args["rating"])
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 

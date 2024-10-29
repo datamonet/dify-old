@@ -21,9 +21,7 @@ def test_validate_credentials():
     model = TongyiLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="qwen-turbo", credentials={"dashscope_api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="qwen-turbo", credentials={"dashscope_api_key": "invalid_key"})
 
     model.validate_credentials(
         model="qwen-turbo",
@@ -66,11 +64,7 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_num_tokens():

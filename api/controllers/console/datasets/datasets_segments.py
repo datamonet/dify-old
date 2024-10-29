@@ -59,9 +59,7 @@ class DatasetDocumentSegmentListApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=str, default=None, location="args")
         parser.add_argument("limit", type=int, default=20, location="args")
-        parser.add_argument(
-            "status", type=str, action="append", default=[], location="args"
-        )
+        parser.add_argument("status", type=str, action="append", default=[], location="args")
         parser.add_argument("hit_count_gte", type=int, default=None, location="args")
         parser.add_argument("enabled", type=str, default="all", location="args")
         parser.add_argument("keyword", type=str, default=None, location="args")
@@ -164,16 +162,12 @@ class DatasetDocumentSegmentApi(Resource):
             raise NotFound("Segment not found.")
 
         if segment.status != "completed":
-            raise NotFound(
-                "Segment is not completed, enable or disable function is not allowed"
-            )
+            raise NotFound("Segment is not completed, enable or disable function is not allowed")
 
         document_indexing_cache_key = "document_{}_indexing".format(segment.document_id)
         cache_result = redis_client.get(document_indexing_cache_key)
         if cache_result is not None:
-            raise InvalidActionError(
-                "Document is being indexed, please try again later"
-            )
+            raise InvalidActionError("Document is being indexed, please try again later")
 
         indexing_cache_key = "segment_{}_indexing".format(segment.id)
         cache_result = redis_client.get(indexing_cache_key)
@@ -256,15 +250,9 @@ class DatasetDocumentSegmentAddApi(Resource):
             raise Forbidden(str(e))
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "content", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "answer", type=str, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "keywords", type=list, required=False, nullable=True, location="json"
-        )
+        parser.add_argument("content", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("answer", type=str, required=False, nullable=True, location="json")
+        parser.add_argument("keywords", type=list, required=False, nullable=True, location="json")
         args = parser.parse_args()
         SegmentService.segment_create_args_validate(args, document)
         segment = SegmentService.create_segment(args, document, dataset)
@@ -326,15 +314,9 @@ class DatasetDocumentSegmentUpdateApi(Resource):
             raise Forbidden(str(e))
         # validate args
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "content", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "answer", type=str, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "keywords", type=list, required=False, nullable=True, location="json"
-        )
+        parser.add_argument("content", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("answer", type=str, required=False, nullable=True, location="json")
+        parser.add_argument("keywords", type=list, required=False, nullable=True, location="json")
         args = parser.parse_args()
         SegmentService.segment_create_args_validate(args, document)
         segment = SegmentService.update_segment(args, segment, document, dataset)

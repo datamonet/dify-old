@@ -45,9 +45,7 @@ class IterationNode(BaseNode[IterationNodeData]):
         iterator_list_segment = self.graph_runtime_state.variable_pool.get(self.node_data.iterator_selector)
 
         if not iterator_list_segment:
-            raise ValueError(
-                f"Iterator variable {self.node_data.iterator_selector} not found"
-            )
+            raise ValueError(f"Iterator variable {self.node_data.iterator_selector} not found")
 
         if len(iterator_list_segment.value) == 0:
             yield RunCompletedEvent(
@@ -61,25 +59,19 @@ class IterationNode(BaseNode[IterationNodeData]):
         iterator_list_value = iterator_list_segment.to_object()
 
         if not isinstance(iterator_list_value, list):
-            raise ValueError(
-                f"Invalid iterator value: {iterator_list_value}, please provide a list."
-            )
+            raise ValueError(f"Invalid iterator value: {iterator_list_value}, please provide a list.")
 
         inputs = {"iterator_selector": iterator_list_value}
 
         graph_config = self.graph_config
 
         if not self.node_data.start_node_id:
-            raise ValueError(
-                f"field start_node_id in iteration {self.node_id} not found"
-            )
+            raise ValueError(f"field start_node_id in iteration {self.node_id} not found")
 
         root_node_id = self.node_data.start_node_id
 
         # init graph
-        iteration_graph = Graph.init(
-            graph_config=graph_config, root_node_id=root_node_id
-        )
+        iteration_graph = Graph.init(graph_config=graph_config, root_node_id=root_node_id)
 
         if not iteration_graph:
             raise ValueError("iteration graph not found")
@@ -138,10 +130,7 @@ class IterationNode(BaseNode[IterationNodeData]):
                 # run workflow
                 rst = graph_engine.run()
                 for event in rst:
-                    if (
-                        isinstance(event, (BaseNodeEvent | BaseParallelBranchEvent))
-                        and not event.in_iteration_id
-                    ):
+                    if isinstance(event, (BaseNodeEvent | BaseParallelBranchEvent)) and not event.in_iteration_id:
                         event.in_iteration_id = self.node_id
 
                     if (
@@ -184,9 +173,7 @@ class IterationNode(BaseNode[IterationNodeData]):
                                 inputs=inputs,
                                 outputs={"output": jsonable_encoder(outputs)},
                                 steps=len(iterator_list_value),
-                                metadata={
-                                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
-                                },
+                                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
                                 error=event.error,
                             )
 
@@ -227,9 +214,7 @@ class IterationNode(BaseNode[IterationNodeData]):
                 variable_pool.add([self.node_id, "index"], next_index)
 
                 if next_index < len(iterator_list_value):
-                    variable_pool.add(
-                        [self.node_id, "item"], iterator_list_value[next_index]
-                    )
+                    variable_pool.add([self.node_id, "item"], iterator_list_value[next_index])
 
                 yield IterationRunNextEvent(
                     iteration_id=self.id,
@@ -249,9 +234,7 @@ class IterationNode(BaseNode[IterationNodeData]):
                 inputs=inputs,
                 outputs={"output": jsonable_encoder(outputs)},
                 steps=len(iterator_list_value),
-                metadata={
-                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
-                },
+                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
             )
 
             yield RunCompletedEvent(
@@ -272,9 +255,7 @@ class IterationNode(BaseNode[IterationNodeData]):
                 inputs=inputs,
                 outputs={"output": jsonable_encoder(outputs)},
                 steps=len(iterator_list_value),
-                metadata={
-                    "total_tokens": graph_engine.graph_runtime_state.total_tokens
-                },
+                metadata={"total_tokens": graph_engine.graph_runtime_state.total_tokens},
                 error=str(e),
             )
 
@@ -309,9 +290,7 @@ class IterationNode(BaseNode[IterationNodeData]):
         }
 
         # init graph
-        iteration_graph = Graph.init(
-            graph_config=graph_config, root_node_id=node_data.start_node_id
-        )
+        iteration_graph = Graph.init(graph_config=graph_config, root_node_id=node_data.start_node_id)
 
         if not iteration_graph:
             raise ValueError("iteration graph not found")
@@ -350,9 +329,7 @@ class IterationNode(BaseNode[IterationNodeData]):
 
         # remove variable out from iteration
         variable_mapping = {
-            key: value
-            for key, value in variable_mapping.items()
-            if value[0] not in iteration_graph.node_ids
+            key: value for key, value in variable_mapping.items() if value[0] not in iteration_graph.node_ids
         }
 
         return variable_mapping

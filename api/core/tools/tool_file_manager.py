@@ -44,9 +44,7 @@ class ToolFileManager:
         """
         data_to_sign = f"file-preview|{file_id}|{timestamp}|{nonce}"
         secret_key = dify_config.SECRET_KEY.encode() if dify_config.SECRET_KEY else b""
-        recalculated_sign = hmac.new(
-            secret_key, data_to_sign.encode(), hashlib.sha256
-        ).digest()
+        recalculated_sign = hmac.new(secret_key, data_to_sign.encode(), hashlib.sha256).digest()
         recalculated_encoded_sign = base64.urlsafe_b64encode(recalculated_sign).decode()
 
         # verify signature

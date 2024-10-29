@@ -16,9 +16,7 @@ class TalksTool(BuiltinTool):
         )
 
         driver_expressions_str = tool_parameters.get("driver_expressions")
-        driver_expressions = (
-            json.loads(driver_expressions_str) if driver_expressions_str else None
-        )
+        driver_expressions = json.loads(driver_expressions_str) if driver_expressions_str else None
 
         script = {
             "type": tool_parameters.get("script_type") or "text",

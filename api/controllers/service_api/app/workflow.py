@@ -62,16 +62,12 @@ class WorkflowRunDetailApi(Resource):
         if app_mode != AppMode.WORKFLOW:
             raise NotWorkflowAppError()
 
-        workflow_run = (
-            db.session.query(WorkflowRun).filter(WorkflowRun.id == workflow_id).first()
-        )
+        workflow_run = db.session.query(WorkflowRun).filter(WorkflowRun.id == workflow_id).first()
         return workflow_run
 
 
 class WorkflowRunApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser):
         """
         Run workflow
@@ -81,9 +77,7 @@ class WorkflowRunApi(Resource):
             raise NotWorkflowAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "inputs", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
         parser.add_argument("files", type=list, required=False, location="json")
         parser.add_argument(
             "response_mode",
@@ -121,9 +115,7 @@ class WorkflowRunApi(Resource):
 
 
 class WorkflowTaskStopApi(Resource):
-    @validate_app_token(
-        fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True)
-    )
+    @validate_app_token(fetch_user_arg=FetchUserArg(fetch_from=WhereisUserArg.JSON, required=True))
     def post(self, app_model: App, end_user: EndUser, task_id: str):
         """
         Stop workflow task
@@ -152,20 +144,14 @@ class WorkflowAppLogApi(Resource):
             choices=["succeeded", "failed", "stopped"],
             location="args",
         )
-        parser.add_argument(
-            "page", type=int_range(1, 99999), default=1, location="args"
-        )
-        parser.add_argument(
-            "limit", type=int_range(1, 100), default=20, location="args"
-        )
+        parser.add_argument("page", type=int_range(1, 99999), default=1, location="args")
+        parser.add_argument("limit", type=int_range(1, 100), default=20, location="args")
         args = parser.parse_args()
 
         # get paginate workflow app logs
         workflow_app_service = WorkflowAppService()
-        workflow_app_log_pagination = (
-            workflow_app_service.get_paginate_workflow_app_logs(
-                app_model=app_model, args=args
-            )
+        workflow_app_log_pagination = workflow_app_service.get_paginate_workflow_app_logs(
+            app_model=app_model, args=args
         )
 
         return workflow_app_log_pagination

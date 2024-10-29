@@ -22,9 +22,7 @@ class OpenAIModeration(Moderation):
         """
         cls._validate_inputs_and_outputs_config(config, True)
 
-    def moderation_for_inputs(
-        self, inputs: dict, query: str = ""
-    ) -> ModerationInputsResult:
+    def moderation_for_inputs(self, inputs: dict, query: str = "") -> ModerationInputsResult:
         flagged = False
         preset_response = ""
 

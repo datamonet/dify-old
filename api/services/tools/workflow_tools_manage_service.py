@@ -53,9 +53,7 @@ class WorkflowToolManageService:
         )
 
         if existing_workflow_tool_provider is not None:
-            raise ValueError(
-                f"Tool with name {name} or app_id {workflow_app_id} already exists"
-            )
+            raise ValueError(f"Tool with name {name} or app_id {workflow_app_id} already exists")
 
         app = db.session.query(App).filter(App.id == workflow_app_id, App.tenant_id == tenant_id).first()
         if app is None:
@@ -145,9 +143,7 @@ class WorkflowToolManageService:
             raise ValueError(f"Tool {workflow_tool_id} not found")
 
         app: App = (
-            db.session.query(App)
-            .filter(App.id == workflow_tool_provider.app_id, App.tenant_id == tenant_id)
-            .first()
+            db.session.query(App).filter(App.id == workflow_tool_provider.app_id, App.tenant_id == tenant_id).first()
         )
 
         if app is None:
@@ -155,9 +151,7 @@ class WorkflowToolManageService:
 
         workflow: Workflow = app.workflow
         if workflow is None:
-            raise ValueError(
-                f"Workflow not found for app {workflow_tool_provider.app_id}"
-            )
+            raise ValueError(f"Workflow not found for app {workflow_tool_provider.app_id}")
 
         workflow_tool_provider.name = name
         workflow_tool_provider.label = label
@@ -178,18 +172,14 @@ class WorkflowToolManageService:
 
         if labels is not None:
             ToolLabelManager.update_tool_labels(
-                ToolTransformService.workflow_provider_to_controller(
-                    workflow_tool_provider
-                ),
+                ToolTransformService.workflow_provider_to_controller(workflow_tool_provider),
                 labels,
             )
 
         return {"result": "success"}
 
     @classmethod
-    def list_tenant_workflow_tools(
-        cls, user_id: str, tenant_id: str
-    ) -> list[UserToolProvider]:
+    def list_tenant_workflow_tools(cls, user_id: str, tenant_id: str) -> list[UserToolProvider]:
         """
         List workflow tools.
         :param user_id: the user id
@@ -199,8 +189,7 @@ class WorkflowToolManageService:
         db_tools = (
             db.session.query(WorkflowToolProvider)
             .filter(
-                WorkflowToolProvider.user_id
-                == user_id  # takin command: List workflow tools需要过滤，只返回自己的工具
+                WorkflowToolProvider.user_id == user_id  # takin command: List workflow tools需要过滤，只返回自己的工具
                 # WorkflowToolProvider.tenant_id == tenant_id
             )
             .all()
@@ -209,9 +198,7 @@ class WorkflowToolManageService:
         tools = []
         for provider in db_tools:
             try:
-                tools.append(
-                    ToolTransformService.workflow_provider_to_controller(provider)
-                )
+                tools.append(ToolTransformService.workflow_provider_to_controller(provider))
             except:
                 # skip deleted tools
                 pass
@@ -221,10 +208,8 @@ class WorkflowToolManageService:
         result = []
 
         for tool in tools:
-            user_tool_provider = (
-                ToolTransformService.workflow_provider_to_user_provider(
-                    provider_controller=tool, labels=labels.get(tool.provider_id, [])
-                )
+            user_tool_provider = ToolTransformService.workflow_provider_to_user_provider(
+                provider_controller=tool, labels=labels.get(tool.provider_id, [])
             )
             ToolTransformService.repack_provider(user_tool_provider)
             user_tool_provider.tools = [
@@ -238,9 +223,7 @@ class WorkflowToolManageService:
         return result
 
     @classmethod
-    def delete_workflow_tool(
-        cls, user_id: str, tenant_id: str, workflow_tool_id: str
-    ) -> dict:
+    def delete_workflow_tool(cls, user_id: str, tenant_id: str, workflow_tool_id: str) -> dict:
         """
         Delete a workflow tool.
         :param user_id: the user id
@@ -257,9 +240,7 @@ class WorkflowToolManageService:
         return {"result": "success"}
 
     @classmethod
-    def get_workflow_tool_by_tool_id(
-        cls, user_id: str, tenant_id: str, workflow_tool_id: str
-    ) -> dict:
+    def get_workflow_tool_by_tool_id(cls, user_id: str, tenant_id: str, workflow_tool_id: str) -> dict:
         """
         Get a workflow tool.
         :param user_id: the user id
@@ -279,11 +260,7 @@ class WorkflowToolManageService:
         if db_tool is None:
             raise ValueError(f"Tool {workflow_tool_id} not found")
 
-        workflow_app: App = (
-            db.session.query(App)
-            .filter(App.id == db_tool.app_id, App.tenant_id == tenant_id)
-            .first()
-        )
+        workflow_app: App = db.session.query(App).filter(App.id == db_tool.app_id, App.tenant_id == tenant_id).first()
 
         if workflow_app is None:
             raise ValueError(f"App {db_tool.app_id} not found")
@@ -307,9 +284,7 @@ class WorkflowToolManageService:
         }
 
     @classmethod
-    def get_workflow_tool_by_app_id(
-        cls, user_id: str, tenant_id: str, workflow_app_id: str
-    ) -> dict:
+    def get_workflow_tool_by_app_id(cls, user_id: str, tenant_id: str, workflow_app_id: str) -> dict:
         """
         Get a workflow tool.
         :param user_id: the user id
@@ -329,11 +304,7 @@ class WorkflowToolManageService:
         if db_tool is None:
             raise ValueError(f"Tool {workflow_app_id} not found")
 
-        workflow_app: App = (
-            db.session.query(App)
-            .filter(App.id == db_tool.app_id, App.tenant_id == tenant_id)
-            .first()
-        )
+        workflow_app: App = db.session.query(App).filter(App.id == db_tool.app_id, App.tenant_id == tenant_id).first()
 
         if workflow_app is None:
             raise ValueError(f"App {db_tool.app_id} not found")
@@ -357,9 +328,7 @@ class WorkflowToolManageService:
         }
 
     @classmethod
-    def list_single_workflow_tools(
-        cls, user_id: str, tenant_id: str, workflow_tool_id: str
-    ) -> list[dict]:
+    def list_single_workflow_tools(cls, user_id: str, tenant_id: str, workflow_tool_id: str) -> list[dict]:
         """
         List workflow tool provider tools.
         :param user_id: the user id

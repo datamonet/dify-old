@@ -27,9 +27,7 @@ class TencentVectorTest(AbstractVectorTest):
         )
 
     def search_by_vector(self):
-        hits_by_vector = self.vector.search_by_vector(
-            query_vector=self.example_embedding
-        )
+        hits_by_vector = self.vector.search_by_vector(query_vector=self.example_embedding)
         assert len(hits_by_vector) == 1
 
     def search_by_full_text(self):

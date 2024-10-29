@@ -48,14 +48,10 @@ class BaiduObsStorage(BaseStorage):
             yield chunk
 
     def download(self, filename, target_filepath):
-        self.client.get_object_to_file(
-            bucket_name=self.bucket_name, key=filename, file_name=target_filepath
-        )
+        self.client.get_object_to_file(bucket_name=self.bucket_name, key=filename, file_name=target_filepath)
 
     def exists(self, filename):
-        res = self.client.get_object_meta_data(
-            bucket_name=self.bucket_name, key=filename
-        )
+        res = self.client.get_object_meta_data(bucket_name=self.bucket_name, key=filename)
         if res is None:
             return False
         return True

@@ -25,6 +25,4 @@ class RegexExpressionTool(BuiltinTool):
             result = re.findall(expression, content)
             return self.create_text_message(str(result))
         except Exception as e:
-            return self.create_text_message(
-                f"Failed to extract result, error: {str(e)}"
-            )
+            return self.create_text_message(f"Failed to extract result, error: {str(e)}")

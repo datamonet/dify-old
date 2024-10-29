@@ -159,9 +159,7 @@ class DatasetDocumentListApi(Resource):
         except services.errors.account.NoPermissionError as e:
             raise Forbidden(str(e))
 
-        query = Document.query.filter_by(
-            dataset_id=str(dataset_id), tenant_id=current_user.current_tenant_id
-        )
+        query = Document.query.filter_by(dataset_id=str(dataset_id), tenant_id=current_user.current_tenant_id)
 
         if search:
             search = f"%{search}%"
@@ -183,9 +181,7 @@ class DatasetDocumentListApi(Resource):
                 .subquery()
             )
 
-            query = query.outerjoin(
-                sub_query, sub_query.c.document_id == Document.id
-            ).order_by(
+            query = query.outerjoin(sub_query, sub_query.c.document_id == Document.id).order_by(
                 sort_logic(db.func.coalesce(sub_query.c.total_hit_count, 0)),
                 sort_logic(Document.position),
             )
@@ -200,9 +196,7 @@ class DatasetDocumentListApi(Resource):
                 desc(Document.position),
             )
 
-        paginated_documents = query.paginate(
-            page=page, per_page=limit, max_per_page=100, error_out=False
-        )
+        paginated_documents = query.paginate(page=page, per_page=limit, max_per_page=100, error_out=False)
         documents = paginated_documents.items
         if fetch:
             for document in documents:
@@ -267,12 +261,8 @@ class DatasetDocumentListApi(Resource):
         )
         parser.add_argument("data_source", type=dict, required=False, location="json")
         parser.add_argument("process_rule", type=dict, required=False, location="json")
-        parser.add_argument(
-            "duplicate", type=bool, default=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "original_document_id", type=str, required=False, location="json"
-        )
+        parser.add_argument("duplicate", type=bool, default=True, nullable=False, location="json")
+        parser.add_argument("original_document_id", type=str, required=False, location="json")
         parser.add_argument(
             "doc_form",
             type=str,
@@ -305,9 +295,7 @@ class DatasetDocumentListApi(Resource):
         DocumentService.document_create_args_validate(args)
 
         try:
-            documents, batch = DocumentService.save_document_with_dataset_id(
-                dataset, args, current_user
-            )
+            documents, batch = DocumentService.save_document_with_dataset_id(dataset, args, current_user)
         except ProviderTokenNotInitError as ex:
             raise ProviderNotInitializeError(ex.description)
         except QuotaExceededError:
@@ -338,12 +326,8 @@ class DatasetInitApi(Resource):
             nullable=False,
             location="json",
         )
-        parser.add_argument(
-            "data_source", type=dict, required=True, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "process_rule", type=dict, required=True, nullable=True, location="json"
-        )
+        parser.add_argument("data_source", type=dict, required=True, nullable=True, location="json")
+        parser.add_argument("process_rule", type=dict, required=True, nullable=True, location="json")
         parser.add_argument(
             "doc_form",
             type=str,
@@ -367,9 +351,7 @@ class DatasetInitApi(Resource):
             nullable=False,
             location="json",
         )
-        parser.add_argument(
-            "embedding_model", type=str, required=False, nullable=True, location="json"
-        )
+        parser.add_argument("embedding_model", type=str, required=False, nullable=True, location="json")
         parser.add_argument(
             "embedding_model_provider",
             type=str,
@@ -384,13 +366,8 @@ class DatasetInitApi(Resource):
             raise Forbidden()
 
         if args["indexing_technique"] == "high_quality":
-            if (
-                args["embedding_model"] is None
-                or args["embedding_model_provider"] is None
-            ):
-                raise ValueError(
-                    "embedding model and embedding model provider are required for high quality indexing."
-                )
+            if args["embedding_model"] is None or args["embedding_model_provider"] is None:
+                raise ValueError("embedding model and embedding model provider are required for high quality indexing.")
             try:
                 model_manager = ModelManager()
                 model_manager.get_default_model_instance(
@@ -409,12 +386,10 @@ class DatasetInitApi(Resource):
         DocumentService.document_create_args_validate(args)
 
         try:
-            dataset, documents, batch = (
-                DocumentService.save_document_without_dataset_id(
-                    tenant_id=current_user.current_tenant_id,
-                    document_data=args,
-                    account=current_user,
-                )
+            dataset, documents, batch = DocumentService.save_document_without_dataset_id(
+                tenant_id=current_user.current_tenant_id,
+                document_data=args,
+                account=current_user,
             )
         except ProviderTokenNotInitError as ex:
             raise ProviderNotInitializeError(ex.description)
@@ -531,9 +506,7 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
                 info_list.append(file_id)
             # format document notion info
             elif (
-                data_source_info
-                and "notion_workspace_id" in data_source_info
-                and "notion_page_id" in data_source_info
+                data_source_info and "notion_workspace_id" in data_source_info and "notion_page_id" in data_source_info
             ):
                 pages = []
                 page = {
@@ -710,18 +683,12 @@ class DocumentDetailApi(DocumentResource):
                 "created_at": document.created_at.timestamp(),
                 "tokens": document.tokens,
                 "indexing_status": document.indexing_status,
-                "completed_at": int(document.completed_at.timestamp())
-                if document.completed_at
-                else None,
-                "updated_at": int(document.updated_at.timestamp())
-                if document.updated_at
-                else None,
+                "completed_at": int(document.completed_at.timestamp()) if document.completed_at else None,
+                "updated_at": int(document.updated_at.timestamp()) if document.updated_at else None,
                 "indexing_latency": document.indexing_latency,
                 "error": document.error,
                 "enabled": document.enabled,
-                "disabled_at": int(document.disabled_at.timestamp())
-                if document.disabled_at
-                else None,
+                "disabled_at": int(document.disabled_at.timestamp()) if document.disabled_at else None,
                 "disabled_by": document.disabled_by,
                 "archived": document.archived,
                 "segment_count": document.segment_count,
@@ -747,18 +714,12 @@ class DocumentDetailApi(DocumentResource):
                 "created_at": document.created_at.timestamp(),
                 "tokens": document.tokens,
                 "indexing_status": document.indexing_status,
-                "completed_at": int(document.completed_at.timestamp())
-                if document.completed_at
-                else None,
-                "updated_at": int(document.updated_at.timestamp())
-                if document.updated_at
-                else None,
+                "completed_at": int(document.completed_at.timestamp()) if document.completed_at else None,
+                "updated_at": int(document.updated_at.timestamp()) if document.updated_at else None,
                 "indexing_latency": document.indexing_latency,
                 "error": document.error,
                 "enabled": document.enabled,
-                "disabled_at": int(document.disabled_at.timestamp())
-                if document.disabled_at
-                else None,
+                "disabled_at": int(document.disabled_at.timestamp()) if document.disabled_at else None,
                 "disabled_by": document.disabled_by,
                 "archived": document.archived,
                 "doc_type": document.doc_type,
@@ -905,9 +866,7 @@ class DocumentStatusApi(DocumentResource):
         indexing_cache_key = "document_{}_indexing".format(document.id)
         cache_result = redis_client.get(indexing_cache_key)
         if cache_result is not None:
-            raise InvalidActionError(
-                "Document is being indexed, please try again later"
-            )
+            raise InvalidActionError("Document is being indexed, please try again later")
 
         if action == "enable":
             if document.enabled:
@@ -1051,9 +1010,7 @@ class DocumentRetryApi(DocumentResource):
         """retry document."""
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "document_ids", type=list, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("document_ids", type=list, required=True, nullable=False, location="json")
         args = parser.parse_args()
         dataset_id = str(dataset_id)
         dataset = DatasetService.get_dataset(dataset_id)
@@ -1099,15 +1056,11 @@ class DocumentRenameApi(DocumentResource):
         dataset = DatasetService.get_dataset(dataset_id)
         DatasetService.check_dataset_operator_permission(current_user, dataset)
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "name", type=str, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("name", type=str, required=True, nullable=False, location="json")
         args = parser.parse_args()
 
         try:
-            document = DocumentService.rename_document(
-                dataset_id, document_id, args["name"]
-            )
+            document = DocumentService.rename_document(dataset_id, document_id, args["name"])
         except services.errors.document.DocumentIndexingError:
             raise DocumentIndexingError("Cannot delete document during indexing.")
 
@@ -1160,16 +1113,12 @@ api.add_resource(
     DocumentIndexingStatusApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/indexing-status",
 )
-api.add_resource(
-    DocumentDetailApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>"
-)
+api.add_resource(DocumentDetailApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
 api.add_resource(
     DocumentProcessingApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/<string:action>",
 )
-api.add_resource(
-    DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>"
-)
+api.add_resource(DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
 api.add_resource(
     DocumentMetadataApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/metadata",
@@ -1187,9 +1136,7 @@ api.add_resource(
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/resume",
 )
 api.add_resource(DocumentRetryApi, "/datasets/<uuid:dataset_id>/retry")
-api.add_resource(
-    DocumentRenameApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/rename"
-)
+api.add_resource(DocumentRenameApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/rename")
 
 api.add_resource(
     WebsiteDocumentSyncApi,

@@ -171,9 +171,7 @@ class SwitchWorkspaceApi(Resource):
 
         return {
             "result": "success",
-            "new_tenant": marshal(
-                WorkspaceService.get_tenant_info(new_tenant), tenant_fields
-            ),
+            "new_tenant": marshal(WorkspaceService.get_tenant_info(new_tenant), tenant_fields),
         }
 
 
@@ -188,11 +186,7 @@ class CustomConfigWorkspaceApi(Resource):
         parser.add_argument("replace_webapp_logo", type=str, location="json")
         args = parser.parse_args()
 
-        tenant = (
-            db.session.query(Tenant)
-            .filter(Tenant.id == current_user.current_tenant_id)
-            .one_or_404()
-        )
+        tenant = db.session.query(Tenant).filter(Tenant.id == current_user.current_tenant_id).one_or_404()
 
         custom_config_dict = {
             "remove_webapp_brand": args["remove_webapp_brand"],
@@ -243,9 +237,7 @@ class WebappLogoWorkspaceApi(Resource):
 
 api.add_resource(TenantListApi, "/workspaces")  # GET for getting all tenants
 api.add_resource(WorkspaceListApi, "/all-workspaces")  # GET for getting all tenants
-api.add_resource(
-    TenantApi, "/workspaces/current", endpoint="workspaces_current"
-)  # GET for getting current tenant info
+api.add_resource(TenantApi, "/workspaces/current", endpoint="workspaces_current")  # GET for getting current tenant info
 api.add_resource(TenantApi, "/info", endpoint="info")  # Deprecated
 api.add_resource(SwitchWorkspaceApi, "/workspaces/switch")  # POST for switching tenant
 api.add_resource(CustomConfigWorkspaceApi, "/workspaces/custom-config")

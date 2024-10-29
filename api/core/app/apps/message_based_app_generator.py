@@ -60,9 +60,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
     ) -> Union[
         ChatbotAppBlockingResponse,
         CompletionAppBlockingResponse,
-        Generator[
-            Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None
-        ],
+        Generator[Union[ChatbotAppStreamResponse, CompletionAppStreamResponse], None, None],
     ]:
         """
         Handle response.
@@ -105,13 +103,9 @@ class MessageBasedAppGenerator(BaseAppGenerator):
         if isinstance(user, Account):
             conversation_filter.append(Conversation.from_account_id == user.id)
         else:
-            conversation_filter.append(
-                Conversation.from_end_user_id == user.id if user else None
-            )
+            conversation_filter.append(Conversation.from_end_user_id == user.id if user else None)
 
-        conversation = (
-            db.session.query(Conversation).filter(and_(*conversation_filter)).first()
-        )
+        conversation = db.session.query(Conversation).filter(and_(*conversation_filter)).first()
 
         if not conversation:
             raise ConversationNotExistsError()
@@ -121,9 +115,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
 
         return conversation
 
-    def _get_app_model_config(
-        self, app_model: App, conversation: Optional[Conversation] = None
-    ) -> AppModelConfig:
+    def _get_app_model_config(self, app_model: App, conversation: Optional[Conversation] = None) -> AppModelConfig:
         if conversation:
             app_model_config = (
                 db.session.query(AppModelConfig)
@@ -188,15 +180,11 @@ class MessageBasedAppGenerator(BaseAppGenerator):
             model_provider = application_generate_entity.model_conf.provider
             model_id = application_generate_entity.model_conf.model
             override_model_configs = None
-            if (
-                app_config.app_model_config_from == EasyUIBasedAppModelConfigFrom.ARGS
-                and app_config.app_mode
-                in {
-                    AppMode.AGENT_CHAT,
-                    AppMode.CHAT,
-                    AppMode.COMPLETION,
-                }
-            ):
+            if app_config.app_model_config_from == EasyUIBasedAppModelConfigFrom.ARGS and app_config.app_mode in {
+                AppMode.AGENT_CHAT,
+                AppMode.CHAT,
+                AppMode.COMPLETION,
+            }:
                 override_model_configs = app_config.app_model_config_dict
 
         # get conversation introduction
@@ -208,9 +196,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
                 app_model_config_id=app_model_config_id,
                 model_provider=model_provider,
                 model_id=model_id,
-                override_model_configs=json.dumps(override_model_configs)
-                if override_model_configs
-                else None,
+                override_model_configs=json.dumps(override_model_configs) if override_model_configs else None,
                 mode=app_config.app_mode.value,
                 name="New conversation",
                 inputs=application_generate_entity.inputs,
@@ -235,9 +221,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
             app_id=app_config.app_id,
             model_provider=model_provider,
             model_id=model_id,
-            override_model_configs=json.dumps(override_model_configs)
-            if override_model_configs
-            else None,
+            override_model_configs=json.dumps(override_model_configs) if override_model_configs else None,
             conversation_id=conversation.id,
             inputs=application_generate_entity.inputs,
             query=application_generate_entity.query or "",
@@ -249,9 +233,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
             answer_tokens=0,
             answer_unit_price=0,
             answer_price_unit=0,
-            parent_message_id=getattr(
-                application_generate_entity, "parent_message_id", None
-            ),
+            parent_message_id=getattr(application_generate_entity, "parent_message_id", None),
             provider_response_latency=0,
             total_price=0,
             currency="USD",
@@ -281,9 +263,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
 
         return conversation, message
 
-    def _get_conversation_introduction(
-        self, application_generate_entity: AppGenerateEntity
-    ) -> str:
+    def _get_conversation_introduction(self, application_generate_entity: AppGenerateEntity) -> str:
         """
         Get conversation introduction
         :param application_generate_entity: application generate entity
@@ -296,9 +276,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
             try:
                 inputs = application_generate_entity.inputs
                 prompt_template = PromptTemplateParser(template=introduction)
-                prompt_inputs = {
-                    k: inputs[k] for k in prompt_template.variable_keys if k in inputs
-                }
+                prompt_inputs = {k: inputs[k] for k in prompt_template.variable_keys if k in inputs}
                 introduction = prompt_template.format(prompt_inputs)
             except KeyError:
                 pass
@@ -311,11 +289,7 @@ class MessageBasedAppGenerator(BaseAppGenerator):
         :param conversation_id: conversation id
         :return: conversation
         """
-        conversation = (
-            db.session.query(Conversation)
-            .filter(Conversation.id == conversation_id)
-            .first()
-        )
+        conversation = db.session.query(Conversation).filter(Conversation.id == conversation_id).first()
 
         if not conversation:
             raise ConversationNotExistsError()

@@ -126,11 +126,7 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_invoke_with_search():
@@ -161,11 +157,7 @@ def test_invoke_with_search():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if not chunk.delta.finish_reason
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if not chunk.delta.finish_reason else True
         total_message += chunk.delta.message.content
 
     assert "不" not in total_message

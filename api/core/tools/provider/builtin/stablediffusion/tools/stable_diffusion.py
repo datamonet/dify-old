@@ -110,13 +110,9 @@ class StableDiffusionTool(BuiltinTool):
             url = str(URL(base_url) / "sdapi" / "v1" / "options")
             response = post(url, data=json.dumps({"sd_model_checkpoint": model}))
             if response.status_code != 200:
-                raise ToolProviderCredentialValidationError(
-                    "Failed to set model, please tell user to set model"
-                )
+                raise ToolProviderCredentialValidationError("Failed to set model, please tell user to set model")
         except Exception:
-            raise ToolProviderCredentialValidationError(
-                "Failed to set model, please tell user to set model"
-            )
+            raise ToolProviderCredentialValidationError("Failed to set model, please tell user to set model")
 
         # get image id and image variable
         image_id = tool_parameters.get("image_id", "")
@@ -161,9 +157,7 @@ class StableDiffusionTool(BuiltinTool):
                 if len([d for d in models if d == model]) > 0:
                     return self.create_text_message(json.dumps(models))
                 else:
-                    raise ToolProviderCredentialValidationError(
-                        f"model {model} does not exist"
-                    )
+                    raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         except Exception as e:
             raise ToolProviderCredentialValidationError(f"Failed to get models, {e}")
 
@@ -212,9 +206,7 @@ class StableDiffusionTool(BuiltinTool):
         image_variable = self.get_default_image_variable()
         image_binary = self.get_variable_file(image_variable.name)
         if not image_binary:
-            return self.create_text_message(
-                "Image not found, please request user to generate image firstly."
-            )
+            return self.create_text_message("Image not found, please request user to generate image firstly.")
 
         # Convert image to RGB and save as PNG
         try:
@@ -347,9 +339,7 @@ class StableDiffusionTool(BuiltinTool):
                     " generate a new image.",
                     required=True,
                     options=[
-                        ToolParameterOption(
-                            value=i.name, label=I18nObject(en_US=i.name, zh_Hans=i.name)
-                        )
+                        ToolParameterOption(value=i.name, label=I18nObject(en_US=i.name, zh_Hans=i.name))
                         for i in self.list_default_image_variables()
                     ],
                 )
@@ -375,10 +365,7 @@ class StableDiffusionTool(BuiltinTool):
                             required=True,
                             default=models[0],
                             options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                                )
-                                for i in models
+                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in models
                             ],
                         )
                     )
@@ -391,9 +378,7 @@ class StableDiffusionTool(BuiltinTool):
                 parameters.append(
                     ToolParameter(
                         name="sampler_name",
-                        label=I18nObject(
-                            en_US="Sampling method", zh_Hans="Sampling method"
-                        ),
+                        label=I18nObject(en_US="Sampling method", zh_Hans="Sampling method"),
                         human_description=I18nObject(
                             en_US="Sampling method of Stable Diffusion, you can check the official documentation"
                             " of Stable Diffusion",
@@ -406,10 +391,7 @@ class StableDiffusionTool(BuiltinTool):
                         required=True,
                         default=sample_methods[0],
                         options=[
-                            ToolParameterOption(
-                                value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                            )
-                            for i in sample_methods
+                            ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in sample_methods
                         ],
                     )
                 )

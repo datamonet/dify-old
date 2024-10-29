@@ -100,9 +100,7 @@ class BaseAppGenerator:
         if var.type == VariableEntityType.SELECT:
             options = var.options
             if user_input_value not in options:
-                raise ValueError(
-                    f"{var.variable} in input form must be one of the following: {options}"
-                )
+                raise ValueError(f"{var.variable} in input form must be one of the following: {options}")
         elif var.type in {VariableEntityType.TEXT_INPUT, VariableEntityType.PARAGRAPH}:
             if var.max_length and len(user_input_value) > var.max_length:
                 raise ValueError(f"{var.variable} in input form must be less than {var.max_length} characters")

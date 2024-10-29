@@ -10,7 +10,7 @@ from core.workflow.nodes.list_operator.node import ListOperatorNode
 from models.workflow import WorkflowNodeExecutionStatus
 
 
-@pytest.fixture
+@pytest.fixture()
 def list_operator_node():
     config = {
         "variable": ["test_variable"],

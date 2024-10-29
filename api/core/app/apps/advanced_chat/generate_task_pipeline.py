@@ -72,9 +72,7 @@ from models.workflow import (
 logger = logging.getLogger(__name__)
 
 
-class AdvancedChatAppGenerateTaskPipeline(
-    BasedGenerateTaskPipeline, WorkflowCycleManage, MessageCycleManage
-):
+class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCycleManage, MessageCycleManage):
     """
     AdvancedChatAppGenerateTaskPipeline is a class that generate stream output and state management for Application.
     """
@@ -141,18 +139,14 @@ class AdvancedChatAppGenerateTaskPipeline(
             self._conversation, self._application_generate_entity.query
         )
 
-        generator = self._wrapper_process_stream_response(
-            trace_manager=self._application_generate_entity.trace_manager
-        )
+        generator = self._wrapper_process_stream_response(trace_manager=self._application_generate_entity.trace_manager)
 
         if self._stream:
             return self._to_stream_response(generator)
         else:
             return self._to_blocking_response(generator)
 
-    def _to_blocking_response(
-        self, generator: Generator[StreamResponse, None, None]
-    ) -> ChatbotAppBlockingResponse:
+    def _to_blocking_response(self, generator: Generator[StreamResponse, None, None]) -> ChatbotAppBlockingResponse:
         """
         Process blocking response.
         :return:
@@ -218,13 +212,9 @@ class AdvancedChatAppGenerateTaskPipeline(
             and features_dict["text_to_speech"].get("enabled")
             and features_dict["text_to_speech"].get("autoPlay") == "enabled"
         ):
-            tts_publisher = AppGeneratorTTSPublisher(
-                tenant_id, features_dict["text_to_speech"].get("voice")
-            )
+            tts_publisher = AppGeneratorTTSPublisher(tenant_id, features_dict["text_to_speech"].get("voice"))
 
-        for response in self._process_stream_response(
-            tts_publisher=tts_publisher, trace_manager=trace_manager
-        ):
+        for response in self._process_stream_response(tts_publisher=tts_publisher, trace_manager=trace_manager):
             while True:
                 audio_response = self._listen_audio_msg(tts_publisher, task_id=task_id)
                 if audio_response:
@@ -249,9 +239,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                     break
                 else:
                     start_listener_time = time.time()
-                    yield MessageAudioStreamResponse(
-                        audio=audio_trunk.audio, task_id=task_id
-                    )
+                    yield MessageAudioStreamResponse(audio=audio_trunk.audio, task_id=task_id)
             except Exception as e:
                 logger.error(e)
                 break
@@ -302,9 +290,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
 
-                workflow_node_execution = self._handle_node_execution_start(
-                    workflow_run=workflow_run, event=event
-                )
+                workflow_node_execution = self._handle_node_execution_start(workflow_run=workflow_run, event=event)
 
                 response = self._workflow_node_start_to_stream_response(
                     event=event,
@@ -315,9 +301,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 if response:
                     yield response
             elif isinstance(event, QueueNodeSucceededEvent):
-                workflow_node_execution = self._handle_workflow_node_execution_success(
-                    event
-                )
+                workflow_node_execution = self._handle_workflow_node_execution_success(event)
 
                 # Record files if it's an answer node or end node
                 if event.node_type in [NodeType.ANSWER, NodeType.END]:
@@ -332,9 +316,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 if response:
                     yield response
             elif isinstance(event, QueueNodeFailedEvent):
-                workflow_node_execution = self._handle_workflow_node_execution_failed(
-                    event
-                )
+                workflow_node_execution = self._handle_workflow_node_execution_failed(event)
 
                 response = self._workflow_node_finish_to_stream_response(
                     event=event,
@@ -355,8 +337,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 )
             elif isinstance(
                 event,
-                QueueParallelBranchRunSucceededEvent
-                | QueueParallelBranchRunFailedEvent,
+                QueueParallelBranchRunSucceededEvent | QueueParallelBranchRunFailedEvent,
             ):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
@@ -415,9 +396,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                     workflow_run=workflow_run,
                 )
 
-                self._queue_manager.publish(
-                    QueueAdvancedChatMessageEndEvent(), PublishFrom.TASK_PIPELINE
-                )
+                self._queue_manager.publish(QueueAdvancedChatMessageEndEvent(), PublishFrom.TASK_PIPELINE)
             elif isinstance(event, QueueWorkflowFailedEvent):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
@@ -441,12 +420,8 @@ class AdvancedChatAppGenerateTaskPipeline(
                     workflow_run=workflow_run,
                 )
 
-                err_event = QueueErrorEvent(
-                    error=ValueError(f"Run failed: {workflow_run.error}")
-                )
-                yield self._error_to_stream_response(
-                    self._handle_error(err_event, self._message)
-                )
+                err_event = QueueErrorEvent(error=ValueError(f"Run failed: {workflow_run.error}"))
+                yield self._error_to_stream_response(self._handle_error(err_event, self._message))
                 break
             elif isinstance(event, QueueStopEvent):
                 if workflow_run and graph_runtime_state:
@@ -477,9 +452,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 self._refetch_message()
 
                 self._message.message_metadata = (
-                    json.dumps(jsonable_encoder(self._task_state.metadata))
-                    if self._task_state.metadata
-                    else None
+                    json.dumps(jsonable_encoder(self._task_state.metadata)) if self._task_state.metadata else None
                 )
 
                 db.session.commit()
@@ -491,9 +464,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 self._refetch_message()
 
                 self._message.message_metadata = (
-                    json.dumps(jsonable_encoder(self._task_state.metadata))
-                    if self._task_state.metadata
-                    else None
+                    json.dumps(jsonable_encoder(self._task_state.metadata)) if self._task_state.metadata else None
                 )
 
                 db.session.commit()
@@ -526,16 +497,10 @@ class AdvancedChatAppGenerateTaskPipeline(
                 if not graph_runtime_state:
                     raise Exception("Graph runtime state not initialized.")
 
-                output_moderation_answer = (
-                    self._handle_output_moderation_when_task_finished(
-                        self._task_state.answer
-                    )
-                )
+                output_moderation_answer = self._handle_output_moderation_when_task_finished(self._task_state.answer)
                 if output_moderation_answer:
                     self._task_state.answer = output_moderation_answer
-                    yield self._message_replace_to_stream_response(
-                        answer=output_moderation_answer
-                    )
+                    yield self._message_replace_to_stream_response(answer=output_moderation_answer)
 
                 # Save message
                 self._save_message(graph_runtime_state=graph_runtime_state)
@@ -557,9 +522,7 @@ class AdvancedChatAppGenerateTaskPipeline(
         self._message.answer = self._task_state.answer
         self._message.provider_response_latency = time.perf_counter() - self._start_at
         self._message.message_metadata = (
-            json.dumps(jsonable_encoder(self._task_state.metadata))
-            if self._task_state.metadata
-            else None
+            json.dumps(jsonable_encoder(self._task_state.metadata)) if self._task_state.metadata else None
         )
         message_files = [
             MessageFile(
@@ -624,9 +587,7 @@ class AdvancedChatAppGenerateTaskPipeline(
         if self._output_moderation_handler:
             if self._output_moderation_handler.should_direct_output():
                 # stop subscribe new token when output moderation should direct output
-                self._task_state.answer = (
-                    self._output_moderation_handler.get_final_output()
-                )
+                self._task_state.answer = self._output_moderation_handler.get_final_output()
                 self._queue_manager.publish(
                     QueueTextChunkEvent(text=self._task_state.answer),
                     PublishFrom.TASK_PIPELINE,
@@ -647,8 +608,6 @@ class AdvancedChatAppGenerateTaskPipeline(
         Refetch message.
         :return:
         """
-        message = (
-            db.session.query(Message).filter(Message.id == self._message.id).first()
-        )
+        message = db.session.query(Message).filter(Message.id == self._message.id).first()
         if message:
             self._message = message

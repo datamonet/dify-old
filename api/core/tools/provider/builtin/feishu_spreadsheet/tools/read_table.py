@@ -6,9 +6,7 @@ from core.tools.utils.feishu_api_utils import FeishuRequest
 
 
 class ReadTableTool(BuiltinTool):
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage:
         app_id = self.runtime.credentials.get("app_id")
         app_secret = self.runtime.credentials.get("app_secret")
         client = FeishuRequest(app_id, app_secret)
@@ -20,8 +18,6 @@ class ReadTableTool(BuiltinTool):
         query = tool_parameters.get("query")
         user_id_type = tool_parameters.get("user_id_type", "open_id")
 
-        res = client.read_table(
-            spreadsheet_token, sheet_id, sheet_name, num_range, query, user_id_type
-        )
+        res = client.read_table(spreadsheet_token, sheet_id, sheet_name, num_range, query, user_id_type)
 
         return self.create_json_message(res)

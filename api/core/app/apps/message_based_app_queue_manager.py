@@ -59,10 +59,7 @@ class MessageBasedAppQueueManager(AppQueueManager):
 
         if isinstance(
             event,
-            QueueStopEvent
-            | QueueErrorEvent
-            | QueueMessageEndEvent
-            | QueueAdvancedChatMessageEndEvent,
+            QueueStopEvent | QueueErrorEvent | QueueMessageEndEvent | QueueAdvancedChatMessageEndEvent,
         ):
             self.stop_listen()
 

@@ -77,9 +77,7 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
         )
 
         rerank_runner = RerankModelRunner(rerank_model_instance)
-        all_documents = rerank_runner.run(
-            query, all_documents, self.score_threshold, self.top_k
-        )
+        all_documents = rerank_runner.run(query, all_documents, self.score_threshold, self.top_k)
 
         for hit_callback in self.hit_callbacks:
             hit_callback.on_tool_end(all_documents)
@@ -100,20 +98,14 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
         ).all()
 
         if segments:
-            index_node_id_to_position = {
-                id: position for position, id in enumerate(index_node_ids)
-            }
+            index_node_id_to_position = {id: position for position, id in enumerate(index_node_ids)}
             sorted_segments = sorted(
                 segments,
-                key=lambda segment: index_node_id_to_position.get(
-                    segment.index_node_id, float("inf")
-                ),
+                key=lambda segment: index_node_id_to_position.get(segment.index_node_id, float("inf")),
             )
             for segment in sorted_segments:
                 if segment.answer:
-                    document_context_list.append(
-                        f"question:{segment.get_sign_content()} answer:{segment.answer}"
-                    )
+                    document_context_list.append(f"question:{segment.get_sign_content()} answer:{segment.answer}")
                 else:
                     document_context_list.append(segment.get_sign_content())
             if self.return_resource:
@@ -136,9 +128,7 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
                             "data_source_type": document.data_source_type,
                             "segment_id": segment.id,
                             "retriever_from": self.retriever_from,
-                            "score": document_score_list.get(
-                                segment.index_node_id, None
-                            ),
+                            "score": document_score_list.get(segment.index_node_id, None),
                         }
 
                         if self.retriever_from == "dev":
@@ -147,9 +137,7 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
                             source["segment_position"] = segment.position
                             source["index_node_hash"] = segment.index_node_hash
                         if segment.answer:
-                            source["content"] = (
-                                f"question:{segment.content} \nanswer:{segment.answer}"
-                            )
+                            source["content"] = f"question:{segment.content} \nanswer:{segment.answer}"
                         else:
                             source["content"] = segment.content
                         context_list.append(source)
@@ -170,9 +158,7 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
     ):
         with flask_app.app_context():
             dataset = (
-                db.session.query(Dataset)
-                .filter(Dataset.tenant_id == self.tenant_id, Dataset.id == dataset_id)
-                .first()
+                db.session.query(Dataset).filter(Dataset.tenant_id == self.tenant_id, Dataset.id == dataset_id).first()
             )
 
             if not dataset:
@@ -208,8 +194,7 @@ class DatasetMultiRetrieverTool(DatasetRetrieverBaseTool):
                         reranking_model=retrieval_model.get("reranking_model", None)
                         if retrieval_model["reranking_enable"]
                         else None,
-                        reranking_mode=retrieval_model.get("reranking_mode")
-                        or "reranking_model",
+                        reranking_mode=retrieval_model.get("reranking_mode") or "reranking_model",
                         weights=retrieval_model.get("weights", None),
                     )
 

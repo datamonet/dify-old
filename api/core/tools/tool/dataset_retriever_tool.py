@@ -46,9 +46,7 @@ class DatasetRetrieverTool(Tool):
         # save original retrieve strategy, and set retrieve strategy to SINGLE
         # Agent only support SINGLE mode
         original_retriever_mode = retrieve_config.retrieve_strategy
-        retrieve_config.retrieve_strategy = (
-            DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
-        )
+        retrieve_config.retrieve_strategy = DatasetRetrieveConfigEntity.RetrieveStrategy.SINGLE
         retrieval_tools = feature.to_dataset_retriever_tool(
             tenant_id=tenant_id,
             dataset_ids=dataset_ids,
@@ -101,9 +99,7 @@ class DatasetRetrieverTool(Tool):
     def tool_provider_type(self) -> ToolProviderType:
         return ToolProviderType.DATASET_RETRIEVAL
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         invoke dataset retriever tool
         """
@@ -116,9 +112,7 @@ class DatasetRetrieverTool(Tool):
 
         return self.create_text_message(text=result)
 
-    def validate_credentials(
-        self, credentials: dict[str, Any], parameters: dict[str, Any]
-    ) -> None:
+    def validate_credentials(self, credentials: dict[str, Any], parameters: dict[str, Any]) -> None:
         """
         validate the credentials for dataset retriever tool
         """

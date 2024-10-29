@@ -80,9 +80,7 @@ def test_overwrite_string_variable():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
         config={
             "id": "node_id",
             "data": {
@@ -96,9 +94,7 @@ def test_overwrite_string_variable():
         },
     )
 
-    with mock.patch(
-        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
-    ) as mock_run:
+    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 
@@ -169,9 +165,7 @@ def test_append_variable_to_array():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
         config={
             "id": "node_id",
             "data": {
@@ -185,9 +179,7 @@ def test_append_variable_to_array():
         },
     )
 
-    with mock.patch(
-        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
-    ) as mock_run:
+    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 
@@ -247,9 +239,7 @@ def test_clear_array():
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
         config={
             "id": "node_id",
             "data": {
@@ -263,9 +253,7 @@ def test_clear_array():
         },
     )
 
-    with mock.patch(
-        "core.workflow.nodes.variable_assigner.node.update_conversation_variable"
-    ) as mock_run:
+    with mock.patch("core.workflow.nodes.variable_assigner.node.update_conversation_variable") as mock_run:
         list(node.run())
         mock_run.assert_called_once()
 

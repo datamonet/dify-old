@@ -20,9 +20,7 @@ class CotCompletionAgentRunner(CotAgentRunner):
 
         system_prompt = (
             first_prompt.replace("{{instruction}}", self._instruction)
-            .replace(
-                "{{tools}}", json.dumps(jsonable_encoder(self._prompt_messages_tools))
-            )
+            .replace("{{tools}}", json.dumps(jsonable_encoder(self._prompt_messages_tools)))
             .replace(
                 "{{tool_names}}",
                 ", ".join([tool.name for tool in self._prompt_messages_tools]),
@@ -35,9 +33,7 @@ class CotCompletionAgentRunner(CotAgentRunner):
         """
         Organize historic prompt
         """
-        historic_prompt_messages = self._organize_historic_prompt_messages(
-            current_session_messages
-        )
+        historic_prompt_messages = self._organize_historic_prompt_messages(current_session_messages)
         historic_prompt = ""
 
         for message in historic_prompt_messages:

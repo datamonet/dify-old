@@ -12,9 +12,7 @@ def test_validate_credentials():
     model = LocalAISpeech2text()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="whisper-1", credentials={"server_url": "invalid_url"}
-        )
+        model.validate_credentials(model="whisper-1", credentials={"server_url": "invalid_url"})
 
     model.validate_credentials(
         model="whisper-1",

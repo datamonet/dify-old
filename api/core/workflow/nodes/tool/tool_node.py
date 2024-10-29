@@ -121,9 +121,7 @@ class ToolNode(BaseNode[ToolNodeData]):
             Mapping[str, Any]: A dictionary containing the generated parameters.
 
         """
-        tool_parameters_dictionary = {
-            parameter.name: parameter for parameter in tool_parameters
-        }
+        tool_parameters_dictionary = {parameter.name: parameter for parameter in tool_parameters}
 
         result = {}
         for parameter_name in node_data.tool_parameters:
@@ -250,9 +248,7 @@ class ToolNode(BaseNode[ToolNodeData]):
 
         return result
 
-    def _extract_tool_response_text(
-        self, tool_response: list[ToolInvokeMessage]
-    ) -> str:
+    def _extract_tool_response_text(self, tool_response: list[ToolInvokeMessage]) -> str:
         """
         Extract tool response text
         """

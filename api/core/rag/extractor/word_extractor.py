@@ -46,9 +46,7 @@ class WordExtractor(BaseExtractor):
             r = requests.get(self.file_path)
 
             if r.status_code != 200:
-                raise ValueError(
-                    f"Check the url of your file; returned status code {r.status_code}"
-                )
+                raise ValueError(f"Check the url of your file; returned status code {r.status_code}")
 
             self.web_path = self.file_path
             # TODO: use a better way to handle the file
@@ -90,18 +88,9 @@ class WordExtractor(BaseExtractor):
                     url = rel.reltype
                     response = requests.get(url, stream=True)
                     if response.status_code == 200:
-                        image_ext = mimetypes.guess_extension(
-                            response.headers["Content-Type"]
-                        )
+                        image_ext = mimetypes.guess_extension(response.headers["Content-Type"])
                         file_uuid = str(uuid.uuid4())
-                        file_key = (
-                            "image_files/"
-                            + self.tenant_id
-                            + "/"
-                            + file_uuid
-                            + "."
-                            + image_ext
-                        )
+                        file_key = "image_files/" + self.tenant_id + "/" + file_uuid + "." + image_ext
                         mime_type, _ = mimetypes.guess_type(file_key)
                         storage.save(file_key, response.content)
                     else:
@@ -110,14 +99,7 @@ class WordExtractor(BaseExtractor):
                     image_ext = rel.target_ref.split(".")[-1]
                     # user uuid as file name
                     file_uuid = str(uuid.uuid4())
-                    file_key = (
-                        "image_files/"
-                        + self.tenant_id
-                        + "/"
-                        + file_uuid
-                        + "."
-                        + image_ext
-                    )
+                    file_key = "image_files/" + self.tenant_id + "/" + file_uuid + "." + image_ext
                     mime_type, _ = mimetypes.guess_type(file_key)
 
                     storage.save(file_key, rel.target_part.blob)
@@ -135,9 +117,7 @@ class WordExtractor(BaseExtractor):
                     created_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
                     used=True,
                     used_by=self.user_id,
-                    used_at=datetime.datetime.now(datetime.timezone.utc).replace(
-                        tzinfo=None
-                    ),
+                    used_at=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
                 )
 
                 db.session.add(upload_file)
@@ -196,9 +176,7 @@ class WordExtractor(BaseExtractor):
         for run in paragraph.runs:
             if run.element.xpath(".//a:blip"):
                 for blip in run.element.xpath(".//a:blip"):
-                    image_id = blip.get(
-                        "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
-                    )
+                    image_id = blip.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
                     if not image_id:
                         continue
                     image_part = paragraph.part.rels[image_id].target_part
@@ -215,9 +193,7 @@ class WordExtractor(BaseExtractor):
         for run in paragraph.runs:
             if run.element.xpath(".//a:blip"):
                 for blip in run.element.xpath(".//a:blip"):
-                    embed_id = blip.get(
-                        "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
-                    )
+                    embed_id = blip.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
                     if embed_id:
                         rel_target = run.part.rels[embed_id].target_ref
                         if rel_target in image_map:
@@ -282,16 +258,12 @@ class WordExtractor(BaseExtractor):
         tables = doc.tables.copy()
         for element in doc.element.body:
             if hasattr(element, "tag"):
-                if isinstance(element.tag, str) and element.tag.endswith(
-                    "p"
-                ):  # paragraph
+                if isinstance(element.tag, str) and element.tag.endswith("p"):  # paragraph
                     para = paragraphs.pop(0)
                     parsed_paragraph = parse_paragraph(para)
                     if parsed_paragraph:
                         content.append(parsed_paragraph)
-                elif isinstance(element.tag, str) and element.tag.endswith(
-                    "tbl"
-                ):  # table
+                elif isinstance(element.tag, str) and element.tag.endswith("tbl"):  # table
                     table = tables.pop(0)
                     content.append(self._table_to_markdown(table, image_map))
         return "\n".join(content)

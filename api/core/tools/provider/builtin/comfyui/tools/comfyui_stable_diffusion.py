@@ -194,9 +194,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                 if len([d for d in models if d == model]) > 0:
                     return self.create_text_message(json.dumps(models))
                 else:
-                    raise ToolProviderCredentialValidationError(
-                        f"model {model} does not exist"
-                    )
+                    raise ToolProviderCredentialValidationError(f"model {model} does not exist")
         except Exception as e:
             raise ToolProviderCredentialValidationError(f"Failed to get models, {e}")
 
@@ -252,9 +250,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         break  # Execution is done
                 elif message["type"] == "status":
                     data = message["data"]
-                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get(
-                        "sid"
-                    ):
+                    if data["status"]["exec_info"]["queue_remaining"] == 0 and data.get("sid"):
                         break  # Execution is done
             else:
                 continue  # previews are binary data
@@ -327,9 +323,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
             draw_options["6"]["inputs"]["clip"][0] = "10"
             draw_options["7"]["inputs"]["clip"][0] = "10"
             # every Lora node link to next Lora node, and Checkpoints node link to first Lora node
-            for i, (lora, strength) in enumerate(
-                zip(lora_list, lora_strength_list), 10
-            ):
+            for i, (lora, strength) in enumerate(zip(lora_list, lora_strength_list), 10):
                 if i - 10 == len(lora_list) - 1:
                     next_node_id = "4"
                 else:
@@ -407,10 +401,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=models[0],
                             options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                                )
-                                for i in models
+                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in models
                             ],
                         )
                     )
@@ -420,9 +411,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         parameters.append(
                             ToolParameter(
                                 name=f"lora_{n}",
-                                label=I18nObject(
-                                    en_US=f"Lora {n}", zh_Hans=f"Lora {n}"
-                                ),
+                                label=I18nObject(en_US=f"Lora {n}", zh_Hans=f"Lora {n}"),
                                 human_description=I18nObject(
                                     en_US="Lora of Stable Diffusion, "
                                     "you can check the official documentation of Stable Diffusion",
@@ -435,10 +424,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                                 "Stable Diffusion",
                                 required=False,
                                 options=[
-                                    ToolParameterOption(
-                                        value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                                    )
-                                    for i in loras
+                                    ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in loras
                                 ],
                             )
                         )
@@ -447,9 +433,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                     parameters.append(
                         ToolParameter(
                             name="sampler_name",
-                            label=I18nObject(
-                                en_US="Sampling method", zh_Hans="Sampling method"
-                            ),
+                            label=I18nObject(en_US="Sampling method", zh_Hans="Sampling method"),
                             human_description=I18nObject(
                                 en_US="Sampling method of Stable Diffusion, "
                                 "you can check the official documentation of Stable Diffusion",
@@ -462,9 +446,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=sample_methods[0],
                             options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                                )
+                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i))
                                 for i in sample_methods
                             ],
                         )
@@ -486,10 +468,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                             required=True,
                             default=schedulers[0],
                             options=[
-                                ToolParameterOption(
-                                    value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                                )
-                                for i in schedulers
+                                ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i)) for i in schedulers
                             ],
                         )
                     )
@@ -510,9 +489,7 @@ class ComfyuiStableDiffusionTool(BuiltinTool):
                         required=True,
                         default=ModelType.SD15.name,
                         options=[
-                            ToolParameterOption(
-                                value=i, label=I18nObject(en_US=i, zh_Hans=i)
-                            )
+                            ToolParameterOption(value=i, label=I18nObject(en_US=i, zh_Hans=i))
                             for i in ModelType.__members__
                         ],
                     )

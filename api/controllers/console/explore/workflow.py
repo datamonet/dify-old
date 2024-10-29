@@ -39,9 +39,7 @@ class InstalledAppWorkflowRunApi(InstalledAppResource):
             raise NotWorkflowAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "inputs", type=dict, required=True, nullable=False, location="json"
-        )
+        parser.add_argument("inputs", type=dict, required=True, nullable=False, location="json")
         parser.add_argument("files", type=list, required=False, location="json")
         args = parser.parse_args()
 
@@ -86,9 +84,7 @@ class InstalledAppWorkflowTaskStopApi(InstalledAppResource):
         return {"result": "success"}
 
 
-api.add_resource(
-    InstalledAppWorkflowRunApi, "/installed-apps/<uuid:installed_app_id>/workflows/run"
-)
+api.add_resource(InstalledAppWorkflowRunApi, "/installed-apps/<uuid:installed_app_id>/workflows/run")
 api.add_resource(
     InstalledAppWorkflowTaskStopApi,
     "/installed-apps/<uuid:installed_app_id>/workflows/tasks/<string:task_id>/stop",

@@ -36,9 +36,7 @@ class AccountNotLinkTenantError(BaseHTTPException):
 
 class AlreadyActivateError(BaseHTTPException):
     error_code = "already_activate"
-    description = (
-        "Auth Token is invalid or account already activated, please check again."
-    )
+    description = "Auth Token is invalid or account already activated, please check again."
     code = 403
 
 

@@ -38,9 +38,7 @@ class CodeNode(BaseNode[CodeNodeData]):
             Python3CodeProvider,
             JavascriptCodeProvider,
         ]
-        code_provider: type[CodeNodeProvider] = next(
-            p for p in providers if p.is_accept_language(code_language)
-        )
+        code_provider: type[CodeNodeProvider] = next(p for p in providers if p.is_accept_language(code_language))
 
         return code_provider.get_default_config()
 
@@ -105,9 +103,7 @@ class CodeNode(BaseNode[CodeNodeData]):
 
         return value.replace("\x00", "")
 
-    def _check_number(
-        self, value: Union[int, float], variable: str
-    ) -> Union[int, float]:
+    def _check_number(self, value: Union[int, float], variable: str) -> Union[int, float]:
         """
         Check number
         :param value: value
@@ -150,9 +146,7 @@ class CodeNode(BaseNode[CodeNodeData]):
         :return:
         """
         if depth > dify_config.CODE_MAX_DEPTH:
-            raise ValueError(
-                f"Depth limit ${dify_config.CODE_MAX_DEPTH} reached, object too deep."
-            )
+            raise ValueError(f"Depth limit ${dify_config.CODE_MAX_DEPTH} reached, object too deep.")
 
         transformed_result = {}
         if output_schema is None:
@@ -179,39 +173,30 @@ class CodeNode(BaseNode[CodeNodeData]):
                     first_element = output_value[0] if len(output_value) > 0 else None
                     if first_element is not None:
                         if isinstance(first_element, int | float) and all(
-                            value is None or isinstance(value, int | float)
-                            for value in output_value
+                            value is None or isinstance(value, int | float) for value in output_value
                         ):
                             for i, value in enumerate(output_value):
                                 self._check_number(
                                     value=value,
-                                    variable=f"{prefix}.{output_name}[{i}]"
-                                    if prefix
-                                    else f"{output_name}[{i}]",
+                                    variable=f"{prefix}.{output_name}[{i}]" if prefix else f"{output_name}[{i}]",
                                 )
                         elif isinstance(first_element, str) and all(
-                            value is None or isinstance(value, str)
-                            for value in output_value
+                            value is None or isinstance(value, str) for value in output_value
                         ):
                             for i, value in enumerate(output_value):
                                 self._check_string(
                                     value=value,
-                                    variable=f"{prefix}.{output_name}[{i}]"
-                                    if prefix
-                                    else f"{output_name}[{i}]",
+                                    variable=f"{prefix}.{output_name}[{i}]" if prefix else f"{output_name}[{i}]",
                                 )
                         elif isinstance(first_element, dict) and all(
-                            value is None or isinstance(value, dict)
-                            for value in output_value
+                            value is None or isinstance(value, dict) for value in output_value
                         ):
                             for i, value in enumerate(output_value):
                                 if value is not None:
                                     self._transform_result(
                                         result=value,
                                         output_schema=None,
-                                        prefix=f"{prefix}.{output_name}[{i}]"
-                                        if prefix
-                                        else f"{output_name}[{i}]",
+                                        prefix=f"{prefix}.{output_name}[{i}]" if prefix else f"{output_name}[{i}]",
                                         depth=depth + 1,
                                     )
                         else:
@@ -222,9 +207,7 @@ class CodeNode(BaseNode[CodeNodeData]):
                 elif output_value is None:
                     pass
                 else:
-                    raise ValueError(
-                        f"Output {prefix}.{output_name} is not a valid type."
-                    )
+                    raise ValueError(f"Output {prefix}.{output_name} is not a valid type.")
 
             return result
 
@@ -273,19 +256,14 @@ class CodeNode(BaseNode[CodeNodeData]):
                             f" got {type(result.get(output_name))} instead."
                         )
                 else:
-                    if (
-                        len(result[output_name])
-                        > dify_config.CODE_MAX_NUMBER_ARRAY_LENGTH
-                    ):
+                    if len(result[output_name]) > dify_config.CODE_MAX_NUMBER_ARRAY_LENGTH:
                         raise ValueError(
                             f"The length of output variable `{prefix}{dot}{output_name}` must be"
                             f" less than {dify_config.CODE_MAX_NUMBER_ARRAY_LENGTH} elements."
                         )
 
                     transformed_result[output_name] = [
-                        self._check_number(
-                            value=value, variable=f"{prefix}{dot}{output_name}[{i}]"
-                        )
+                        self._check_number(value=value, variable=f"{prefix}{dot}{output_name}[{i}]")
                         for i, value in enumerate(result[output_name])
                     ]
             elif output_config.type == "array[string]":
@@ -299,19 +277,14 @@ class CodeNode(BaseNode[CodeNodeData]):
                             f" got {type(result.get(output_name))} instead."
                         )
                 else:
-                    if (
-                        len(result[output_name])
-                        > dify_config.CODE_MAX_STRING_ARRAY_LENGTH
-                    ):
+                    if len(result[output_name]) > dify_config.CODE_MAX_STRING_ARRAY_LENGTH:
                         raise ValueError(
                             f"The length of output variable `{prefix}{dot}{output_name}` must be"
                             f" less than {dify_config.CODE_MAX_STRING_ARRAY_LENGTH} elements."
                         )
 
                     transformed_result[output_name] = [
-                        self._check_string(
-                            value=value, variable=f"{prefix}{dot}{output_name}[{i}]"
-                        )
+                        self._check_string(value=value, variable=f"{prefix}{dot}{output_name}[{i}]")
                         for i, value in enumerate(result[output_name])
                     ]
             elif output_config.type == "array[object]":
@@ -325,10 +298,7 @@ class CodeNode(BaseNode[CodeNodeData]):
                             f" got {type(result.get(output_name))} instead."
                         )
                 else:
-                    if (
-                        len(result[output_name])
-                        > dify_config.CODE_MAX_OBJECT_ARRAY_LENGTH
-                    ):
+                    if len(result[output_name]) > dify_config.CODE_MAX_OBJECT_ARRAY_LENGTH:
                         raise ValueError(
                             f"The length of output variable `{prefix}{dot}{output_name}` must be"
                             f" less than {dify_config.CODE_MAX_OBJECT_ARRAY_LENGTH} elements."

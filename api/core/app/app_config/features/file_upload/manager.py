@@ -33,9 +33,7 @@ class FileUploadConfigManager:
                 return FileExtraConfig.model_validate(data)
 
     @classmethod
-    def validate_and_set_defaults(
-        cls, config: dict, is_vision: bool = True
-    ) -> tuple[dict, list[str]]:
+    def validate_and_set_defaults(cls, config: dict, is_vision: bool = True) -> tuple[dict, list[str]]:
         """
         Validate and set defaults for file upload feature
 

@@ -23,9 +23,7 @@ class CotChatAgentRunner(CotAgentRunner):
 
         system_prompt = (
             first_prompt.replace("{{instruction}}", self._instruction)
-            .replace(
-                "{{tools}}", json.dumps(jsonable_encoder(self._prompt_messages_tools))
-            )
+            .replace("{{tools}}", json.dumps(jsonable_encoder(self._prompt_messages_tools)))
             .replace(
                 "{{tool_names}}",
                 ", ".join([tool.name for tool in self._prompt_messages_tools]),
@@ -71,9 +69,7 @@ class CotChatAgentRunner(CotAgentRunner):
                     if unit.action_str:
                         assistant_message.content += f"Action: {unit.action_str}\n\n"
                     if unit.observation:
-                        assistant_message.content += (
-                            f"Observation: {unit.observation}\n\n"
-                        )
+                        assistant_message.content += f"Observation: {unit.observation}\n\n"
 
             assistant_messages = [assistant_message]
 
@@ -99,9 +95,7 @@ class CotChatAgentRunner(CotAgentRunner):
             ]
         else:
             # organize historic prompt messages
-            historic_messages = self._organize_historic_prompt_messages(
-                [system_message, *query_messages]
-            )
+            historic_messages = self._organize_historic_prompt_messages([system_message, *query_messages])
             messages = [system_message, *historic_messages, *query_messages]
 
         # join all messages

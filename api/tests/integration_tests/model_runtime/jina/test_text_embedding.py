@@ -13,9 +13,7 @@ def test_validate_credentials():
     model = JinaTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="jina-embeddings-v2-base-en", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="jina-embeddings-v2-base-en", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="jina-embeddings-v2-base-en",

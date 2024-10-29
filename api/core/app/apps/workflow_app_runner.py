@@ -102,8 +102,7 @@ class WorkflowBasedAppRunner(AppRunner):
         node_configs = [
             node
             for node in graph_config.get("nodes", [])
-            if node.get("id") == node_id
-            or node.get("data", {}).get("iteration_id", "") == node_id
+            if node.get("id") == node_id or node.get("data", {}).get("iteration_id", "") == node_id
         ]
 
         graph_config["nodes"] = node_configs
@@ -165,9 +164,7 @@ class WorkflowBasedAppRunner(AppRunner):
 
         return graph, variable_pool
 
-    def _handle_event(
-        self, workflow_entry: WorkflowEntry, event: GraphEngineEvent
-    ) -> None:
+    def _handle_event(self, workflow_entry: WorkflowEntry, event: GraphEngineEvent) -> None:
         """
         Handle event
         :param workflow_entry: workflow entry
@@ -175,9 +172,7 @@ class WorkflowBasedAppRunner(AppRunner):
         """
         if isinstance(event, GraphRunStartedEvent):
             self._publish_event(
-                QueueWorkflowStartedEvent(
-                    graph_runtime_state=workflow_entry.graph_engine.graph_runtime_state
-                )
+                QueueWorkflowStartedEvent(graph_runtime_state=workflow_entry.graph_engine.graph_runtime_state)
             )
         elif isinstance(event, GraphRunSucceededEvent):
             self._publish_event(QueueWorkflowSucceededEvent(outputs=event.outputs))
@@ -249,8 +244,7 @@ class WorkflowBasedAppRunner(AppRunner):
                     if event.route_node_state.node_run_result
                     else {},
                     error=event.route_node_state.node_run_result.error
-                    if event.route_node_state.node_run_result
-                    and event.route_node_state.node_run_result.error
+                    if event.route_node_state.node_run_result and event.route_node_state.node_run_result.error
                     else "Unknown error",
                     in_iteration_id=event.in_iteration_id,
                 )
@@ -352,9 +346,7 @@ class WorkflowBasedAppRunner(AppRunner):
                     outputs=event.outputs,
                     metadata=event.metadata,
                     steps=event.steps,
-                    error=event.error
-                    if isinstance(event, IterationRunFailedEvent)
-                    else None,
+                    error=event.error if isinstance(event, IterationRunFailedEvent) else None,
                 )
             )
 

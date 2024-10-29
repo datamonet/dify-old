@@ -23,13 +23,9 @@ def test_validate_credentials():
     model = StepfunLargeLanguageModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="step-1-8k", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="step-1-8k", credentials={"api_key": "invalid_key"})
 
-    model.validate_credentials(
-        model="step-1-8k", credentials={"api_key": os.environ.get("STEPFUN_API_KEY")}
-    )
+    model.validate_credentials(model="step-1-8k", credentials={"api_key": os.environ.get("STEPFUN_API_KEY")})
 
 
 def test_invoke_model():
@@ -72,11 +68,7 @@ def test_invoke_stream_model():
         assert isinstance(chunk, LLMResultChunk)
         assert isinstance(chunk.delta, LLMResultChunkDelta)
         assert isinstance(chunk.delta.message, AssistantPromptMessage)
-        assert (
-            len(chunk.delta.message.content) > 0
-            if chunk.delta.finish_reason is None
-            else True
-        )
+        assert len(chunk.delta.message.content) > 0 if chunk.delta.finish_reason is None else True
 
 
 def test_get_customizable_model_schema():
@@ -124,9 +116,7 @@ def test_invoke_chat_model_with_tools():
                 description="Get the current stock price",
                 parameters={
                     "type": "object",
-                    "properties": {
-                        "symbol": {"type": "string", "description": "The stock symbol"}
-                    },
+                    "properties": {"symbol": {"type": "string", "description": "The stock symbol"}},
                     "required": ["symbol"],
                 },
             ),

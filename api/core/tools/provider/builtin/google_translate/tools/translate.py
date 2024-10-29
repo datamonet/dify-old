@@ -27,9 +27,7 @@ class GoogleTranslate(BuiltinTool):
             result = self._translate(content, dest)
             return self.create_text_message(str(result))
         except Exception:
-            return self.create_text_message(
-                "Translation service error, please check the network"
-            )
+            return self.create_text_message("Translation service error, please check the network")
 
     def _translate(self, content: str, dest: str) -> str:
         try:

@@ -14,9 +14,7 @@ from core.model_runtime.model_providers.wenxin.text_embedding.text_embedding imp
 
 def test_max_chunks():
     class _MockTextEmbedding(TextEmbedding):
-        def embed_documents(
-            self, model: str, texts: list[str], user: str
-        ) -> (list[list[float]], int, int):
+        def embed_documents(self, model: str, texts: list[str], user: str) -> (list[list[float]], int, int):
             embeddings = [[1.0, 2.0, 3.0] for i in range(len(texts))]
             tokens = 0
             for text in texts:
@@ -62,9 +60,7 @@ def test_context_size():
     context_size = embedding_model._get_context_size(model, credentials)
 
     class _MockTextEmbedding(TextEmbedding):
-        def embed_documents(
-            self, model: str, texts: list[str], user: str
-        ) -> (list[list[float]], int, int):
+        def embed_documents(self, model: str, texts: list[str], user: str) -> (list[list[float]], int, int):
             embeddings = [[1.0, 2.0, 3.0] for i in range(len(texts))]
             tokens = 0
             for text in texts:
@@ -79,7 +75,5 @@ def test_context_size():
     assert get_num_tokens_by_gpt2(text) == context_size * 2
 
     texts = [text]
-    result: TextEmbeddingResult = embedding_model.invoke(
-        model, credentials, texts, "test"
-    )
+    result: TextEmbeddingResult = embedding_model.invoke(model, credentials, texts, "test")
     assert result.usage.tokens == context_size

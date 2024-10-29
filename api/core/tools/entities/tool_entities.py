@@ -213,16 +213,10 @@ class ToolParameter(BaseModel):
 
     name: str = Field(..., description="The name of the parameter")
     label: I18nObject = Field(..., description="The label presented to the user")
-    human_description: Optional[I18nObject] = Field(
-        None, description="The description presented to the user"
-    )
-    placeholder: Optional[I18nObject] = Field(
-        None, description="The placeholder presented to the user"
-    )
+    human_description: Optional[I18nObject] = Field(None, description="The description presented to the user")
+    placeholder: Optional[I18nObject] = Field(None, description="The placeholder presented to the user")
     type: ToolParameterType = Field(..., description="The type of the parameter")
-    form: ToolParameterForm = Field(
-        ..., description="The form of the parameter, schema/form/llm"
-    )
+    form: ToolParameterForm = Field(..., description="The form of the parameter, schema/form/llm")
     llm_description: Optional[str] = None
     required: Optional[bool] = False
     default: Optional[Union[float, int, str]] = None
@@ -251,10 +245,7 @@ class ToolParameter(BaseModel):
         # convert options to ToolParameterOption
         if options:
             options = [
-                ToolParameterOption(
-                    value=option, label=I18nObject(en_US=option, zh_Hans=option)
-                )
-                for option in options
+                ToolParameterOption(value=option, label=I18nObject(en_US=option, zh_Hans=option)) for option in options
             ]
         return cls(
             name=name,
@@ -458,9 +449,7 @@ class ModelToolConfiguration(BaseModel):
     type: str = Field(..., description="The type of the model tool")
     model: str = Field(..., description="The model")
     label: I18nObject = Field(..., description="The label of the model tool")
-    properties: dict[ModelToolPropertyKey, Any] = Field(
-        ..., description="The properties of the model tool"
-    )
+    properties: dict[ModelToolPropertyKey, Any] = Field(..., description="The properties of the model tool")
 
 
 class ModelToolProviderConfiguration(BaseModel):
@@ -469,9 +458,7 @@ class ModelToolProviderConfiguration(BaseModel):
     """
 
     provider: str = Field(..., description="The provider of the model tool")
-    models: list[ModelToolConfiguration] = Field(
-        ..., description="The models of the model tool"
-    )
+    models: list[ModelToolConfiguration] = Field(..., description="The models of the model tool")
     label: I18nObject = Field(..., description="The label of the model tool")
 
 
@@ -482,9 +469,7 @@ class WorkflowToolParameterConfiguration(BaseModel):
 
     name: str = Field(..., description="The name of the parameter")
     description: str = Field(..., description="The description of the parameter")
-    form: ToolParameter.ToolParameterForm = Field(
-        ..., description="The form of the parameter"
-    )
+    form: ToolParameter.ToolParameterForm = Field(..., description="The form of the parameter")
 
 
 class ToolInvokeMeta(BaseModel):

@@ -53,17 +53,13 @@ def get_mocked_fetch_model_config(
             preferred_provider_type=ProviderType.CUSTOM,
             using_provider_type=ProviderType.CUSTOM,
             system_configuration=SystemConfiguration(enabled=False),
-            custom_configuration=CustomConfiguration(
-                provider=CustomProviderConfiguration(credentials=credentials)
-            ),
+            custom_configuration=CustomConfiguration(provider=CustomProviderConfiguration(credentials=credentials)),
             model_settings=[],
         ),
         provider_instance=provider_instance,
         model_type_instance=model_type_instance,
     )
-    model_instance = ModelInstance(
-        provider_model_bundle=provider_model_bundle, model=model
-    )
+    model_instance = ModelInstance(provider_model_bundle=provider_model_bundle, model=model)
     model_schema = model_type_instance.get_model_schema(model)
     assert model_schema is not None
     model_config = ModelConfigWithCredentialsEntity(
@@ -138,9 +134,7 @@ def init_parameter_extractor_node(config: dict):
         id=str(uuid.uuid4()),
         graph_init_params=init_params,
         graph=graph,
-        graph_runtime_state=GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        ),
+        graph_runtime_state=GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter()),
         config=config,
     )
 

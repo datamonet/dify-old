@@ -168,9 +168,7 @@ class ReactMultiDatasetRouter:
         text, usage = self._handle_invoke_result(invoke_result=invoke_result)
 
         # deduct quota
-        LLMNode.deduct_llm_quota(
-            tenant_id=tenant_id, model_instance=model_instance, usage=usage
-        )
+        LLMNode.deduct_llm_quota(tenant_id=tenant_id, model_instance=model_instance, usage=usage)
 
         return text, usage
 
@@ -222,9 +220,7 @@ class ReactMultiDatasetRouter:
         format_instructions = format_instructions.format(tool_names=tool_names)
         template = "\n\n".join([prefix, formatted_tools, format_instructions, suffix])
         prompt_messages = []
-        system_prompt_messages = ChatModelMessage(
-            role=PromptMessageRole.SYSTEM, text=template
-        )
+        system_prompt_messages = ChatModelMessage(role=PromptMessageRole.SYSTEM, text=template)
         prompt_messages.append(system_prompt_messages)
         user_prompt_message = ChatModelMessage(role=PromptMessageRole.USER, text=query)
         prompt_messages.append(user_prompt_message)

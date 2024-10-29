@@ -44,9 +44,7 @@ class AudioApi(Resource):
         file = request.files["file"]
 
         try:
-            response = AudioService.transcript_asr(
-                app_model=app_model, file=file, end_user=end_user
-            )
+            response = AudioService.transcript_asr(app_model=app_model, file=file, end_user=end_user)
 
             return response
         except services.errors.app_model_config.AppModelConfigBrokenError:
@@ -97,9 +95,7 @@ class TextApi(Resource):
                 voice = args.get("voice") or text_to_speech.get("voice")
             else:
                 try:
-                    voice = args.get(
-                        "voice"
-                    ) or app_model.app_model_config.text_to_speech_dict.get("voice")
+                    voice = args.get("voice") or app_model.app_model_config.text_to_speech_dict.get("voice")
                 except Exception:
                     voice = None
             response = AudioService.transcript_tts(

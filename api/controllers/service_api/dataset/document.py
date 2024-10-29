@@ -35,18 +35,10 @@ class DocumentAddByTextApi(DatasetApiResource):
     def post(self, tenant_id, dataset_id):
         """Create document by text."""
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "name", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "text", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "process_rule", type=dict, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "original_document_id", type=str, required=False, location="json"
-        )
+        parser.add_argument("name", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("text", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("process_rule", type=dict, required=False, nullable=True, location="json")
+        parser.add_argument("original_document_id", type=str, required=False, location="json")
         parser.add_argument(
             "doc_form",
             type=str,
@@ -80,11 +72,7 @@ class DocumentAddByTextApi(DatasetApiResource):
         args = parser.parse_args()
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
         if not dataset:
             raise ValueError("Dataset is not exist.")
@@ -109,9 +97,7 @@ class DocumentAddByTextApi(DatasetApiResource):
                 dataset=dataset,
                 document_data=args,
                 account=current_user,
-                dataset_process_rule=dataset.latest_process_rule
-                if "process_rule" not in args
-                else None,
+                dataset_process_rule=dataset.latest_process_rule if "process_rule" not in args else None,
                 created_from="api",
             )
         except ProviderTokenNotInitError as ex:
@@ -132,15 +118,9 @@ class DocumentUpdateByTextApi(DatasetApiResource):
     def post(self, tenant_id, dataset_id, document_id):
         """Update document by text."""
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "name", type=str, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "text", type=str, required=False, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "process_rule", type=dict, required=False, nullable=True, location="json"
-        )
+        parser.add_argument("name", type=str, required=False, nullable=True, location="json")
+        parser.add_argument("text", type=str, required=False, nullable=True, location="json")
+        parser.add_argument("process_rule", type=dict, required=False, nullable=True, location="json")
         parser.add_argument(
             "doc_form",
             type=str,
@@ -167,11 +147,7 @@ class DocumentUpdateByTextApi(DatasetApiResource):
         args = parser.parse_args()
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
         if not dataset:
             raise ValueError("Dataset is not exist.")
@@ -195,9 +171,7 @@ class DocumentUpdateByTextApi(DatasetApiResource):
                 dataset=dataset,
                 document_data=args,
                 account=current_user,
-                dataset_process_rule=dataset.latest_process_rule
-                if "process_rule" not in args
-                else None,
+                dataset_process_rule=dataset.latest_process_rule if "process_rule" not in args else None,
                 created_from="api",
             )
         except ProviderTokenNotInitError as ex:
@@ -228,11 +202,7 @@ class DocumentAddByFileApi(DatasetApiResource):
         # get dataset info
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
         if not dataset:
             raise ValueError("Dataset is not exist.")
@@ -262,9 +232,7 @@ class DocumentAddByFileApi(DatasetApiResource):
                 dataset=dataset,
                 document_data=args,
                 account=dataset.created_by_account,
-                dataset_process_rule=dataset.latest_process_rule
-                if "process_rule" not in args
-                else None,
+                dataset_process_rule=dataset.latest_process_rule if "process_rule" not in args else None,
                 created_from="api",
             )
         except ProviderTokenNotInitError as ex:
@@ -294,11 +262,7 @@ class DocumentUpdateByFileApi(DatasetApiResource):
         # get dataset info
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
         if not dataset:
             raise ValueError("Dataset is not exist.")
@@ -324,9 +288,7 @@ class DocumentUpdateByFileApi(DatasetApiResource):
                 dataset=dataset,
                 document_data=args,
                 account=dataset.created_by_account,
-                dataset_process_rule=dataset.latest_process_rule
-                if "process_rule" not in args
-                else None,
+                dataset_process_rule=dataset.latest_process_rule if "process_rule" not in args else None,
                 created_from="api",
             )
         except ProviderTokenNotInitError as ex:
@@ -347,11 +309,7 @@ class DocumentDeleteApi(DatasetApiResource):
         tenant_id = str(tenant_id)
 
         # get dataset info
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
 
         if not dataset:
             raise ValueError("Dataset is not exist.")
@@ -382,17 +340,11 @@ class DocumentListApi(DatasetApiResource):
         page = request.args.get("page", default=1, type=int)
         limit = request.args.get("limit", default=20, type=int)
         search = request.args.get("keyword", default=None, type=str)
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
         if not dataset:
             raise NotFound("Dataset not found.")
 
-        query = Document.query.filter_by(
-            dataset_id=str(dataset_id), tenant_id=tenant_id
-        )
+        query = Document.query.filter_by(dataset_id=str(dataset_id), tenant_id=tenant_id)
 
         if search:
             search = f"%{search}%"
@@ -400,9 +352,7 @@ class DocumentListApi(DatasetApiResource):
 
         query = query.order_by(desc(Document.created_at))
 
-        paginated_documents = query.paginate(
-            page=page, per_page=limit, max_per_page=100, error_out=False
-        )
+        paginated_documents = query.paginate(page=page, per_page=limit, max_per_page=100, error_out=False)
         documents = paginated_documents.items
 
         response = {
@@ -422,11 +372,7 @@ class DocumentIndexingStatusApi(DatasetApiResource):
         batch = str(batch)
         tenant_id = str(tenant_id)
         # get dataset
-        dataset = (
-            db.session.query(Dataset)
-            .filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id)
-            .first()
-        )
+        dataset = db.session.query(Dataset).filter(Dataset.tenant_id == tenant_id, Dataset.id == dataset_id).first()
         if not dataset:
             raise NotFound("Dataset not found.")
         # get documents
@@ -453,12 +399,8 @@ class DocumentIndexingStatusApi(DatasetApiResource):
         return data
 
 
-api.add_resource(
-    DocumentAddByTextApi, "/datasets/<uuid:dataset_id>/document/create_by_text"
-)
-api.add_resource(
-    DocumentAddByFileApi, "/datasets/<uuid:dataset_id>/document/create_by_file"
-)
+api.add_resource(DocumentAddByTextApi, "/datasets/<uuid:dataset_id>/document/create_by_text")
+api.add_resource(DocumentAddByFileApi, "/datasets/<uuid:dataset_id>/document/create_by_file")
 api.add_resource(
     DocumentUpdateByTextApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_text",
@@ -467,9 +409,7 @@ api.add_resource(
     DocumentUpdateByFileApi,
     "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_file",
 )
-api.add_resource(
-    DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>"
-)
+api.add_resource(DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
 api.add_resource(DocumentListApi, "/datasets/<uuid:dataset_id>/documents")
 api.add_resource(
     DocumentIndexingStatusApi,

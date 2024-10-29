@@ -14,16 +14,13 @@ class MockModerationClass:
         self: Moderations,
         *,
         input: Union[str, list[str]],
-        model: Union[str, Literal["text-moderation-latest", "text-moderation-stable"]]
-        | NotGiven = NOT_GIVEN,
+        model: Union[str, Literal["text-moderation-latest", "text-moderation-stable"]] | NotGiven = NOT_GIVEN,
         **kwargs: Any,
     ) -> ModerationCreateResponse:
         if isinstance(input, str):
             input = [input]
 
-        if not re.match(
-            r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)
-        ):
+        if not re.match(r"^(https?):\/\/[^\s\/$.?#].[^\s]*$", str(self._client.base_url)):
             raise InvokeAuthorizationError("Invalid base url")
 
         if len(self._client.api_key) < 18:
@@ -101,6 +98,4 @@ class MockModerationClass:
                     )
                 )
 
-        return ModerationCreateResponse(
-            id="shiroii kuloko", model=model, results=result
-        )
+        return ModerationCreateResponse(id="shiroii kuloko", model=model, results=result)

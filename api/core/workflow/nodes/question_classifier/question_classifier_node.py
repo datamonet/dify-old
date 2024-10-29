@@ -115,10 +115,7 @@ class QuestionClassifierNode(LLMNode):
         try:
             result_text_json = parse_and_check_json_markdown(result_text, [])
             # result_text_json = json.loads(result_text.strip('```JSON\n'))
-            if (
-                "category_name" in result_text_json
-                and "category_id" in result_text_json
-            ):
+            if "category_name" in result_text_json and "category_id" in result_text_json:
                 category_id_result = result_text_json["category_id"]
                 classes = node_data.classes
                 classes_map = {class_.id: class_.name for class_ in classes}
@@ -185,20 +182,12 @@ class QuestionClassifierNode(LLMNode):
         variable_mapping = {"query": node_data.query_variable_selector}
         variable_selectors = []
         if node_data.instruction:
-            variable_template_parser = VariableTemplateParser(
-                template=node_data.instruction
-            )
-            variable_selectors.extend(
-                variable_template_parser.extract_variable_selectors()
-            )
+            variable_template_parser = VariableTemplateParser(template=node_data.instruction)
+            variable_selectors.extend(variable_template_parser.extract_variable_selectors())
         for variable_selector in variable_selectors:
-            variable_mapping[variable_selector.variable] = (
-                variable_selector.value_selector
-            )
+            variable_mapping[variable_selector.variable] = variable_selector.value_selector
 
-        variable_mapping = {
-            node_id + "." + key: value for key, value in variable_mapping.items()
-        }
+        variable_mapping = {node_id + "." + key: value for key, value in variable_mapping.items()}
 
         return variable_mapping
 
@@ -232,9 +221,7 @@ class QuestionClassifierNode(LLMNode):
         )
         rest_tokens = 2000
 
-        model_context_tokens = model_config.model_schema.model_properties.get(
-            ModelPropertyKey.CONTEXT_SIZE
-        )
+        model_context_tokens = model_config.model_schema.model_properties.get(ModelPropertyKey.CONTEXT_SIZE)
         if model_context_tokens:
             model_instance = ModelInstance(
                 provider_model_bundle=model_config.provider_model_bundle,
@@ -246,8 +233,7 @@ class QuestionClassifierNode(LLMNode):
             max_tokens = 0
             for parameter_rule in model_config.model_schema.parameter_rules:
                 if parameter_rule.name == "max_tokens" or (
-                    parameter_rule.use_template
-                    and parameter_rule.use_template == "max_tokens"
+                    parameter_rule.use_template and parameter_rule.use_template == "max_tokens"
                 ):
                     max_tokens = (
                         model_config.parameters.get(parameter_rule.name)

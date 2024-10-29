@@ -21,9 +21,7 @@ class FirecrawlApp:
         json_data = {"url": url}
         if params:
             json_data.update(params)
-        response = requests.post(
-            f"{self.base_url}/v0/scrape", headers=headers, json=json_data
-        )
+        response = requests.post(f"{self.base_url}/v0/scrape", headers=headers, json=json_data)
         if response.status_code == 200:
             response = response.json()
             if response["success"] == True:
@@ -39,13 +37,9 @@ class FirecrawlApp:
 
         elif response.status_code in {402, 409, 500}:
             error_message = response.json().get("error", "Unknown error occurred")
-            raise Exception(
-                f"Failed to scrape URL. Status code: {response.status_code}. Error: {error_message}"
-            )
+            raise Exception(f"Failed to scrape URL. Status code: {response.status_code}. Error: {error_message}")
         else:
-            raise Exception(
-                f"Failed to scrape URL. Status code: {response.status_code}"
-            )
+            raise Exception(f"Failed to scrape URL. Status code: {response.status_code}")
 
     def crawl_url(self, url, params=None) -> str:
         headers = self._prepare_headers()
@@ -61,25 +55,17 @@ class FirecrawlApp:
 
     def check_crawl_status(self, job_id) -> dict:
         headers = self._prepare_headers()
-        response = self._get_request(
-            f"{self.base_url}/v0/crawl/status/{job_id}", headers
-        )
+        response = self._get_request(f"{self.base_url}/v0/crawl/status/{job_id}", headers)
         if response.status_code == 200:
             crawl_status_response = response.json()
             if crawl_status_response.get("status") == "completed":
                 total = crawl_status_response.get("total", 0)
                 if total == 0:
-                    raise Exception(
-                        "Failed to check crawl status. Error: No page found"
-                    )
+                    raise Exception("Failed to check crawl status. Error: No page found")
                 data = crawl_status_response.get("data", [])
                 url_data_list = []
                 for item in data:
-                    if (
-                        isinstance(item, dict)
-                        and "metadata" in item
-                        and "markdown" in item
-                    ):
+                    if isinstance(item, dict) and "metadata" in item and "markdown" in item:
                         url_data = {
                             "title": item.get("metadata").get("title"),
                             "description": item.get("metadata").get("description"),
@@ -136,6 +122,4 @@ class FirecrawlApp:
 
     def _handle_error(self, response, action):
         error_message = response.json().get("error", "Unknown error occurred")
-        raise Exception(
-            f"Failed to {action}. Status code: {response.status_code}. Error: {error_message}"
-        )
+        raise Exception(f"Failed to {action}. Status code: {response.status_code}. Error: {error_message}")

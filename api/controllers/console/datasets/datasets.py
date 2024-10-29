@@ -58,9 +58,7 @@ class DatasetListApi(Resource):
         tag_ids = request.args.getlist("tag_ids")
 
         if ids:
-            datasets, total = DatasetService.get_datasets_by_ids(
-                ids, current_user.current_tenant_id
-            )
+            datasets, total = DatasetService.get_datasets_by_ids(ids, current_user.current_tenant_id)
         else:
             datasets, total = DatasetService.get_datasets(
                 page,
@@ -73,26 +71,18 @@ class DatasetListApi(Resource):
 
         # check embedding setting
         provider_manager = ProviderManager()
-        configurations = provider_manager.get_configurations(
-            tenant_id=current_user.current_tenant_id
-        )
+        configurations = provider_manager.get_configurations(tenant_id=current_user.current_tenant_id)
 
-        embedding_models = configurations.get_models(
-            model_type=ModelType.TEXT_EMBEDDING, only_active=True
-        )
+        embedding_models = configurations.get_models(model_type=ModelType.TEXT_EMBEDDING, only_active=True)
 
         model_names = []
         for embedding_model in embedding_models:
-            model_names.append(
-                f"{embedding_model.model}:{embedding_model.provider.provider}"
-            )
+            model_names.append(f"{embedding_model.model}:{embedding_model.provider.provider}")
 
         data = marshal(datasets, dataset_detail_fields)
         for item in data:
             if item["indexing_technique"] == "high_quality":
-                item_model = (
-                    f"{item['embedding_model']}:{item['embedding_model_provider']}"
-                )
+                item_model = f"{item['embedding_model']}:{item['embedding_model_provider']}"
                 if item_model in model_names:
                     item["embedding_available"] = True
                 else:
@@ -101,9 +91,7 @@ class DatasetListApi(Resource):
                 item["embedding_available"] = True
 
             if item.get("permission") == "partial_members":
-                part_users_list = (
-                    DatasetPermissionService.get_dataset_partial_member_list(item["id"])
-                )
+                part_users_list = DatasetPermissionService.get_dataset_partial_member_list(item["id"])
                 item.update({"partial_member_list": part_users_list})
             else:
                 item.update({"partial_member_list": []})
@@ -203,26 +191,18 @@ class DatasetApi(Resource):
             raise Forbidden(str(e))
         data = marshal(dataset, dataset_detail_fields)
         if data.get("permission") == "partial_members":
-            part_users_list = DatasetPermissionService.get_dataset_partial_member_list(
-                dataset_id_str
-            )
+            part_users_list = DatasetPermissionService.get_dataset_partial_member_list(dataset_id_str)
             data.update({"partial_member_list": part_users_list})
 
         # check embedding setting
         provider_manager = ProviderManager()
-        configurations = provider_manager.get_configurations(
-            tenant_id=current_user.current_tenant_id
-        )
+        configurations = provider_manager.get_configurations(tenant_id=current_user.current_tenant_id)
 
-        embedding_models = configurations.get_models(
-            model_type=ModelType.TEXT_EMBEDDING, only_active=True
-        )
+        embedding_models = configurations.get_models(model_type=ModelType.TEXT_EMBEDDING, only_active=True)
 
         model_names = []
         for embedding_model in embedding_models:
-            model_names.append(
-                f"{embedding_model.model}:{embedding_model.provider.provider}"
-            )
+            model_names.append(f"{embedding_model.model}:{embedding_model.provider.provider}")
 
         if data["indexing_technique"] == "high_quality":
             item_model = f"{data['embedding_model']}:{data['embedding_model_provider']}"
@@ -234,9 +214,7 @@ class DatasetApi(Resource):
             data["embedding_available"] = True
 
         if data.get("permission") == "partial_members":
-            part_users_list = DatasetPermissionService.get_dataset_partial_member_list(
-                dataset_id_str
-            )
+            part_users_list = DatasetPermissionService.get_dataset_partial_member_list(dataset_id_str)
             data.update({"partial_member_list": part_users_list})
 
         return data, 200
@@ -360,10 +338,7 @@ class DatasetApi(Resource):
         result_data = marshal(dataset, dataset_detail_fields)
         tenant_id = current_user.current_tenant_id
 
-        if (
-            data.get("partial_member_list")
-            and data.get("permission") == "partial_members"
-        ):
+        if data.get("partial_member_list") and data.get("permission") == "partial_members":
             DatasetPermissionService.update_partial_member_list(
                 tenant_id, dataset_id_str, data.get("partial_member_list")
             )
@@ -374,9 +349,7 @@ class DatasetApi(Resource):
         ):
             DatasetPermissionService.clear_partial_member_list(dataset_id_str)
 
-        partial_member_list = DatasetPermissionService.get_dataset_partial_member_list(
-            dataset_id_str
-        )
+        partial_member_list = DatasetPermissionService.get_dataset_partial_member_list(dataset_id_str)
         result_data.update({"partial_member_list": partial_member_list})
 
         return result_data, 200
@@ -430,9 +403,7 @@ class DatasetQueryApi(Resource):
         page = request.args.get("page", default=1, type=int)
         limit = request.args.get("limit", default=20, type=int)
 
-        dataset_queries, total = DatasetService.get_dataset_queries(
-            dataset_id=dataset.id, page=page, per_page=limit
-        )
+        dataset_queries, total = DatasetService.get_dataset_queries(dataset_id=dataset.id, page=page, per_page=limit)
 
         response = {
             "data": marshal(dataset_queries, dataset_query_detail_fields),
@@ -450,12 +421,8 @@ class DatasetIndexingEstimateApi(Resource):
     @account_initialization_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "info_list", type=dict, required=True, nullable=True, location="json"
-        )
-        parser.add_argument(
-            "process_rule", type=dict, required=True, nullable=True, location="json"
-        )
+        parser.add_argument("info_list", type=dict, required=True, nullable=True, location="json")
+        parser.add_argument("process_rule", type=dict, required=True, nullable=True, location="json")
         parser.add_argument(
             "indexing_technique",
             type=str,
@@ -472,9 +439,7 @@ class DatasetIndexingEstimateApi(Resource):
             nullable=False,
             location="json",
         )
-        parser.add_argument(
-            "dataset_id", type=str, required=False, nullable=False, location="json"
-        )
+        parser.add_argument("dataset_id", type=str, required=False, nullable=False, location="json")
         parser.add_argument(
             "doc_language",
             type=str,
@@ -717,12 +682,7 @@ class DatasetApiBaseUrlApi(Resource):
     @login_required
     @account_initialization_required
     def get(self):
-        return {
-            "api_base_url": (
-                dify_config.SERVICE_API_URL or request.host_url.rstrip("/")
-            )
-            + "/v1"
-        }
+        return {"api_base_url": (dify_config.SERVICE_API_URL or request.host_url.rstrip("/")) + "/v1"}
 
 
 class DatasetRetrievalSettingApi(Resource):
@@ -836,9 +796,7 @@ class DatasetPermissionUserListApi(Resource):
         except services.errors.account.NoPermissionError as e:
             raise Forbidden(str(e))
 
-        partial_members_list = DatasetPermissionService.get_dataset_partial_member_list(
-            dataset_id_str
-        )
+        partial_members_list = DatasetPermissionService.get_dataset_partial_member_list(dataset_id_str)
 
         return {
             "data": partial_members_list,
@@ -852,16 +810,10 @@ api.add_resource(DatasetQueryApi, "/datasets/<uuid:dataset_id>/queries")
 api.add_resource(DatasetErrorDocs, "/datasets/<uuid:dataset_id>/error-docs")
 api.add_resource(DatasetIndexingEstimateApi, "/datasets/indexing-estimate")
 api.add_resource(DatasetRelatedAppListApi, "/datasets/<uuid:dataset_id>/related-apps")
-api.add_resource(
-    DatasetIndexingStatusApi, "/datasets/<uuid:dataset_id>/indexing-status"
-)
+api.add_resource(DatasetIndexingStatusApi, "/datasets/<uuid:dataset_id>/indexing-status")
 api.add_resource(DatasetApiKeyApi, "/datasets/api-keys")
 api.add_resource(DatasetApiDeleteApi, "/datasets/api-keys/<uuid:api_key_id>")
 api.add_resource(DatasetApiBaseUrlApi, "/datasets/api-base-info")
 api.add_resource(DatasetRetrievalSettingApi, "/datasets/retrieval-setting")
-api.add_resource(
-    DatasetRetrievalSettingMockApi, "/datasets/retrieval-setting/<string:vector_type>"
-)
-api.add_resource(
-    DatasetPermissionUserListApi, "/datasets/<uuid:dataset_id>/permission-part-users"
-)
+api.add_resource(DatasetRetrievalSettingMockApi, "/datasets/retrieval-setting/<string:vector_type>")
+api.add_resource(DatasetPermissionUserListApi, "/datasets/<uuid:dataset_id>/permission-part-users")

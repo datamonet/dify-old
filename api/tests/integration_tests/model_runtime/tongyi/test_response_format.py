@@ -44,9 +44,7 @@ def invoke_model_with_json_response(model_name="qwen-max-0403"):
         model=model_name,
         credentials={"dashscope_api_key": os.environ.get("TONGYI_DASHSCOPE_API_KEY")},
         prompt_messages=[
-            UserPromptMessage(
-                content='output json data with format `{"data": "test", "code": 200, "msg": "success"}'
-            )
+            UserPromptMessage(content='output json data with format `{"data": "test", "code": 200, "msg": "success"}')
         ],
         model_parameters={
             "temperature": 0.5,

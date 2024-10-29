@@ -40,9 +40,7 @@ class WorkflowLoggingCallback(WorkflowCallback):
         elif isinstance(event, GraphRunSucceededEvent):
             self.print_text("\n[GraphRunSucceededEvent]", color="green")
         elif isinstance(event, GraphRunFailedEvent):
-            self.print_text(
-                f"\n[GraphRunFailedEvent] reason: {event.error}", color="red"
-            )
+            self.print_text(f"\n[GraphRunFailedEvent] reason: {event.error}", color="red")
         elif isinstance(event, NodeRunStartedEvent):
             self.on_workflow_node_execute_started(event=event)
         elif isinstance(event, NodeRunSucceededEvent):
@@ -53,9 +51,7 @@ class WorkflowLoggingCallback(WorkflowCallback):
             self.on_node_text_chunk(event=event)
         elif isinstance(event, ParallelBranchRunStartedEvent):
             self.on_workflow_parallel_started(event=event)
-        elif isinstance(
-            event, ParallelBranchRunSucceededEvent | ParallelBranchRunFailedEvent
-        ):
+        elif isinstance(event, ParallelBranchRunSucceededEvent | ParallelBranchRunFailedEvent):
             self.on_workflow_parallel_completed(event=event)
         elif isinstance(event, IterationRunStartedEvent):
             self.on_workflow_iteration_started(event=event)
@@ -152,9 +148,7 @@ class WorkflowLoggingCallback(WorkflowCallback):
 
         self.print_text(event.chunk_content, color="pink", end="")
 
-    def on_workflow_parallel_started(
-        self, event: ParallelBranchRunStartedEvent
-    ) -> None:
+    def on_workflow_parallel_started(self, event: ParallelBranchRunStartedEvent) -> None:
         """
         Publish parallel started
         """
@@ -204,9 +198,7 @@ class WorkflowLoggingCallback(WorkflowCallback):
         self.print_text(f"Iteration Node ID: {event.iteration_id}", color="blue")
         self.print_text(f"Iteration Index: {event.index}", color="blue")
 
-    def on_workflow_iteration_completed(
-        self, event: IterationRunSucceededEvent | IterationRunFailedEvent
-    ) -> None:
+    def on_workflow_iteration_completed(self, event: IterationRunSucceededEvent | IterationRunFailedEvent) -> None:
         """
         Publish iteration completed
         """
@@ -218,9 +210,7 @@ class WorkflowLoggingCallback(WorkflowCallback):
         )
         self.print_text(f"Node ID: {event.iteration_id}", color="blue")
 
-    def print_text(
-        self, text: str, color: Optional[str] = None, end: str = "\n"
-    ) -> None:
+    def print_text(self, text: str, color: Optional[str] = None, end: str = "\n") -> None:
         """Print text with highlighting and no end characters."""
         text_to_print = self._get_colored_text(text, color) if color else text
         print(f"{text_to_print}", end=end)

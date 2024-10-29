@@ -32,9 +32,7 @@ class MockAnthropicClass:
             id="msg-123",
             type="message",
             role="assistant",
-            content=[
-                ContentBlock(text="hello, I'm a chatbot from anthropic", type="text")
-            ],
+            content=[ContentBlock(text="hello, I'm a chatbot from anthropic", type="text")],
             model=model,
             stop_reason="stop_sequence",
             usage=Usage(input_tokens=1, output_tokens=1),

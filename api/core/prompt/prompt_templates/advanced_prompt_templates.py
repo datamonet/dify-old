@@ -15,13 +15,9 @@ CHAT_APP_COMPLETION_PROMPT_CONFIG = {
     "stop": ["Human:"],
 }
 
-CHAT_APP_CHAT_PROMPT_CONFIG = {
-    "chat_prompt_config": {"prompt": [{"role": "system", "text": "{{#pre_prompt#}}"}]}
-}
+CHAT_APP_CHAT_PROMPT_CONFIG = {"chat_prompt_config": {"prompt": [{"role": "system", "text": "{{#pre_prompt#}}"}]}}
 
-COMPLETION_APP_CHAT_PROMPT_CONFIG = {
-    "chat_prompt_config": {"prompt": [{"role": "user", "text": "{{#pre_prompt#}}"}]}
-}
+COMPLETION_APP_CHAT_PROMPT_CONFIG = {"chat_prompt_config": {"prompt": [{"role": "user", "text": "{{#pre_prompt#}}"}]}}
 
 COMPLETION_APP_COMPLETION_PROMPT_CONFIG = {
     "completion_prompt_config": {"prompt": {"text": "{{#pre_prompt#}}"}},

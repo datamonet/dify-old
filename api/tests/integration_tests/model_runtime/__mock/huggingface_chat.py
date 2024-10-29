@@ -21,10 +21,7 @@ class MockHuggingfaceChatClass:
             details=Details(
                 finish_reason="length",
                 generated_tokens=6,
-                tokens=[
-                    Token(id=0, text="You", logprob=0.0, special=False)
-                    for i in range(0, 6)
-                ],
+                tokens=[Token(id=0, text="You", logprob=0.0, special=False) for i in range(0, 6)],
             ),
         )
 
@@ -41,9 +38,7 @@ class MockHuggingfaceChatClass:
                 token=Token(id=i, text=full_text[i], logprob=0.0, special=False),
             )
             response.generated_text = full_text[i]
-            response.details = StreamDetails(
-                finish_reason="stop_sequence", generated_tokens=1
-            )
+            response.details = StreamDetails(finish_reason="stop_sequence", generated_tokens=1)
 
             yield response
 
@@ -54,9 +49,7 @@ class MockHuggingfaceChatClass:
         stream: Literal[False] = ...,
         model: Optional[str] = None,
         **kwargs: Any,
-    ) -> Union[
-        TextGenerationResponse, Generator[TextGenerationStreamResponse, None, None]
-    ]:
+    ) -> Union[TextGenerationResponse, Generator[TextGenerationStreamResponse, None, None]]:
         # check if key is valid
         if not re.match(r"Bearer\shf\-[a-zA-Z0-9]{16,}", self.headers["authorization"]):
             raise BadRequestError("Invalid API key")

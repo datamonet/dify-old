@@ -44,9 +44,7 @@ class CSVExtractor(BaseExtractor):
                 detected_encodings = detect_file_encodings(self._file_path)
                 for encoding in detected_encodings:
                     try:
-                        with open(
-                            self._file_path, newline="", encoding=encoding.encoding
-                        ) as csvfile:
+                        with open(self._file_path, newline="", encoding=encoding.encoding) as csvfile:
                             docs = self._read_from_file(csvfile)
                         break
                     except UnicodeDecodeError:
@@ -64,16 +62,12 @@ class CSVExtractor(BaseExtractor):
 
             # check source column exists
             if self.source_column and self.source_column not in df.columns:
-                raise ValueError(
-                    f"Source column '{self.source_column}' not found in CSV file."
-                )
+                raise ValueError(f"Source column '{self.source_column}' not found in CSV file.")
 
             # create document objects
 
             for i, row in df.iterrows():
-                content = ";".join(
-                    f"{col.strip()}: {str(row[col]).strip()}" for col in df.columns
-                )
+                content = ";".join(f"{col.strip()}: {str(row[col]).strip()}" for col in df.columns)
                 source = row[self.source_column] if self.source_column else ""
                 metadata = {"source": source, "row": i}
                 doc = Document(page_content=content, metadata=metadata)

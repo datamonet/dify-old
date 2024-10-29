@@ -28,8 +28,6 @@ class GeocoderTool(BuiltinTool):
             "keyWord": keyword,
         }
 
-        result = requests.get(
-            base_url + "?ds=" + json.dumps(params, ensure_ascii=False) + "&tk=" + tk
-        ).json()
+        result = requests.get(base_url + "?ds=" + json.dumps(params, ensure_ascii=False) + "&tk=" + tk).json()
 
         return self.create_json_message(result)

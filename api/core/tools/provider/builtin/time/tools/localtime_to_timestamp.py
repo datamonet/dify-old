@@ -30,9 +30,7 @@ class LocaltimeToTimestampTool(BuiltinTool):
         return self.create_text_message(f"{timestamp}")
 
     @staticmethod
-    def localtime_to_timestamp(
-        localtime: str, time_format: str, local_tz=None
-    ) -> int | None:
+    def localtime_to_timestamp(localtime: str, time_format: str, local_tz=None) -> int | None:
         try:
             if local_tz is None:
                 local_tz = datetime.now().astimezone().tzinfo

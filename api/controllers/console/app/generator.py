@@ -28,21 +28,13 @@ class RuleGenerateApi(Resource):
     @account_initialization_required
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "instruction", type=str, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "model_config", type=dict, required=True, nullable=False, location="json"
-        )
-        parser.add_argument(
-            "no_variable", type=bool, required=True, default=False, location="json"
-        )
+        parser.add_argument("instruction", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("model_config", type=dict, required=True, nullable=False, location="json")
+        parser.add_argument("no_variable", type=bool, required=True, default=False, location="json")
         args = parser.parse_args()
 
         account = current_user
-        PROMPT_GENERATION_MAX_TOKENS = int(
-            os.getenv("PROMPT_GENERATION_MAX_TOKENS", "512")
-        )
+        PROMPT_GENERATION_MAX_TOKENS = int(os.getenv("PROMPT_GENERATION_MAX_TOKENS", "512"))
 
         try:
             rules = LLMGenerator.generate_rule_config(

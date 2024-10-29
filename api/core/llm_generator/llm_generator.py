@@ -91,13 +91,9 @@ class LLMGenerator:
         output_parser = SuggestedQuestionsAfterAnswerOutputParser()
         format_instructions = output_parser.get_format_instructions()
 
-        prompt_template = PromptTemplateParser(
-            template="{{histories}}\n{{format_instructions}}\nquestions:\n"
-        )
+        prompt_template = PromptTemplateParser(template="{{histories}}\n{{format_instructions}}\nquestions:\n")
 
-        prompt = prompt_template.format(
-            {"histories": histories, "format_instructions": format_instructions}
-        )
+        prompt = prompt_template.format({"histories": histories, "format_instructions": format_instructions})
 
         try:
             model_manager = ModelManager()
@@ -148,9 +144,7 @@ class LLMGenerator:
         model_parameters = {"max_tokens": rule_config_max_tokens, "temperature": 0.01}
 
         if no_variable:
-            prompt_template = PromptTemplateParser(
-                WORKFLOW_RULE_CONFIG_PROMPT_GENERATE_TEMPLATE
-            )
+            prompt_template = PromptTemplateParser(WORKFLOW_RULE_CONFIG_PROMPT_GENERATE_TEMPLATE)
 
             prompt_generate = prompt_template.format(
                 inputs={
@@ -184,16 +178,12 @@ class LLMGenerator:
                 logging.exception(e)
                 rule_config["error"] = str(e)
 
-            rule_config["error"] = (
-                f"Failed to {error_step}. Error: {error}" if error else ""
-            )
+            rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
 
             return rule_config
 
         # get rule config prompt, parameter and statement
-        prompt_generate, parameter_generate, statement_generate = (
-            output_parser.get_format_instructions()
-        )
+        prompt_generate, parameter_generate, statement_generate = output_parser.get_format_instructions()
 
         prompt_template = PromptTemplateParser(prompt_generate)
 
@@ -230,9 +220,7 @@ class LLMGenerator:
             except InvokeError as e:
                 error = str(e)
                 error_step = "generate prefix prompt"
-                rule_config["error"] = (
-                    f"Failed to {error_step}. Error: {error}" if error else ""
-                )
+                rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
 
                 return rule_config
 
@@ -262,9 +250,7 @@ class LLMGenerator:
                     model_parameters=model_parameters,
                     stream=False,
                 )
-                rule_config["variables"] = re.findall(
-                    r'"\s*([^"]+)\s*"', parameter_content.message.content
-                )
+                rule_config["variables"] = re.findall(r'"\s*([^"]+)\s*"', parameter_content.message.content)
             except InvokeError as e:
                 error = str(e)
                 error_step = "generate variables"
@@ -284,9 +270,7 @@ class LLMGenerator:
             logging.exception(e)
             rule_config["error"] = str(e)
 
-        rule_config["error"] = (
-            f"Failed to {error_step}. Error: {error}" if error else ""
-        )
+        rule_config["error"] = f"Failed to {error_step}. Error: {error}" if error else ""
 
         return rule_config
 

@@ -22,18 +22,10 @@ def add_document_to_index_task(dataset_document_id: str):
 
     Usage: add_document_to_index.delay(document_id)
     """
-    logging.info(
-        click.style(
-            "Start add document to index: {}".format(dataset_document_id), fg="green"
-        )
-    )
+    logging.info(click.style("Start add document to index: {}".format(dataset_document_id), fg="green"))
     start_at = time.perf_counter()
 
-    dataset_document = (
-        db.session.query(DatasetDocument)
-        .filter(DatasetDocument.id == dataset_document_id)
-        .first()
-    )
+    dataset_document = db.session.query(DatasetDocument).filter(DatasetDocument.id == dataset_document_id).first()
     if not dataset_document:
         raise NotFound("Document not found")
 
@@ -79,18 +71,14 @@ def add_document_to_index_task(dataset_document_id: str):
         end_at = time.perf_counter()
         logging.info(
             click.style(
-                "Document added to index: {} latency: {}".format(
-                    dataset_document.id, end_at - start_at
-                ),
+                "Document added to index: {} latency: {}".format(dataset_document.id, end_at - start_at),
                 fg="green",
             )
         )
     except Exception as e:
         logging.exception("add document to index failed")
         dataset_document.enabled = False
-        dataset_document.disabled_at = datetime.datetime.now(
-            datetime.timezone.utc
-        ).replace(tzinfo=None)
+        dataset_document.disabled_at = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         dataset_document.status = "error"
         dataset_document.error = str(e)
         db.session.commit()

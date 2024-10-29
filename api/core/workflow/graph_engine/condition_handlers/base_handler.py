@@ -8,9 +8,7 @@ from core.workflow.graph_engine.entities.runtime_route_state import RouteNodeSta
 
 
 class RunConditionHandler(ABC):
-    def __init__(
-        self, init_params: GraphInitParams, graph: Graph, condition: RunCondition
-    ):
+    def __init__(self, init_params: GraphInitParams, graph: Graph, condition: RunCondition):
         self.init_params = init_params
         self.graph = graph
         self.condition = condition

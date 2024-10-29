@@ -20,9 +20,7 @@ class WecomGroupBotTool(BuiltinTool):
 
         hook_key = tool_parameters.get("hook_key", "")
         if not is_valid_uuid(hook_key):
-            return self.create_text_message(
-                f"Invalid parameter hook_key ${hook_key}, not a valid UUID"
-            )
+            return self.create_text_message(f"Invalid parameter hook_key ${hook_key}, not a valid UUID")
 
         message_type = tool_parameters.get("message_type", "text")
         if message_type == "markdown":
@@ -56,6 +54,4 @@ class WecomGroupBotTool(BuiltinTool):
                     f"Failed to send the text message, status code: {res.status_code}, response: {res.text}"
                 )
         except Exception as e:
-            return self.create_text_message(
-                "Failed to send message to group chat bot. {}".format(e)
-            )
+            return self.create_text_message("Failed to send message to group chat bot. {}".format(e))

@@ -37,10 +37,6 @@ class FetchAnsByStackExQuesIDTool(BuiltinTool):
         )
 
         if response.status_code == 200:
-            return self.create_text_message(
-                self.summary(user_id=user_id, content=response.text)
-            )
+            return self.create_text_message(self.summary(user_id=user_id, content=response.text))
         else:
-            return self.create_text_message(
-                f"API request failed with status code {response.status_code}"
-            )
+            return self.create_text_message(f"API request failed with status code {response.status_code}")

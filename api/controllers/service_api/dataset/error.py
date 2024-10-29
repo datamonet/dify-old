@@ -33,9 +33,7 @@ class HighQualityDatasetOnlyError(BaseHTTPException):
 
 class DatasetNotInitializedError(BaseHTTPException):
     error_code = "dataset_not_initialized"
-    description = (
-        "The dataset is still being initialized or indexing. Please wait a moment."
-    )
+    description = "The dataset is still being initialized or indexing. Please wait a moment."
     code = 400
 
 

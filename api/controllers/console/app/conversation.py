@@ -37,12 +37,8 @@ class CompletionConversationApi(Resource):
             raise Forbidden()
         parser = reqparse.RequestParser()
         parser.add_argument("keyword", type=str, location="args")
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         parser.add_argument(
             "annotation_status",
             type=str,
@@ -50,22 +46,14 @@ class CompletionConversationApi(Resource):
             default="all",
             location="args",
         )
-        parser.add_argument(
-            "page", type=int_range(1, 99999), default=1, location="args"
-        )
-        parser.add_argument(
-            "limit", type=int_range(1, 100), default=20, location="args"
-        )
+        parser.add_argument("page", type=int_range(1, 99999), default=1, location="args")
+        parser.add_argument("limit", type=int_range(1, 100), default=20, location="args")
         args = parser.parse_args()
 
-        query = db.select(Conversation).where(
-            Conversation.app_id == app_model.id, Conversation.mode == "completion"
-        )
+        query = db.select(Conversation).where(Conversation.app_id == app_model.id, Conversation.mode == "completion")
 
         if args["keyword"]:
-            query = query.join(
-                Message, Message.conversation_id == Conversation.id
-            ).filter(
+            query = query.join(Message, Message.conversation_id == Conversation.id).filter(
                 or_(
                     Message.query.ilike("%{}%".format(args["keyword"])),
                     Message.answer.ilike("%{}%".format(args["keyword"])),
@@ -110,9 +98,7 @@ class CompletionConversationApi(Resource):
 
         query = query.order_by(Conversation.created_at.desc())
 
-        conversations = db.paginate(
-            query, page=args["page"], per_page=args["limit"], error_out=False
-        )
+        conversations = db.paginate(query, page=args["page"], per_page=args["limit"], error_out=False)
 
         return conversations
 
@@ -141,9 +127,7 @@ class CompletionConversationDetailApi(Resource):
 
         conversation = (
             db.session.query(Conversation)
-            .filter(
-                Conversation.id == conversation_id, Conversation.app_id == app_model.id
-            )
+            .filter(Conversation.id == conversation_id, Conversation.app_id == app_model.id)
             .first()
         )
 
@@ -167,12 +151,8 @@ class ChatConversationApi(Resource):
             raise Forbidden()
         parser = reqparse.RequestParser()
         parser.add_argument("keyword", type=str, location="args")
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         parser.add_argument(
             "annotation_status",
             type=str,
@@ -186,12 +166,8 @@ class ChatConversationApi(Resource):
             required=False,
             location="args",
         )
-        parser.add_argument(
-            "page", type=int_range(1, 99999), required=False, default=1, location="args"
-        )
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("page", type=int_range(1, 99999), required=False, default=1, location="args")
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         parser.add_argument(
             "sort_by",
             type=str,
@@ -300,9 +276,7 @@ class ChatConversationApi(Resource):
             case _:
                 query = query.order_by(Conversation.created_at.desc())
 
-        conversations = db.paginate(
-            query, page=args["page"], per_page=args["limit"], error_out=False
-        )
+        conversations = db.paginate(query, page=args["page"], per_page=args["limit"], error_out=False)
 
         return conversations
 
@@ -331,9 +305,7 @@ class ChatConversationDetailApi(Resource):
 
         conversation = (
             db.session.query(Conversation)
-            .filter(
-                Conversation.id == conversation_id, Conversation.app_id == app_model.id
-            )
+            .filter(Conversation.id == conversation_id, Conversation.app_id == app_model.id)
             .first()
         )
 
@@ -346,9 +318,7 @@ class ChatConversationDetailApi(Resource):
         return {"result": "success"}, 204
 
 
-api.add_resource(
-    CompletionConversationApi, "/apps/<uuid:app_id>/completion-conversations"
-)
+api.add_resource(CompletionConversationApi, "/apps/<uuid:app_id>/completion-conversations")
 api.add_resource(
     CompletionConversationDetailApi,
     "/apps/<uuid:app_id>/completion-conversations/<uuid:conversation_id>",

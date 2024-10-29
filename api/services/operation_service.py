@@ -15,9 +15,7 @@ class OperationService:
         }
 
         url = f"{cls.base_url}{endpoint}"
-        response = requests.request(
-            method, url, json=json, params=params, headers=headers
-        )
+        response = requests.request(method, url, json=json, params=params, headers=headers)
 
         return response.json()
 

@@ -41,9 +41,7 @@ class AIPPTGenerateTool(BuiltinTool):
         self._api_token_cache_lock = Lock()
         self._style_cache_lock = Lock()
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> ToolInvokeMessage | list[ToolInvokeMessage]:
+    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]) -> ToolInvokeMessage | list[ToolInvokeMessage]:
         """
         Invokes the AIPPT generate tool with the given user ID and tool parameters.
 
@@ -97,9 +95,7 @@ class AIPPTGenerateTool(BuiltinTool):
             self._generate_content(task_id=task_id, model=model, user_id=user_id)
 
         # generate ppt
-        _, ppt_url = self._generate_ppt(
-            task_id=task_id, suit_id=suit_id, user_id=user_id
-        )
+        _, ppt_url = self._generate_ppt(task_id=task_id, suit_id=suit_id, user_id=user_id)
 
         return self.create_text_message(
             """the ppt has been created successfully,"""
@@ -120,9 +116,7 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(
-                credentials=self.runtime.credentials, user_id=user_id
-            ),
+            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
         }
         response = post(
             str(self._api_base_url / "ai" / "chat" / "v2" / "task"),
@@ -154,14 +148,10 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(
-                credentials=self.runtime.credentials, user_id=user_id
-            ),
+            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
         }
 
-        response = requests_get(
-            url=api_url, headers=headers, stream=True, timeout=(10, 60)
-        )
+        response = requests_get(url=api_url, headers=headers, stream=True, timeout=(10, 60))
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -202,14 +192,10 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(
-                credentials=self.runtime.credentials, user_id=user_id
-            ),
+            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
         }
 
-        response = requests_get(
-            url=api_url, headers=headers, stream=True, timeout=(10, 60)
-        )
+        response = requests_get(url=api_url, headers=headers, stream=True, timeout=(10, 60))
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -259,9 +245,7 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(
-                credentials=self.runtime.credentials, user_id=user_id
-            ),
+            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id=user_id),
         }
 
         response = post(
@@ -358,9 +342,7 @@ class AIPPTGenerateTool(BuiltinTool):
 
         param = {"uid": user_id, "channel": ""}
 
-        response = get(
-            str(cls._api_base_url / "grant" / "token"), params=param, headers=headers
-        )
+        response = get(str(cls._api_base_url / "grant" / "token"), params=param, headers=headers)
 
         if response.status_code != 200:
             raise Exception(f"Failed to connect to aippt: {response.text}")
@@ -387,9 +369,7 @@ class AIPPTGenerateTool(BuiltinTool):
         ).decode("utf-8")
 
     @classmethod
-    def _get_styles(
-        cls, credentials: dict[str, str], user_id: str
-    ) -> tuple[list[dict], list[dict]]:
+    def _get_styles(cls, credentials: dict[str, str], user_id: str) -> tuple[list[dict], list[dict]]:
         """
         Get styles
         """
@@ -456,9 +436,7 @@ class AIPPTGenerateTool(BuiltinTool):
         :param credentials: the credentials
         :return: Tuple[list[dict[id, color]], list[dict[id, style]]
         """
-        if not self.runtime.credentials.get(
-            "aippt_access_key"
-        ) or not self.runtime.credentials.get("aippt_secret_key"):
+        if not self.runtime.credentials.get("aippt_access_key") or not self.runtime.credentials.get("aippt_secret_key"):
             raise Exception("Please provide aippt credentials")
 
         return self._get_styles(credentials=self.runtime.credentials, user_id=user_id)
@@ -470,9 +448,7 @@ class AIPPTGenerateTool(BuiltinTool):
         headers = {
             "x-channel": "",
             "x-api-key": self.runtime.credentials["aippt_access_key"],
-            "x-token": self._get_api_token(
-                credentials=self.runtime.credentials, user_id="__dify_system__"
-            ),
+            "x-token": self._get_api_token(credentials=self.runtime.credentials, user_id="__dify_system__"),
         }
         response = get(
             str(self._api_base_url / "template_component" / "suit" / "search"),
@@ -496,9 +472,7 @@ class AIPPTGenerateTool(BuiltinTool):
         if len(response.get("data", {}).get("list") or []) > 0:
             return response.get("data", {}).get("list")[0].get("id")
 
-        raise Exception(
-            "Failed to get suit, the suit does not exist, please check the style and color"
-        )
+        raise Exception("Failed to get suit, the suit does not exist, please check the style and color")
 
     def get_runtime_parameters(self) -> list[ToolParameter]:
         """

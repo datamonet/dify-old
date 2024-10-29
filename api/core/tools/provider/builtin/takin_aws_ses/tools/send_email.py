@@ -44,8 +44,6 @@ class SendEmailTool(BuiltinTool):
         )
         result = []
 
-        result.append(
-            self.create_json_message({"response": response, "count": len(emails)})
-        )
+        result.append(self.create_json_message({"response": response, "count": len(emails)}))
         return result
         # return

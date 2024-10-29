@@ -39,14 +39,10 @@ class SavedMessageListApi(InstalledAppResource):
 
         parser = reqparse.RequestParser()
         parser.add_argument("last_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
 
-        return SavedMessageService.pagination_by_last_id(
-            app_model, current_user, args["last_id"], args["limit"]
-        )
+        return SavedMessageService.pagination_by_last_id(app_model, current_user, args["last_id"], args["limit"])
 
     def post(self, installed_app):
         app_model = installed_app.app
@@ -54,9 +50,7 @@ class SavedMessageListApi(InstalledAppResource):
             raise NotCompletionAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "message_id", type=uuid_value, required=True, location="json"
-        )
+        parser.add_argument("message_id", type=uuid_value, required=True, location="json")
         args = parser.parse_args()
 
         try:

@@ -26,9 +26,7 @@ class WebsiteService:
         provider = args.get("provider")
         url = args.get("url")
         options = args.get("options")
-        credentials = ApiKeyAuthService.get_auth_credentials(
-            current_user.current_tenant_id, "website", provider
-        )
+        credentials = ApiKeyAuthService.get_auth_credentials(current_user.current_tenant_id, "website", provider)
         if provider == "firecrawl":
             # decrypt api_key
             api_key = encrypter.decrypt_token(
@@ -56,16 +54,8 @@ class WebsiteService:
                     }
                 }
             else:
-                includes = (
-                    options.get("includes").split(",")
-                    if options.get("includes")
-                    else []
-                )
-                excludes = (
-                    options.get("excludes").split(",")
-                    if options.get("excludes")
-                    else []
-                )
+                includes = options.get("includes").split(",") if options.get("includes") else []
+                excludes = options.get("excludes").split(",") if options.get("excludes") else []
                 params = {
                     "crawlerOptions": {
                         "includes": includes or [],
@@ -127,9 +117,7 @@ class WebsiteService:
 
     @classmethod
     def get_crawl_status(cls, job_id: str, provider: str) -> dict:
-        credentials = ApiKeyAuthService.get_auth_credentials(
-            current_user.current_tenant_id, "website", provider
-        )
+        credentials = ApiKeyAuthService.get_auth_credentials(current_user.current_tenant_id, "website", provider)
         if provider == "firecrawl":
             # decrypt api_key
             api_key = encrypter.decrypt_token(
@@ -207,16 +195,10 @@ class WebsiteService:
         return crawl_status_data
 
     @classmethod
-    def get_crawl_url_data(
-        cls, job_id: str, provider: str, url: str, tenant_id: str
-    ) -> dict | None:
-        credentials = ApiKeyAuthService.get_auth_credentials(
-            tenant_id, "website", provider
-        )
+    def get_crawl_url_data(cls, job_id: str, provider: str, url: str, tenant_id: str) -> dict | None:
+        credentials = ApiKeyAuthService.get_auth_credentials(tenant_id, "website", provider)
         # decrypt api_key
-        api_key = encrypter.decrypt_token(
-            tenant_id=tenant_id, token=credentials.get("config").get("api_key")
-        )
+        api_key = encrypter.decrypt_token(tenant_id=tenant_id, token=credentials.get("config").get("api_key"))
         if provider == "firecrawl":
             file_key = "website_files/" + job_id + ".txt"
             if storage.exists(file_key):
@@ -255,9 +237,7 @@ class WebsiteService:
                     raise ValueError("Failed to crawl")
                 return response.json().get("data")
             else:
-                api_key = encrypter.decrypt_token(
-                    tenant_id=tenant_id, token=credentials.get("config").get("api_key")
-                )
+                api_key = encrypter.decrypt_token(tenant_id=tenant_id, token=credentials.get("config").get("api_key"))
                 response = requests.post(
                     "https://adaptivecrawlstatus-kir3wx7b3a-uc.a.run.app",
                     headers={
@@ -289,17 +269,11 @@ class WebsiteService:
             raise ValueError("Invalid provider")
 
     @classmethod
-    def get_scrape_url_data(
-        cls, provider: str, url: str, tenant_id: str, only_main_content: bool
-    ) -> dict | None:
-        credentials = ApiKeyAuthService.get_auth_credentials(
-            tenant_id, "website", provider
-        )
+    def get_scrape_url_data(cls, provider: str, url: str, tenant_id: str, only_main_content: bool) -> dict | None:
+        credentials = ApiKeyAuthService.get_auth_credentials(tenant_id, "website", provider)
         if provider == "firecrawl":
             # decrypt api_key
-            api_key = encrypter.decrypt_token(
-                tenant_id=tenant_id, token=credentials.get("config").get("api_key")
-            )
+            api_key = encrypter.decrypt_token(tenant_id=tenant_id, token=credentials.get("config").get("api_key"))
             firecrawl_app = FirecrawlApp(
                 api_key=api_key,
                 base_url=credentials.get("config").get("base_url", None),

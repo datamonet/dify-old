@@ -33,9 +33,7 @@ class ParagraphIndexProcessor(BaseIndexProcessor):
         all_documents = []
         for document in documents:
             # document clean
-            document_text = CleanProcessor.clean(
-                document.page_content, kwargs.get("process_rule")
-            )
+            document_text = CleanProcessor.clean(document.page_content, kwargs.get("process_rule"))
             document.page_content = document_text
             # parse document to nodes
             document_nodes = splitter.split_documents([document])
@@ -58,9 +56,7 @@ class ParagraphIndexProcessor(BaseIndexProcessor):
             all_documents.extend(split_documents)
         return all_documents
 
-    def load(
-        self, dataset: Dataset, documents: list[Document], with_keywords: bool = True
-    ):
+    def load(self, dataset: Dataset, documents: list[Document], with_keywords: bool = True):
         if dataset.indexing_technique == "high_quality":
             vector = Vector(dataset)
             vector.create(documents)

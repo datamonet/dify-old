@@ -70,21 +70,13 @@ class ApiExternalDataTool(ExternalDataTool):
             )
 
         # decrypt api_key
-        api_key = encrypter.decrypt_token(
-            tenant_id=self.tenant_id, token=api_based_extension.api_key
-        )
+        api_key = encrypter.decrypt_token(tenant_id=self.tenant_id, token=api_based_extension.api_key)
 
         try:
             # request api
-            requestor = APIBasedExtensionRequestor(
-                api_endpoint=api_based_extension.api_endpoint, api_key=api_key
-            )
+            requestor = APIBasedExtensionRequestor(api_endpoint=api_based_extension.api_endpoint, api_key=api_key)
         except Exception as e:
-            raise ValueError(
-                "[External data tool] API query failed, variable: {}, error: {}".format(
-                    self.variable, e
-                )
-            )
+            raise ValueError("[External data tool] API query failed, variable: {}, error: {}".format(self.variable, e))
 
         response_json = requestor.request(
             point=APIBasedExtensionPoint.APP_EXTERNAL_DATA_TOOL_QUERY,
@@ -105,9 +97,7 @@ class ApiExternalDataTool(ExternalDataTool):
 
         if not isinstance(response_json["result"], str):
             raise ValueError(
-                "[External data tool] API query failed, variable: {}, error: result is not string".format(
-                    self.variable
-                )
+                "[External data tool] API query failed, variable: {}, error: result is not string".format(self.variable)
             )
 
         return response_json["result"]

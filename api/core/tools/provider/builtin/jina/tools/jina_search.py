@@ -19,12 +19,8 @@ class JinaSearchTool(BuiltinTool):
 
         headers = {"Accept": "application/json"}
 
-        if "api_key" in self.runtime.credentials and self.runtime.credentials.get(
-            "api_key"
-        ):
-            headers["Authorization"] = "Bearer " + self.runtime.credentials.get(
-                "api_key"
-            )
+        if "api_key" in self.runtime.credentials and self.runtime.credentials.get("api_key"):
+            headers["Authorization"] = "Bearer " + self.runtime.credentials.get("api_key")
 
         if tool_parameters.get("image_caption", False):
             headers["X-With-Generated-Alt"] = "true"

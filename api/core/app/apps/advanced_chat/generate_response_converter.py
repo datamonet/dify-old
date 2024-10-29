@@ -22,9 +22,7 @@ class AdvancedChatAppGenerateResponseConverter(AppGenerateResponseConverter):
     _blocking_response_type = ChatbotAppBlockingResponse
 
     @classmethod
-    def convert_blocking_full_response(
-        cls, blocking_response: AppBlockingResponse
-    ) -> dict[str, Any]:
+    def convert_blocking_full_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
         """
         Convert blocking full response.
         :param blocking_response: blocking response
@@ -46,9 +44,7 @@ class AdvancedChatAppGenerateResponseConverter(AppGenerateResponseConverter):
         return response
 
     @classmethod
-    def convert_blocking_simple_response(
-        cls, blocking_response: AppBlockingResponse
-    ) -> dict[str, Any]:
+    def convert_blocking_simple_response(cls, blocking_response: AppBlockingResponse) -> dict[str, Any]:
         """
         Convert blocking simple response.
         :param blocking_response: blocking response
@@ -119,16 +115,12 @@ class AdvancedChatAppGenerateResponseConverter(AppGenerateResponseConverter):
             if isinstance(sub_stream_response, MessageEndStreamResponse):
                 sub_stream_response_dict = sub_stream_response.to_dict()
                 metadata = sub_stream_response_dict.get("metadata", {})
-                sub_stream_response_dict["metadata"] = cls._get_simple_metadata(
-                    metadata
-                )
+                sub_stream_response_dict["metadata"] = cls._get_simple_metadata(metadata)
                 response_chunk.update(sub_stream_response_dict)
             if isinstance(sub_stream_response, ErrorStreamResponse):
                 data = cls._error_to_stream_response(sub_stream_response.err)
                 response_chunk.update(data)
-            elif isinstance(
-                sub_stream_response, NodeStartStreamResponse | NodeFinishStreamResponse
-            ):
+            elif isinstance(sub_stream_response, NodeStartStreamResponse | NodeFinishStreamResponse):
                 response_chunk.update(sub_stream_response.to_ignore_detail_dict())
             else:
                 response_chunk.update(sub_stream_response.to_dict())

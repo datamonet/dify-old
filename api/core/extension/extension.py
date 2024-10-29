@@ -23,9 +23,7 @@ class Extension:
 
         return list(module_extensions.values())
 
-    def module_extension(
-        self, module: ExtensionModule, extension_name: str
-    ) -> ModuleExtension:
+    def module_extension(self, module: ExtensionModule, extension_name: str) -> ModuleExtension:
         module_extensions = self.__module_extensions.get(module.value)
 
         if not module_extensions:
@@ -42,9 +40,7 @@ class Extension:
         module_extension = self.module_extension(module, extension_name)
         return module_extension.extension_class
 
-    def validate_form_schema(
-        self, module: ExtensionModule, extension_name: str, config: dict
-    ) -> None:
+    def validate_form_schema(self, module: ExtensionModule, extension_name: str, config: dict) -> None:
         module_extension = self.module_extension(module, extension_name)
         form_schema = module_extension.form_schema
 

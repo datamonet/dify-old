@@ -22,9 +22,7 @@ class DataPostProcessor:
         weights: Optional[dict] = None,
         reorder_enabled: bool = False,
     ):
-        self.rerank_runner = self._get_rerank_runner(
-            reranking_mode, tenant_id, reranking_model, weights
-        )
+        self.rerank_runner = self._get_rerank_runner(reranking_mode, tenant_id, reranking_model, weights)
         self.reorder_runner = self._get_reorder_runner(reorder_enabled)
 
     def invoke(
@@ -36,9 +34,7 @@ class DataPostProcessor:
         user: Optional[str] = None,
     ) -> list[Document]:
         if self.rerank_runner:
-            documents = self.rerank_runner.run(
-                query, documents, score_threshold, top_n, user
-            )
+            documents = self.rerank_runner.run(query, documents, score_threshold, top_n, user)
 
         if self.reorder_runner:
             documents = self.reorder_runner.run(documents)
@@ -59,12 +55,8 @@ class DataPostProcessor:
                 weights=Weights(
                     vector_setting=VectorSetting(
                         vector_weight=weights["vector_setting"]["vector_weight"],
-                        embedding_provider_name=weights["vector_setting"][
-                            "embedding_provider_name"
-                        ],
-                        embedding_model_name=weights["vector_setting"][
-                            "embedding_model_name"
-                        ],
+                        embedding_provider_name=weights["vector_setting"]["embedding_provider_name"],
+                        embedding_model_name=weights["vector_setting"]["embedding_model_name"],
                     ),
                     keyword_setting=KeywordSetting(
                         keyword_weight=weights["keyword_setting"]["keyword_weight"],

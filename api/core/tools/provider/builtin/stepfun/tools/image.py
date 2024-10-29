@@ -18,10 +18,7 @@ class StepfunTool(BuiltinTool):
         """
         invoke tools
         """
-        base_url = (
-            self.runtime.credentials.get("stepfun_base_url")
-            or "https://api.stepfun.com"
-        )
+        base_url = self.runtime.credentials.get("stepfun_base_url") or "https://api.stepfun.com"
         base_url = str(URL(base_url) / "v1")
 
         client = OpenAI(

@@ -14,9 +14,7 @@ def test_validate_credentials():
     model = VoyageTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="voyage-3", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="voyage-3", credentials={"api_key": "invalid_key"})
     with patch("requests.post") as mock_post:
         mock_response = Mock()
         mock_response.json.return_value = {
@@ -33,9 +31,7 @@ def test_validate_credentials():
         }
         mock_response.status_code = 200
         mock_post.return_value = mock_response
-        model.validate_credentials(
-            model="voyage-3", credentials={"api_key": os.environ.get("VOYAGE_API_KEY")}
-        )
+        model.validate_credentials(model="voyage-3", credentials={"api_key": os.environ.get("VOYAGE_API_KEY")})
 
 
 def test_invoke_model():

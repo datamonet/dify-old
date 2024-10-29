@@ -28,10 +28,7 @@ class HitTestingService:
         external_retrieval_model: dict,
         limit: int = 10,
     ) -> dict:
-        if (
-            dataset.available_document_count == 0
-            or dataset.available_segment_count == 0
-        ):
+        if dataset.available_document_count == 0 or dataset.available_segment_count == 0:
             return {
                 "query": {
                     "content": query,
@@ -100,9 +97,7 @@ class HitTestingService:
         )
 
         end = time.perf_counter()
-        logging.debug(
-            f"External knowledge hit testing retrieve in {end - start:0.4f} seconds"
-        )
+        logging.debug(f"External knowledge hit testing retrieve in {end - start:0.4f} seconds")
 
         dataset_query = DatasetQuery(
             dataset_id=dataset.id,
@@ -118,9 +113,7 @@ class HitTestingService:
         return cls.compact_external_retrieve_response(dataset, query, all_documents)
 
     @classmethod
-    def compact_retrieve_response(
-        cls, dataset: Dataset, query: str, documents: list[Document]
-    ):
+    def compact_retrieve_response(cls, dataset: Dataset, query: str, documents: list[Document]):
         records = []
 
         for document in documents:
@@ -155,9 +148,7 @@ class HitTestingService:
         }
 
     @classmethod
-    def compact_external_retrieve_response(
-        cls, dataset: Dataset, query: str, documents: list
-    ):
+    def compact_external_retrieve_response(cls, dataset: Dataset, query: str, documents: list):
         records = []
         if dataset.provider == "external":
             for document in documents:

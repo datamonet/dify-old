@@ -26,12 +26,8 @@ class WorkflowDailyRunsStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -92,12 +88,8 @@ class WorkflowDailyTerminalsStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -144,9 +136,7 @@ WHERE
         with db.engine.begin() as conn:
             rs = conn.execute(db.text(sql_query), arg_dict)
             for i in rs:
-                response_data.append(
-                    {"date": str(i.date), "terminal_count": i.terminal_count}
-                )
+                response_data.append({"date": str(i.date), "terminal_count": i.terminal_count})
 
         return jsonify({"data": response_data})
 
@@ -160,12 +150,8 @@ class WorkflowDailyTokenCostStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         args = parser.parse_args()
 
         sql_query = """SELECT
@@ -231,12 +217,8 @@ class WorkflowAverageAppInteractionStatistic(Resource):
         account = current_user
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
-        parser.add_argument(
-            "end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args"
-        )
+        parser.add_argument("start", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
+        parser.add_argument("end", type=DatetimeString("%Y-%m-%d %H:%M"), location="args")
         args = parser.parse_args()
 
         sql_query = """SELECT

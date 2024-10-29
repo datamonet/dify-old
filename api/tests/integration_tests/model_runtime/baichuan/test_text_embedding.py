@@ -13,9 +13,7 @@ def test_validate_credentials():
     model = BaichuanTextEmbeddingModel()
 
     with pytest.raises(CredentialsValidateFailedError):
-        model.validate_credentials(
-            model="baichuan-text-embedding", credentials={"api_key": "invalid_key"}
-        )
+        model.validate_credentials(model="baichuan-text-embedding", credentials={"api_key": "invalid_key"})
 
     model.validate_credentials(
         model="baichuan-text-embedding",

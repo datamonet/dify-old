@@ -77,9 +77,7 @@ class GitHubOAuth(OAuth):
 
         email_response = requests.get(self._EMAIL_INFO_URL, headers=headers)
         email_info = email_response.json()
-        primary_email = next(
-            (email for email in email_info if email["primary"] == True), None
-        )
+        primary_email = next((email for email in email_info if email["primary"] == True), None)
 
         return {**user_info, "email": primary_email["email"]}
 
@@ -132,6 +130,4 @@ class GoogleOAuth(OAuth):
         return response.json()
 
     def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
-        return OAuthUserInfo(
-            id=str(raw_info["sub"]), name=None, email=raw_info["email"]
-        )
+        return OAuthUserInfo(id=str(raw_info["sub"]), name=None, email=raw_info["email"])

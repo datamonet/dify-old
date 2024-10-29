@@ -70,13 +70,9 @@ class GraphEngineThreadPool(ThreadPoolExecutor):
         self.submit_count -= 1
 
     def check_is_full(self) -> None:
-        print(
-            f"submit_count: {self.submit_count}, max_submit_count: {self.max_submit_count}"
-        )
+        print(f"submit_count: {self.submit_count}, max_submit_count: {self.max_submit_count}")
         if self.submit_count > self.max_submit_count:
-            raise ValueError(
-                f"Max submit count {self.max_submit_count} of workflow thread pool reached."
-            )
+            raise ValueError(f"Max submit count {self.max_submit_count} of workflow thread pool reached.")
 
 
 class GraphEngine:
@@ -105,9 +101,7 @@ class GraphEngine:
         # init thread pool
         if thread_pool_id:
             if thread_pool_id not in GraphEngine.workflow_thread_pool_mapping:
-                raise ValueError(
-                    f"Max submit count {thread_pool_max_submit_count} of workflow thread pool reached."
-                )
+                raise ValueError(f"Max submit count {thread_pool_max_submit_count} of workflow thread pool reached.")
 
             self.thread_pool_id = thread_pool_id
             self.thread_pool = GraphEngine.workflow_thread_pool_mapping[thread_pool_id]
@@ -119,9 +113,7 @@ class GraphEngine:
             )
             self.thread_pool_id = str(uuid.uuid4())
             self.is_main_thread_pool = True
-            GraphEngine.workflow_thread_pool_mapping[self.thread_pool_id] = (
-                self.thread_pool
-            )
+            GraphEngine.workflow_thread_pool_mapping[self.thread_pool_id] = self.thread_pool
 
         self.graph = graph
         self.init_params = GraphInitParams(
@@ -136,9 +128,7 @@ class GraphEngine:
             call_depth=call_depth,
         )
 
-        self.graph_runtime_state = GraphRuntimeState(
-            variable_pool=variable_pool, start_at=time.perf_counter()
-        )
+        self.graph_runtime_state = GraphRuntimeState(variable_pool=variable_pool, start_at=time.perf_counter())
 
         self.max_execution_steps = max_execution_steps
         self.max_execution_time = max_execution_time
@@ -158,18 +148,13 @@ class GraphEngine:
                 )
 
             # run graph
-            generator = stream_processor.process(
-                self._run(start_node_id=self.graph.root_node_id)
-            )
+            generator = stream_processor.process(self._run(start_node_id=self.graph.root_node_id))
 
             for item in generator:
                 try:
                     yield item
                     if isinstance(item, NodeRunFailedEvent):
-                        yield GraphRunFailedEvent(
-                            error=item.route_node_state.failed_reason
-                            or "Unknown error."
-                        )
+                        yield GraphRunFailedEvent(error=item.route_node_state.failed_reason or "Unknown error.")
                         return
                     elif isinstance(item, NodeRunSucceededEvent):
                         if item.node_type == NodeType.END:
@@ -184,17 +169,15 @@ class GraphEngine:
                                 self.graph_runtime_state.outputs["answer"] = ""
 
                             self.graph_runtime_state.outputs["answer"] += "\n" + (
-                                item.route_node_state.node_run_result.outputs.get(
-                                    "answer", ""
-                                )
+                                item.route_node_state.node_run_result.outputs.get("answer", "")
                                 if item.route_node_state.node_run_result
                                 and item.route_node_state.node_run_result.outputs
                                 else ""
                             )
 
-                            self.graph_runtime_state.outputs["answer"] = (
-                                self.graph_runtime_state.outputs["answer"].strip()
-                            )
+                            self.graph_runtime_state.outputs["answer"] = self.graph_runtime_state.outputs[
+                                "answer"
+                            ].strip()
                 except Exception as e:
                     logger.exception(f"Graph run failed: {str(e)}")
                     yield GraphRunFailedEvent(error=str(e))
@@ -214,10 +197,7 @@ class GraphEngine:
             raise e
 
     def _release_thread(self):
-        if (
-            self.is_main_thread_pool
-            and self.thread_pool_id in GraphEngine.workflow_thread_pool_mapping
-        ):
+        if self.is_main_thread_pool and self.thread_pool_id in GraphEngine.workflow_thread_pool_mapping:
             del GraphEngine.workflow_thread_pool_mapping[self.thread_pool_id]
 
     def _run(
@@ -236,25 +216,17 @@ class GraphEngine:
         while True:
             # max steps reached
             if self.graph_runtime_state.node_run_steps > self.max_execution_steps:
-                raise GraphRunFailedError(
-                    "Max steps {} reached.".format(self.max_execution_steps)
-                )
+                raise GraphRunFailedError("Max steps {} reached.".format(self.max_execution_steps))
 
             # or max execution time reached
             if self._is_timed_out(
                 start_at=self.graph_runtime_state.start_at,
                 max_execution_time=self.max_execution_time,
             ):
-                raise GraphRunFailedError(
-                    "Max execution time {}s reached.".format(self.max_execution_time)
-                )
+                raise GraphRunFailedError("Max execution time {}s reached.".format(self.max_execution_time))
 
             # init route node state
-            route_node_state = (
-                self.graph_runtime_state.node_run_state.create_node_state(
-                    node_id=next_node_id
-                )
-            )
+            route_node_state = self.graph_runtime_state.node_run_state.create_node_state(node_id=next_node_id)
 
             # get node config
             node_id = route_node_state.node_id
@@ -266,9 +238,7 @@ class GraphEngine:
             node_type = NodeType(node_config.get("data", {}).get("type"))
             node_cls = node_type_classes_mapping[node_type]
 
-            previous_node_id = (
-                previous_route_node_state.node_id if previous_route_node_state else None
-            )
+            previous_node_id = previous_route_node_state.node_id if previous_route_node_state else None
 
             # init workflow run state
             node_instance = node_cls(  # type: ignore
@@ -295,15 +265,11 @@ class GraphEngine:
                 for item in generator:
                     if isinstance(item, NodeRunStartedEvent):
                         self.graph_runtime_state.node_run_steps += 1
-                        item.route_node_state.index = (
-                            self.graph_runtime_state.node_run_steps
-                        )
+                        item.route_node_state.index = self.graph_runtime_state.node_run_steps
 
                     yield item
 
-                self.graph_runtime_state.node_run_state.node_state_mapping[
-                    route_node_state.id
-                ] = route_node_state
+                self.graph_runtime_state.node_run_state.node_state_mapping[route_node_state.id] = route_node_state
 
                 # append route
                 if previous_route_node_state:
@@ -330,10 +296,7 @@ class GraphEngine:
 
             # It may not be necessary, but it is necessary. :)
             if (
-                self.graph.node_id_config_mapping[next_node_id]
-                .get("data", {})
-                .get("type", "")
-                .lower()
+                self.graph.node_id_config_mapping[next_node_id].get("data", {}).get("type", "").lower()
                 == NodeType.END.value
             ):
                 break
@@ -433,11 +396,7 @@ class GraphEngine:
 
                     next_node_id = final_node_id
 
-            if (
-                in_parallel_id
-                and self.graph.node_parallel_mapping.get(next_node_id, "")
-                != in_parallel_id
-            ):
+            if in_parallel_id and self.graph.node_parallel_mapping.get(next_node_id, "") != in_parallel_id:
                 break
 
     def _run_parallel_branches(
@@ -447,9 +406,7 @@ class GraphEngine:
         parallel_start_node_id: Optional[str] = None,
     ) -> Generator[GraphEngineEvent | str, None, None]:
         # if nodes has no run conditions, parallel run all nodes
-        parallel_id = self.graph.node_parallel_mapping.get(
-            edge_mappings[0].target_node_id
-        )
+        parallel_id = self.graph.node_parallel_mapping.get(edge_mappings[0].target_node_id)
         if not parallel_id:
             node_id = edge_mappings[0].target_node_id
             node_config = self.graph.node_id_config_mapping.get(node_id)
@@ -477,8 +434,7 @@ class GraphEngine:
         for edge in edge_mappings:
             if (
                 edge.target_node_id not in self.graph.node_parallel_mapping
-                or self.graph.node_parallel_mapping.get(edge.target_node_id, "")
-                != parallel_id
+                or self.graph.node_parallel_mapping.get(edge.target_node_id, "") != parallel_id
             ):
                 continue
 
@@ -631,9 +587,7 @@ class GraphEngine:
                         item.parallel_id = parallel_id
                         item.parallel_start_node_id = parallel_start_node_id
                         item.parent_parallel_id = parent_parallel_id
-                        item.parent_parallel_start_node_id = (
-                            parent_parallel_start_node_id
-                        )
+                        item.parent_parallel_start_node_id = parent_parallel_start_node_id
 
                     yield item
                 else:
@@ -643,8 +597,7 @@ class GraphEngine:
 
                         if run_result.status == WorkflowNodeExecutionStatus.FAILED:
                             yield NodeRunFailedEvent(
-                                error=route_node_state.failed_reason
-                                or "Unknown error.",
+                                error=route_node_state.failed_reason or "Unknown error.",
                                 id=node_instance.id,
                                 node_id=node_instance.node_id,
                                 node_type=node_instance.node_type,
@@ -656,21 +609,15 @@ class GraphEngine:
                                 parent_parallel_start_node_id=parent_parallel_start_node_id,
                             )
                         elif run_result.status == WorkflowNodeExecutionStatus.SUCCEEDED:
-                            if run_result.metadata and run_result.metadata.get(
-                                NodeRunMetadataKey.TOTAL_TOKENS
-                            ):
+                            if run_result.metadata and run_result.metadata.get(NodeRunMetadataKey.TOTAL_TOKENS):
                                 # plus state total_tokens
                                 self.graph_runtime_state.total_tokens += int(
-                                    run_result.metadata.get(
-                                        NodeRunMetadataKey.TOTAL_TOKENS
-                                    )  # type: ignore[arg-type]
+                                    run_result.metadata.get(NodeRunMetadataKey.TOTAL_TOKENS)  # type: ignore[arg-type]
                                 )
 
                             if run_result.llm_usage:
                                 # use the latest usage
-                                self.graph_runtime_state.llm_usage += (
-                                    run_result.llm_usage
-                                )
+                                self.graph_runtime_state.llm_usage += run_result.llm_usage
 
                             # append node output variables to variable pool
                             if run_result.outputs:
@@ -690,19 +637,13 @@ class GraphEngine:
                                 if not run_result.metadata:
                                     run_result.metadata = {}
 
-                                run_result.metadata[NodeRunMetadataKey.PARALLEL_ID] = (
-                                    parallel_id
-                                )
-                                run_result.metadata[
-                                    NodeRunMetadataKey.PARALLEL_START_NODE_ID
-                                ] = parallel_start_node_id
+                                run_result.metadata[NodeRunMetadataKey.PARALLEL_ID] = parallel_id
+                                run_result.metadata[NodeRunMetadataKey.PARALLEL_START_NODE_ID] = parallel_start_node_id
                                 if parent_parallel_id and parent_parallel_start_node_id:
-                                    run_result.metadata[
-                                        NodeRunMetadataKey.PARENT_PARALLEL_ID
-                                    ] = parent_parallel_id
-                                    run_result.metadata[
-                                        NodeRunMetadataKey.PARENT_PARALLEL_START_NODE_ID
-                                    ] = parent_parallel_start_node_id
+                                    run_result.metadata[NodeRunMetadataKey.PARENT_PARALLEL_ID] = parent_parallel_id
+                                    run_result.metadata[NodeRunMetadataKey.PARENT_PARALLEL_START_NODE_ID] = (
+                                        parent_parallel_start_node_id
+                                    )
 
                             yield NodeRunSucceededEvent(
                                 id=node_instance.id,
@@ -763,16 +704,12 @@ class GraphEngine:
             )
             return
         except Exception as e:
-            logger.exception(
-                f"Node {node_instance.node_data.title} run failed: {str(e)}"
-            )
+            logger.exception(f"Node {node_instance.node_data.title} run failed: {str(e)}")
             raise e
         finally:
             db.session.close()
 
-    def _append_variables_recursively(
-        self, node_id: str, variable_key_list: list[str], variable_value: VariableValue
-    ):
+    def _append_variables_recursively(self, node_id: str, variable_key_list: list[str], variable_value: VariableValue):
         """
         Append variables recursively
         :param node_id: node id
@@ -780,9 +717,7 @@ class GraphEngine:
         :param variable_value: variable value
         :return:
         """
-        self.graph_runtime_state.variable_pool.add(
-            [node_id] + variable_key_list, variable_value
-        )
+        self.graph_runtime_state.variable_pool.add([node_id] + variable_key_list, variable_value)
 
         # if variable_value is a dict, then recursively append variables
         if isinstance(variable_value, dict):

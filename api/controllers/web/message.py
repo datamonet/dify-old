@@ -91,13 +91,9 @@ class MessageListApi(WebApiResource):
             raise NotChatAppError()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "conversation_id", required=True, type=uuid_value, location="args"
-        )
+        parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
         parser.add_argument("first_id", type=uuid_value, location="args")
-        parser.add_argument(
-            "limit", type=int_range(1, 100), required=False, default=20, location="args"
-        )
+        parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
 
         try:
@@ -120,15 +116,11 @@ class MessageFeedbackApi(WebApiResource):
         message_id = str(message_id)
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "rating", type=str, choices=["like", "dislike", None], location="json"
-        )
+        parser.add_argument("rating", type=str, choices=["like", "dislike", None], location="json")
         args = parser.parse_args()
 
         try:
-            MessageService.create_feedback(
-                app_model, message_id, end_user, args["rating"]
-            )
+            MessageService.create_feedback(app_model, message_id, end_user, args["rating"])
         except services.errors.message.MessageNotExistsError:
             raise NotFound("Message Not Exists.")
 
@@ -222,6 +214,4 @@ class MessageSuggestedQuestionApi(WebApiResource):
 api.add_resource(MessageListApi, "/messages")
 api.add_resource(MessageFeedbackApi, "/messages/<uuid:message_id>/feedbacks")
 api.add_resource(MessageMoreLikeThisApi, "/messages/<uuid:message_id>/more-like-this")
-api.add_resource(
-    MessageSuggestedQuestionApi, "/messages/<uuid:message_id>/suggested-questions"
-)
+api.add_resource(MessageSuggestedQuestionApi, "/messages/<uuid:message_id>/suggested-questions")

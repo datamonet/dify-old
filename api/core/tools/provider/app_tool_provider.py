@@ -21,14 +21,10 @@ class AppToolProviderEntity(ToolProviderController):
     def provider_type(self) -> ToolProviderType:
         return ToolProviderType.APP
 
-    def _validate_credentials(
-        self, tool_name: str, credentials: dict[str, Any]
-    ) -> None:
+    def _validate_credentials(self, tool_name: str, credentials: dict[str, Any]) -> None:
         pass
 
-    def validate_parameters(
-        self, tool_name: str, tool_parameters: dict[str, Any]
-    ) -> None:
+    def validate_parameters(self, tool_name: str, tool_parameters: dict[str, Any]) -> None:
         pass
 
     def get_tools(self, user_id: str) -> list[Tool]:

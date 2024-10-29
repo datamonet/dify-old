@@ -50,9 +50,7 @@ class VectorizerTool(BuiltinTool):
 
         return [
             self.create_text_message("the vectorized svg is saved as an image."),
-            self.create_blob_message(
-                blob=response.content, meta={"mime_type": "image/svg+xml"}
-            ),
+            self.create_blob_message(blob=response.content, meta={"mime_type": "image/svg+xml"}),
         ]
 
     def get_runtime_parameters(self) -> list[ToolParameter]:

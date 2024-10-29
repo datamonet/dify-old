@@ -30,9 +30,7 @@ class TagService:
         return results
 
     @staticmethod
-    def get_target_ids_by_tag_ids(
-        tag_type: str, current_tenant_id: str, tag_ids: list
-    ) -> list:
+    def get_target_ids_by_tag_ids(tag_type: str, current_tenant_id: str, tag_ids: list) -> list:
         tags = (
             db.session.query(Tag)
             .filter(
@@ -59,9 +57,7 @@ class TagService:
         return results
 
     @staticmethod
-    def get_tags_by_target_id(
-        tag_type: str, current_tenant_id: str, target_id: str
-    ) -> list:
+    def get_tags_by_target_id(tag_type: str, current_tenant_id: str, target_id: str) -> list:
         tags = (
             db.session.query(Tag)
             .join(TagBinding, Tag.id == TagBinding.tag_id)
@@ -110,9 +106,7 @@ class TagService:
             raise NotFound("Tag not found")
         db.session.delete(tag)
         # delete tag binding
-        tag_bindings = (
-            db.session.query(TagBinding).filter(TagBinding.tag_id == tag_id).all()
-        )
+        tag_bindings = db.session.query(TagBinding).filter(TagBinding.tag_id == tag_id).all()
         if tag_bindings:
             for tag_binding in tag_bindings:
                 db.session.delete(tag_binding)
@@ -176,9 +170,7 @@ class TagService:
         elif type == "app":
             app = (
                 db.session.query(App)
-                .filter(
-                    App.tenant_id == current_user.current_tenant_id, App.id == target_id
-                )
+                .filter(App.tenant_id == current_user.current_tenant_id, App.id == target_id)
                 .first()
             )
             if not app:

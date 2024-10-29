@@ -52,9 +52,7 @@ class MockGoogleResponseCandidateClass:
 class MockGoogleClass:
     @staticmethod
     def generate_content_sync() -> GenerateContentResponse:
-        return GenerateContentResponse(
-            done=True, iterator=None, result=glm.GenerateContentResponse({}), chunks=[]
-        )
+        return GenerateContentResponse(done=True, iterator=None, result=glm.GenerateContentResponse({}), chunks=[])
 
     @staticmethod
     def generate_content_stream() -> Generator[GenerateContentResponse, None, None]:
@@ -118,17 +116,13 @@ class MockGoogleClass:
 
 @pytest.fixture()
 def setup_google_mock(request, monkeypatch: MonkeyPatch):
-    monkeypatch.setattr(
-        BaseGenerateContentResponse, "text", MockGoogleClass.generative_response_text
-    )
+    monkeypatch.setattr(BaseGenerateContentResponse, "text", MockGoogleClass.generative_response_text)
     monkeypatch.setattr(
         BaseGenerateContentResponse,
         "candidates",
         MockGoogleClass.generative_response_candidates,
     )
-    monkeypatch.setattr(
-        GenerativeModel, "generate_content", MockGoogleClass.generate_content
-    )
+    monkeypatch.setattr(GenerativeModel, "generate_content", MockGoogleClass.generate_content)
     monkeypatch.setattr(_ClientManager, "make_client", MockGoogleClass.make_client)
 
     yield
