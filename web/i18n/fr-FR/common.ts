@@ -38,6 +38,10 @@ const translation = {
     duplicate: 'Dupliquer',
     rename: 'Renommer',
     audioSourceUnavailable: 'AudioSource n’est pas disponible',
+    zoomOut: 'Zoom arrière',
+    zoomIn: 'Zoom avant',
+    openInNewTab: 'Ouvrir dans un nouvel onglet',
+    copyImage: 'Copier l’image',
   },
   placeholder: {
     input: 'Veuillez entrer',
@@ -497,6 +501,7 @@ const translation = {
       vectorHash: 'Hachage vectoriel:',
       hitScore: 'Score de Récupération:',
     },
+    inputPlaceholder: 'Parler au bot',
   },
   promptEditor: {
     placeholder: 'Écrivez votre mot d\'invite ici, entrez \'{\' pour insérer une variable, entrez \'/\' pour insérer un bloc de contenu d\'invite',
@@ -573,6 +578,16 @@ const translation = {
   errorMsg: {
     fieldRequired: '{{field}} est obligatoire',
     urlError: 'L’URL doit commencer par http:// ou https://',
+  },
+  fileUploader: {
+    pasteFileLinkInputPlaceholder: 'Entrez l’URL...',
+    uploadFromComputer: 'Téléchargement local',
+    pasteFileLink: 'Coller le lien du fichier',
+    uploadFromComputerReadError: 'Échec de la lecture du fichier, veuillez réessayer.',
+    uploadFromComputerUploadError: 'Le téléchargement du fichier a échoué, veuillez le télécharger à nouveau.',
+    fileExtensionNotSupport: 'Extension de fichier non prise en charge',
+    pasteFileLinkInvalid: 'Lien de fichier non valide',
+    uploadFromComputerLimit: 'Le fichier de téléchargement ne peut pas dépasser {{size}}',
   },
 }
 

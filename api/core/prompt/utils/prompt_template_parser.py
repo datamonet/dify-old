@@ -37,10 +37,8 @@ class PromptTemplateParser:
                 key, match.group(0)
             )  # return original matched string if key not found
 
-            if remove_template_variables:
-                return PromptTemplateParser.remove_template_variables(
-                    value, self.with_variable_tmpl
-                )
+            if remove_template_variables and isinstance(value, str):
+                return PromptTemplateParser.remove_template_variables(value, self.with_variable_tmpl)
             return value
 
         prompt = re.sub(self.regex, replacer, self.template)

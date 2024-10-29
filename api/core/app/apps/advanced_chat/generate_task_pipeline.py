@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from typing import Any, Optional, Union
 
 from constants.tts_auto_play_timeout import (
@@ -15,6 +15,7 @@ from core.app.apps.advanced_chat.app_generator_tts_publisher import (
 from core.app.apps.base_app_queue_manager import AppQueueManager, PublishFrom
 from core.app.entities.app_invoke_entities import (
     AdvancedChatAppGenerateEntity,
+    InvokeFrom,
 )
 from core.app.entities.queue_entities import (
     QueueAdvancedChatMessageEndEvent,
@@ -57,10 +58,12 @@ from core.model_runtime.utils.encoders import jsonable_encoder
 from core.ops.ops_trace_manager import TraceQueueManager
 from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
+from core.workflow.nodes import NodeType
 from events.message_event import message_was_created
 from extensions.ext_database import db
+from models import Conversation, EndUser, Message, MessageFile
 from models.account import Account
-from models.model import Conversation, EndUser, Message
+from models.enums import CreatedByRole
 from models.workflow import (
     Workflow,
     WorkflowRunStatus,
@@ -122,6 +125,7 @@ class AdvancedChatAppGenerateTaskPipeline(
         self._task_state = WorkflowTaskState()
 
         self._conversation_name_generate_thread = None
+        self._recorded_files: list[Mapping[str, Any]] = []
 
     def process(self):
         """
@@ -315,6 +319,10 @@ class AdvancedChatAppGenerateTaskPipeline(
                     event
                 )
 
+                # Record files if it's an answer node or end node
+                if event.node_type in [NodeType.ANSWER, NodeType.END]:
+                    self._recorded_files.extend(self._fetch_files_from_node_outputs(event.outputs or {}))
+
                 response = self._workflow_node_finish_to_stream_response(
                     event=event,
                     task_id=self._application_generate_entity.task_id,
@@ -397,7 +405,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                     start_at=graph_runtime_state.start_at,
                     total_tokens=graph_runtime_state.total_tokens,
                     total_steps=graph_runtime_state.node_run_steps,
-                    outputs=json.dumps(event.outputs) if event.outputs else None,
+                    outputs=event.outputs,
                     conversation_id=self._conversation.id,
                     trace_manager=trace_manager,
                 )
@@ -543,13 +551,7 @@ class AdvancedChatAppGenerateTaskPipeline(
         if self._conversation_name_generate_thread:
             self._conversation_name_generate_thread.join()
 
-    def _save_message(
-        self, graph_runtime_state: Optional[GraphRuntimeState] = None
-    ) -> None:
-        """
-        Save message.
-        :return:
-        """
+    def _save_message(self, graph_runtime_state: Optional[GraphRuntimeState] = None) -> None:
         self._refetch_message()
 
         self._message.answer = self._task_state.answer
@@ -559,6 +561,22 @@ class AdvancedChatAppGenerateTaskPipeline(
             if self._task_state.metadata
             else None
         )
+        message_files = [
+            MessageFile(
+                message_id=self._message.id,
+                type=file["type"],
+                transfer_method=file["transfer_method"],
+                url=file["remote_url"],
+                belongs_to="assistant",
+                upload_file_id=file["related_id"],
+                created_by_role=CreatedByRole.ACCOUNT
+                if self._message.invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
+                else CreatedByRole.END_USER,
+                created_by=self._message.from_account_id or self._message.from_end_user_id or "",
+            )
+            for file in self._recorded_files
+        ]
+        db.session.add_all(message_files)
 
         if graph_runtime_state and graph_runtime_state.llm_usage:
             usage = graph_runtime_state.llm_usage
@@ -594,9 +612,7 @@ class AdvancedChatAppGenerateTaskPipeline(
                 del extras["metadata"]["annotation_reply"]
 
         return MessageEndStreamResponse(
-            task_id=self._application_generate_entity.task_id,
-            id=self._message.id,
-            **extras,
+            task_id=self._application_generate_entity.task_id, id=self._message.id, files=self._recorded_files, **extras
         )
 
     def _handle_output_moderation_chunk(self, text: str) -> bool:

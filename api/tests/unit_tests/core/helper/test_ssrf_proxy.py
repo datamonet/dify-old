@@ -10,7 +10,7 @@ from core.helper.ssrf_proxy import (
 )
 
 
-@patch("httpx.request")
+@patch("httpx.Client.request")
 def test_successful_request(mock_request):
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -20,7 +20,7 @@ def test_successful_request(mock_request):
     assert response.status_code == 200
 
 
-@patch("httpx.request")
+@patch("httpx.Client.request")
 def test_retry_exceed_max_retries(mock_request):
     mock_response = MagicMock()
     mock_response.status_code = 500
@@ -38,7 +38,7 @@ def test_retry_exceed_max_retries(mock_request):
     )
 
 
-@patch("httpx.request")
+@patch("httpx.Client.request")
 def test_retry_logic_success(mock_request):
     side_effects = []
 

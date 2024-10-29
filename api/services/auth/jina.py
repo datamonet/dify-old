@@ -28,10 +28,7 @@ class JinaAuth(ApiKeyAuthBase):
             self._handle_error(response)
 
     def _prepare_headers(self):
-        return {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
-        }
+        return {"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}"}
 
     def _post_request(self, url, data, headers):
         return requests.post(url, headers=headers, json=data)
@@ -39,17 +36,9 @@ class JinaAuth(ApiKeyAuthBase):
     def _handle_error(self, response):
         if response.status_code in {402, 409, 500}:
             error_message = response.json().get("error", "Unknown error occurred")
-            raise Exception(
-                f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}"
-            )
+            raise Exception(f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}")
         else:
             if response.text:
-                error_message = json.loads(response.text).get(
-                    "error", "Unknown error occurred"
-                )
-                raise Exception(
-                    f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}"
-                )
-            raise Exception(
-                f"Unexpected error occurred while trying to authorize. Status code: {response.status_code}"
-            )
+                error_message = json.loads(response.text).get("error", "Unknown error occurred")
+                raise Exception(f"Failed to authorize. Status code: {response.status_code}. Error: {error_message}")
+            raise Exception(f"Unexpected error occurred while trying to authorize. Status code: {response.status_code}")

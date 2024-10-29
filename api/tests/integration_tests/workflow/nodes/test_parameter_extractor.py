@@ -21,10 +21,7 @@ from core.entities.provider_entities import (
 )
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.model_entities import ModelType
-from core.model_runtime.model_providers.model_provider_factory import (
-    ModelProviderFactory,
-)
-from core.workflow.entities.node_entities import UserFrom
+from core.model_runtime.model_providers.model_provider_factory import ModelProviderFactory
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.graph import Graph
@@ -34,6 +31,7 @@ from core.workflow.nodes.parameter_extractor.parameter_extractor_node import (
     ParameterExtractorNode,
 )
 from extensions.ext_database import db
+from models.enums import UserFrom
 from models.provider import ProviderType
 
 """FOR MOCK FIXTURES, DO NOT REMOVE"""

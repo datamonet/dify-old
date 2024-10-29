@@ -1,7 +1,8 @@
 import logging
 import re
 from abc import abstractmethod
-from typing import Optional
+from collections.abc import Iterable
+from typing import Any, Optional
 
 from pydantic import ConfigDict
 
@@ -29,7 +30,7 @@ class TTSModel(AIModel):
         content_text: str,
         voice: str,
         user: Optional[str] = None,
-    ):
+    ) -> Iterable[bytes]:
         """
         Invoke large language model
 
@@ -63,7 +64,7 @@ class TTSModel(AIModel):
         content_text: str,
         voice: str,
         user: Optional[str] = None,
-    ):
+    ) -> Iterable[bytes]:
         """
         Invoke large language model
 
@@ -82,25 +83,25 @@ class TTSModel(AIModel):
         self, model: str, credentials: dict, language: Optional[str] = None
     ) -> list:
         """
-        Get voice for given tts model voices
+        Retrieves the list of voices supported by a given text-to-speech (TTS) model.
 
-        :param language: tts language
-        :param model: model name
-        :param credentials: model credentials
-        :return: voices lists
+        :param language: The language for which the voices are requested.
+        :param model: The name of the TTS model.
+        :param credentials: The credentials required to access the TTS model.
+        :return: A list of voices supported by the TTS model.
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if model_schema and ModelPropertyKey.VOICES in model_schema.model_properties:
-            voices = model_schema.model_properties[ModelPropertyKey.VOICES]
-            if language:
-                return [
-                    {"name": d["name"], "value": d["mode"]}
-                    for d in voices
-                    if language and language in d.get("language")
-                ]
-            else:
-                return [{"name": d["name"], "value": d["mode"]} for d in voices]
+        if not model_schema or ModelPropertyKey.VOICES not in model_schema.model_properties:
+            raise ValueError("this model does not support voice")
+
+        voices = model_schema.model_properties[ModelPropertyKey.VOICES]
+        if language:
+            return [
+                {"name": d["name"], "value": d["mode"]} for d in voices if language and language in d.get("language")
+            ]
+        else:
+            return [{"name": d["name"], "value": d["mode"]} for d in voices]
 
     def _get_model_default_voice(self, model: str, credentials: dict) -> any:
         """
@@ -128,11 +129,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.AUDIO_TYPE in model_schema.model_properties
-        ):
-            return model_schema.model_properties[ModelPropertyKey.AUDIO_TYPE]
+        if not model_schema or ModelPropertyKey.AUDIO_TYPE not in model_schema.model_properties:
+            raise ValueError("this model does not support audio type")
+
+        return model_schema.model_properties[ModelPropertyKey.AUDIO_TYPE]
 
     def _get_model_word_limit(self, model: str, credentials: dict) -> int:
         """
@@ -141,11 +141,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.WORD_LIMIT in model_schema.model_properties
-        ):
-            return model_schema.model_properties[ModelPropertyKey.WORD_LIMIT]
+        if not model_schema or ModelPropertyKey.WORD_LIMIT not in model_schema.model_properties:
+            raise ValueError("this model does not support word limit")
+
+        return model_schema.model_properties[ModelPropertyKey.WORD_LIMIT]
 
     def _get_model_workers_limit(self, model: str, credentials: dict) -> int:
         """
@@ -154,11 +153,10 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.MAX_WORKERS in model_schema.model_properties
-        ):
-            return model_schema.model_properties[ModelPropertyKey.MAX_WORKERS]
+        if not model_schema or ModelPropertyKey.MAX_WORKERS not in model_schema.model_properties:
+            raise ValueError("this model does not support max workers")
+
+        return model_schema.model_properties[ModelPropertyKey.MAX_WORKERS]
 
     @staticmethod
     def _split_text_into_sentences(org_text, max_length=2000, pattern=r"[。.!?]"):

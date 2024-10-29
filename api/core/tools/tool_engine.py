@@ -9,10 +9,9 @@ from yarl import URL
 
 from core.app.entities.app_invoke_entities import InvokeFrom
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
-from core.callback_handler.workflow_tool_callback_handler import (
-    DifyWorkflowCallbackHandler,
-)
-from core.file.file_obj import FileTransferMethod
+from core.callback_handler.workflow_tool_callback_handler import DifyWorkflowCallbackHandler
+from core.file import FileType
+from core.file.models import FileTransferMethod
 from core.ops.ops_trace_manager import TraceQueueManager
 from core.tools.entities.tool_entities import (
     ToolInvokeMessage,
@@ -33,6 +32,7 @@ from core.tools.tool.tool import Tool
 from core.tools.tool.workflow_tool import WorkflowTool
 from core.tools.utils.message_transformer import ToolFileMessageTransformer
 from extensions.ext_database import db
+from models.enums import CreatedByRole
 from models.model import Message, MessageFile
 
 
@@ -149,9 +149,8 @@ class ToolEngine:
         """
         try:
             # hit the callback handler
-            workflow_tool_callback.on_tool_start(
-                tool_name=tool.identity.name, tool_inputs=tool_parameters
-            )
+            assert tool.identity is not None
+            workflow_tool_callback.on_tool_start(tool_name=tool.identity.name, tool_inputs=tool_parameters)
 
             if isinstance(tool, WorkflowTool):
                 tool.workflow_call_depth = workflow_call_depth + 1
@@ -307,32 +306,30 @@ class ToolEngine:
         result = []
 
         for message in tool_messages:
-            file_type = "bin"
             if "image" in message.mimetype:
-                file_type = "image"
+                file_type = FileType.IMAGE
             elif "video" in message.mimetype:
-                file_type = "video"
+                file_type = FileType.VIDEO
             elif "audio" in message.mimetype:
-                file_type = "audio"
-            elif "text" in message.mimetype:
-                file_type = "text"
-            elif "pdf" in message.mimetype:
-                file_type = "pdf"
-            elif "zip" in message.mimetype:
-                file_type = "archive"
-            # ...
+                file_type = FileType.AUDIO
+            elif "text" in message.mimetype or "pdf" in message.mimetype:
+                file_type = FileType.DOCUMENT
+            else:
+                file_type = FileType.CUSTOM
 
+            # extract tool file id from url
+            tool_file_id = message.url.split("/")[-1].split(".")[0]
             message_file = MessageFile(
                 message_id=agent_message.id,
                 type=file_type,
-                transfer_method=FileTransferMethod.TOOL_FILE.value,
+                transfer_method=FileTransferMethod.TOOL_FILE,
                 belongs_to="assistant",
                 url=message.url,
-                upload_file_id=None,
+                upload_file_id=tool_file_id,
                 created_by_role=(
-                    "account"
+                    CreatedByRole.ACCOUNT
                     if invoke_from in {InvokeFrom.EXPLORE, InvokeFrom.DEBUGGER}
-                    else "end_user"
+                    else CreatedByRole.END_USER
                 ),
                 created_by=user_id,
             )

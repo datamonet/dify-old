@@ -6,7 +6,7 @@ from typing import cast
 import pytest
 
 from core.app.entities.app_invoke_entities import InvokeFrom
-from core.workflow.entities.node_entities import NodeRunResult, UserFrom
+from core.workflow.entities.node_entities import NodeRunResult
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.enums import SystemVariableKey
 from core.workflow.graph_engine.entities.graph import Graph
@@ -14,6 +14,7 @@ from core.workflow.graph_engine.entities.graph_init_params import GraphInitParam
 from core.workflow.graph_engine.entities.graph_runtime_state import GraphRuntimeState
 from core.workflow.nodes.code.code_node import CodeNode
 from core.workflow.nodes.code.entities import CodeNodeData
+from models.enums import UserFrom
 from models.workflow import WorkflowNodeExecutionStatus, WorkflowType
 
 CODE_MAX_STRING_LENGTH = int(getenv("CODE_MAX_STRING_LENGTH", "10000"))
@@ -105,6 +106,8 @@ def test_execute_code(setup_code_executor_mock):
     }
 
     node = init_code_node(code_config)
+    node.graph_runtime_state.variable_pool.add(["1", "123", "args1"], 1)
+    node.graph_runtime_state.variable_pool.add(["1", "123", "args2"], 2)
 
     # execute node
     result = node._run()
@@ -149,6 +152,8 @@ def test_execute_code_output_validator(setup_code_executor_mock):
     }
 
     node = init_code_node(code_config)
+    node.graph_runtime_state.variable_pool.add(["1", "123", "args1"], 1)
+    node.graph_runtime_state.variable_pool.add(["1", "123", "args2"], 2)
 
     # execute node
     result = node._run()

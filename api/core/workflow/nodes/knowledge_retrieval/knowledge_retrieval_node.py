@@ -20,8 +20,10 @@ from core.model_runtime.model_providers.__base.large_language_model import (
 )
 from core.rag.retrieval.dataset_retrieval import DatasetRetrieval
 from core.rag.retrieval.retrieval_methods import RetrievalMethod
-from core.workflow.entities.node_entities import NodeRunResult, NodeType
-from core.workflow.nodes.base_node import BaseNode
+from core.variables import StringSegment
+from core.workflow.entities.node_entities import NodeRunResult
+from core.workflow.nodes.base import BaseNode
+from core.workflow.nodes.enums import NodeType
 from core.workflow.nodes.knowledge_retrieval.entities import KnowledgeRetrievalNodeData
 from extensions.ext_database import db
 from models.dataset import Dataset, Document, DocumentSegment
@@ -38,18 +40,20 @@ default_retrieval_model = {
 }
 
 
-class KnowledgeRetrievalNode(BaseNode):
+class KnowledgeRetrievalNode(BaseNode[KnowledgeRetrievalNodeData]):
     _node_data_cls = KnowledgeRetrievalNodeData
-    node_type = NodeType.KNOWLEDGE_RETRIEVAL
+    _node_type = NodeType.KNOWLEDGE_RETRIEVAL
 
     def _run(self) -> NodeRunResult:
-        node_data = cast(KnowledgeRetrievalNodeData, self.node_data)
-
         # extract variables
-        variable = self.graph_runtime_state.variable_pool.get_any(
-            node_data.query_variable_selector
-        )
-        query = variable
+        variable = self.graph_runtime_state.variable_pool.get(self.node_data.query_variable_selector)
+        if not isinstance(variable, StringSegment):
+            return NodeRunResult(
+                status=WorkflowNodeExecutionStatus.FAILED,
+                inputs={},
+                error="Query variable is not string type.",
+            )
+        query = variable.value
         variables = {"query": query}
         if not query:
             return NodeRunResult(
@@ -59,7 +63,7 @@ class KnowledgeRetrievalNode(BaseNode):
             )
         # retrieve knowledge
         try:
-            results = self._fetch_dataset_retriever(node_data=node_data, query=query)
+            results = self._fetch_dataset_retriever(node_data=self.node_data, query=query)
             outputs = {"result": results}
             return NodeRunResult(
                 status=WorkflowNodeExecutionStatus.SUCCEEDED,
@@ -291,6 +295,7 @@ class KnowledgeRetrievalNode(BaseNode):
     @classmethod
     def _extract_variable_selector_to_variable_mapping(
         cls,
+        *,
         graph_config: Mapping[str, Any],
         node_id: str,
         node_data: KnowledgeRetrievalNodeData,

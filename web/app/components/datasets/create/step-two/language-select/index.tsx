@@ -21,7 +21,7 @@ const LanguageSelect: FC<ILanguageSelectProps> = ({
       trigger='click'
       htmlContent={
         <div className='w-full py-1'>
-          {languages.filter(language => language.supported).map(({ prompt_name, name }) => (
+          {languages.filter(language => language.supported).map(({ prompt_name }) => (
             <div
               key={prompt_name}
               className='py-2 px-3 mx-1 flex items-center gap-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700 text-sm'

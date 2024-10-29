@@ -1,5 +1,6 @@
 import base64
 import logging
+import random
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -22,7 +23,9 @@ from models.model import DifySetup
 from services.errors.account import (
     AccountAlreadyInTenantError,
     AccountLoginError,
+    AccountNotFoundError,
     AccountNotLinkTenantError,
+    AccountPasswordError,
     AccountRegisterError,
     CannotOperateSelfError,
     CurrentPasswordIncorrectError,
@@ -30,18 +33,22 @@ from services.errors.account import (
     LinkAccountIntegrateError,
     MemberNotInTenantError,
     NoPermissionError,
-    RateLimitExceededError,
     RoleAlreadyAssignedError,
     TenantNotFoundError,
 )
+from services.errors.workspace import WorkSpaceNotAllowedCreateError
+from services.feature_service import FeatureService
+from tasks.mail_email_code_login import send_email_code_login_mail_task
 from tasks.mail_invite_member_task import send_invite_member_mail_task
 from tasks.mail_reset_password_task import send_reset_password_mail_task
 
 
 class AccountService:
-    reset_password_rate_limiter = RateLimiter(
-        prefix="reset_password_rate_limit", max_attempts=5, time_window=60 * 60
+    reset_password_rate_limiter = RateLimiter(prefix="reset_password_rate_limit", max_attempts=1, time_window=60 * 1)
+    email_code_login_rate_limiter = RateLimiter(
+        prefix="email_code_login_rate_limit", max_attempts=1, time_window=60 * 1
     )
+    LOGIN_MAX_ERROR_LIMITS = 5
 
     @staticmethod
     def load_user(email: str) -> Account:
@@ -50,8 +57,8 @@ class AccountService:
         if not account:
             return None
 
-        if account.status in {AccountStatus.BANNED.value, AccountStatus.CLOSED.value}:
-            raise Unauthorized("Account is banned or closed.")
+        if account.status == AccountStatus.BANNED.value:
+            raise Unauthorized("Account is banned.")
 
         current_tenant: TenantAccountJoin = TenantAccountJoin.query.filter_by(
             account_id=account.id, current=True
@@ -92,25 +99,34 @@ class AccountService:
         return token
 
     @staticmethod
-    def authenticate(email: str, password: str) -> Account:
+    def authenticate(email: str, password: str, invite_token: Optional[str] = None) -> Account:
         """authenticate account with email and password"""
 
         account = Account.query.filter_by(email=email).first()
         if not account:
-            raise AccountLoginError("Invalid email or password.")
+            raise AccountNotFoundError()
 
-        if account.status in {AccountStatus.BANNED.value, AccountStatus.CLOSED.value}:
-            raise AccountLoginError("Account is banned or closed.")
+        if account.status == AccountStatus.BANNED.value:
+            raise AccountLoginError("Account is banned.")
+
+        if password and invite_token and account.password is None:
+            # if invite_token is valid, set password and password_salt
+            salt = secrets.token_bytes(16)
+            base64_salt = base64.b64encode(salt).decode()
+            password_hashed = hash_password(password, salt)
+            base64_password_hashed = base64.b64encode(password_hashed).decode()
+            account.password = base64_password_hashed
+            account.password_salt = base64_salt
+
+        if account.password is None or not compare_password(password, account.password, account.password_salt):
+            raise AccountPasswordError("Invalid email or password.")
 
         if account.status == AccountStatus.PENDING.value:
             account.status = AccountStatus.ACTIVE.value
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
-            db.session.commit()
 
-        if account.password is None or not compare_password(
-            password, account.password, account.password_salt
-        ):
-            raise AccountLoginError("Invalid email or password.")
+        db.session.commit()
+
         return account
 
     @staticmethod
@@ -143,8 +159,13 @@ class AccountService:
         interface_language: str,
         password: Optional[str] = None,
         interface_theme: str = "light",
+        is_setup: Optional[bool] = False,
     ) -> Account:
         """create account"""
+        if not FeatureService.get_system_features().is_allow_register and not is_setup:
+            from controllers.console.error import NotAllowedRegister
+
+            raise NotAllowedRegister()
         account = Account()
         account.email = email
         account.name = name
@@ -169,6 +190,19 @@ class AccountService:
 
         db.session.add(account)
         db.session.commit()
+        return account
+
+    @staticmethod
+    def create_account_and_tenant(
+        email: str, name: str, interface_language: str, password: Optional[str] = None
+    ) -> Account:
+        """create account"""
+        account = AccountService.create_account(
+            email=email, name=name, interface_language=interface_language, password=password
+        )
+
+        TenantService.create_owner_tenant_if_not_exist(account=account)
+
         return account
 
     @staticmethod
@@ -236,15 +270,18 @@ class AccountService:
     @staticmethod
     def login(account: Account, *, ip_address: Optional[str] = None):
         if ip_address:
-            AccountService.update_last_login(account, ip_address=ip_address)
-        exp = timedelta(days=30)
-        token = AccountService.get_account_jwt_token(account, exp=exp)
-        redis_client.set(
-            _get_login_cache_key(account_id=account.id, token=token),
-            "1",
-            ex=int(exp.total_seconds()),
-        )
-        return token
+            AccountService.update_login_info(account=account, ip_address=ip_address)
+
+        if account.status == AccountStatus.PENDING.value:
+            account.status = AccountStatus.ACTIVE.value
+            db.session.commit()
+
+        access_token = AccountService.get_account_jwt_token(account=account)
+        refresh_token = _generate_refresh_token()
+
+        AccountService._store_refresh_token(refresh_token, account.id)
+
+        return TokenPair(access_token=access_token, refresh_token=refresh_token)
 
     @staticmethod
     def logout(*, account: Account, token: str):
@@ -258,17 +295,29 @@ class AccountService:
         return AccountService.load_user(email)
 
     @classmethod
-    def send_reset_password_email(cls, account):
-        if cls.reset_password_rate_limiter.is_rate_limited(account.email):
-            raise RateLimitExceededError(
-                f"Rate limit exceeded for email: {account.email}. Please try again later."
-            )
+    def send_reset_password_email(
+        cls,
+        account: Optional[Account] = None,
+        email: Optional[str] = None,
+        language: Optional[str] = "en-US",
+    ):
+        account_email = account.email if account else email
 
-        token = TokenManager.generate_token(account, "reset_password")
-        send_reset_password_mail_task.delay(
-            language=account.interface_language, to=account.email, token=token
+        if cls.reset_password_rate_limiter.is_rate_limited(account_email):
+            from controllers.console.auth.error import PasswordResetRateLimitExceededError
+
+            raise PasswordResetRateLimitExceededError()
+
+        code = "".join([str(random.randint(0, 9)) for _ in range(6)])
+        token = TokenManager.generate_token(
+            account=account, email=email, token_type="reset_password", additional_data={"code": code}
         )
-        cls.reset_password_rate_limiter.increment_rate_limit(account.email)
+        send_reset_password_mail_task.delay(
+            language=language,
+            to=account_email,
+            code=code,
+        )
+        cls.reset_password_rate_limiter.increment_rate_limit(account_email)
         return token
 
     @classmethod
@@ -279,6 +328,116 @@ class AccountService:
     def get_reset_password_data(cls, token: str) -> Optional[dict[str, Any]]:
         return TokenManager.get_token_data(token, "reset_password")
 
+    @classmethod
+    def send_email_code_login_email(
+        cls, account: Optional[Account] = None, email: Optional[str] = None, language: Optional[str] = "en-US"
+    ):
+        if cls.email_code_login_rate_limiter.is_rate_limited(email):
+            from controllers.console.auth.error import EmailCodeLoginRateLimitExceededError
+
+            raise EmailCodeLoginRateLimitExceededError()
+
+        code = "".join([str(random.randint(0, 9)) for _ in range(6)])
+        token = TokenManager.generate_token(
+            account=account, email=email, token_type="email_code_login", additional_data={"code": code}
+        )
+        send_email_code_login_mail_task.delay(
+            language=language,
+            to=account.email if account else email,
+            code=code,
+        )
+        cls.email_code_login_rate_limiter.increment_rate_limit(email)
+        return token
+
+    @classmethod
+    def get_email_code_login_data(cls, token: str) -> Optional[dict[str, Any]]:
+        return TokenManager.get_token_data(token, "email_code_login")
+
+    @classmethod
+    def revoke_email_code_login_token(cls, token: str):
+        TokenManager.revoke_token(token, "email_code_login")
+
+    @classmethod
+    def get_user_through_email(cls, email: str):
+        account = db.session.query(Account).filter(Account.email == email).first()
+        if not account:
+            return None
+
+        if account.status == AccountStatus.BANNED.value:
+            raise Unauthorized("Account is banned.")
+
+        return account
+
+    @staticmethod
+    def add_login_error_rate_limit(email: str) -> None:
+        key = f"login_error_rate_limit:{email}"
+        count = redis_client.get(key)
+        if count is None:
+            count = 0
+        count = int(count) + 1
+        redis_client.setex(key, 60 * 60 * 24, count)
+
+    @staticmethod
+    def is_login_error_rate_limit(email: str) -> bool:
+        key = f"login_error_rate_limit:{email}"
+        count = redis_client.get(key)
+        if count is None:
+            return False
+
+        count = int(count)
+        if count > AccountService.LOGIN_MAX_ERROR_LIMITS:
+            return True
+        return False
+
+    @staticmethod
+    def reset_login_error_rate_limit(email: str):
+        key = f"login_error_rate_limit:{email}"
+        redis_client.delete(key)
+
+    @staticmethod
+    def is_email_send_ip_limit(ip_address: str):
+        minute_key = f"email_send_ip_limit_minute:{ip_address}"
+        freeze_key = f"email_send_ip_limit_freeze:{ip_address}"
+        hour_limit_key = f"email_send_ip_limit_hour:{ip_address}"
+
+        # check ip is frozen
+        if redis_client.get(freeze_key):
+            return True
+
+        # check current minute count
+        current_minute_count = redis_client.get(minute_key)
+        if current_minute_count is None:
+            current_minute_count = 0
+        current_minute_count = int(current_minute_count)
+
+        # check current hour count
+        if current_minute_count > dify_config.EMAIL_SEND_IP_LIMIT_PER_MINUTE:
+            hour_limit_count = redis_client.get(hour_limit_key)
+            if hour_limit_count is None:
+                hour_limit_count = 0
+            hour_limit_count = int(hour_limit_count)
+
+            if hour_limit_count >= 1:
+                redis_client.setex(freeze_key, 60 * 60, 1)
+                return True
+            else:
+                redis_client.setex(hour_limit_key, 60 * 10, hour_limit_count + 1)  # first time limit 10 minutes
+
+            # add hour limit count
+            redis_client.incr(hour_limit_key)
+            redis_client.expire(hour_limit_key, 60 * 60)
+
+            return True
+
+        redis_client.setex(minute_key, 60, current_minute_count + 1)
+        redis_client.expire(minute_key, 60)
+
+        return False
+
+
+def _get_login_cache_key(*, account_id: str, token: str):
+    return f"account_login:{account_id}:{token}"
+
 
 def _get_login_cache_key(*, account_id: str, token: str):
     return f"account_login:{account_id}:{token}"
@@ -286,8 +445,16 @@ def _get_login_cache_key(*, account_id: str, token: str):
 
 class TenantService:
     @staticmethod
-    def create_tenant(name: str) -> Tenant:
+    def create_tenant(name: str, is_setup: Optional[bool] = False, is_from_dashboard: Optional[bool] = False) -> Tenant:
         """Create tenant"""
+        if (
+            not FeatureService.get_system_features().is_allow_create_workspace
+            and not is_setup
+            and not is_from_dashboard
+        ):
+            from controllers.console.error import NotAllowedCreateWorkspace
+
+            raise NotAllowedCreateWorkspace()
         tenant = Tenant(name=name)
 
         db.session.add(tenant)
@@ -298,8 +465,10 @@ class TenantService:
         return tenant
 
     @staticmethod
-    def create_owner_tenant_if_not_exist(account: Account, name: Optional[str] = None):
-        """Create owner tenant if not exist"""
+    def create_owner_tenant_if_not_exist(
+        account: Account, name: Optional[str] = None, is_setup: Optional[bool] = False
+    ):
+        """Check if user have a workspace or not"""
         available_ta = (
             TenantAccountJoin.query.filter_by(account_id=account.id)
             .order_by(TenantAccountJoin.id.asc())
@@ -309,10 +478,14 @@ class TenantService:
         if available_ta:
             return
 
+        """Create owner tenant if not exist"""
+        if not FeatureService.get_system_features().is_allow_create_workspace and not is_setup:
+            raise WorkSpaceNotAllowedCreateError()
+
         if name:
-            tenant = TenantService.create_tenant(name)
+            tenant = TenantService.create_tenant(name=name, is_setup=is_setup)
         else:
-            tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
+            tenant = TenantService.create_tenant(name=f"{account.name}'s Workspace", is_setup=is_setup)
         TenantService.create_tenant_member(tenant, account, role="owner")
         account.current_tenant = tenant
         db.session.commit()
@@ -328,8 +501,13 @@ class TenantService:
                 logging.error(f"Tenant {tenant.id} has already an owner.")
                 raise Exception("Tenant already has an owner.")
 
-        ta = TenantAccountJoin(tenant_id=tenant.id, account_id=account.id, role=role)
-        db.session.add(ta)
+        ta = db.session.query(TenantAccountJoin).filter_by(tenant_id=tenant.id, account_id=account.id).first()
+        if ta:
+            ta.role = role
+        else:
+            ta = TenantAccountJoin(tenant_id=tenant.id, account_id=account.id, role=role)
+            db.session.add(ta)
+
         db.session.commit()
         return ta
 
@@ -580,12 +758,13 @@ class RegisterService:
                 name=name,
                 interface_language=languages[0],
                 password=password,
+                is_setup=True,
             )
 
             account.last_login_ip = ip_address
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-            TenantService.create_owner_tenant_if_not_exist(account)
+            TenantService.create_owner_tenant_if_not_exist(account=account, is_setup=True)
 
             dify_setup = DifySetup(version=dify_config.CURRENT_VERSION)
             db.session.add(dify_setup)
@@ -610,6 +789,7 @@ class RegisterService:
         provider: Optional[str] = None,
         language: Optional[str] = None,
         status: Optional[AccountStatus] = None,
+        is_setup: Optional[bool] = False,
     ) -> Account:
         db.session.begin_nested()
         """Register account"""
@@ -619,21 +799,23 @@ class RegisterService:
                 name=name,
                 interface_language=language or languages[0],
                 password=password,
+                is_setup=is_setup,
             )
             account.status = AccountStatus.ACTIVE.value if not status else status.value
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             if open_id is not None or provider is not None:
                 AccountService.link_account_integrate(provider, open_id, account)
-            if dify_config.EDITION != "SELF_HOSTED":
-                tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
 
+            if FeatureService.get_system_features().is_allow_create_workspace:
+                tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
                 TenantService.create_tenant_member(tenant, account, role="owner")
                 account.current_tenant = tenant
-
                 tenant_was_created.send(tenant)
 
             db.session.commit()
+        except WorkSpaceNotAllowedCreateError:
+            db.session.rollback()
         except Exception as e:
             db.session.rollback()
             logging.error(f"Register failed: {e}")
@@ -658,7 +840,7 @@ class RegisterService:
             name = email.split("@")[0]
 
             account = cls.register(
-                email=email, name=name, language=language, status=AccountStatus.PENDING
+                email=email, name=name, language=language, status=AccountStatus.PENDING, is_setup=True
             )
             # Create new tenant member for invited tenant
             TenantService.create_tenant_member(tenant, account, role)
@@ -704,6 +886,11 @@ class RegisterService:
             json.dumps(invitation_data),
         )
         return token
+
+    @classmethod
+    def is_valid_invite_token(cls, token: str) -> bool:
+        data = redis_client.get(cls._get_invitation_token_key(token))
+        return data is not None
 
     @classmethod
     def revoke_token(cls, workspace_id: str, email: str, token: str):
@@ -763,7 +950,7 @@ class RegisterService:
 
     @classmethod
     def _get_invitation_by_token(
-        cls, token: str, workspace_id: str, email: str
+        cls, token: str, workspace_id: Optional[str] = None, email: Optional[str] = None
     ) -> Optional[dict[str, str]]:
         if workspace_id is not None and email is not None:
             email_hash = sha256(email.encode()).hexdigest()

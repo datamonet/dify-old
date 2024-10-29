@@ -21,7 +21,12 @@ class AppParameterApi(InstalledAppResource):
         "options": fields.List(fields.String),
     }
 
-    system_parameters_fields = {"image_file_size_limit": fields.String}
+    system_parameters_fields = {
+        "image_file_size_limit": fields.Integer,
+        "video_file_size_limit": fields.Integer,
+        "audio_file_size_limit": fields.Integer,
+        "file_size_limit": fields.Integer,
+    }
 
     parameters_fields = {
         "agent_mode": fields.Raw,  # takin command:explore中需要返回agent的配置，主要用于tools的扣费
@@ -92,7 +97,10 @@ class AppParameterApi(InstalledAppResource):
                 },
             ),
             "system_parameters": {
-                "image_file_size_limit": dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT
+                "image_file_size_limit": dify_config.UPLOAD_IMAGE_FILE_SIZE_LIMIT,
+                "video_file_size_limit": dify_config.UPLOAD_VIDEO_FILE_SIZE_LIMIT,
+                "audio_file_size_limit": dify_config.UPLOAD_AUDIO_FILE_SIZE_LIMIT,
+                "file_size_limit": dify_config.UPLOAD_FILE_SIZE_LIMIT,
             },
         }
 
