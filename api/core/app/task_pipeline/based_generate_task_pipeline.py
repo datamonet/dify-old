@@ -127,10 +127,7 @@ class BasedGenerateTaskPipeline:
             return OutputModeration(
                 tenant_id=app_config.tenant_id,
                 app_id=app_config.app_id,
-                rule=ModerationRule(
-                    type=sensitive_word_avoidance.type,
-                    config=sensitive_word_avoidance.config,
-                ),
+                rule=ModerationRule(type=sensitive_word_avoidance.type, config=sensitive_word_avoidance.config),
                 queue_manager=self._queue_manager,
             )
 

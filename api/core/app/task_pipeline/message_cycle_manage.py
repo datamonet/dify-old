@@ -1,8 +1,10 @@
+import logging
 from threading import Thread
 from typing import Optional, Union
 
 from flask import Flask, current_app
 
+from configs import dify_config
 from core.app.entities.app_invoke_entities import (
     AdvancedChatAppGenerateEntity,
     AgentChatAppGenerateEntity,
@@ -30,10 +32,7 @@ from services.annotation_service import AppAnnotationService
 
 class MessageCycleManage:
     _application_generate_entity: Union[
-        ChatAppGenerateEntity,
-        CompletionAppGenerateEntity,
-        AgentChatAppGenerateEntity,
-        AdvancedChatAppGenerateEntity,
+        ChatAppGenerateEntity, CompletionAppGenerateEntity, AgentChatAppGenerateEntity, AdvancedChatAppGenerateEntity
     ]
     _task_state: Union[EasyUITaskState, WorkflowTaskState]
 
@@ -85,7 +84,9 @@ class MessageCycleManage:
                 try:
                     name = LLMGenerator.generate_conversation_name(app_model.tenant_id, query)
                     conversation.name = name
-                except:
+                except Exception as e:
+                    if dify_config.DEBUG:
+                        logging.exception(f"generate conversation name failed: {e}")
                     pass
 
                 db.session.merge(conversation)
@@ -103,10 +104,7 @@ class MessageCycleManage:
             account = annotation.account
             self._task_state.metadata["annotation_reply"] = {
                 "id": annotation.id,
-                "account": {
-                    "id": annotation.account_id,
-                    "name": account.name if account else "Dify user",
-                },
+                "account": {"id": annotation.account_id, "name": account.name if account else "Dify user"},
             }
 
             return annotation
@@ -160,10 +158,7 @@ class MessageCycleManage:
         return None
 
     def _message_to_stream_response(
-        self,
-        answer: str,
-        message_id: str,
-        from_variable_selector: Optional[list[str]] = None,
+        self, answer: str, message_id: str, from_variable_selector: Optional[list[str]] = None
     ) -> MessageStreamResponse:
         """
         Message to stream response.
