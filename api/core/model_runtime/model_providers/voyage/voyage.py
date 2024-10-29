@@ -20,13 +20,9 @@ class VoyageProvider(ModelProvider):
 
             # Use `voyage-3` model for validate,
             # no matter what model you pass in, text completion model or chat model
-            model_instance.validate_credentials(
-                model="voyage-3", credentials=credentials
-            )
+            model_instance.validate_credentials(model="voyage-3", credentials=credentials)
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(
-                f"{self.get_provider_schema().provider} credentials validate failed"
-            )
+            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
             raise ex

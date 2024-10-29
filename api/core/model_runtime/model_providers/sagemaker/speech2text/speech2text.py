@@ -5,11 +5,7 @@ from typing import IO, Any, Optional
 import boto3
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -20,9 +16,7 @@ from core.model_runtime.errors.invoke import (
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.speech2text_model import Speech2TextModel
-from core.model_runtime.model_providers.sagemaker.sagemaker import (
-    generate_presigned_url,
-)
+from core.model_runtime.model_providers.sagemaker.sagemaker import generate_presigned_url
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +29,7 @@ class SageMakerSpeech2TextModel(Speech2TextModel):
     sagemaker_client: Any = None
     s3_client: Any = None
 
-    def _invoke(
-        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
-    ) -> str:
+    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke speech2text model
 
@@ -63,15 +55,10 @@ class SageMakerSpeech2TextModel(Speech2TextModel):
                             region_name=aws_region,
                         )
                         self.s3_client = boto3.client(
-                            "s3",
-                            aws_access_key_id=access_key,
-                            aws_secret_access_key=secret_key,
-                            region_name=aws_region,
+                            "s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name=aws_region
                         )
                     else:
-                        self.sagemaker_client = boto3.client(
-                            "sagemaker-runtime", region_name=aws_region
-                        )
+                        self.sagemaker_client = boto3.client("sagemaker-runtime", region_name=aws_region)
                         self.s3_client = boto3.client("s3", region_name=aws_region)
                 else:
                     self.sagemaker_client = boto3.client("sagemaker-runtime")
@@ -81,15 +68,11 @@ class SageMakerSpeech2TextModel(Speech2TextModel):
             sagemaker_endpoint = credentials.get("sagemaker_endpoint")
             bucket = credentials.get("audio_s3_cache_bucket")
 
-            s3_presign_url = generate_presigned_url(
-                self.s3_client, file, bucket, s3_prefix
-            )
+            s3_presign_url = generate_presigned_url(self.s3_client, file, bucket, s3_prefix)
             payload = {"audio_s3_presign_uri": s3_presign_url}
 
             response_model = self.sagemaker_client.invoke_endpoint(
-                EndpointName=sagemaker_endpoint,
-                Body=json.dumps(payload),
-                ContentType="application/json",
+                EndpointName=sagemaker_endpoint, Body=json.dumps(payload), ContentType="application/json"
             )
             json_str = response_model["Body"].read().decode("utf8")
             json_obj = json.loads(json_str)

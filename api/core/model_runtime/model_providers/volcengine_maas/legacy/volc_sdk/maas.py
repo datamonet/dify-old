@@ -9,9 +9,7 @@ from .common import SSEDecoder, dict_to_object, gen_req_id, json_to_object
 
 class MaasService(Service):
     def __init__(self, host, region, connection_timeout=60, socket_timeout=60):
-        service_info = self.get_service_info(
-            host, region, connection_timeout, socket_timeout
-        )
+        service_info = self.get_service_info(host, region, connection_timeout, socket_timeout)
         self._apikey = None
         api_info = self.get_api_info()
         super().__init__(service_info, api_info)
@@ -35,9 +33,7 @@ class MaasService(Service):
     def get_api_info():
         api_info = {
             "chat": ApiInfo("POST", "/api/v2/endpoint/{endpoint_id}/chat", {}, {}, {}),
-            "embeddings": ApiInfo(
-                "POST", "/api/v2/endpoint/{endpoint_id}/embeddings", {}, {}, {}
-            ),
+            "embeddings": ApiInfo("POST", "/api/v2/endpoint/{endpoint_id}/embeddings", {}, {}, {}),
         }
         return api_info
 
@@ -52,15 +48,7 @@ class MaasService(Service):
 
         try:
             req["stream"] = True
-            res = self._call(
-                endpoint_id,
-                "chat",
-                req_id,
-                {},
-                json.dumps(req).encode("utf-8"),
-                apikey,
-                stream=True,
-            )
+            res = self._call(endpoint_id, "chat", req_id, {}, json.dumps(req).encode("utf-8"), apikey, stream=True)
 
             decoder = SSEDecoder(res)
 
@@ -100,14 +88,7 @@ class MaasService(Service):
         apikey = self._apikey
 
         try:
-            res = self._call(
-                endpoint_id,
-                api,
-                req_id,
-                params,
-                json.dumps(req).encode("utf-8"),
-                apikey,
-            )
+            res = self._call(endpoint_id, api, req_id, params, json.dumps(req).encode("utf-8"), apikey)
             resp = dict_to_object(res.json())
             if resp and isinstance(resp, dict):
                 resp["req_id"] = req_id
@@ -166,9 +147,7 @@ class MaasService(Service):
                 raise new_client_sdk_request_error(raw, req_id)
 
             if resp.error:
-                raise MaasError(
-                    resp.error.code_n, resp.error.code, resp.error.message, req_id
-                )
+                raise MaasError(resp.error.code_n, resp.error.code, resp.error.message, req_id)
             else:
                 raise new_client_sdk_request_error(resp, req_id)
 
@@ -193,12 +172,7 @@ class MaasError(Exception):
 
 
 def new_client_sdk_request_error(raw, req_id=""):
-    return MaasError(
-        1709701,
-        "ClientSDKRequestError",
-        "MaaS SDK request error: {}".format(raw),
-        req_id,
-    )
+    return MaasError(1709701, "ClientSDKRequestError", "MaaS SDK request error: {}".format(raw), req_id)
 
 
 class BinaryResponseContent:
@@ -217,12 +191,8 @@ class BinaryResponseContent:
                     f.write(data)
 
         if len(error_bytes) > 0:
-            resp = json_to_object(
-                str(error_bytes, encoding="utf-8"), req_id=self.request_id
-            )
-            raise MaasError(
-                resp.error.code_n, resp.error.code, resp.error.message, self.request_id
-            )
+            resp = json_to_object(str(error_bytes, encoding="utf-8"), req_id=self.request_id)
+            raise MaasError(resp.error.code_n, resp.error.code, resp.error.message, self.request_id)
 
     def iter_bytes(self) -> Iterator[bytes]:
         yield from self.response

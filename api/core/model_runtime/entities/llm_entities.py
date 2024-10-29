@@ -4,10 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from core.model_runtime.entities.message_entities import (
-    AssistantPromptMessage,
-    PromptMessage,
-)
+from core.model_runtime.entities.message_entities import AssistantPromptMessage, PromptMessage
 from core.model_runtime.entities.model_entities import ModelUsage, PriceInfo
 
 

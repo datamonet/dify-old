@@ -2,13 +2,8 @@ from collections.abc import Generator
 from typing import Optional, Union
 
 from core.model_runtime.entities.llm_entities import LLMResult
-from core.model_runtime.entities.message_entities import (
-    PromptMessage,
-    PromptMessageTool,
-)
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
-    OAIAPICompatLargeLanguageModel,
-)
+from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageTool
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
 
 
 class LeptonAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
@@ -33,9 +28,7 @@ class LeptonAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
         user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         self._add_custom_parameters(credentials, model)
-        return super()._invoke(
-            model, credentials, prompt_messages, model_parameters, tools, stop, stream
-        )
+        return super()._invoke(model, credentials, prompt_messages, model_parameters, tools, stop, stream)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         self._add_custom_parameters(credentials, model)
@@ -44,6 +37,4 @@ class LeptonAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
     @classmethod
     def _add_custom_parameters(cls, credentials: dict, model: str) -> None:
         credentials["mode"] = "chat"
-        credentials["endpoint_url"] = (
-            f"https://{cls.MODEL_PREFIX_MAP[model]}.lepton.run/api/v1"
-        )
+        credentials["endpoint_url"] = f"https://{cls.MODEL_PREFIX_MAP[model]}.lepton.run/api/v1"

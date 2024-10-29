@@ -6,20 +6,10 @@ from replicate import Client as ReplicateClient
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-    PriceType,
-)
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType, PriceType
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 from core.model_runtime.model_providers.replicate._common import _CommonReplicate
 
 
@@ -42,9 +32,7 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
         :param input_type: input type
         :return: embeddings result
         """
-        client = ReplicateClient(
-            api_token=credentials["replicate_api_token"], timeout=30
-        )
+        client = ReplicateClient(api_token=credentials["replicate_api_token"], timeout=30)
 
         if "model_version" in credentials:
             model_version = credentials["model_version"]
@@ -56,9 +44,7 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
 
         text_input_key = self._get_text_input_key(model, model_version, client)
 
-        embeddings = self._generate_embeddings_by_text_input_key(
-            client, replicate_model_version, text_input_key, texts
-        )
+        embeddings = self._generate_embeddings_by_text_input_key(client, replicate_model_version, text_input_key, texts)
 
         tokens = self.get_num_tokens(model, credentials, texts)
         usage = self._calc_response_usage(model, credentials, tokens)
@@ -73,14 +59,10 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         if "replicate_api_token" not in credentials:
-            raise CredentialsValidateFailedError(
-                "Replicate Access Token must be provided."
-            )
+            raise CredentialsValidateFailedError("Replicate Access Token must be provided.")
 
         try:
-            client = ReplicateClient(
-                api_token=credentials["replicate_api_token"], timeout=30
-            )
+            client = ReplicateClient(api_token=credentials["replicate_api_token"], timeout=30)
 
             if "model_version" in credentials:
                 model_version = credentials["model_version"]
@@ -98,9 +80,7 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
         except Exception as e:
             raise CredentialsValidateFailedError(str(e))
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> Optional[AIModelEntity]:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
         entity = AIModelEntity(
             model=model,
             label=I18nObject(en_US=model),
@@ -111,17 +91,13 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
         return entity
 
     @staticmethod
-    def _get_text_input_key(
-        model: str, model_version: str, client: ReplicateClient
-    ) -> str:
+    def _get_text_input_key(model: str, model_version: str, client: ReplicateClient) -> str:
         model_info = client.models.get(model)
         model_info_version = model_info.versions.get(model_version)
 
         # sort through the openapi schema to get the name of text, texts or inputs
         input_properties = sorted(
-            model_info_version.openapi_schema["components"]["schemas"]["Input"][
-                "properties"
-            ].items(),
+            model_info_version.openapi_schema["components"]["schemas"]["Input"]["properties"].items(),
             key=lambda item: item[1].get("x-order", 0),
         )
 
@@ -134,17 +110,12 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
 
     @staticmethod
     def _generate_embeddings_by_text_input_key(
-        client: ReplicateClient,
-        replicate_model_version: str,
-        text_input_key: str,
-        texts: list[str],
+        client: ReplicateClient, replicate_model_version: str, text_input_key: str, texts: list[str]
     ) -> list[list[float]]:
         if text_input_key in {"text", "inputs"}:
             embeddings = []
             for text in texts:
-                result = client.run(
-                    replicate_model_version, input={text_input_key: text}
-                )
+                result = client.run(replicate_model_version, input={text_input_key: text})
                 embeddings.append(result[0].get("embedding"))
 
             return [list(map(float, e)) for e in embeddings]
@@ -162,14 +133,9 @@ class ReplicateEmbeddingModel(_CommonReplicate, TextEmbeddingModel):
         else:
             raise ValueError(f"embeddings input key is invalid: {text_input_key}")
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage

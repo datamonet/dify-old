@@ -121,9 +121,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                 text = ""
                 for message_content in first_prompt_message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(
-                            TextPromptMessageContent, message_content
-                        )
+                        message_content = cast(TextPromptMessageContent, message_content)
                         text = message_content.data
                         break
             return self._get_num_tokens_by_gpt2(text)
@@ -145,13 +143,9 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                 stream=False,
             )
         except InvokeError as ex:
-            raise CredentialsValidateFailedError(
-                f"An error occurred during credentials validation: {ex.description}"
-            )
+            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {ex.description}")
         except Exception as ex:
-            raise CredentialsValidateFailedError(
-                f"An error occurred during credentials validation: {str(ex)}"
-            )
+            raise CredentialsValidateFailedError(f"An error occurred during credentials validation: {str(ex)}")
 
     def _generate(
         self,
@@ -201,9 +195,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
 
         if completion_type is LLMMode.CHAT:
             endpoint_url = urljoin(endpoint_url, "api/chat")
-            data["messages"] = [
-                self._convert_prompt_message_to_dict(m) for m in prompt_messages
-            ]
+            data["messages"] = [self._convert_prompt_message_to_dict(m) for m in prompt_messages]
         else:
             endpoint_url = urljoin(endpoint_url, "api/generate")
             first_prompt_message = prompt_messages[0]
@@ -216,14 +208,10 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                     images = []
                     for message_content in first_prompt_message.content:
                         if message_content.type == PromptMessageContentType.TEXT:
-                            message_content = cast(
-                                TextPromptMessageContent, message_content
-                            )
+                            message_content = cast(TextPromptMessageContent, message_content)
                             text = message_content.data
                         elif message_content.type == PromptMessageContentType.IMAGE:
-                            message_content = cast(
-                                ImagePromptMessageContent, message_content
-                            )
+                            message_content = cast(ImagePromptMessageContent, message_content)
                             image_data = re.sub(
                                 r"^data:image\/[a-zA-Z]+;base64,",
                                 "",
@@ -235,24 +223,16 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                     data["images"] = images
 
         # send a post request to validate the credentials
-        response = requests.post(
-            endpoint_url, headers=headers, json=data, timeout=(10, 300), stream=stream
-        )
+        response = requests.post(endpoint_url, headers=headers, json=data, timeout=(10, 300), stream=stream)
 
         response.encoding = "utf-8"
         if response.status_code != 200:
-            raise InvokeError(
-                f"API request failed with status code {response.status_code}: {response.text}"
-            )
+            raise InvokeError(f"API request failed with status code {response.status_code}: {response.text}")
 
         if stream:
-            return self._handle_generate_stream_response(
-                model, credentials, completion_type, response, prompt_messages
-            )
+            return self._handle_generate_stream_response(model, credentials, completion_type, response, prompt_messages)
 
-        return self._handle_generate_response(
-            model, credentials, completion_type, response, prompt_messages
-        )
+        return self._handle_generate_response(model, credentials, completion_type, response, prompt_messages)
 
     def _handle_generate_response(
         self,
@@ -292,9 +272,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
             completion_tokens = self._get_num_tokens_by_gpt2(assistant_message.content)
 
         # transform usage
-        usage = self._calc_response_usage(
-            model, credentials, prompt_tokens, completion_tokens
-        )
+        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
         # transform response
         result = LLMResult(
@@ -335,9 +313,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
             completion_tokens = self._get_num_tokens_by_gpt2(full_text)
 
             # transform usage
-            usage = self._calc_response_usage(
-                model, credentials, prompt_tokens, completion_tokens
-            )
+            usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
             return LLMResultChunk(
                 model=model,
@@ -357,7 +333,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
             try:
                 chunk_json = json.loads(chunk)
                 # stream ended
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 yield create_final_llm_result_chunk(
                     index=chunk_index,
                     message=AssistantPromptMessage(content=""),
@@ -393,27 +369,19 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                 else:
                     prompt_message_content = prompt_messages[0].content
                     if isinstance(prompt_message_content, str):
-                        prompt_tokens = self._get_num_tokens_by_gpt2(
-                            prompt_message_content
-                        )
+                        prompt_tokens = self._get_num_tokens_by_gpt2(prompt_message_content)
                     else:
                         content_text = ""
                         for message_content in prompt_message_content:
                             if message_content.type == PromptMessageContentType.TEXT:
-                                message_content = cast(
-                                    TextPromptMessageContent, message_content
-                                )
+                                message_content = cast(TextPromptMessageContent, message_content)
                                 content_text += message_content.data
                         prompt_tokens = self._get_num_tokens_by_gpt2(content_text)
 
-                completion_tokens = chunk_json.get(
-                    "eval_count", self._get_num_tokens_by_gpt2(full_text)
-                )
+                completion_tokens = chunk_json.get("eval_count", self._get_num_tokens_by_gpt2(full_text))
 
                 # transform usage
-                usage = self._calc_response_usage(
-                    model, credentials, prompt_tokens, completion_tokens
-                )
+                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
                 yield LLMResultChunk(
                     model=chunk_json["model"],
@@ -450,17 +418,11 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                 images = []
                 for message_content in message.content:
                     if message_content.type == PromptMessageContentType.TEXT:
-                        message_content = cast(
-                            TextPromptMessageContent, message_content
-                        )
+                        message_content = cast(TextPromptMessageContent, message_content)
                         text = message_content.data
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(
-                            ImagePromptMessageContent, message_content
-                        )
-                        image_data = re.sub(
-                            r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data
-                        )
+                        message_content = cast(ImagePromptMessageContent, message_content)
+                        image_data = re.sub(r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data)
                         images.append(image_data)
 
                 message_dict = {"role": "user", "content": text, "images": images}
@@ -490,9 +452,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
 
         return num_tokens
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         Get customizable model schema.
 
@@ -513,9 +473,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             model_properties={
                 ModelPropertyKey.MODE: credentials.get("mode"),
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", 4096)
-                ),
+                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", 4096)),
             },
             parameter_rules=[
                 ParameterRule(
@@ -584,17 +542,13 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                         "(Default: 128, -1 = infinite generation, -2 = fill context)",
                         zh_Hans="生成文本时预测的最大令牌数。（默认值：128，-1 = 无限生成，-2 = 填充上下文）",
                     ),
-                    default=(
-                        512 if int(credentials.get("max_tokens", 4096)) >= 768 else 128
-                    ),
+                    default=(512 if int(credentials.get("max_tokens", 4096)) >= 768 else 128),
                     min=-2,
                     max=int(credentials.get("max_tokens", 4096)),
                 ),
                 ParameterRule(
                     name="mirostat",
-                    label=I18nObject(
-                        en_US="Mirostat sampling", zh_Hans="Mirostat 采样"
-                    ),
+                    label=I18nObject(en_US="Mirostat sampling", zh_Hans="Mirostat 采样"),
                     type=ParameterType.INT,
                     help=I18nObject(
                         en_US="Enable Mirostat sampling for controlling perplexity. "
@@ -631,9 +585,7 @@ class OllamaLargeLanguageModel(LargeLanguageModel):
                 ),
                 ParameterRule(
                     name="num_ctx",
-                    label=I18nObject(
-                        en_US="Size of context window", zh_Hans="上下文窗口大小"
-                    ),
+                    label=I18nObject(en_US="Size of context window", zh_Hans="上下文窗口大小"),
                     type=ParameterType.INT,
                     help=I18nObject(
                         en_US="Sets the size of the context window used to generate the next token. (Default: 2048)",

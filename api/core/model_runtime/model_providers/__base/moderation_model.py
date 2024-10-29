@@ -18,9 +18,7 @@ class ModerationModel(AIModel):
     # pydantic configs
     model_config = ConfigDict(protected_namespaces=())
 
-    def invoke(
-        self, model: str, credentials: dict, text: str, user: Optional[str] = None
-    ) -> bool:
+    def invoke(self, model: str, credentials: dict, text: str, user: Optional[str] = None) -> bool:
         """
         Invoke moderation model
 
@@ -38,9 +36,7 @@ class ModerationModel(AIModel):
             raise self._transform_invoke_error(e)
 
     @abstractmethod
-    def _invoke(
-        self, model: str, credentials: dict, text: str, user: Optional[str] = None
-    ) -> bool:
+    def _invoke(self, model: str, credentials: dict, text: str, user: Optional[str] = None) -> bool:
         """
         Invoke large language model
 

@@ -18,9 +18,7 @@ from core.model_runtime.entities.model_entities import (
     ParameterType,
     PriceConfig,
 )
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
-    OAIAPICompatLargeLanguageModel,
-)
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
 
 
 class TogetherAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
@@ -41,16 +39,7 @@ class TogetherAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
     ) -> Union[LLMResult, Generator]:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
 
-        return super()._invoke(
-            model,
-            cred_with_endpoint,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+        return super()._invoke(model, cred_with_endpoint, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
@@ -71,19 +60,10 @@ class TogetherAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
 
         return super()._generate(
-            model,
-            cred_with_endpoint,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
+            model, cred_with_endpoint, prompt_messages, model_parameters, tools, stop, stream, user
         )
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         cred_with_endpoint = self._update_endpoint_url(credentials=credentials)
         REPETITION_PENALTY = "repetition_penalty"
         TOP_K = "top_k"
@@ -96,9 +76,7 @@ class TogetherAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
             features=features,
             model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    cred_with_endpoint.get("context_size", "4096")
-                ),
+                ModelPropertyKey.CONTEXT_SIZE: int(cred_with_endpoint.get("context_size", "4096")),
                 ModelPropertyKey.MODE: cred_with_endpoint.get("mode"),
             },
             parameter_rules=[
@@ -176,9 +154,7 @@ class TogetherAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
         elif cred_with_endpoint["mode"] == "completion":
             entity.model_properties[ModelPropertyKey.MODE] = LLMMode.COMPLETION.value
         else:
-            raise ValueError(
-                f"Unknown completion type {cred_with_endpoint['completion_type']}"
-            )
+            raise ValueError(f"Unknown completion type {cred_with_endpoint['completion_type']}")
 
         return entity
 

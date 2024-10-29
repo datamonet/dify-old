@@ -8,17 +8,8 @@ import boto3
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    PriceType,
-)
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -28,9 +19,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 
 BATCH_SIZE = 20
 CONTEXT_SIZE = 8192
@@ -56,14 +45,7 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
     def _sagemaker_embedding(self, sm_client, endpoint_name, content_list: list[str]):
         response_model = sm_client.invoke_endpoint(
             EndpointName=endpoint_name,
-            Body=json.dumps(
-                {
-                    "inputs": content_list,
-                    "parameters": {},
-                    "is_query": False,
-                    "instruction": "",
-                }
-            ),
+            Body=json.dumps({"inputs": content_list, "parameters": {}, "is_query": False, "instruction": ""}),
             ContentType="application/json",
         )
         json_str = response_model["Body"].read().decode("utf8")
@@ -105,9 +87,7 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
                             region_name=aws_region,
                         )
                     else:
-                        self.sagemaker_client = boto3.client(
-                            "sagemaker-runtime", region_name=aws_region
-                        )
+                        self.sagemaker_client = boto3.client("sagemaker-runtime", region_name=aws_region)
                 else:
                     self.sagemaker_client = boto3.client("sagemaker-runtime")
 
@@ -117,16 +97,12 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
             line = 3
             truncated_texts = [item[:CONTEXT_SIZE] for item in texts]
 
-            batches = batch_generator(
-                (text for text in truncated_texts), batch_size=BATCH_SIZE
-            )
+            batches = batch_generator((text for text in truncated_texts), batch_size=BATCH_SIZE)
             all_embeddings = []
 
             line = 4
             for batch in batches:
-                embeddings = self._sagemaker_embedding(
-                    self.sagemaker_client, sagemaker_endpoint, batch
-                )
+                embeddings = self._sagemaker_embedding(self.sagemaker_client, sagemaker_endpoint, batch)
                 all_embeddings.extend(embeddings)
 
             line = 5
@@ -138,9 +114,7 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
             )
             line = 6
 
-            return TextEmbeddingResult(
-                embeddings=all_embeddings, usage=usage, model=model
-            )
+            return TextEmbeddingResult(embeddings=all_embeddings, usage=usage, model=model)
 
         except Exception as e:
             logger.exception(f"Exception {e}, line : {line}")
@@ -169,9 +143,7 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -182,10 +154,7 @@ class SageMakerEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage

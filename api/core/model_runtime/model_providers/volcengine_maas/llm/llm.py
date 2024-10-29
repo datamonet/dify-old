@@ -5,11 +5,7 @@ from typing import Optional
 from volcenginesdkarkruntime.types.chat import ChatCompletion, ChatCompletionChunk
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.llm_entities import (
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-)
+from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -33,9 +29,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 from core.model_runtime.model_providers.volcengine_maas.client import ArkClientV3
 from core.model_runtime.model_providers.volcengine_maas.legacy.client import MaaSClient
 from core.model_runtime.model_providers.volcengine_maas.legacy.errors import (
@@ -68,26 +62,8 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
         user: str | None = None,
     ) -> LLMResult | Generator:
         if ArkClientV3.is_legacy(credentials):
-            return self._generate_v2(
-                model,
-                credentials,
-                prompt_messages,
-                model_parameters,
-                tools,
-                stop,
-                stream,
-                user,
-            )
-        return self._generate_v3(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+            return self._generate_v2(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
+        return self._generate_v3(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -141,9 +117,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
         if len(messages) == 0:
             return 0
         num_tokens = 0
-        messages_dict = [
-            MaaSClient.convert_prompt_message_to_maas_message(m) for m in messages
-        ]
+        messages_dict = [MaaSClient.convert_prompt_message_to_maas_message(m) for m in messages]
         for message in messages_dict:
             for key, value in message.items():
                 num_tokens += self._get_num_tokens_by_gpt2(str(key))
@@ -178,14 +152,8 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
         req_params = get_v2_req_params(credentials, model_parameters, stop)
         extra_model_kwargs = {}
         if tools:
-            extra_model_kwargs["tools"] = [
-                MaaSClient.transform_tool_prompt_to_maas_config(tool) for tool in tools
-            ]
-        resp = MaaSClient.wrap_exception(
-            lambda: client.chat(
-                req_params, prompt_messages, stream, **extra_model_kwargs
-            )
-        )
+            extra_model_kwargs["tools"] = [MaaSClient.transform_tool_prompt_to_maas_config(tool) for tool in tools]
+        resp = MaaSClient.wrap_exception(lambda: client.chat(req_params, prompt_messages, stream, **extra_model_kwargs))
 
         def _handle_stream_chat_response() -> Generator:
             for index, r in enumerate(resp):
@@ -207,9 +175,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=index,
-                        message=AssistantPromptMessage(
-                            content=message["content"] or "", tool_calls=[]
-                        ),
+                        message=AssistantPromptMessage(content=message["content"] or "", tool_calls=[]),
                         usage=usage,
                         finish_reason=choice.get("finish_reason"),
                     ),
@@ -231,8 +197,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
                         id=call["function"]["name"],
                         type=call["type"],
                         function=AssistantPromptMessage.ToolCall.ToolCallFunction(
-                            name=call["function"]["name"],
-                            arguments=call["function"]["arguments"],
+                            name=call["function"]["name"], arguments=call["function"]["arguments"]
                         ),
                     )
                     tool_calls.append(tool_call)
@@ -273,9 +238,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
         if tools:
             req_params["tools"] = tools
 
-        def _handle_stream_chat_response(
-            chunks: Generator[ChatCompletionChunk],
-        ) -> Generator:
+        def _handle_stream_chat_response(chunks: Generator[ChatCompletionChunk]) -> Generator:
             for chunk in chunks:
                 yield LLMResultChunk(
                     model=model,
@@ -283,10 +246,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
                     delta=LLMResultChunkDelta(
                         index=0,
                         message=AssistantPromptMessage(
-                            content=chunk.choices[0].delta.content
-                            if chunk.choices
-                            else "",
-                            tool_calls=[],
+                            content=chunk.choices[0].delta.content if chunk.choices else "", tool_calls=[]
                         ),
                         usage=self._calc_response_usage(
                             model=model,
@@ -296,9 +256,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
                         )
                         if chunk.usage
                         else None,
-                        finish_reason=chunk.choices[0].finish_reason
-                        if chunk.choices
-                        else None,
+                        finish_reason=chunk.choices[0].finish_reason if chunk.choices else None,
                     ),
                 )
 
@@ -361,11 +319,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
                 label=I18nObject(zh_Hans="Top P", en_US="Top P"),
             ),
             ParameterRule(
-                name="top_k",
-                type=ParameterType.INT,
-                min=1,
-                default=1,
-                label=I18nObject(zh_Hans="Top K", en_US="Top K"),
+                name="top_k", type=ParameterType.INT, min=1, default=1, label=I18nObject(zh_Hans="Top K", en_US="Top K")
             ),
             ParameterRule(
                 name="presence_penalty",
@@ -401,9 +355,7 @@ class VolcengineMaaSLargeLanguageModel(LargeLanguageModel):
         ]
 
         model_properties = {}
-        model_properties[ModelPropertyKey.CONTEXT_SIZE] = (
-            model_config.properties.context_size
-        )
+        model_properties[ModelPropertyKey.CONTEXT_SIZE] = model_config.properties.context_size
         model_properties[ModelPropertyKey.MODE] = model_config.properties.mode.value
 
         entity = AIModelEntity(

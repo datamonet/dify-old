@@ -1,19 +1,10 @@
 from collections.abc import Generator
 from typing import Optional, Union
 
-from core.model_runtime.entities.llm_entities import (
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-)
-from core.model_runtime.entities.message_entities import (
-    PromptMessage,
-    PromptMessageTool,
-)
+from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
+from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageTool
 from core.model_runtime.entities.model_entities import AIModelEntity
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
-    OAIAPICompatLargeLanguageModel,
-)
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
 
 
 class OpenRouterLargeLanguageModel(OAIAPICompatLargeLanguageModel):
@@ -35,16 +26,7 @@ class OpenRouterLargeLanguageModel(OAIAPICompatLargeLanguageModel):
     ) -> Union[LLMResult, Generator]:
         self._update_credential(model, credentials)
 
-        return self._generate(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+        return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         self._update_credential(model, credentials)
@@ -75,16 +57,7 @@ class OpenRouterLargeLanguageModel(OAIAPICompatLargeLanguageModel):
                 model, credentials, prompt_messages, model_parameters, tools, stop, user
             )
         else:
-            return super()._generate(
-                model,
-                credentials,
-                prompt_messages,
-                model_parameters,
-                tools,
-                stop,
-                stream,
-                user,
-            )
+            return super()._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def _generate_block_as_stream(
         self,
@@ -97,14 +70,7 @@ class OpenRouterLargeLanguageModel(OAIAPICompatLargeLanguageModel):
         user: Optional[str] = None,
     ) -> Generator:
         resp: LLMResult = super()._generate(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            False,
-            user,
+            model, credentials, prompt_messages, model_parameters, tools, stop, False, user
         )
 
         yield LLMResultChunk(
@@ -123,9 +89,7 @@ class OpenRouterLargeLanguageModel(OAIAPICompatLargeLanguageModel):
             ),
         )
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         self._update_credential(model, credentials)
 
         return super().get_customizable_model_schema(model, credentials)

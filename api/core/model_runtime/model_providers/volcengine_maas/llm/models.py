@@ -17,94 +17,59 @@ class ModelConfig(BaseModel):
 
 configs: dict[str, ModelConfig] = {
     "Doubao-pro-4k": ModelConfig(
-        properties=ModelProperties(
-            context_size=4096, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=4096, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Doubao-lite-4k": ModelConfig(
-        properties=ModelProperties(
-            context_size=4096, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=4096, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Doubao-pro-32k": ModelConfig(
-        properties=ModelProperties(
-            context_size=32768, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=32768, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Doubao-lite-32k": ModelConfig(
-        properties=ModelProperties(
-            context_size=32768, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=32768, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Doubao-pro-128k": ModelConfig(
-        properties=ModelProperties(
-            context_size=131072, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=131072, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Doubao-lite-128k": ModelConfig(
-        properties=ModelProperties(
-            context_size=131072, max_tokens=4096, mode=LLMMode.CHAT
-        ),
-        features=[],
+        properties=ModelProperties(context_size=131072, max_tokens=4096, mode=LLMMode.CHAT), features=[]
     ),
     "Skylark2-pro-4k": ModelConfig(
-        properties=ModelProperties(
-            context_size=4096, max_tokens=4096, mode=LLMMode.CHAT
-        ),
-        features=[],
+        properties=ModelProperties(context_size=4096, max_tokens=4096, mode=LLMMode.CHAT), features=[]
     ),
     "Llama3-8B": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=8192, mode=LLMMode.CHAT
-        ),
-        features=[],
+        properties=ModelProperties(context_size=8192, max_tokens=8192, mode=LLMMode.CHAT), features=[]
     ),
     "Llama3-70B": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=8192, mode=LLMMode.CHAT
-        ),
-        features=[],
+        properties=ModelProperties(context_size=8192, max_tokens=8192, mode=LLMMode.CHAT), features=[]
     ),
     "Moonshot-v1-8k": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=8192, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Moonshot-v1-32k": ModelConfig(
-        properties=ModelProperties(
-            context_size=32768, max_tokens=16384, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=32768, max_tokens=16384, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Moonshot-v1-128k": ModelConfig(
-        properties=ModelProperties(
-            context_size=131072, max_tokens=65536, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=131072, max_tokens=65536, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "GLM3-130B": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=8192, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "GLM3-130B-Fin": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=4096, mode=LLMMode.CHAT
-        ),
+        properties=ModelProperties(context_size=8192, max_tokens=4096, mode=LLMMode.CHAT),
         features=[ModelFeature.TOOL_CALL],
     ),
     "Mistral-7B": ModelConfig(
-        properties=ModelProperties(
-            context_size=8192, max_tokens=2048, mode=LLMMode.CHAT
-        ),
-        features=[],
+        properties=ModelProperties(context_size=8192, max_tokens=2048, mode=LLMMode.CHAT), features=[]
     ),
 }
 
@@ -124,9 +89,7 @@ def get_model_config(credentials: dict) -> ModelConfig:
     return model_configs
 
 
-def get_v2_req_params(
-    credentials: dict, model_parameters: dict, stop: list[str] | None = None
-):
+def get_v2_req_params(credentials: dict, model_parameters: dict, stop: list[str] | None = None):
     req_params = {}
     # predefined properties
     model_configs = get_model_config(credentials)
@@ -154,9 +117,7 @@ def get_v2_req_params(
     return req_params
 
 
-def get_v3_req_params(
-    credentials: dict, model_parameters: dict, stop: list[str] | None = None
-):
+def get_v3_req_params(credentials: dict, model_parameters: dict, stop: list[str] | None = None):
     req_params = {}
     # predefined properties
     model_configs = get_model_config(credentials)

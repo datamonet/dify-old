@@ -3,12 +3,7 @@ from typing import Optional
 import httpx
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -57,17 +52,8 @@ class VoyageRerankModel(RerankModel):
         try:
             response = httpx.post(
                 base_url + "/rerank",
-                json={
-                    "model": model,
-                    "query": query,
-                    "documents": docs,
-                    "top_k": top_n,
-                    "return_documents": True,
-                },
-                headers={
-                    "Authorization": f"Bearer {credentials.get('api_key')}",
-                    "Content-Type": "application/json",
-                },
+                json={"model": model, "query": query, "documents": docs, "top_k": top_n, "return_documents": True},
+                headers={"Authorization": f"Bearer {credentials.get('api_key')}", "Content-Type": "application/json"},
             )
             response.raise_for_status()
             results = response.json()
@@ -79,10 +65,7 @@ class VoyageRerankModel(RerankModel):
                     text=result["document"],
                     score=result["relevance_score"],
                 )
-                if (
-                    score_threshold is None
-                    or result["relevance_score"] >= score_threshold
-                ):
+                if score_threshold is None or result["relevance_score"] >= score_threshold:
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)
@@ -125,9 +108,7 @@ class VoyageRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -136,11 +117,7 @@ class VoyageRerankModel(RerankModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.RERANK,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", "8000")
-                )
-            },
+            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", "8000"))},
         )
 
         return entity

@@ -6,11 +6,7 @@ from typing import Any, Optional
 import boto3
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -33,9 +29,7 @@ class SageMakerRerankModel(RerankModel):
 
     sagemaker_client: Any = None
 
-    def _sagemaker_rerank(
-        self, query_input: str, docs: list[str], rerank_endpoint: str
-    ):
+    def _sagemaker_rerank(self, query_input: str, docs: list[str], rerank_endpoint: str):
         inputs = [query_input] * len(docs)
         response_model = self.sagemaker_client.invoke_endpoint(
             EndpointName=rerank_endpoint,
@@ -88,9 +82,7 @@ class SageMakerRerankModel(RerankModel):
                             region_name=aws_region,
                         )
                     else:
-                        self.sagemaker_client = boto3.client(
-                            "sagemaker-runtime", region_name=aws_region
-                        )
+                        self.sagemaker_client = boto3.client("sagemaker-runtime", region_name=aws_region)
                 else:
                     self.sagemaker_client = boto3.client("sagemaker-runtime")
 
@@ -109,9 +101,7 @@ class SageMakerRerankModel(RerankModel):
             rerank_documents = []
             for idx, result in enumerate(candidate_docs):
                 rerank_document = RerankDocument(
-                    index=idx,
-                    text=result.get("content"),
-                    score=result.get("score", -100.0),
+                    index=idx, text=result.get("content"), score=result.get("score", -100.0)
                 )
 
                 if score_threshold is not None:

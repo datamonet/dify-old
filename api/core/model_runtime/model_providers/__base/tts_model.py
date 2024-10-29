@@ -79,9 +79,7 @@ class TTSModel(AIModel):
         """
         raise NotImplementedError
 
-    def get_tts_model_voices(
-        self, model: str, credentials: dict, language: Optional[str] = None
-    ) -> list:
+    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
         """
         Retrieves the list of voices supported by a given text-to-speech (TTS) model.
 
@@ -103,7 +101,7 @@ class TTSModel(AIModel):
         else:
             return [{"name": d["name"], "value": d["mode"]} for d in voices]
 
-    def _get_model_default_voice(self, model: str, credentials: dict) -> any:
+    def _get_model_default_voice(self, model: str, credentials: dict) -> Any:
         """
         Get voice for given tts model
 
@@ -113,10 +111,7 @@ class TTSModel(AIModel):
         """
         model_schema = self.get_model_schema(model, credentials)
 
-        if (
-            model_schema
-            and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties
-        ):
+        if model_schema and ModelPropertyKey.DEFAULT_VOICE in model_schema.model_properties:
             return model_schema.model_properties[ModelPropertyKey.DEFAULT_VOICE]
 
     def _get_model_audio_type(self, model: str, credentials: dict) -> str:

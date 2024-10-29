@@ -7,10 +7,7 @@ from requests.exceptions import ConnectionError, InvalidSchema, MissingSchema
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -20,9 +17,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 
 
 class OpenLLMTextEmbeddingModel(TextEmbeddingModel):
@@ -78,13 +73,9 @@ class OpenLLMTextEmbeddingModel(TextEmbeddingModel):
             embeddings = resp["embeddings"]
             total_tokens = resp["num_tokens"]
         except KeyError as e:
-            raise InvokeServerUnavailableError(
-                f"Failed to convert response to json: {e} with text: {response.text}"
-            )
+            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=total_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=total_tokens)
 
         result = TextEmbeddingResult(model=model, embeddings=embeddings, usage=usage)
 
@@ -136,9 +127,7 @@ class OpenLLMTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -149,10 +138,7 @@ class OpenLLMTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage

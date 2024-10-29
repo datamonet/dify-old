@@ -119,9 +119,7 @@ class BaichuanModel:
                 err = resp["error"]["type"]
                 msg = resp["error"]["message"]
             except Exception as e:
-                raise InternalServerError(
-                    f"Failed to convert response to json: {e} with text: {response.text}"
-                )
+                raise InternalServerError(f"Failed to convert response to json: {e} with text: {response.text}")
 
             if err == "invalid_api_key":
                 raise InvalidAPIKeyError(msg)

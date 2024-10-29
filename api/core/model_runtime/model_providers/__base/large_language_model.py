@@ -10,13 +10,7 @@ from pydantic import ConfigDict
 from configs import dify_config
 from core.model_runtime.callbacks.base_callback import Callback
 from core.model_runtime.callbacks.logging_callback import LoggingCallback
-from core.model_runtime.entities.llm_entities import (
-    LLMMode,
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-    LLMUsage,
-)
+from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta, LLMUsage
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -77,9 +71,7 @@ class LargeLanguageModel(AIModel):
         if model_parameters is None:
             model_parameters = {}
 
-        model_parameters = self._validate_and_filter_model_parameters(
-            model, model_parameters, credentials
-        )
+        model_parameters = self._validate_and_filter_model_parameters(model, model_parameters, credentials)
 
         self.started_at = time.perf_counter()
 
@@ -102,7 +94,7 @@ class LargeLanguageModel(AIModel):
         )
 
         try:
-            if "response_format" in model_parameters:
+            if "response_format" in model_parameters and model_parameters["response_format"] in {"JSON", "XML"}:
                 result = self._code_block_mode_wrapper(
                     model=model,
                     credentials=credentials,
@@ -225,39 +217,27 @@ if you are not sure about the structure.
         block_prompts = block_prompts.replace("{{block}}", code_block)
 
         # check if there is a system message
-        if len(prompt_messages) > 0 and isinstance(
-            prompt_messages[0], SystemPromptMessage
-        ):
+        if len(prompt_messages) > 0 and isinstance(prompt_messages[0], SystemPromptMessage):
             # override the system message
             prompt_messages[0] = SystemPromptMessage(
-                content=block_prompts.replace(
-                    "{{instructions}}", str(prompt_messages[0].content)
-                )
+                content=block_prompts.replace("{{instructions}}", str(prompt_messages[0].content))
             )
         else:
             # insert the system message
             prompt_messages.insert(
                 0,
                 SystemPromptMessage(
-                    content=block_prompts.replace(
-                        "{{instructions}}",
-                        f"Please output a valid {code_block} object.",
-                    )
+                    content=block_prompts.replace("{{instructions}}", f"Please output a valid {code_block} object.")
                 ),
             )
 
-        if len(prompt_messages) > 0 and isinstance(
-            prompt_messages[-1], UserPromptMessage
-        ):
+        if len(prompt_messages) > 0 and isinstance(prompt_messages[-1], UserPromptMessage):
             # add ```JSON\n to the last text message
             if isinstance(prompt_messages[-1].content, str):
                 prompt_messages[-1].content += f"\n```{code_block}\n"
             elif isinstance(prompt_messages[-1].content, list):
                 for i in range(len(prompt_messages[-1].content) - 1, -1, -1):
-                    if (
-                        prompt_messages[-1].content[i].type
-                        == PromptMessageContentType.TEXT
-                    ):
+                    if prompt_messages[-1].content[i].type == PromptMessageContentType.TEXT:
                         prompt_messages[-1].content[i].data += f"\n```{code_block}\n"
                         break
         else:
@@ -282,29 +262,19 @@ if you are not sure about the structure.
                 yield first_chunk
                 yield from response
 
-            if (
-                first_chunk.delta.message.content
-                and first_chunk.delta.message.content.startswith("`")
-            ):
+            if first_chunk.delta.message.content and first_chunk.delta.message.content.startswith("`"):
                 return self._code_block_mode_stream_processor_with_backtick(
-                    model=model,
-                    prompt_messages=prompt_messages,
-                    input_generator=new_generator(),
+                    model=model, prompt_messages=prompt_messages, input_generator=new_generator()
                 )
             else:
                 return self._code_block_mode_stream_processor(
-                    model=model,
-                    prompt_messages=prompt_messages,
-                    input_generator=new_generator(),
+                    model=model, prompt_messages=prompt_messages, input_generator=new_generator()
                 )
 
         return response
 
     def _code_block_mode_stream_processor(
-        self,
-        model: str,
-        prompt_messages: list[PromptMessage],
-        input_generator: Generator[LLMResultChunk, None, None],
+        self, model: str, prompt_messages: list[PromptMessage], input_generator: Generator[LLMResultChunk, None, None]
     ) -> Generator[LLMResultChunk, None, None]:
         """
         Code block mode stream processor, ensure the response is a code block with output markdown quote
@@ -354,17 +324,12 @@ if you are not sure about the structure.
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=0,
-                        message=AssistantPromptMessage(
-                            content=new_piece, tool_calls=[]
-                        ),
+                        message=AssistantPromptMessage(content=new_piece, tool_calls=[]),
                     ),
                 )
 
     def _code_block_mode_stream_processor_with_backtick(
-        self,
-        model: str,
-        prompt_messages: list,
-        input_generator: Generator[LLMResultChunk, None, None],
+        self, model: str, prompt_messages: list, input_generator: Generator[LLMResultChunk, None, None]
     ) -> Generator[LLMResultChunk, None, None]:
         """
         Code block mode stream processor, ensure the response is a code block with output markdown quote.
@@ -431,9 +396,7 @@ if you are not sure about the structure.
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=0,
-                        message=AssistantPromptMessage(
-                            content=new_piece, tool_calls=[]
-                        ),
+                        message=AssistantPromptMessage(content=new_piece, tool_calls=[]),
                     ),
                 )
 
@@ -572,9 +535,7 @@ if you are not sure about the structure.
 
         return []
 
-    def get_model_mode(
-        self, model: str, credentials: Optional[Mapping] = None
-    ) -> LLMMode:
+    def get_model_mode(self, model: str, credentials: Optional[Mapping] = None) -> LLMMode:
         """
         Get model mode
 
@@ -586,9 +547,7 @@ if you are not sure about the structure.
 
         mode = LLMMode.CHAT
         if model_schema and model_schema.model_properties.get(ModelPropertyKey.MODE):
-            mode = LLMMode.value_of(
-                model_schema.model_properties[ModelPropertyKey.MODE]
-            )
+            mode = LLMMode.value_of(model_schema.model_properties[ModelPropertyKey.MODE])
 
         return mode
 
@@ -614,10 +573,7 @@ if you are not sure about the structure.
 
         # get completion price info
         completion_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.OUTPUT,
-            tokens=completion_tokens,
+            model=model, credentials=credentials, price_type=PriceType.OUTPUT, tokens=completion_tokens
         )
 
         # transform usage
@@ -631,8 +587,7 @@ if you are not sure about the structure.
             completion_price_unit=completion_price_info.unit,
             completion_price=completion_price_info.total_amount,
             total_tokens=prompt_tokens + completion_tokens,
-            total_price=prompt_price_info.total_amount
-            + completion_price_info.total_amount,
+            total_price=prompt_price_info.total_amount + completion_price_info.total_amount,
             currency=prompt_price_info.currency,
             latency=time.perf_counter() - self.started_at,
         )
@@ -682,9 +637,7 @@ if you are not sure about the structure.
                     if callback.raise_error:
                         raise e
                     else:
-                        logger.warning(
-                            f"Callback {callback.__class__.__name__} on_before_invoke failed with error {e}"
-                        )
+                        logger.warning(f"Callback {callback.__class__.__name__} on_before_invoke failed with error {e}")
 
     def _trigger_new_chunk_callbacks(
         self,
@@ -731,9 +684,7 @@ if you are not sure about the structure.
                     if callback.raise_error:
                         raise e
                     else:
-                        logger.warning(
-                            f"Callback {callback.__class__.__name__} on_new_chunk failed with error {e}"
-                        )
+                        logger.warning(f"Callback {callback.__class__.__name__} on_new_chunk failed with error {e}")
 
     def _trigger_after_invoke_callbacks(
         self,
@@ -781,9 +732,7 @@ if you are not sure about the structure.
                     if callback.raise_error:
                         raise e
                     else:
-                        logger.warning(
-                            f"Callback {callback.__class__.__name__} on_after_invoke failed with error {e}"
-                        )
+                        logger.warning(f"Callback {callback.__class__.__name__} on_after_invoke failed with error {e}")
 
     def _trigger_invoke_error_callbacks(
         self,
@@ -831,13 +780,9 @@ if you are not sure about the structure.
                     if callback.raise_error:
                         raise e
                     else:
-                        logger.warning(
-                            f"Callback {callback.__class__.__name__} on_invoke_error failed with error {e}"
-                        )
+                        logger.warning(f"Callback {callback.__class__.__name__} on_invoke_error failed with error {e}")
 
-    def _validate_and_filter_model_parameters(
-        self, model: str, model_parameters: dict, credentials: dict
-    ) -> dict:
+    def _validate_and_filter_model_parameters(self, model: str, model_parameters: dict, credentials: dict) -> dict:
         """
         Validate model parameters
 
@@ -854,23 +799,16 @@ if you are not sure about the structure.
             parameter_name = parameter_rule.name
             parameter_value = model_parameters.get(parameter_name)
             if parameter_value is None:
-                if (
-                    parameter_rule.use_template
-                    and parameter_rule.use_template in model_parameters
-                ):
+                if parameter_rule.use_template and parameter_rule.use_template in model_parameters:
                     # if parameter value is None, use template value variable name instead
                     parameter_value = model_parameters[parameter_rule.use_template]
                 else:
                     if parameter_rule.required:
                         if parameter_rule.default is not None:
-                            filtered_model_parameters[parameter_name] = (
-                                parameter_rule.default
-                            )
+                            filtered_model_parameters[parameter_name] = parameter_rule.default
                             continue
                         else:
-                            raise ValueError(
-                                f"Model Parameter {parameter_name} is required."
-                            )
+                            raise ValueError(f"Model Parameter {parameter_name} is required.")
                     else:
                         continue
 
@@ -880,96 +818,60 @@ if you are not sure about the structure.
                     raise ValueError(f"Model Parameter {parameter_name} should be int.")
 
                 # validate parameter value range
-                if (
-                    parameter_rule.min is not None
-                    and parameter_value < parameter_rule.min
-                ):
+                if parameter_rule.min is not None and parameter_value < parameter_rule.min:
                     raise ValueError(
                         f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
                     )
 
-                if (
-                    parameter_rule.max is not None
-                    and parameter_value > parameter_rule.max
-                ):
+                if parameter_rule.max is not None and parameter_value > parameter_rule.max:
                     raise ValueError(
                         f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
                     )
             elif parameter_rule.type == ParameterType.FLOAT:
                 if not isinstance(parameter_value, float | int):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be float."
-                    )
+                    raise ValueError(f"Model Parameter {parameter_name} should be float.")
 
                 # validate parameter value precision
                 if parameter_rule.precision is not None:
                     if parameter_rule.precision == 0:
                         if parameter_value != int(parameter_value):
-                            raise ValueError(
-                                f"Model Parameter {parameter_name} should be int."
-                            )
+                            raise ValueError(f"Model Parameter {parameter_name} should be int.")
                     else:
-                        if parameter_value != round(
-                            parameter_value, parameter_rule.precision
-                        ):
+                        if parameter_value != round(parameter_value, parameter_rule.precision):
                             raise ValueError(
                                 f"Model Parameter {parameter_name} should be round to {parameter_rule.precision}"
                                 f" decimal places."
                             )
 
                 # validate parameter value range
-                if (
-                    parameter_rule.min is not None
-                    and parameter_value < parameter_rule.min
-                ):
+                if parameter_rule.min is not None and parameter_value < parameter_rule.min:
                     raise ValueError(
                         f"Model Parameter {parameter_name} should be greater than or equal to {parameter_rule.min}."
                     )
 
-                if (
-                    parameter_rule.max is not None
-                    and parameter_value > parameter_rule.max
-                ):
+                if parameter_rule.max is not None and parameter_value > parameter_rule.max:
                     raise ValueError(
                         f"Model Parameter {parameter_name} should be less than or equal to {parameter_rule.max}."
                     )
             elif parameter_rule.type == ParameterType.BOOLEAN:
                 if not isinstance(parameter_value, bool):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be bool."
-                    )
+                    raise ValueError(f"Model Parameter {parameter_name} should be bool.")
             elif parameter_rule.type == ParameterType.STRING:
                 if not isinstance(parameter_value, str):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be string."
-                    )
+                    raise ValueError(f"Model Parameter {parameter_name} should be string.")
 
                 # validate options
-                if (
-                    parameter_rule.options
-                    and parameter_value not in parameter_rule.options
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be one of {parameter_rule.options}."
-                    )
+                if parameter_rule.options and parameter_value not in parameter_rule.options:
+                    raise ValueError(f"Model Parameter {parameter_name} should be one of {parameter_rule.options}.")
             elif parameter_rule.type == ParameterType.TEXT:
                 if not isinstance(parameter_value, str):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be text."
-                    )
+                    raise ValueError(f"Model Parameter {parameter_name} should be text.")
 
                 # validate options
-                if (
-                    parameter_rule.options
-                    and parameter_value not in parameter_rule.options
-                ):
-                    raise ValueError(
-                        f"Model Parameter {parameter_name} should be one of {parameter_rule.options}."
-                    )
+                if parameter_rule.options and parameter_value not in parameter_rule.options:
+                    raise ValueError(f"Model Parameter {parameter_name} should be one of {parameter_rule.options}.")
             else:
-                raise ValueError(
-                    f"Model Parameter {parameter_name} type {parameter_rule.type} is not supported."
-                )
+                raise ValueError(f"Model Parameter {parameter_name} type {parameter_rule.type} is not supported.")
 
             filtered_model_parameters[parameter_name] = parameter_value
 

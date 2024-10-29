@@ -1,6 +1,6 @@
 import concurrent.futures
 import copy
-from typing import Optional
+from typing import Any, Optional
 
 from openai import AzureOpenAI
 
@@ -9,10 +9,7 @@ from core.model_runtime.errors.invoke import InvokeBadRequestError
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.tts_model import TTSModel
 from core.model_runtime.model_providers.azure_openai._common import _CommonAzureOpenAI
-from core.model_runtime.model_providers.azure_openai._constant import (
-    TTS_BASE_MODELS,
-    AzureBaseModel,
-)
+from core.model_runtime.model_providers.azure_openai._constant import TTS_BASE_MODELS, AzureBaseModel
 
 
 class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
@@ -21,14 +18,8 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
     """
 
     def _invoke(
-        self,
-        model: str,
-        tenant_id: str,
-        credentials: dict,
-        content_text: str,
-        voice: str,
-        user: Optional[str] = None,
-    ) -> any:
+        self, model: str, tenant_id: str, credentials: dict, content_text: str, voice: str, user: Optional[str] = None
+    ) -> Any:
         """
         _invoke text2speech model
 
@@ -41,14 +32,11 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
         :return: text translated to audio file
         """
         if not voice or voice not in [
-            d["value"]
-            for d in self.get_tts_model_voices(model=model, credentials=credentials)
+            d["value"] for d in self.get_tts_model_voices(model=model, credentials=credentials)
         ]:
             voice = self._get_model_default_voice(model, credentials)
 
-        return self._tts_invoke_streaming(
-            model=model, credentials=credentials, content_text=content_text, voice=voice
-        )
+        return self._tts_invoke_streaming(model=model, credentials=credentials, content_text=content_text, voice=voice)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -68,9 +56,7 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _tts_invoke_streaming(
-        self, model: str, credentials: dict, content_text: str, voice: str
-    ) -> any:
+    def _tts_invoke_streaming(self, model: str, credentials: dict, content_text: str, voice: str) -> Any:
         """
         _tts_invoke_streaming text2speech model
         :param model: model name
@@ -86,12 +72,8 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
             # max length is 4096 characters, there is 3500 limit for each request
             max_length = 3500
             if len(content_text) > max_length:
-                sentences = self._split_text_into_sentences(
-                    content_text, max_length=max_length
-                )
-                executor = concurrent.futures.ThreadPoolExecutor(
-                    max_workers=min(3, len(sentences))
-                )
+                sentences = self._split_text_into_sentences(content_text, max_length=max_length)
+                executor = concurrent.futures.ThreadPoolExecutor(max_workers=min(3, len(sentences)))
                 futures = [
                     executor.submit(
                         client.audio.speech.with_streaming_response.create,
@@ -107,10 +89,7 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
 
             else:
                 response = client.audio.speech.with_streaming_response.create(
-                    model=model,
-                    voice=voice,
-                    response_format="mp3",
-                    input=content_text.strip(),
+                    model=model, voice=voice, response_format="mp3", input=content_text.strip()
                 )
 
                 yield from response.__enter__().iter_bytes(1024)  # noqa:PLC2801
@@ -129,18 +108,12 @@ class AzureOpenAIText2SpeechModel(_CommonAzureOpenAI, TTSModel):
         """
         credentials_kwargs = self._to_credential_kwargs(credentials)
         client = AzureOpenAI(**credentials_kwargs)
-        response = client.audio.speech.create(
-            model=model, voice=voice, input=sentence.strip()
-        )
+        response = client.audio.speech.create(model=model, voice=voice, input=sentence.strip())
         if isinstance(response.read(), bytes):
             return response.read()
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> Optional[AIModelEntity]:
-        ai_model_entity = self._get_ai_model_entity(
-            credentials["base_model_name"], model
-        )
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
+        ai_model_entity = self._get_ai_model_entity(credentials["base_model_name"], model)
         return ai_model_entity.entity
 
     @staticmethod

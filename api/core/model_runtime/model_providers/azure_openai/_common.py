@@ -9,9 +9,7 @@ from core.model_runtime.errors.invoke import (
     InvokeRateLimitError,
     InvokeServerUnavailableError,
 )
-from core.model_runtime.model_providers.azure_openai._constant import (
-    AZURE_OPENAI_API_VERSION,
-)
+from core.model_runtime.model_providers.azure_openai._constant import AZURE_OPENAI_API_VERSION
 
 
 class _CommonAzureOpenAI:
@@ -34,10 +32,7 @@ class _CommonAzureOpenAI:
             InvokeConnectionError: [openai.APIConnectionError, openai.APITimeoutError],
             InvokeServerUnavailableError: [openai.InternalServerError],
             InvokeRateLimitError: [openai.RateLimitError],
-            InvokeAuthorizationError: [
-                openai.AuthenticationError,
-                openai.PermissionDeniedError,
-            ],
+            InvokeAuthorizationError: [openai.AuthenticationError, openai.PermissionDeniedError],
             InvokeBadRequestError: [
                 openai.BadRequestError,
                 openai.NotFoundError,

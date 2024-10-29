@@ -6,17 +6,8 @@ import requests
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    PriceType,
-)
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -26,9 +17,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 
 
 class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
@@ -64,10 +53,7 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
         base_url = base_url.removesuffix("/")
 
         url = base_url + "/embeddings"
-        headers = {
-            "Authorization": "Bearer " + api_key,
-            "Content-Type": "application/json",
-        }
+        headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
 
         data = {"model": model, "input": texts}
 
@@ -98,18 +84,12 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
             embeddings = resp["data"]
             usage = resp["usage"]
         except Exception as e:
-            raise InvokeServerUnavailableError(
-                f"Failed to convert response to json: {e} with text: {response.text}"
-            )
+            raise InvokeServerUnavailableError(f"Failed to convert response to json: {e} with text: {response.text}")
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=usage["total_tokens"]
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
 
         result = TextEmbeddingResult(
-            model=model,
-            embeddings=[[float(data) for data in x["embedding"]] for x in embeddings],
-            usage=usage,
+            model=model, embeddings=[[float(data) for data in x["embedding"]] for x in embeddings], usage=usage
         )
 
         return result
@@ -148,9 +128,7 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError, InvokeBadRequestError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -161,10 +139,7 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage
@@ -180,9 +155,7 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
 
         return usage
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -191,11 +164,7 @@ class MixedBreadTextEmbeddingModel(TextEmbeddingModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.TEXT_EMBEDDING,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", "512")
-                )
-            },
+            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", "512"))},
         )
 
         return entity

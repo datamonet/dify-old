@@ -20,13 +20,9 @@ class MinimaxProvider(ModelProvider):
             model_instance = self.get_model_instance(ModelType.LLM)
 
             # Use `abab5.5-chat` model for validate,
-            model_instance.validate_credentials(
-                model="abab5.5-chat", credentials=credentials
-            )
+            model_instance.validate_credentials(model="abab5.5-chat", credentials=credentials)
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(
-                f"{self.get_provider_schema().provider} credentials validate failed"
-            )
+            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
             raise CredentialsValidateFailedError(f"{ex}")

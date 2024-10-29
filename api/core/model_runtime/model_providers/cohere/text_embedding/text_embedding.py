@@ -7,10 +7,7 @@ from cohere.core import RequestOptions
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -20,9 +17,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 
 
 class CohereTextEmbeddingModel(TextEmbeddingModel):
@@ -58,9 +53,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         used_tokens = 0
 
         for i, text in enumerate(texts):
-            tokenize_response = self._tokenize(
-                model=model, credentials=credentials, text=text
-            )
+            tokenize_response = self._tokenize(model=model, credentials=credentials, text=text)
 
             for j in range(0, len(tokenize_response), context_size):
                 tokens += [tokenize_response[j : j + context_size]]
@@ -72,9 +65,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         for i in _iter:
             # call embedding model
             embeddings_batch, embedding_used_tokens = self._embedding_invoke(
-                model=model,
-                credentials=credentials,
-                texts=["".join(token) for token in tokens[i : i + max_chunks]],
+                model=model, credentials=credentials, texts=["".join(token) for token in tokens[i : i + max_chunks]]
             )
 
             used_tokens += embedding_used_tokens
@@ -100,9 +91,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
             embeddings[i] = (average / np.linalg.norm(average)).tolist()
 
         # calc usage
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
@@ -121,9 +110,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         full_text = " ".join(texts)
 
         try:
-            response = self._tokenize(
-                model=model, credentials=credentials, text=full_text
-            )
+            response = self._tokenize(model=model, credentials=credentials, text=full_text)
         except Exception as e:
             raise self._transform_invoke_error(e)
 
@@ -141,16 +128,9 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
             return []
 
         # initialize client
-        client = cohere.Client(
-            credentials.get("api_key"), base_url=credentials.get("base_url")
-        )
+        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
 
-        response = client.tokenize(
-            text=text,
-            model=model,
-            offline=False,
-            request_options=RequestOptions(max_retries=0),
-        )
+        response = client.tokenize(text=text, model=model, offline=False, request_options=RequestOptions(max_retries=0))
 
         return response.token_strings
 
@@ -168,9 +148,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _embedding_invoke(
-        self, model: str, credentials: dict, texts: list[str]
-    ) -> tuple[list[list[float]], int]:
+    def _embedding_invoke(self, model: str, credentials: dict, texts: list[str]) -> tuple[list[list[float]], int]:
         """
         Invoke embedding model
 
@@ -180,9 +158,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         :return: embeddings and used tokens
         """
         # initialize client
-        client = cohere.Client(
-            credentials.get("api_key"), base_url=credentials.get("base_url")
-        )
+        client = cohere.Client(credentials.get("api_key"), base_url=credentials.get("base_url"))
 
         # call embedding model
         response = client.embed(
@@ -194,9 +170,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
 
         return response.embeddings, int(response.meta.billed_units.input_tokens)
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -207,10 +181,7 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage
@@ -237,15 +208,9 @@ class CohereTextEmbeddingModel(TextEmbeddingModel):
         :return: Invoke error mapping
         """
         return {
-            InvokeConnectionError: [
-                cohere.errors.service_unavailable_error.ServiceUnavailableError
-            ],
-            InvokeServerUnavailableError: [
-                cohere.errors.internal_server_error.InternalServerError
-            ],
-            InvokeRateLimitError: [
-                cohere.errors.too_many_requests_error.TooManyRequestsError
-            ],
+            InvokeConnectionError: [cohere.errors.service_unavailable_error.ServiceUnavailableError],
+            InvokeServerUnavailableError: [cohere.errors.internal_server_error.InternalServerError],
+            InvokeRateLimitError: [cohere.errors.too_many_requests_error.TooManyRequestsError],
             InvokeAuthorizationError: [
                 cohere.errors.unauthorized_error.UnauthorizedError,
                 cohere.errors.forbidden_error.ForbiddenError,

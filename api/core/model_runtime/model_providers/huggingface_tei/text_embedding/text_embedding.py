@@ -3,17 +3,8 @@ from typing import Optional
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    PriceType,
-)
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -23,9 +14,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 from core.model_runtime.model_providers.huggingface_tei.tei_helper import TeiHelper
 
 
@@ -73,9 +62,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
         # get tokenized results from TEI
         batched_tokenize_result = TeiHelper.invoke_tokenize(server_url, texts)
 
-        for i, (text, tokenize_result) in enumerate(
-            zip(texts, batched_tokenize_result)
-        ):
+        for i, (text, tokenize_result) in enumerate(zip(texts, batched_tokenize_result)):
             # Check if the number of tokens is larger than the context size
             num_tokens = len(tokenize_result)
 
@@ -88,8 +75,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
                     else:
                         break
                 rest_special_token_count = (
-                    len([token for token in tokenize_result if token["special"]])
-                    - pre_special_token_count
+                    len([token for token in tokenize_result if token["special"]]) - pre_special_token_count
                 )
 
                 # Calculate the cutoff point, leave 20 extra space to avoid exceeding the limit
@@ -121,13 +107,9 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
         except RuntimeError as e:
             raise InvokeServerUnavailableError(str(e))
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
-        result = TextEmbeddingResult(
-            model=model, embeddings=batched_embeddings, usage=usage
-        )
+        result = TextEmbeddingResult(model=model, embeddings=batched_embeddings, usage=usage)
 
         return result
 
@@ -162,9 +144,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
             extra_args = TeiHelper.get_tei_extra_parameter(server_url, model)
             print(extra_args)
             if extra_args.model_type != "embedding":
-                raise CredentialsValidateFailedError(
-                    "Current model is not a embedding model"
-                )
+                raise CredentialsValidateFailedError("Current model is not a embedding model")
 
             credentials["context_size"] = extra_args.max_input_length
             credentials["max_chunks"] = extra_args.max_client_batch_size
@@ -182,9 +162,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -195,10 +173,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage
@@ -226,9 +201,7 @@ class HuggingfaceTeiTextEmbeddingModel(TextEmbeddingModel):
             model_type=ModelType.TEXT_EMBEDDING,
             model_properties={
                 ModelPropertyKey.MAX_CHUNKS: int(credentials.get("max_chunks", 1)),
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", 512)
-                ),
+                ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", 512)),
             },
             parameter_rules=[],
         )

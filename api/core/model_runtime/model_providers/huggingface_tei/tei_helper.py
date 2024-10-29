@@ -14,12 +14,7 @@ class TeiModelExtraParameter:
     max_input_length: int
     max_client_batch_size: int
 
-    def __init__(
-        self,
-        model_type: str,
-        max_input_length: int,
-        max_client_batch_size: Optional[int] = None,
-    ) -> None:
+    def __init__(self, model_type: str, max_input_length: int, max_client_batch_size: Optional[int] = None) -> None:
         self.model_type = model_type
         self.max_input_length = max_input_length
         self.max_client_batch_size = max_client_batch_size
@@ -31,9 +26,7 @@ cache_lock = Lock()
 
 class TeiHelper:
     @staticmethod
-    def get_tei_extra_parameter(
-        server_url: str, model_name: str
-    ) -> TeiModelExtraParameter:
+    def get_tei_extra_parameter(server_url: str, model_name: str) -> TeiModelExtraParameter:
         TeiHelper._clean_cache()
         with cache_lock:
             if model_name not in cache:
@@ -47,14 +40,10 @@ class TeiHelper:
     def _clean_cache() -> None:
         try:
             with cache_lock:
-                expired_keys = [
-                    model_uid
-                    for model_uid, model in cache.items()
-                    if model["expires"] < time()
-                ]
+                expired_keys = [model_uid for model_uid, model in cache.items() if model["expires"] < time()]
                 for model_uid in expired_keys:
                     del cache[model_uid]
-        except RuntimeError:
+        except RuntimeError as e:
             pass
 
     @staticmethod
@@ -74,9 +63,7 @@ class TeiHelper:
         try:
             response = session.get(url, timeout=10)
         except (MissingSchema, ConnectionError, Timeout) as e:
-            raise RuntimeError(
-                f"get tei model extra parameter failed, url: {url}, error: {e}"
-            )
+            raise RuntimeError(f"get tei model extra parameter failed, url: {url}, error: {e}")
         if response.status_code != 200:
             raise RuntimeError(
                 f"get tei model extra parameter failed, status code: {response.status_code}, response: {response.text}"
@@ -95,9 +82,7 @@ class TeiHelper:
         max_client_batch_size = response_json.get("max_client_batch_size", 1)
 
         return TeiModelExtraParameter(
-            model_type=model_type,
-            max_input_length=max_input_length,
-            max_client_batch_size=max_client_batch_size,
+            model_type=model_type, max_input_length=max_input_length, max_client_batch_size=max_client_batch_size
         )
 
     @staticmethod

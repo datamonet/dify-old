@@ -62,13 +62,7 @@ class ErnieBotModel(_CommonWenxin):
 
         # build body
         body = self._build_request_body(
-            model,
-            messages=messages_cloned,
-            stream=stream,
-            parameters=parameters,
-            tools=tools,
-            stop=stop,
-            user=user,
+            model, messages=messages_cloned, stream=stream, parameters=parameters, tools=tools, stop=stop, user=user
         )
         headers = {
             "Content-Type": "application/json",
@@ -87,11 +81,7 @@ class ErnieBotModel(_CommonWenxin):
         return [ErnieMessage(message.content, message.role) for message in messages]
 
     def _check_parameters(
-        self,
-        model: str,
-        parameters: dict[str, Any],
-        tools: list[PromptMessageTool],
-        stop: list[str],
+        self, model: str, parameters: dict[str, Any], tools: list[PromptMessageTool], stop: list[str]
     ) -> None:
         if model not in self.api_bases:
             raise BadRequestError(f"Invalid model: {model}")
@@ -125,9 +115,7 @@ class ErnieBotModel(_CommonWenxin):
     ) -> dict[str, Any]:
         # if model in self.function_calling_supports:
         #     return self._build_function_calling_request_body(model, messages, parameters, tools, stop, user)
-        return self._build_chat_request_body(
-            model, messages, stream, parameters, stop, user
-        )
+        return self._build_chat_request_body(model, messages, stream, parameters, stop, user)
 
     def _build_function_calling_request_body(
         self,
@@ -181,10 +169,7 @@ class ErnieBotModel(_CommonWenxin):
         if "max_tokens" in parameters and type(parameters["max_tokens"]) == int:
             body["max_output_tokens"] = parameters["max_tokens"]
 
-        if (
-            "presence_penalty" in parameters
-            and type(parameters["presence_penalty"]) == float
-        ):
+        if "presence_penalty" in parameters and type(parameters["presence_penalty"]) == float:
             body["penalty_score"] = parameters["presence_penalty"]
 
         if system_message:
@@ -212,9 +197,7 @@ class ErnieBotModel(_CommonWenxin):
 
         return message
 
-    def _handle_chat_stream_generate_response(
-        self, response: Response
-    ) -> Generator[ErnieMessage, None, None]:
+    def _handle_chat_stream_generate_response(self, response: Response) -> Generator[ErnieMessage, None, None]:
         for line in response.iter_lines():
             if len(line) == 0:
                 continue

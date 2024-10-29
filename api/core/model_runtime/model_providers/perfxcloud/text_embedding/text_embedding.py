@@ -17,17 +17,10 @@ from core.model_runtime.entities.model_entities import (
     PriceConfig,
     PriceType,
 )
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
-from core.model_runtime.model_providers.openai_api_compatible._common import (
-    _CommonOaiApiCompat,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.openai_api_compatible._common import _CommonOaiApiCompat
 
 
 class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
@@ -102,19 +95,10 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
         for i in _iter:
             # Prepare the payload for the request
-            payload = {
-                "input": inputs[i : i + max_chunks],
-                "model": model,
-                **extra_model_kwargs,
-            }
+            payload = {"input": inputs[i : i + max_chunks], "model": model, **extra_model_kwargs}
 
             # Make the request to the OpenAI API
-            response = requests.post(
-                endpoint_url,
-                headers=headers,
-                data=json.dumps(payload),
-                timeout=(10, 300),
-            )
+            response = requests.post(endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300))
 
             response.raise_for_status()  # Raise an exception for HTTP errors
             response_data = response.json()
@@ -127,13 +111,9 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
             batched_embeddings += embeddings_batch
 
         # calc usage
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
-        return TextEmbeddingResult(
-            embeddings=batched_embeddings, usage=usage, model=model
-        )
+        return TextEmbeddingResult(embeddings=batched_embeddings, usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
@@ -173,12 +153,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
             payload = {"input": "ping", "model": model}
 
-            response = requests.post(
-                url=endpoint_url,
-                headers=headers,
-                data=json.dumps(payload),
-                timeout=(10, 300),
-            )
+            response = requests.post(url=endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300))
 
             if response.status_code != 200:
                 raise CredentialsValidateFailedError(
@@ -187,23 +162,17 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
             try:
                 json_result = response.json()
-            except json.JSONDecodeError:
-                raise CredentialsValidateFailedError(
-                    "Credentials validation failed: JSON decode error"
-                )
+            except json.JSONDecodeError as e:
+                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error")
 
             if "model" not in json_result:
-                raise CredentialsValidateFailedError(
-                    "Credentials validation failed: invalid response"
-                )
+                raise CredentialsValidateFailedError("Credentials validation failed: invalid response")
         except CredentialsValidateFailedError:
             raise
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -226,9 +195,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
 
         return entity
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -239,10 +206,7 @@ class OAICompatEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage

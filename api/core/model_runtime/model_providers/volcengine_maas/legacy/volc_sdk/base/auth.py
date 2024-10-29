@@ -76,9 +76,7 @@ class Signer:
         if request.path == "":
             request.path = "/"
         if request.method != "GET" and "Content-Type" not in request.headers:
-            request.headers["Content-Type"] = (
-                "application/x-www-form-urlencoded; charset=utf-8"
-            )
+            request.headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
 
         format_date = Signer.get_current_format_date()
         request.headers["X-Date"] = format_date
@@ -94,16 +92,10 @@ class Signer:
         hashed_canon_req = Signer.hashed_canonical_request_v4(request, md)
         md.set_credential_scope("/".join([md.date, md.region, md.service, "request"]))
 
-        signing_str = "\n".join(
-            [md.algorithm, format_date, md.credential_scope, hashed_canon_req]
-        )
-        signing_key = Signer.get_signing_secret_key_v4(
-            credentials.sk, md.date, md.region, md.service
-        )
+        signing_str = "\n".join([md.algorithm, format_date, md.credential_scope, hashed_canon_req])
+        signing_key = Signer.get_signing_secret_key_v4(credentials.sk, md.date, md.region, md.service)
         sign = Util.to_hex(Util.hmac_sha256(signing_key, signing_str))
-        request.headers["Authorization"] = Signer.build_auth_header_v4(
-            sign, md, credentials
-        )
+        request.headers["Authorization"] = Signer.build_auth_header_v4(sign, md, credentials)
 
     @staticmethod
     def hashed_canonical_request_v4(request, meta):

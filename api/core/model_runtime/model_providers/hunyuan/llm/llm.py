@@ -9,11 +9,7 @@ from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.hunyuan.v20230901 import hunyuan_client, models
 
-from core.model_runtime.entities.llm_entities import (
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-)
+from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
@@ -27,9 +23,7 @@ from core.model_runtime.entities.message_entities import (
 )
 from core.model_runtime.errors.invoke import InvokeError
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 
 logger = logging.getLogger(__name__)
 
@@ -81,9 +75,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
         response = client.ChatCompletions(request)
 
         if stream:
-            return self._handle_stream_chat_response(
-                model, credentials, prompt_messages, response
-            )
+            return self._handle_stream_chat_response(model, credentials, prompt_messages, response)
 
         return self._handle_chat_response(credentials, model, prompt_messages, response)
 
@@ -118,9 +110,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
         client = hunyuan_client.HunyuanClient(cred, "", clientProfile)
         return client
 
-    def _convert_prompt_messages_to_dicts(
-        self, prompt_messages: list[PromptMessage]
-    ) -> list[dict]:
+    def _convert_prompt_messages_to_dicts(self, prompt_messages: list[PromptMessage]) -> list[dict]:
         """Convert a list of PromptMessage objects to a list of dictionaries with 'Role' and 'Content' keys."""
         dict_list = []
         for message in prompt_messages:
@@ -152,53 +142,32 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
                         }
                     )
                 else:
-                    dict_list.append(
-                        {"Role": message.role.value, "Content": message.content}
-                    )
+                    dict_list.append({"Role": message.role.value, "Content": message.content})
             elif isinstance(message, ToolPromptMessage):
                 tool_execute_result = {"result": message.content}
                 content = json.dumps(tool_execute_result, ensure_ascii=False)
-                dict_list.append(
-                    {
-                        "Role": message.role.value,
-                        "Content": content,
-                        "ToolCallId": message.tool_call_id,
-                    }
-                )
+                dict_list.append({"Role": message.role.value, "Content": content, "ToolCallId": message.tool_call_id})
             elif isinstance(message, UserPromptMessage):
                 message = cast(UserPromptMessage, message)
                 if isinstance(message.content, str):
-                    dict_list.append(
-                        {"Role": message.role.value, "Content": message.content}
-                    )
+                    dict_list.append({"Role": message.role.value, "Content": message.content})
                 else:
                     sub_messages = []
                     for message_content in message.content:
                         if message_content.type == PromptMessageContentType.TEXT:
-                            message_content = cast(
-                                TextPromptMessageContent, message_content
-                            )
-                            sub_message_dict = {
-                                "Type": "text",
-                                "Text": message_content.data,
-                            }
+                            message_content = cast(TextPromptMessageContent, message_content)
+                            sub_message_dict = {"Type": "text", "Text": message_content.data}
                             sub_messages.append(sub_message_dict)
                         elif message_content.type == PromptMessageContentType.IMAGE:
-                            message_content = cast(
-                                ImagePromptMessageContent, message_content
-                            )
+                            message_content = cast(ImagePromptMessageContent, message_content)
                             sub_message_dict = {
                                 "Type": "image_url",
                                 "ImageUrl": {"Url": message_content.data},
                             }
                             sub_messages.append(sub_message_dict)
-                    dict_list.append(
-                        {"Role": message.role.value, "Contents": sub_messages}
-                    )
+                    dict_list.append({"Role": message.role.value, "Contents": sub_messages})
             else:
-                dict_list.append(
-                    {"Role": message.role.value, "Content": message.content}
-                )
+                dict_list.append({"Role": message.role.value, "Content": message.content})
         return dict_list
 
     def _handle_stream_chat_response(self, model, credentials, prompt_messages, resp):
@@ -236,17 +205,11 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
                     else:
                         tool_call.function.name += new_tool_call.function.name
                         tool_call.function.arguments += new_tool_call.function.arguments
-                if (
-                    tool_call is not None
-                    and len(tool_call.function.name) > 0
-                    and len(tool_call.function.arguments) > 0
-                ):
+                if tool_call is not None and len(tool_call.function.name) > 0 and len(tool_call.function.arguments) > 0:
                     tool_calls.append(tool_call)
                     tool_call = None
 
-            assistant_prompt_message = AssistantPromptMessage(
-                content=message_content, tool_calls=[]
-            )
+            assistant_prompt_message = AssistantPromptMessage(content=message_content, tool_calls=[])
             # rewrite content = "" while tool_call to avoid show content on web page
             if len(tool_calls) > 0:
                 assistant_prompt_message.content = ""
@@ -258,9 +221,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
                 tool_calls = []
 
             if len(finish_reason) > 0:
-                usage = self._calc_response_usage(
-                    model, credentials, prompt_tokens, completion_tokens
-                )
+                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
                 delta_chunk = LLMResultChunkDelta(
                     index=index,
@@ -286,10 +247,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
 
     def _handle_chat_response(self, credentials, model, prompt_messages, response):
         usage = self._calc_response_usage(
-            model,
-            credentials,
-            response.Usage.PromptTokens,
-            response.Usage.CompletionTokens,
+            model, credentials, response.Usage.PromptTokens, response.Usage.CompletionTokens
         )
         assistant_prompt_message = AssistantPromptMessage()
         assistant_prompt_message.content = response.Choices[0].Message.Content
@@ -323,9 +281,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(
-            self._convert_one_message_to_text(message) for message in messages
-        )
+        text = "".join(self._convert_one_message_to_text(message) for message in messages)
 
         # trim off the trailing ' ' that might come from the "Assistant: "
         return text.rstrip()
@@ -369,9 +325,7 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
             InvokeError: [TencentCloudSDKException],
         }
 
-    def _extract_response_tool_calls(
-        self, response_tool_calls: list[dict]
-    ) -> list[AssistantPromptMessage.ToolCall]:
+    def _extract_response_tool_calls(self, response_tool_calls: list[dict]) -> list[AssistantPromptMessage.ToolCall]:
         """
         Extract tool calls from response
 
@@ -383,14 +337,11 @@ class HunyuanLargeLanguageModel(LargeLanguageModel):
             for response_tool_call in response_tool_calls:
                 response_function = response_tool_call.get("Function", {})
                 function = AssistantPromptMessage.ToolCall.ToolCallFunction(
-                    name=response_function.get("Name", ""),
-                    arguments=response_function.get("Arguments", ""),
+                    name=response_function.get("Name", ""), arguments=response_function.get("Arguments", "")
                 )
 
                 tool_call = AssistantPromptMessage.ToolCall(
-                    id=response_tool_call.get("Id", 0),
-                    type="function",
-                    function=function,
+                    id=response_tool_call.get("Id", 0), type="function", function=function
                 )
                 tool_calls.append(tool_call)
 

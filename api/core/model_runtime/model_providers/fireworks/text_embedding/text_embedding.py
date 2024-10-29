@@ -7,14 +7,9 @@ from openai import OpenAI
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.model_entities import PriceType
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 from core.model_runtime.model_providers.fireworks._common import _CommonFireworks
 
 
@@ -84,12 +79,8 @@ class FireworksTextEmbeddingModel(_CommonFireworks, TextEmbeddingModel):
             used_tokens += embedding_used_tokens
             batched_embeddings += embeddings_batch
 
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=used_tokens
-        )
-        return TextEmbeddingResult(
-            embeddings=batched_embeddings, usage=usage, model=model
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
+        return TextEmbeddingResult(embeddings=batched_embeddings, usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
@@ -116,18 +107,12 @@ class FireworksTextEmbeddingModel(_CommonFireworks, TextEmbeddingModel):
             client = OpenAI(**credentials_kwargs)
 
             # call embedding model
-            self._embedding_invoke(
-                model=model, client=client, texts=["ping"], extra_model_kwargs={}
-            )
+            self._embedding_invoke(model=model, client=client, texts=["ping"], extra_model_kwargs={})
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
     def _embedding_invoke(
-        self,
-        model: str,
-        client: OpenAI,
-        texts: Union[list[str], str],
-        extra_model_kwargs: dict,
+        self, model: str, client: OpenAI, texts: Union[list[str], str], extra_model_kwargs: dict
     ) -> tuple[list[list[float]], int]:
         """
         Invoke embedding model
@@ -137,14 +122,10 @@ class FireworksTextEmbeddingModel(_CommonFireworks, TextEmbeddingModel):
         :param extra_model_kwargs: extra model kwargs
         :return: embeddings and used tokens
         """
-        response = client.embeddings.create(
-            model=model, input=texts, **extra_model_kwargs
-        )
+        response = client.embeddings.create(model=model, input=texts, **extra_model_kwargs)
         return [data.embedding for data in response.data], response.usage.total_tokens
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -154,10 +135,7 @@ class FireworksTextEmbeddingModel(_CommonFireworks, TextEmbeddingModel):
         :return: usage
         """
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            tokens=tokens,
-            price_type=PriceType.INPUT,
+            model=model, credentials=credentials, tokens=tokens, price_type=PriceType.INPUT
         )
 
         usage = EmbeddingUsage(

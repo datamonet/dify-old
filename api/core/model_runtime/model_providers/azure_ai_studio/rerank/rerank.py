@@ -6,11 +6,7 @@ import urllib.request
 from typing import Optional
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -33,25 +29,16 @@ class AzureRerankModel(RerankModel):
 
     def _allow_self_signed_https(self, allowed):
         # bypass the server certificate verification on client side
-        if (
-            allowed
-            and not os.environ.get("PYTHONHTTPSVERIFY", "")
-            and getattr(ssl, "_create_unverified_context", None)
-        ):
+        if allowed and not os.environ.get("PYTHONHTTPSVERIFY", "") and getattr(ssl, "_create_unverified_context", None):
             ssl._create_default_https_context = ssl._create_unverified_context
 
-    def _azure_rerank(
-        self, query_input: str, docs: list[str], endpoint: str, api_key: str
-    ):
+    def _azure_rerank(self, query_input: str, docs: list[str], endpoint: str, api_key: str):
         #   self._allow_self_signed_https(True)  # Enable if using self-signed certificate
 
         data = {"inputs": query_input, "docs": docs}
 
         body = json.dumps(data).encode("utf-8")
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-        }
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
 
         req = urllib.request.Request(endpoint, body, headers)
 
@@ -95,9 +82,7 @@ class AzureRerankModel(RerankModel):
             api_key = credentials.get("jwt_token")
 
             if not endpoint or not api_key:
-                raise ValueError(
-                    "Azure endpoint and API key must be provided in credentials"
-                )
+                raise ValueError("Azure endpoint and API key must be provided in credentials")
 
             result = self._azure_rerank(query, docs, endpoint, api_key)
             logger.info(f"Azure rerank result: {result}")
@@ -160,12 +145,7 @@ class AzureRerankModel(RerankModel):
             InvokeServerUnavailableError: [urllib.error.HTTPError],
             InvokeRateLimitError: [InvokeRateLimitError],
             InvokeAuthorizationError: [InvokeAuthorizationError],
-            InvokeBadRequestError: [
-                InvokeBadRequestError,
-                KeyError,
-                ValueError,
-                json.JSONDecodeError,
-            ],
+            InvokeBadRequestError: [InvokeBadRequestError, KeyError, ValueError, json.JSONDecodeError],
         }
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:

@@ -9,19 +9,12 @@ from configs.middleware.storage.aliyun_oss_storage_config import AliyunOSSStorag
 from configs.middleware.storage.amazon_s3_storage_config import S3StorageConfig
 from configs.middleware.storage.azure_blob_storage_config import AzureBlobStorageConfig
 from configs.middleware.storage.baidu_obs_storage_config import BaiduOBSStorageConfig
-from configs.middleware.storage.google_cloud_storage_config import (
-    GoogleCloudStorageConfig,
-)
-from configs.middleware.storage.huawei_obs_storage_config import (
-    HuaweiCloudOBSStorageConfig,
-)
+from configs.middleware.storage.google_cloud_storage_config import GoogleCloudStorageConfig
+from configs.middleware.storage.huawei_obs_storage_config import HuaweiCloudOBSStorageConfig
 from configs.middleware.storage.oci_storage_config import OCIStorageConfig
-from configs.middleware.storage.tencent_cos_storage_config import (
-    TencentCloudCOSStorageConfig,
-)
-from configs.middleware.storage.volcengine_tos_storage_config import (
-    VolcengineTOSStorageConfig,
-)
+from configs.middleware.storage.supabase_storage_config import SupabaseStorageConfig
+from configs.middleware.storage.tencent_cos_storage_config import TencentCloudCOSStorageConfig
+from configs.middleware.storage.volcengine_tos_storage_config import VolcengineTOSStorageConfig
 from configs.middleware.vdb.analyticdb_config import AnalyticdbConfig
 from configs.middleware.vdb.chroma_config import ChromaConfig
 from configs.middleware.vdb.elasticsearch_config import ElasticsearchConfig
@@ -121,9 +114,7 @@ class DatabaseConfig:
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         db_extras = (
-            f"{self.DB_EXTRAS}&client_encoding={self.DB_CHARSET}"
-            if self.DB_CHARSET
-            else self.DB_EXTRAS
+            f"{self.DB_EXTRAS}&client_encoding={self.DB_CHARSET}" if self.DB_CHARSET else self.DB_EXTRAS
         ).strip("&")
         db_extras = f"?{db_extras}" if db_extras else ""
         return (
@@ -207,11 +198,23 @@ class CeleryConfig(DatabaseConfig):
     @computed_field
     @property
     def BROKER_USE_SSL(self) -> bool:
-        return (
-            self.CELERY_BROKER_URL.startswith("rediss://")
-            if self.CELERY_BROKER_URL
-            else False
-        )
+        return self.CELERY_BROKER_URL.startswith("rediss://") if self.CELERY_BROKER_URL else False
+
+
+class InternalTestConfig(BaseSettings):
+    """
+    Configuration settings for Internal Test
+    """
+
+    AWS_SECRET_ACCESS_KEY: Optional[str] = Field(
+        description="Internal test AWS secret access key",
+        default=None,
+    )
+
+    AWS_ACCESS_KEY_ID: Optional[str] = Field(
+        description="Internal test AWS access key ID",
+        default=None,
+    )
 
 
 class MiddlewareConfig(
@@ -229,6 +232,7 @@ class MiddlewareConfig(
     HuaweiCloudOBSStorageConfig,
     OCIStorageConfig,
     S3StorageConfig,
+    SupabaseStorageConfig,
     TencentCloudCOSStorageConfig,
     VolcengineTOSStorageConfig,
     # configs of vdb and vdb providers

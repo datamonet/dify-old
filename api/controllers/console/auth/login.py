@@ -201,6 +201,19 @@ class EmailCodeLoginApi(Resource):
         return {"result": "success", "data": token_pair.model_dump()}
 
 
+class RefreshTokenApi(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("refresh_token", type=str, required=True, location="json")
+        args = parser.parse_args()
+
+        try:
+            new_token_pair = AccountService.refresh_token(args["refresh_token"])
+            return {"result": "success", "data": new_token_pair.model_dump()}
+        except Exception as e:
+            return {"result": "fail", "data": str(e)}, 401
+
+
 api.add_resource(LoginApi, "/login")
 api.add_resource(LogoutApi, "/logout")
 api.add_resource(EmailCodeLoginSendEmailApi, "/email-code-login")

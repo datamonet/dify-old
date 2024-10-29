@@ -16,15 +16,9 @@ from volcenginesdkarkruntime.types.chat import (
     ChatCompletionToolParam,
     ChatCompletionUserMessageParam,
 )
-from volcenginesdkarkruntime.types.chat.chat_completion_content_part_image_param import (
-    ImageURL,
-)
-from volcenginesdkarkruntime.types.chat.chat_completion_message_tool_call_param import (
-    Function,
-)
-from volcenginesdkarkruntime.types.create_embedding_response import (
-    CreateEmbeddingResponse,
-)
+from volcenginesdkarkruntime.types.chat.chat_completion_content_part_image_param import ImageURL
+from volcenginesdkarkruntime.types.chat.chat_completion_message_tool_call_param import Function
+from volcenginesdkarkruntime.types.create_embedding_response import CreateEmbeddingResponse
 from volcenginesdkarkruntime.types.shared_params import FunctionDefinition
 
 from core.model_runtime.entities.message_entities import (
@@ -115,12 +109,8 @@ class ArkClientV3:
                             )
                         )
                     elif message_content.type == PromptMessageContentType.IMAGE:
-                        message_content = cast(
-                            ImagePromptMessageContent, message_content
-                        )
-                        image_data = re.sub(
-                            r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data
-                        )
+                        message_content = cast(ImagePromptMessageContent, message_content)
+                        image_data = re.sub(r"^data:image\/[a-zA-Z]+;base64,", "", message_content.data)
                         content.append(
                             ChatCompletionContentPartImageParam(
                                 image_url=ImageURL(
@@ -141,9 +131,7 @@ class ArkClientV3:
                 else [
                     ChatCompletionMessageToolCallParam(
                         id=call.id,
-                        function=Function(
-                            name=call.function.name, arguments=call.function.arguments
-                        ),
+                        function=Function(name=call.function.name, arguments=call.function.arguments),
                         type="function",
                     )
                     for call in message.tool_calls
@@ -151,9 +139,7 @@ class ArkClientV3:
             )
         elif isinstance(message, SystemPromptMessage):
             message = cast(SystemPromptMessage, message)
-            message_dict = ChatCompletionSystemMessageParam(
-                content=message.content, role="system"
-            )
+            message_dict = ChatCompletionSystemMessageParam(content=message.content, role="system")
         elif isinstance(message, ToolPromptMessage):
             message = cast(ToolPromptMessage, message)
             message_dict = ChatCompletionToolMessageParam(
@@ -190,9 +176,7 @@ class ArkClientV3:
         return self.ark.chat.completions.create(
             model=self.endpoint_id,
             messages=[self.convert_prompt_message(message) for message in messages],
-            tools=[self._convert_tool_prompt(tool) for tool in tools]
-            if tools
-            else None,
+            tools=[self._convert_tool_prompt(tool) for tool in tools] if tools else None,
             stop=stop,
             frequency_penalty=frequency_penalty,
             max_tokens=max_tokens,
@@ -217,9 +201,7 @@ class ArkClientV3:
             stream=True,
             model=self.endpoint_id,
             messages=[self.convert_prompt_message(message) for message in messages],
-            tools=[self._convert_tool_prompt(tool) for tool in tools]
-            if tools
-            else None,
+            tools=[self._convert_tool_prompt(tool) for tool in tools] if tools else None,
             stop=stop,
             frequency_penalty=frequency_penalty,
             max_tokens=max_tokens,

@@ -26,10 +26,7 @@ class CodeNodeProvider(BaseModel):
         return {
             "type": "code",
             "config": {
-                "variables": [
-                    {"variable": "arg1", "value_selector": []},
-                    {"variable": "arg2", "value_selector": []},
-                ],
+                "variables": [{"variable": "arg1", "value_selector": []}, {"variable": "arg2", "value_selector": []}],
                 "code_language": cls.get_language(),
                 "code": cls.get_default_code(),
                 "outputs": {"result": {"type": "string", "children": None}},

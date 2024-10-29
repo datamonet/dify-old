@@ -10,10 +10,10 @@ from collections.abc import Generator
 from datetime import datetime
 from hashlib import sha256
 from typing import Any, Optional, Union
+from zoneinfo import available_timezones
 
 from flask import Response, stream_with_context
 from flask_restful import fields
-from zoneinfo import available_timezones
 
 from configs import dify_config
 from core.app.features.rate_limiting.rate_limit import RateLimitGenerator
@@ -150,9 +150,7 @@ def timezone(timezone_string):
     if timezone_string and timezone_string in available_timezones():
         return timezone_string
 
-    error = "{timezone_string} is not a valid timezone.".format(
-        timezone_string=timezone_string
-    )
+    error = "{timezone_string} is not a valid timezone.".format(timezone_string=timezone_string)
     raise ValueError(error)
 
 
@@ -165,7 +163,7 @@ def generate_string(n):
     return result
 
 
-def get_remote_ip(request) -> str:
+def extract_remote_ip(request) -> str:
     if request.headers.get("CF-Connecting-IP"):
         return request.headers.get("Cf-Connecting-Ip")
     elif request.headers.getlist("X-Forwarded-For"):
@@ -181,17 +179,13 @@ def generate_text_hash(text: str) -> str:
 
 def compact_generate_response(response: Union[dict, RateLimitGenerator]) -> Response:
     if isinstance(response, dict):
-        return Response(
-            response=json.dumps(response), status=200, mimetype="application/json"
-        )
+        return Response(response=json.dumps(response), status=200, mimetype="application/json")
     else:
 
         def generate() -> Generator:
             yield from response
 
-        return Response(
-            stream_with_context(generate()), status=200, mimetype="text/event-stream"
-        )
+        return Response(stream_with_context(generate()), status=200, mimetype="text/event-stream")
 
 
 class TokenManager:
@@ -251,9 +245,7 @@ class TokenManager:
         return token_data
 
     @classmethod
-    def _get_current_token_for_account(
-        cls, account_id: str, token_type: str
-    ) -> Optional[str]:
+    def _get_current_token_for_account(cls, account_id: str, token_type: str) -> Optional[str]:
         key = cls._get_account_token_key(account_id, token_type)
         current_token = redis_client.get(key)
         return current_token

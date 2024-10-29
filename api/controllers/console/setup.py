@@ -4,7 +4,7 @@ from flask import request
 from flask_restful import Resource, reqparse
 
 from configs import dify_config
-from libs.helper import StrLen, email, get_remote_ip
+from libs.helper import StrLen, email, extract_remote_ip
 from libs.password import valid_password
 from models.model import DifySetup
 from services.account_service import RegisterService, TenantService
@@ -54,7 +54,7 @@ class SetupApi(Resource):
             email=args["email"],
             name=args["name"],
             password=args["password"],
-            ip_address=get_remote_ip(request),
+            ip_address=extract_remote_ip(request),
         )
 
         return {"result": "success"}, 201

@@ -1,24 +1,12 @@
 import time
 from typing import Optional
 
-from xinference_client.client.restful.restful_client import (
-    Client,
-    RESTfulEmbeddingModelHandle,
-)
+from xinference_client.client.restful.restful_client import Client, RESTfulEmbeddingModelHandle
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-    PriceType,
-)
-from core.model_runtime.entities.text_embedding_entities import (
-    EmbeddingUsage,
-    TextEmbeddingResult,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType, PriceType
+from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,
@@ -28,13 +16,8 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.text_embedding_model import (
-    TextEmbeddingModel,
-)
-from core.model_runtime.model_providers.xinference.xinference_helper import (
-    XinferenceHelper,
-    validate_model_uid,
-)
+from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
+from core.model_runtime.model_providers.xinference.xinference_helper import XinferenceHelper, validate_model_uid
 
 
 class XinferenceTextEmbeddingModel(TextEmbeddingModel):
@@ -95,14 +78,10 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
         """
 
         usage = embeddings["usage"]
-        usage = self._calc_response_usage(
-            model=model, credentials=credentials, tokens=usage["total_tokens"]
-        )
+        usage = self._calc_response_usage(model=model, credentials=credentials, tokens=usage["total_tokens"])
 
         result = TextEmbeddingResult(
-            model=model,
-            embeddings=[embedding["embedding"] for embedding in embeddings["data"]],
-            usage=usage,
+            model=model, embeddings=[embedding["embedding"] for embedding in embeddings["data"]], usage=usage
         )
 
         return result
@@ -132,9 +111,7 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
         """
         try:
             if not validate_model_uid(credentials):
-                raise CredentialsValidateFailedError(
-                    "model_uid should not contain /, ?, or #"
-                )
+                raise CredentialsValidateFailedError("model_uid should not contain /, ?, or #")
 
             server_url = credentials["server_url"]
             model_uid = credentials["model_uid"]
@@ -166,9 +143,7 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
 
             self._invoke(model=model, credentials=credentials, texts=["ping"])
         except InvokeAuthorizationError as e:
-            raise CredentialsValidateFailedError(
-                f"Failed to validate credentials for model {model}: {e}"
-            )
+            raise CredentialsValidateFailedError(f"Failed to validate credentials for model {model}: {e}")
         except RuntimeError as e:
             raise CredentialsValidateFailedError(e)
 
@@ -182,9 +157,7 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
             InvokeBadRequestError: [KeyError],
         }
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 
@@ -195,10 +168,7 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
         """
         # get input price info
         input_price_info = self.get_price(
-            model=model,
-            credentials=credentials,
-            price_type=PriceType.INPUT,
-            tokens=tokens,
+            model=model, credentials=credentials, price_type=PriceType.INPUT, tokens=tokens
         )
 
         # transform usage
@@ -226,9 +196,7 @@ class XinferenceTextEmbeddingModel(TextEmbeddingModel):
             model_type=ModelType.TEXT_EMBEDDING,
             model_properties={
                 ModelPropertyKey.MAX_CHUNKS: 1,
-                ModelPropertyKey.CONTEXT_SIZE: "max_tokens" in credentials
-                and credentials["max_tokens"]
-                or 512,
+                ModelPropertyKey.CONTEXT_SIZE: "max_tokens" in credentials and credentials["max_tokens"] or 512,
             },
             parameter_rules=[],
         )

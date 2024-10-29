@@ -67,10 +67,7 @@ class NomicTextEmbeddingModel(_CommonNomic, TextEmbeddingModel):
 
         # calc usage
         usage = self._calc_response_usage(
-            model=model,
-            credentials=credentials,
-            tokens=prompt_tokens,
-            total_tokens=total_tokens,
+            model=model, credentials=credentials, tokens=prompt_tokens, total_tokens=total_tokens
         )
         return TextEmbeddingResult(embeddings=embeddings, usage=usage, model=model)
 
@@ -100,9 +97,7 @@ class NomicTextEmbeddingModel(_CommonNomic, TextEmbeddingModel):
             raise CredentialsValidateFailedError(str(ex))
 
     @nomic_login_required
-    def embed_text(
-        self, model: str, credentials: dict, texts: list[str]
-    ) -> tuple[list[list[float]], int, int]:
+    def embed_text(self, model: str, credentials: dict, texts: list[str]) -> tuple[list[list[float]], int, int]:
         """Call out to Nomic's embedding endpoint.
 
         Args:
@@ -138,9 +133,7 @@ class NomicTextEmbeddingModel(_CommonNomic, TextEmbeddingModel):
         prompt_tokens = response["usage"]["prompt_tokens"]
         return embeddings, prompt_tokens, total_tokens
 
-    def _calc_response_usage(
-        self, model: str, credentials: dict, tokens: int, total_tokens: int
-    ) -> EmbeddingUsage:
+    def _calc_response_usage(self, model: str, credentials: dict, tokens: int, total_tokens: int) -> EmbeddingUsage:
         """
         Calculate response usage
 

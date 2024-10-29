@@ -4,14 +4,7 @@ from collections import defaultdict, deque
 from collections.abc import Callable
 from decimal import Decimal
 from enum import Enum
-from ipaddress import (
-    IPv4Address,
-    IPv4Interface,
-    IPv4Network,
-    IPv6Address,
-    IPv6Interface,
-    IPv6Network,
-)
+from ipaddress import IPv4Address, IPv4Interface, IPv4Network, IPv6Address, IPv6Interface, IPv6Network
 from pathlib import Path, PurePath
 from re import Pattern
 from types import GeneratorType
@@ -25,9 +18,7 @@ from pydantic_core import Url
 from pydantic_extra_types.color import Color
 
 
-def _model_dump(
-    model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any
-) -> Any:
+def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
     return model.model_dump(mode=mode, **kwargs)
 
 
@@ -92,9 +83,7 @@ ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
 def generate_encoders_by_class_tuples(
     type_encoder_map: dict[Any, Callable[[Any], Any]],
 ) -> dict[Callable[[Any], Any], tuple[Any, ...]]:
-    encoders_by_class_tuples: dict[Callable[[Any], Any], tuple[Any, ...]] = defaultdict(
-        tuple
-    )
+    encoders_by_class_tuples: dict[Callable[[Any], Any], tuple[Any, ...]] = defaultdict(tuple)
     for type_, encoder in type_encoder_map.items():
         encoders_by_class_tuples[encoder] += (type_,)
     return encoders_by_class_tuples
@@ -163,11 +152,7 @@ def jsonable_encoder(
         allowed_keys = set(obj.keys())
         for key, value in obj.items():
             if (
-                (
-                    not sqlalchemy_safe
-                    or (not isinstance(key, str))
-                    or (not key.startswith("_sa"))
-                )
+                (not sqlalchemy_safe or (not isinstance(key, str)) or (not key.startswith("_sa")))
                 and (value is not None or not exclude_none)
                 and key in allowed_keys
             ):

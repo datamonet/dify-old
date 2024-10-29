@@ -146,8 +146,7 @@ class EndpointConfig(BaseSettings):
     )
 
     CONSOLE_WEB_URL: str = Field(
-        description="Base URL for the console web interface,"
-        "used for frontend references and CORS configuration",
+        description="Base URL for the console web interface," "used for frontend references and CORS configuration",
         default="",
     )
 
@@ -251,20 +250,15 @@ class HttpConfig(BaseSettings):
         return self.inner_WEB_API_CORS_ALLOW_ORIGINS.split(",")
 
     HTTP_REQUEST_MAX_CONNECT_TIMEOUT: Annotated[
-        PositiveInt,
-        Field(
-            ge=10, description="Maximum connection timeout in seconds for HTTP requests"
-        ),
+        PositiveInt, Field(ge=10, description="Maximum connection timeout in seconds for HTTP requests")
     ] = 10
 
     HTTP_REQUEST_MAX_READ_TIMEOUT: Annotated[
-        PositiveInt,
-        Field(ge=60, description="Maximum read timeout in seconds for HTTP requests"),
+        PositiveInt, Field(ge=60, description="Maximum read timeout in seconds for HTTP requests")
     ] = 60
 
     HTTP_REQUEST_MAX_WRITE_TIMEOUT: Annotated[
-        PositiveInt,
-        Field(ge=10, description="Maximum write timeout in seconds for HTTP requests"),
+        PositiveInt, Field(ge=10, description="Maximum write timeout in seconds for HTTP requests")
     ] = 20
 
     HTTP_REQUEST_NODE_MAX_BINARY_SIZE: PositiveInt = Field(
@@ -410,9 +404,9 @@ class WorkflowConfig(BaseSettings):
     )
 
 
-class OAuthConfig(BaseSettings):
+class AuthConfig(BaseSettings):
     """
-    Configuration for OAuth authentication
+    Configuration for authentication and OAuth
     """
 
     OAUTH_REDIRECT_PATH: str = Field(
@@ -421,7 +415,7 @@ class OAuthConfig(BaseSettings):
     )
 
     GITHUB_CLIENT_ID: Optional[str] = Field(
-        description="GitHub OAuth client secret",
+        description="GitHub OAuth client ID",
         default=None,
     )
 
@@ -438,6 +432,11 @@ class OAuthConfig(BaseSettings):
     GOOGLE_CLIENT_SECRET: Optional[str] = Field(
         description="Google OAuth client secret",
         default=None,
+    )
+
+    ACCESS_TOKEN_EXPIRE_MINUTES: PositiveInt = Field(
+        description="Expiration time for access tokens in minutes",
+        default=60,
     )
 
 
@@ -647,51 +646,27 @@ class PositionConfig(BaseSettings):
 
     @computed_field
     def POSITION_PROVIDER_PINS_LIST(self) -> list[str]:
-        return [
-            item.strip()
-            for item in self.POSITION_PROVIDER_PINS.split(",")
-            if item.strip() != ""
-        ]
+        return [item.strip() for item in self.POSITION_PROVIDER_PINS.split(",") if item.strip() != ""]
 
     @computed_field
     def POSITION_PROVIDER_INCLUDES_SET(self) -> set[str]:
-        return {
-            item.strip()
-            for item in self.POSITION_PROVIDER_INCLUDES.split(",")
-            if item.strip() != ""
-        }
+        return {item.strip() for item in self.POSITION_PROVIDER_INCLUDES.split(",") if item.strip() != ""}
 
     @computed_field
     def POSITION_PROVIDER_EXCLUDES_SET(self) -> set[str]:
-        return {
-            item.strip()
-            for item in self.POSITION_PROVIDER_EXCLUDES.split(",")
-            if item.strip() != ""
-        }
+        return {item.strip() for item in self.POSITION_PROVIDER_EXCLUDES.split(",") if item.strip() != ""}
 
     @computed_field
     def POSITION_TOOL_PINS_LIST(self) -> list[str]:
-        return [
-            item.strip()
-            for item in self.POSITION_TOOL_PINS.split(",")
-            if item.strip() != ""
-        ]
+        return [item.strip() for item in self.POSITION_TOOL_PINS.split(",") if item.strip() != ""]
 
     @computed_field
     def POSITION_TOOL_INCLUDES_SET(self) -> set[str]:
-        return {
-            item.strip()
-            for item in self.POSITION_TOOL_INCLUDES.split(",")
-            if item.strip() != ""
-        }
+        return {item.strip() for item in self.POSITION_TOOL_INCLUDES.split(",") if item.strip() != ""}
 
     @computed_field
     def POSITION_TOOL_EXCLUDES_SET(self) -> set[str]:
-        return {
-            item.strip()
-            for item in self.POSITION_TOOL_EXCLUDES.split(",")
-            if item.strip() != ""
-        }
+        return {item.strip() for item in self.POSITION_TOOL_EXCLUDES.split(",") if item.strip() != ""}
 
 
 class LoginConfig(BaseSettings):
@@ -724,6 +699,7 @@ class LoginConfig(BaseSettings):
 class FeatureConfig(
     # place the configs in alphabet order
     AppExecutionConfig,
+    AuthConfig,  # Changed from OAuthConfig to AuthConfig
     BillingConfig,
     CodeExecutionSandboxConfig,
     DataSetConfig,
@@ -738,7 +714,7 @@ class FeatureConfig(
     MailConfig,
     ModelLoadBalanceConfig,
     ModerationConfig,
-    OAuthConfig,
+    PositionConfig,
     RagEtlConfig,
     SecurityConfig,
     ToolConfig,

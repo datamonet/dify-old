@@ -3,12 +3,7 @@ from typing import Optional
 import httpx
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelPropertyKey,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelPropertyKey, ModelType
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -58,17 +53,8 @@ class MixedBreadRerankModel(RerankModel):
         try:
             response = httpx.post(
                 base_url + "/reranking",
-                json={
-                    "model": model,
-                    "query": query,
-                    "input": docs,
-                    "top_k": top_n,
-                    "return_input": True,
-                },
-                headers={
-                    "Authorization": f"Bearer {credentials.get('api_key')}",
-                    "Content-Type": "application/json",
-                },
+                json={"model": model, "query": query, "input": docs, "top_k": top_n, "return_input": True},
+                headers={"Authorization": f"Bearer {credentials.get('api_key')}", "Content-Type": "application/json"},
             )
             response.raise_for_status()
             results = response.json()
@@ -124,9 +110,7 @@ class MixedBreadRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """
@@ -135,11 +119,7 @@ class MixedBreadRerankModel(RerankModel):
             label=I18nObject(en_US=model),
             model_type=ModelType.RERANK,
             fetch_from=FetchFrom.CUSTOMIZABLE_MODEL,
-            model_properties={
-                ModelPropertyKey.CONTEXT_SIZE: int(
-                    credentials.get("context_size", "512")
-                )
-            },
+            model_properties={ModelPropertyKey.CONTEXT_SIZE: int(credentials.get("context_size", "512"))},
         )
 
         return entity

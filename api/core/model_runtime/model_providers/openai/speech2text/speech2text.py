@@ -3,11 +3,7 @@ from typing import IO, Optional
 from openai import OpenAI
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.speech2text_model import Speech2TextModel
 from core.model_runtime.model_providers.openai._common import _CommonOpenAI
@@ -18,9 +14,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
     Model class for OpenAI Speech to text model.
     """
 
-    def _invoke(
-        self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None
-    ) -> str:
+    def _invoke(self, model: str, credentials: dict, file: IO[bytes], user: Optional[str] = None) -> str:
         """
         Invoke speech2text model
 
@@ -48,9 +42,7 @@ class OpenAISpeech2TextModel(_CommonOpenAI, Speech2TextModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _speech2text_invoke(
-        self, model: str, credentials: dict, file: IO[bytes]
-    ) -> str:
+    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
         """
         Invoke speech2text model
 

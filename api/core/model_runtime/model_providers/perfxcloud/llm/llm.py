@@ -26,18 +26,14 @@ class PerfXCloudLargeLanguageModel(OpenAILargeLanguageModel):
     ) -> Union[LLMResult, Generator]:
         self._add_custom_parameters(credentials)
 
-        return super()._invoke(
-            model, credentials, prompt_messages, model_parameters, tools, stop, stream
-        )
+        return super()._invoke(model, credentials, prompt_messages, model_parameters, tools, stop, stream)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         self._add_custom_parameters(credentials)
         super().validate_credentials(model, credentials)
 
     # refactored from openai model runtime, use cl100k_base for calculate token number
-    def _num_tokens_from_string(
-        self, model: str, text: str, tools: Optional[list[PromptMessageTool]] = None
-    ) -> int:
+    def _num_tokens_from_string(self, model: str, text: str, tools: Optional[list[PromptMessageTool]] = None) -> int:
         """
         Calculate num tokens for text completion model with tiktoken package.
 
@@ -56,10 +52,7 @@ class PerfXCloudLargeLanguageModel(OpenAILargeLanguageModel):
 
     # refactored from openai model runtime, use cl100k_base for calculate token number
     def _num_tokens_from_messages(
-        self,
-        model: str,
-        messages: list[PromptMessage],
-        tools: Optional[list[PromptMessageTool]] = None,
+        self, model: str, messages: list[PromptMessage], tools: Optional[list[PromptMessageTool]] = None
     ) -> int:
         """Calculate num tokens for gpt-3.5-turbo and gpt-4 with tiktoken package.
 
@@ -120,6 +113,4 @@ class PerfXCloudLargeLanguageModel(OpenAILargeLanguageModel):
             credentials["openai_api_base"] = "https://cloud.perfxlab.cn"
         else:
             parsed_url = urlparse(credentials["endpoint_url"])
-            credentials["openai_api_base"] = (
-                f"{parsed_url.scheme}://{parsed_url.netloc}"
-            )
+            credentials["openai_api_base"] = f"{parsed_url.scheme}://{parsed_url.netloc}"

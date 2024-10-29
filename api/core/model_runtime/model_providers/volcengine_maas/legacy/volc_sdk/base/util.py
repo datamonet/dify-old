@@ -16,21 +16,9 @@ class Util:
         for key in sorted(params.keys()):
             if type(params[key]) == list:
                 for k in params[key]:
-                    query = (
-                        query
-                        + quote(key, safe="-_.~")
-                        + "="
-                        + quote(k, safe="-_.~")
-                        + "&"
-                    )
+                    query = query + quote(key, safe="-_.~") + "=" + quote(k, safe="-_.~") + "&"
             else:
-                query = (
-                    query
-                    + quote(key, safe="-_.~")
-                    + "="
-                    + quote(params[key], safe="-_.~")
-                    + "&"
-                )
+                query = query + quote(key, safe="-_.~") + "=" + quote(params[key], safe="-_.~") + "&"
         query = query[:-1]
         return query.replace("+", "%20")
 

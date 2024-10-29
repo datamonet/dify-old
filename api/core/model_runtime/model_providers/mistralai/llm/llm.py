@@ -2,13 +2,8 @@ from collections.abc import Generator
 from typing import Optional, Union
 
 from core.model_runtime.entities.llm_entities import LLMResult
-from core.model_runtime.entities.message_entities import (
-    PromptMessage,
-    PromptMessageTool,
-)
-from core.model_runtime.model_providers.openai_api_compatible.llm.llm import (
-    OAIAPICompatLargeLanguageModel,
-)
+from core.model_runtime.entities.message_entities import PromptMessage, PromptMessageTool
+from core.model_runtime.model_providers.openai_api_compatible.llm.llm import OAIAPICompatLargeLanguageModel
 
 
 class MistralAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
@@ -29,16 +24,7 @@ class MistralAILargeLanguageModel(OAIAPICompatLargeLanguageModel):
         stop = []
         user = None
 
-        return super()._invoke(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+        return super()._invoke(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         self._add_custom_parameters(credentials)

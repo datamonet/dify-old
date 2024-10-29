@@ -2,12 +2,7 @@ from collections.abc import Generator
 from typing import Optional
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.llm_entities import (
-    LLMMode,
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-)
+from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -31,13 +26,8 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
-from core.model_runtime.model_providers.openllm.llm.openllm_generate import (
-    OpenLLMGenerate,
-    OpenLLMGenerateMessage,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
+from core.model_runtime.model_providers.openllm.llm.openllm_generate import OpenLLMGenerate, OpenLLMGenerateMessage
 from core.model_runtime.model_providers.openllm.llm.openllm_generate_errors import (
     BadRequestError,
     InsufficientAccountBalanceError,
@@ -60,16 +50,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
         stream: bool = True,
         user: str | None = None,
     ) -> LLMResult | Generator:
-        return self._generate(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+        return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def validate_credentials(self, model: str, credentials: dict) -> None:
         """
@@ -84,9 +65,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
             instance.generate(
                 server_url=credentials["server_url"],
                 model_name=model,
-                prompt_messages=[
-                    OpenLLMGenerateMessage(content="ping\nAnswer: ", role="user")
-                ],
+                prompt_messages=[OpenLLMGenerateMessage(content="ping\nAnswer: ", role="user")],
                 model_parameters={
                     "max_tokens": 64,
                     "temperature": 0.8,
@@ -109,9 +88,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
     ) -> int:
         return self._num_tokens_from_messages(prompt_messages, tools)
 
-    def _num_tokens_from_messages(
-        self, messages: list[PromptMessage], tools: list[PromptMessageTool]
-    ) -> int:
+    def _num_tokens_from_messages(self, messages: list[PromptMessage], tools: list[PromptMessageTool]) -> int:
         """
         Calculate num tokens for OpenLLM model
         it's a generate model, so we just join them by spe
@@ -134,10 +111,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
         response = client.generate(
             model_name=model,
             server_url=credentials["server_url"],
-            prompt_messages=[
-                self._convert_prompt_message_to_openllm_message(message)
-                for message in prompt_messages
-            ],
+            prompt_messages=[self._convert_prompt_message_to_openllm_message(message) for message in prompt_messages],
             model_parameters=model_parameters,
             stop=stop,
             stream=stream,
@@ -146,45 +120,27 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
 
         if stream:
             return self._handle_chat_generate_stream_response(
-                model=model,
-                prompt_messages=prompt_messages,
-                credentials=credentials,
-                response=response,
+                model=model, prompt_messages=prompt_messages, credentials=credentials, response=response
             )
         return self._handle_chat_generate_response(
-            model=model,
-            prompt_messages=prompt_messages,
-            credentials=credentials,
-            response=response,
+            model=model, prompt_messages=prompt_messages, credentials=credentials, response=response
         )
 
-    def _convert_prompt_message_to_openllm_message(
-        self, prompt_message: PromptMessage
-    ) -> OpenLLMGenerateMessage:
+    def _convert_prompt_message_to_openllm_message(self, prompt_message: PromptMessage) -> OpenLLMGenerateMessage:
         """
         convert PromptMessage to OpenLLMGenerateMessage so that we can use OpenLLMGenerateMessage interface
         """
         if isinstance(prompt_message, UserPromptMessage):
-            return OpenLLMGenerateMessage(
-                role=OpenLLMGenerateMessage.Role.USER.value,
-                content=prompt_message.content,
-            )
+            return OpenLLMGenerateMessage(role=OpenLLMGenerateMessage.Role.USER.value, content=prompt_message.content)
         elif isinstance(prompt_message, AssistantPromptMessage):
             return OpenLLMGenerateMessage(
-                role=OpenLLMGenerateMessage.Role.ASSISTANT.value,
-                content=prompt_message.content,
+                role=OpenLLMGenerateMessage.Role.ASSISTANT.value, content=prompt_message.content
             )
         else:
-            raise NotImplementedError(
-                f"Prompt message type {type(prompt_message)} is not supported"
-            )
+            raise NotImplementedError(f"Prompt message type {type(prompt_message)} is not supported")
 
     def _handle_chat_generate_response(
-        self,
-        model: str,
-        prompt_messages: list[PromptMessage],
-        credentials: dict,
-        response: OpenLLMGenerateMessage,
+        self, model: str, prompt_messages: list[PromptMessage], credentials: dict, response: OpenLLMGenerateMessage
     ) -> LLMResult:
         usage = self._calc_response_usage(
             model=model,
@@ -222,9 +178,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=0,
-                        message=AssistantPromptMessage(
-                            content=message.content, tool_calls=[]
-                        ),
+                        message=AssistantPromptMessage(content=message.content, tool_calls=[]),
                         usage=usage,
                         finish_reason=message.stop_reason or None,
                     ),
@@ -235,9 +189,7 @@ class OpenLLMLargeLanguageModel(LargeLanguageModel):
                     prompt_messages=prompt_messages,
                     delta=LLMResultChunkDelta(
                         index=0,
-                        message=AssistantPromptMessage(
-                            content=message.content, tool_calls=[]
-                        ),
+                        message=AssistantPromptMessage(content=message.content, tool_calls=[]),
                         finish_reason=message.stop_reason or None,
                     ),
                 )

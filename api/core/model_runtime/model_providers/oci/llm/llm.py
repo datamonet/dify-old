@@ -8,11 +8,7 @@ from typing import Optional, Union
 import oci
 from oci.generative_ai_inference.models.base_chat_response import BaseChatResponse
 
-from core.model_runtime.entities.llm_entities import (
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-)
+from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -31,9 +27,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 
 logger = logging.getLogger(__name__)
 
@@ -140,16 +134,7 @@ class OCILargeLanguageModel(LargeLanguageModel):
         # print(tools)
 
         # invoke model
-        return self._generate(
-            model,
-            credentials,
-            prompt_messages,
-            model_parameters,
-            tools,
-            stop,
-            stream,
-            user,
-        )
+        return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
 
     def get_num_tokens(
         self,
@@ -198,9 +183,7 @@ class OCILargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(
-            self._convert_one_message_to_text(message) for message in messages
-        )
+        text = "".join(self._convert_one_message_to_text(message) for message in messages)
 
         return text.rstrip()
 
@@ -252,9 +235,7 @@ class OCILargeLanguageModel(LargeLanguageModel):
         # ref: https://docs.oracle.com/en-us/iaas/api/#/en/generative-ai-inference/20231130/ChatResult/Chat
         oci_config = copy.deepcopy(oci_config_template)
         if "oci_config_content" in credentials:
-            oci_config_content = base64.b64decode(
-                credentials.get("oci_config_content")
-            ).decode("utf-8")
+            oci_config_content = base64.b64decode(credentials.get("oci_config_content")).decode("utf-8")
             config_items = oci_config_content.split("/")
             if len(config_items) != 5:
                 raise CredentialsValidateFailedError(
@@ -267,24 +248,16 @@ class OCILargeLanguageModel(LargeLanguageModel):
             oci_config["region"] = config_items[3]
             oci_config["compartment_id"] = config_items[4]
         else:
-            raise CredentialsValidateFailedError(
-                "need to set oci_config_content in credentials "
-            )
+            raise CredentialsValidateFailedError("need to set oci_config_content in credentials ")
         if "oci_key_content" in credentials:
-            oci_key_content = base64.b64decode(
-                credentials.get("oci_key_content")
-            ).decode("utf-8")
+            oci_key_content = base64.b64decode(credentials.get("oci_key_content")).decode("utf-8")
             oci_config["key_content"] = oci_key_content.encode(encoding="utf-8")
         else:
-            raise CredentialsValidateFailedError(
-                "need to set oci_config_content in credentials "
-            )
+            raise CredentialsValidateFailedError("need to set oci_config_content in credentials ")
 
         # oci_config = oci.config.from_file('~/.oci/config', credentials.get('oci_api_profile'))
         compartment_id = oci_config["compartment_id"]
-        client = oci.generative_ai_inference.GenerativeAiInferenceClient(
-            config=oci_config
-        )
+        client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=oci_config)
         # call embedding model
         request_args = copy.deepcopy(request_template)
         request_args["compartmentId"] = compartment_id
@@ -294,16 +267,12 @@ class OCILargeLanguageModel(LargeLanguageModel):
         system_prompts = []
         # if "meta.llama" in model:
         #    request_args["chatRequest"]["apiFormat"] = "GENERIC"
-        request_args["chatRequest"]["maxTokens"] = model_parameters.pop(
-            "maxTokens", 600
-        )
+        request_args["chatRequest"]["maxTokens"] = model_parameters.pop("maxTokens", 600)
         request_args["chatRequest"].update(model_parameters)
         frequency_penalty = model_parameters.get("frequencyPenalty", 0)
         presence_penalty = model_parameters.get("presencePenalty", 0)
         if frequency_penalty > 0 and presence_penalty > 0:
-            raise InvokeBadRequestError(
-                "Cannot set both frequency penalty and presence penalty"
-            )
+            raise InvokeBadRequestError("Cannot set both frequency penalty and presence penalty")
 
         # for msg in prompt_messages:  # makes message roles strictly alternating
         #    content = self._format_message_to_glm_content(msg)
@@ -342,18 +311,8 @@ class OCILargeLanguageModel(LargeLanguageModel):
             meta_messages = []
             for message in prompt_messages:
                 text = message.content
-                meta_messages.append(
-                    {
-                        "role": message.role.name,
-                        "content": [{"type": "TEXT", "text": text}],
-                    }
-                )
-            args = {
-                "apiFormat": "GENERIC",
-                "messages": meta_messages,
-                "numGenerations": 1,
-                "topK": -1,
-            }
+                meta_messages.append({"role": message.role.name, "content": [{"type": "TEXT", "text": text}]})
+            args = {"apiFormat": "GENERIC", "messages": meta_messages, "numGenerations": 1, "topK": -1}
             request_args["chatRequest"].update(args)
 
         if stream:
@@ -364,20 +323,12 @@ class OCILargeLanguageModel(LargeLanguageModel):
         # print(vars(response))
 
         if stream:
-            return self._handle_generate_stream_response(
-                model, credentials, response, prompt_messages
-            )
+            return self._handle_generate_stream_response(model, credentials, response, prompt_messages)
 
-        return self._handle_generate_response(
-            model, credentials, response, prompt_messages
-        )
+        return self._handle_generate_response(model, credentials, response, prompt_messages)
 
     def _handle_generate_response(
-        self,
-        model: str,
-        credentials: dict,
-        response: BaseChatResponse,
-        prompt_messages: list[PromptMessage],
+        self, model: str, credentials: dict, response: BaseChatResponse, prompt_messages: list[PromptMessage]
     ) -> LLMResult:
         """
         Handle llm response
@@ -389,20 +340,14 @@ class OCILargeLanguageModel(LargeLanguageModel):
         :return: llm response
         """
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(
-            content=response.data.chat_response.text
-        )
+        assistant_prompt_message = AssistantPromptMessage(content=response.data.chat_response.text)
 
         # calculate num tokens
         prompt_tokens = self.get_num_characters(model, credentials, prompt_messages)
-        completion_tokens = self.get_num_characters(
-            model, credentials, [assistant_prompt_message]
-        )
+        completion_tokens = self.get_num_characters(model, credentials, [assistant_prompt_message])
 
         # transform usage
-        usage = self._calc_response_usage(
-            model, credentials, prompt_tokens, completion_tokens
-        )
+        usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
         # transform response
         result = LLMResult(
@@ -415,11 +360,7 @@ class OCILargeLanguageModel(LargeLanguageModel):
         return result
 
     def _handle_generate_stream_response(
-        self,
-        model: str,
-        credentials: dict,
-        response: BaseChatResponse,
-        prompt_messages: list[PromptMessage],
+        self, model: str, credentials: dict, response: BaseChatResponse, prompt_messages: list[PromptMessage]
     ) -> Generator:
         """
         Handle llm stream response
@@ -457,31 +398,21 @@ class OCILargeLanguageModel(LargeLanguageModel):
                     if chunk["text"]:
                         assistant_prompt_message.content += chunk["text"]
                 elif model.startswith("meta"):
-                    assistant_prompt_message.content += chunk["message"]["content"][0][
-                        "text"
-                    ]
+                    assistant_prompt_message.content += chunk["message"]["content"][0]["text"]
                 index += 1
                 # transform assistant message to prompt message
                 yield LLMResultChunk(
                     model=model,
                     prompt_messages=prompt_messages,
-                    delta=LLMResultChunkDelta(
-                        index=index, message=assistant_prompt_message
-                    ),
+                    delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message),
                 )
             else:
                 # calculate num tokens
-                prompt_tokens = self.get_num_characters(
-                    model, credentials, prompt_messages
-                )
-                completion_tokens = self.get_num_characters(
-                    model, credentials, [assistant_prompt_message]
-                )
+                prompt_tokens = self.get_num_characters(model, credentials, prompt_messages)
+                completion_tokens = self.get_num_characters(model, credentials, [assistant_prompt_message])
 
                 # transform usage
-                usage = self._calc_response_usage(
-                    model, credentials, prompt_tokens, completion_tokens
-                )
+                usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
 
                 yield LLMResultChunk(
                     model=model,
@@ -506,9 +437,7 @@ class OCILargeLanguageModel(LargeLanguageModel):
 
         content = message.content
         if isinstance(content, list):
-            content = "".join(
-                c.data for c in content if c.type != PromptMessageContentType.IMAGE
-            )
+            content = "".join(c.data for c in content if c.type != PromptMessageContentType.IMAGE)
 
         if isinstance(message, UserPromptMessage):
             message_text = f"{human_prompt} {content}"

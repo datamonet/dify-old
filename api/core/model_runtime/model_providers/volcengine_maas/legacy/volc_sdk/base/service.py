@@ -41,12 +41,7 @@ class Service:
 
         url = r.build(doseq)
         resp = self.session.get(
-            url,
-            headers=r.headers,
-            timeout=(
-                self.service_info.connection_timeout,
-                self.service_info.socket_timeout,
-            ),
+            url, headers=r.headers, timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout)
         )
         if resp.status_code == 200:
             return resp.text
@@ -69,10 +64,7 @@ class Service:
             url,
             headers=r.headers,
             data=r.form,
-            timeout=(
-                self.service_info.connection_timeout,
-                self.service_info.socket_timeout,
-            ),
+            timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout),
         )
         if resp.status_code == 200:
             return resp.text
@@ -94,10 +86,7 @@ class Service:
             url,
             headers=r.headers,
             data=r.body,
-            timeout=(
-                self.service_info.connection_timeout,
-                self.service_info.socket_timeout,
-            ),
+            timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout),
         )
         if resp.status_code == 200:
             return json.dumps(resp.json())
@@ -121,11 +110,7 @@ class Service:
 
     def prepare_request(self, api_info, params, doseq=0):
         for key in params:
-            if (
-                type(params[key]) == int
-                or type(params[key]) == float
-                or type(params[key]) == bool
-            ):
+            if type(params[key]) == int or type(params[key]) == float or type(params[key]) == bool:
                 params[key] = str(params[key])
             elif type(params[key]) == list:
                 if not doseq:
@@ -206,26 +191,11 @@ class Request:
         self.socket_timeout = socket_timeout
 
     def build(self, doseq=0):
-        return (
-            self.schema
-            + "://"
-            + self.host
-            + self.path
-            + "?"
-            + urlencode(self.query, doseq)
-        )
+        return self.schema + "://" + self.host + self.path + "?" + urlencode(self.query, doseq)
 
 
 class ServiceInfo:
-    def __init__(
-        self,
-        host,
-        header,
-        credentials,
-        connection_timeout,
-        socket_timeout,
-        scheme="http",
-    ):
+    def __init__(self, host, header, credentials, connection_timeout, socket_timeout, scheme="http"):
         self.host = host
         self.header = header
         self.credentials = credentials

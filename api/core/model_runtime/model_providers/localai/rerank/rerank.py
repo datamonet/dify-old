@@ -6,11 +6,7 @@ from requests import post
 from yarl import URL
 
 from core.model_runtime.entities.common_entities import I18nObject
-from core.model_runtime.entities.model_entities import (
-    AIModelEntity,
-    FetchFrom,
-    ModelType,
-)
+from core.model_runtime.entities.model_entities import AIModelEntity, FetchFrom, ModelType
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
@@ -63,31 +59,31 @@ class LocalaiRerankModel(RerankModel):
             raise CredentialsValidateFailedError("model_name is required")
 
         url = server_url
-        headers = {
-            "Authorization": f"Bearer {credentials.get('api_key')}",
-            "Content-Type": "application/json",
-        }
+        headers = {"Authorization": f"Bearer {credentials.get('api_key')}", "Content-Type": "application/json"}
 
         data = {"model": model_name, "query": query, "documents": docs, "top_n": top_n}
 
         try:
-            response = post(
-                str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=10
-            )
+            response = post(str(URL(url) / "rerank"), headers=headers, data=dumps(data), timeout=10)
             response.raise_for_status()
             results = response.json()
 
             rerank_documents = []
             for result in results["results"]:
+                index = result["index"]
+                if "document" in result:
+                    text = result["document"]["text"]
+                else:
+                    # llama.cpp rerank maynot return original documents
+                    text = docs[index]
+
                 rerank_document = RerankDocument(
-                    index=result["index"],
-                    text=result["document"]["text"],
+                    index=index,
+                    text=text,
                     score=result["relevance_score"],
                 )
-                if (
-                    score_threshold is None
-                    or result["relevance_score"] >= score_threshold
-                ):
+
+                if score_threshold is None or result["relevance_score"] >= score_threshold:
                     rerank_documents.append(rerank_document)
 
             return RerankResult(model=model, docs=rerank_documents)
@@ -131,9 +127,7 @@ class LocalaiRerankModel(RerankModel):
             InvokeBadRequestError: [httpx.RequestError],
         }
 
-    def get_customizable_model_schema(
-        self, model: str, credentials: dict
-    ) -> AIModelEntity:
+    def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
         generate custom model entities from credentials
         """

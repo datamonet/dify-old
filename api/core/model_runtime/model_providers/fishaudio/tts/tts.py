@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 
@@ -12,9 +12,7 @@ class FishAudioText2SpeechModel(TTSModel):
     Model class for Fish.audio Text to Speech model.
     """
 
-    def get_tts_model_voices(
-        self, model: str, credentials: dict, language: Optional[str] = None
-    ) -> list:
+    def get_tts_model_voices(self, model: str, credentials: dict, language: Optional[str] = None) -> list:
         api_base = credentials.get("api_base", "https://api.fish.audio")
         api_key = credentials.get("api_key")
         use_public_models = credentials.get("use_public_models", "false") == "true"
@@ -48,7 +46,7 @@ class FishAudioText2SpeechModel(TTSModel):
         content_text: str,
         voice: str,
         user: Optional[str] = None,
-    ) -> any:
+    ) -> Any:
         """
         Invoke text2speech model
 
@@ -68,9 +66,7 @@ class FishAudioText2SpeechModel(TTSModel):
             voice=voice,
         )
 
-    def validate_credentials(
-        self, credentials: dict, user: Optional[str] = None
-    ) -> None:
+    def validate_credentials(self, credentials: dict, user: Optional[str] = None) -> None:
         """
         Validate credentials for text2speech model
 
@@ -91,9 +87,7 @@ class FishAudioText2SpeechModel(TTSModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _tts_invoke_streaming(
-        self, model: str, credentials: dict, content_text: str, voice: str
-    ) -> any:
+    def _tts_invoke_streaming(self, model: str, credentials: dict, content_text: str, voice: str) -> Any:
         """
         Invoke streaming text2speech model
         :param model: model name
@@ -106,9 +100,7 @@ class FishAudioText2SpeechModel(TTSModel):
         try:
             word_limit = self._get_model_word_limit(model, credentials)
             if len(content_text) > word_limit:
-                sentences = self._split_text_into_sentences(
-                    content_text, max_length=word_limit
-                )
+                sentences = self._split_text_into_sentences(content_text, max_length=word_limit)
             else:
                 sentences = [content_text.strip()]
 
@@ -120,9 +112,7 @@ class FishAudioText2SpeechModel(TTSModel):
         except Exception as ex:
             raise InvokeBadRequestError(str(ex))
 
-    def _tts_invoke_streaming_sentence(
-        self, credentials: dict, content_text: str, voice: Optional[str] = None
-    ) -> any:
+    def _tts_invoke_streaming_sentence(self, credentials: dict, content_text: str, voice: Optional[str] = None) -> Any:
         """
         Invoke streaming text2speech model
 
@@ -148,9 +138,7 @@ class FishAudioText2SpeechModel(TTSModel):
             timeout=None,
         ) as response:
             if response.status_code != 200:
-                raise InvokeBadRequestError(
-                    f"Error: {response.status_code} - {response.text}"
-                )
+                raise InvokeBadRequestError(f"Error: {response.status_code} - {response.text}")
             yield from response.iter_bytes()
 
     @property

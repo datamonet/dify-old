@@ -18,13 +18,9 @@ class NomicAtlasProvider(ModelProvider):
         """
         try:
             model_instance = self.get_model_instance(ModelType.TEXT_EMBEDDING)
-            model_instance.validate_credentials(
-                model="nomic-embed-text-v1.5", credentials=credentials
-            )
+            model_instance.validate_credentials(model="nomic-embed-text-v1.5", credentials=credentials)
         except CredentialsValidateFailedError as ex:
             raise ex
         except Exception as ex:
-            logger.exception(
-                f"{self.get_provider_schema().provider} credentials validate failed"
-            )
+            logger.exception(f"{self.get_provider_schema().provider} credentials validate failed")
             raise ex

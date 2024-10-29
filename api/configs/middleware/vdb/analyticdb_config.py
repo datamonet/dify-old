@@ -11,12 +11,10 @@ class AnalyticdbConfig(BaseModel):
     """
 
     ANALYTICDB_KEY_ID: Optional[str] = Field(
-        default=None,
-        description="The Access Key ID provided by Alibaba Cloud for API authentication.",
+        default=None, description="The Access Key ID provided by Alibaba Cloud for API authentication."
     )
     ANALYTICDB_KEY_SECRET: Optional[str] = Field(
-        default=None,
-        description="The Secret Access Key corresponding to the Access Key ID for secure API access.",
+        default=None, description="The Secret Access Key corresponding to the Access Key ID for secure API access."
     )
     ANALYTICDB_REGION_ID: Optional[str] = Field(
         default=None,
@@ -32,12 +30,10 @@ class AnalyticdbConfig(BaseModel):
         " (usually the initial account created with the instance).",
     )
     ANALYTICDB_PASSWORD: Optional[str] = Field(
-        default=None,
-        description="The password associated with the AnalyticDB account for database authentication.",
+        default=None, description="The password associated with the AnalyticDB account for database authentication."
     )
     ANALYTICDB_NAMESPACE: Optional[str] = Field(
-        default=None,
-        description="The namespace within AnalyticDB for schema isolation (if using namespace feature).",
+        default=None, description="The namespace within AnalyticDB for schema isolation (if using namespace feature)."
     )
     ANALYTICDB_NAMESPACE_PASSWORD: Optional[str] = Field(
         default=None,

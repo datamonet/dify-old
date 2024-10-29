@@ -81,16 +81,10 @@ class OpenLLMGenerate:
             "skip_special_tokens": True,
         }
 
-        if (
-            "max_tokens" in model_parameters
-            and type(model_parameters["max_tokens"]) == int
-        ):
+        if "max_tokens" in model_parameters and type(model_parameters["max_tokens"]) == int:
             default_llm_config["max_new_tokens"] = model_parameters["max_tokens"]
 
-        if (
-            "temperature" in model_parameters
-            and type(model_parameters["temperature"]) == float
-        ):
+        if "temperature" in model_parameters and type(model_parameters["temperature"]) == float:
             default_llm_config["temperature"] = model_parameters["temperature"]
 
         if "top_p" in model_parameters and type(model_parameters["top_p"]) == float:
@@ -99,10 +93,7 @@ class OpenLLMGenerate:
         if "top_k" in model_parameters and type(model_parameters["top_k"]) == int:
             default_llm_config["top_k"] = model_parameters["top_k"]
 
-        if (
-            "use_cache" in model_parameters
-            and type(model_parameters["use_cache"]) == bool
-        ):
+        if "use_cache" in model_parameters and type(model_parameters["use_cache"]) == bool:
             default_llm_config["use_cache"] = model_parameters["use_cache"]
 
         headers = {"Content-Type": "application/json", "accept": "application/json"}
@@ -121,13 +112,7 @@ class OpenLLMGenerate:
         }
 
         try:
-            response = post(
-                url=url,
-                data=dumps(data),
-                timeout=timeout,
-                stream=stream,
-                headers=headers,
-            )
+            response = post(url=url, data=dumps(data), timeout=timeout, stream=stream, headers=headers)
         except (ConnectionError, InvalidSchema, MissingSchema) as e:
             # cloud not connect to the server
             raise InvalidAuthenticationError(f"Invalid server URL: {e}")
@@ -148,15 +133,11 @@ class OpenLLMGenerate:
             return self._handle_chat_stream_generate_response(response)
         return self._handle_chat_generate_response(response)
 
-    def _handle_chat_generate_response(
-        self, response: Response
-    ) -> OpenLLMGenerateMessage:
+    def _handle_chat_generate_response(self, response: Response) -> OpenLLMGenerateMessage:
         try:
             data = response.json()
         except Exception as e:
-            raise InternalServerError(
-                f"Failed to convert response to json: {e} with text: {response.text}"
-            )
+            raise InternalServerError(f"Failed to convert response to json: {e} with text: {response.text}")
 
         message = data["outputs"][0]
         text = message["text"]
@@ -164,9 +145,7 @@ class OpenLLMGenerate:
         prompt_token_ids = data["prompt_token_ids"]
         stop_reason = message["finish_reason"]
 
-        message = OpenLLMGenerateMessage(
-            content=text, role=OpenLLMGenerateMessage.Role.ASSISTANT.value
-        )
+        message = OpenLLMGenerateMessage(content=text, role=OpenLLMGenerateMessage.Role.ASSISTANT.value)
         message.stop_reason = stop_reason
         message.usage = {
             "prompt_tokens": len(prompt_token_ids),
@@ -195,9 +174,7 @@ class OpenLLMGenerate:
             try:
                 data = loads(line)
             except Exception as e:
-                raise InternalServerError(
-                    f"Failed to convert response to json: {e} with text: {line}"
-                )
+                raise InternalServerError(f"Failed to convert response to json: {e} with text: {line}")
 
             output = data["outputs"]
 
@@ -206,9 +183,7 @@ class OpenLLMGenerate:
                 token_ids = choice["token_ids"]
 
                 completion_usage += len(token_ids)
-                message = OpenLLMGenerateMessage(
-                    content=text, role=OpenLLMGenerateMessage.Role.ASSISTANT.value
-                )
+                message = OpenLLMGenerateMessage(content=text, role=OpenLLMGenerateMessage.Role.ASSISTANT.value)
 
                 if choice.get("finish_reason"):
                     finish_reason = choice["finish_reason"]

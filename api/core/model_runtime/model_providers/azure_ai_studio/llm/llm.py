@@ -20,12 +20,7 @@ from azure.core.exceptions import (
 )
 
 from core.model_runtime.callbacks.base_callback import Callback
-from core.model_runtime.entities.llm_entities import (
-    LLMResult,
-    LLMResultChunk,
-    LLMResultChunkDelta,
-    LLMUsage,
-)
+from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, LLMResultChunkDelta, LLMUsage
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     PromptMessage,
@@ -47,9 +42,7 @@ from core.model_runtime.errors.invoke import (
     InvokeServerUnavailableError,
 )
 from core.model_runtime.errors.validate import CredentialsValidateFailedError
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 
 logger = logging.getLogger(__name__)
 
@@ -91,13 +84,9 @@ class AzureAIStudioLargeLanguageModel(LargeLanguageModel):
         if not self.client:
             endpoint = credentials.get("endpoint")
             api_key = credentials.get("api_key")
-            self.client = ChatCompletionsClient(
-                endpoint=endpoint, credential=AzureKeyCredential(api_key)
-            )
+            self.client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
 
-        messages = [
-            {"role": msg.role.value, "content": msg.content} for msg in prompt_messages
-        ]
+        messages = [{"role": msg.role.value, "content": msg.content} for msg in prompt_messages]
 
         payload = {
             "messages": messages,
@@ -119,15 +108,11 @@ class AzureAIStudioLargeLanguageModel(LargeLanguageModel):
             if stream:
                 return self._handle_stream_response(response, model, prompt_messages)
             else:
-                return self._handle_non_stream_response(
-                    response, model, prompt_messages, credentials
-                )
+                return self._handle_non_stream_response(response, model, prompt_messages, credentials)
         except Exception as e:
             raise self._transform_invoke_error(e)
 
-    def _handle_stream_response(
-        self, response, model: str, prompt_messages: list[PromptMessage]
-    ) -> Generator:
+    def _handle_stream_response(self, response, model: str, prompt_messages: list[PromptMessage]) -> Generator:
         for chunk in response:
             if isinstance(chunk, StreamingChatCompletionsUpdate):
                 if chunk.choices:
@@ -138,33 +123,19 @@ class AzureAIStudioLargeLanguageModel(LargeLanguageModel):
                             prompt_messages=prompt_messages,
                             delta=LLMResultChunkDelta(
                                 index=0,
-                                message=AssistantPromptMessage(
-                                    content=delta.content, tool_calls=[]
-                                ),
+                                message=AssistantPromptMessage(content=delta.content, tool_calls=[]),
                             ),
                         )
 
     def _handle_non_stream_response(
-        self,
-        response,
-        model: str,
-        prompt_messages: list[PromptMessage],
-        credentials: dict,
+        self, response, model: str, prompt_messages: list[PromptMessage], credentials: dict
     ) -> LLMResult:
         assistant_text = response.choices[0].message.content
         assistant_prompt_message = AssistantPromptMessage(content=assistant_text)
         usage = self._calc_response_usage(
-            model,
-            credentials,
-            response.usage.prompt_tokens,
-            response.usage.completion_tokens,
+            model, credentials, response.usage.prompt_tokens, response.usage.completion_tokens
         )
-        result = LLMResult(
-            model=model,
-            prompt_messages=prompt_messages,
-            message=assistant_prompt_message,
-            usage=usage,
-        )
+        result = LLMResult(model=model, prompt_messages=prompt_messages, message=assistant_prompt_message, usage=usage)
 
         if hasattr(response, "system_fingerprint"):
             result.system_fingerprint = response.system_fingerprint
@@ -206,9 +177,7 @@ class AzureAIStudioLargeLanguageModel(LargeLanguageModel):
                         prompt_messages=prompt_messages,
                         delta=LLMResultChunkDelta(
                             index=0,
-                            message=AssistantPromptMessage(
-                                content=content, tool_calls=[]
-                            ),
+                            message=AssistantPromptMessage(content=content, tool_calls=[]),
                         ),
                         system_fingerprint=chunk.get("system_fingerprint"),
                     )
@@ -288,9 +257,7 @@ class AzureAIStudioLargeLanguageModel(LargeLanguageModel):
         try:
             endpoint = credentials.get("endpoint")
             api_key = credentials.get("api_key")
-            client = ChatCompletionsClient(
-                endpoint=endpoint, credential=AzureKeyCredential(api_key)
-            )
+            client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
             client.get_model_info()
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
