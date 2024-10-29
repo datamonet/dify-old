@@ -4,14 +4,8 @@ import time
 from collections.abc import Generator, Mapping
 from typing import Any, Optional, Union
 
-from constants.tts_auto_play_timeout import (
-    TTS_AUTO_PLAY_TIMEOUT,
-    TTS_AUTO_PLAY_YIELD_CPU_TIME,
-)
-from core.app.apps.advanced_chat.app_generator_tts_publisher import (
-    AppGeneratorTTSPublisher,
-    AudioTrunk,
-)
+from constants.tts_auto_play_timeout import TTS_AUTO_PLAY_TIMEOUT, TTS_AUTO_PLAY_YIELD_CPU_TIME
+from core.app.apps.advanced_chat.app_generator_tts_publisher import AppGeneratorTTSPublisher, AudioTrunk
 from core.app.apps.base_app_queue_manager import AppQueueManager, PublishFrom
 from core.app.entities.app_invoke_entities import (
     AdvancedChatAppGenerateEntity,
@@ -49,11 +43,10 @@ from core.app.entities.task_entities import (
     StreamResponse,
     WorkflowTaskState,
 )
-from core.app.task_pipeline.based_generate_task_pipeline import (
-    BasedGenerateTaskPipeline,
-)
+from core.app.task_pipeline.based_generate_task_pipeline import BasedGenerateTaskPipeline
 from core.app.task_pipeline.message_cycle_manage import MessageCycleManage
 from core.app.task_pipeline.workflow_cycle_manage import WorkflowCycleManage
+from core.model_runtime.entities.llm_entities import LLMUsage
 from core.model_runtime.utils.encoders import jsonable_encoder
 from core.ops.ops_trace_manager import TraceQueueManager
 from core.workflow.enums import SystemVariableKey
@@ -66,6 +59,7 @@ from models.account import Account
 from models.enums import CreatedByRole
 from models.workflow import (
     Workflow,
+    WorkflowNodeExecution,
     WorkflowRunStatus,
 )
 
@@ -82,6 +76,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
     _workflow: Workflow
     _user: Union[Account, EndUser]
     _workflow_system_variables: dict[SystemVariableKey, Any]
+    _wip_workflow_node_executions: dict[str, WorkflowNodeExecution]
 
     def __init__(
         self,
@@ -118,9 +113,14 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
             SystemVariableKey.FILES: application_generate_entity.files,
             SystemVariableKey.CONVERSATION_ID: conversation.id,
             SystemVariableKey.USER_ID: user_id,
+            SystemVariableKey.DIALOGUE_COUNT: conversation.dialogue_count,
+            SystemVariableKey.APP_ID: application_generate_entity.app_config.app_id,
+            SystemVariableKey.WORKFLOW_ID: workflow.id,
+            SystemVariableKey.WORKFLOW_RUN_ID: application_generate_entity.workflow_run_id,
         }
 
         self._task_state = WorkflowTaskState()
+        self._wip_workflow_node_executions = {}
 
         self._conversation_name_generate_thread = None
         self._recorded_files: list[Mapping[str, Any]] = []
@@ -283,8 +283,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                 db.session.close()
 
                 yield self._workflow_start_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run
                 )
             elif isinstance(event, QueueNodeStartedEvent):
                 if not workflow_run:
@@ -331,48 +330,35 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                     raise Exception("Workflow run not initialized.")
 
                 yield self._workflow_parallel_branch_start_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
-                    event=event,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run, event=event
                 )
-            elif isinstance(
-                event,
-                QueueParallelBranchRunSucceededEvent | QueueParallelBranchRunFailedEvent,
-            ):
+            elif isinstance(event, QueueParallelBranchRunSucceededEvent | QueueParallelBranchRunFailedEvent):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
 
                 yield self._workflow_parallel_branch_finished_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
-                    event=event,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run, event=event
                 )
             elif isinstance(event, QueueIterationStartEvent):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
 
                 yield self._workflow_iteration_start_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
-                    event=event,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run, event=event
                 )
             elif isinstance(event, QueueIterationNextEvent):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
 
                 yield self._workflow_iteration_next_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
-                    event=event,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run, event=event
                 )
             elif isinstance(event, QueueIterationCompletedEvent):
                 if not workflow_run:
                     raise Exception("Workflow run not initialized.")
 
                 yield self._workflow_iteration_completed_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
-                    event=event,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run, event=event
                 )
             elif isinstance(event, QueueWorkflowSucceededEvent):
                 if not workflow_run:
@@ -392,8 +378,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                 )
 
                 yield self._workflow_finish_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run
                 )
 
                 self._queue_manager.publish(QueueAdvancedChatMessageEndEvent(), PublishFrom.TASK_PIPELINE)
@@ -416,8 +401,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                 )
 
                 yield self._workflow_finish_to_stream_response(
-                    task_id=self._application_generate_entity.task_id,
-                    workflow_run=workflow_run,
+                    task_id=self._application_generate_entity.task_id, workflow_run=workflow_run
                 )
 
                 err_event = QueueErrorEvent(error=ValueError(f"Run failed: {workflow_run.error}"))
@@ -437,8 +421,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                     )
 
                     yield self._workflow_finish_to_stream_response(
-                        task_id=self._application_generate_entity.task_id,
-                        workflow_run=workflow_run,
+                        task_id=self._application_generate_entity.task_id, workflow_run=workflow_run
                     )
 
                 # Save message
@@ -486,9 +469,7 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
 
                 self._task_state.answer += delta_text
                 yield self._message_to_stream_response(
-                    answer=delta_text,
-                    message_id=self._message.id,
-                    from_variable_selector=event.from_variable_selector,
+                    answer=delta_text, message_id=self._message.id, from_variable_selector=event.from_variable_selector
                 )
             elif isinstance(event, QueueMessageReplaceEvent):
                 # published by moderation
@@ -552,6 +533,10 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
             self._message.total_price = usage.total_price
             self._message.currency = usage.currency
 
+            self._task_state.metadata["usage"] = jsonable_encoder(usage)
+        else:
+            self._task_state.metadata["usage"] = jsonable_encoder(LLMUsage.empty_usage())
+
         db.session.commit()
 
         message_was_created.send(
@@ -589,13 +574,11 @@ class AdvancedChatAppGenerateTaskPipeline(BasedGenerateTaskPipeline, WorkflowCyc
                 # stop subscribe new token when output moderation should direct output
                 self._task_state.answer = self._output_moderation_handler.get_final_output()
                 self._queue_manager.publish(
-                    QueueTextChunkEvent(text=self._task_state.answer),
-                    PublishFrom.TASK_PIPELINE,
+                    QueueTextChunkEvent(text=self._task_state.answer), PublishFrom.TASK_PIPELINE
                 )
 
                 self._queue_manager.publish(
-                    QueueStopEvent(stopped_by=QueueStopEvent.StopBy.OUTPUT_MODERATION),
-                    PublishFrom.TASK_PIPELINE,
+                    QueueStopEvent(stopped_by=QueueStopEvent.StopBy.OUTPUT_MODERATION), PublishFrom.TASK_PIPELINE
                 )
                 return True
             else:

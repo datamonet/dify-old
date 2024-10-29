@@ -8,20 +8,12 @@ from typing import Any, Literal, Union, overload
 from flask import Flask, current_app
 from pydantic import ValidationError
 
-from core.app.app_config.easy_ui_based_app.model_config.converter import (
-    ModelConfigConverter,
-)
+from core.app.app_config.easy_ui_based_app.model_config.converter import ModelConfigConverter
 from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
-from core.app.apps.base_app_queue_manager import (
-    AppQueueManager,
-    GenerateTaskStoppedError,
-    PublishFrom,
-)
+from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
 from core.app.apps.completion.app_config_manager import CompletionAppConfigManager
 from core.app.apps.completion.app_runner import CompletionAppRunner
-from core.app.apps.completion.generate_response_converter import (
-    CompletionAppGenerateResponseConverter,
-)
+from core.app.apps.completion.generate_response_converter import CompletionAppGenerateResponseConverter
 from core.app.apps.message_based_app_generator import MessageBasedAppGenerator
 from core.app.apps.message_based_app_queue_manager import MessageBasedAppQueueManager
 from core.app.entities.app_invoke_entities import CompletionAppGenerateEntity, InvokeFrom
@@ -59,12 +51,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
     ) -> dict: ...
 
     def generate(
-        self,
-        app_model: App,
-        user: Union[Account, EndUser],
-        args: Any,
-        invoke_from: InvokeFrom,
-        stream: bool = True,
+        self, app_model: App, user: Union[Account, EndUser], args: Any, invoke_from: InvokeFrom, stream: bool = True
     ) -> Union[dict, Generator[str, None, None]]:
         """
         Generate App response.
@@ -119,9 +106,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
 
         # convert to app config
         app_config = CompletionAppConfigManager.get_app_config(
-            app_model=app_model,
-            app_model_config=app_model_config,
-            override_config_dict=override_model_config_dict,
+            app_model=app_model, app_model_config=app_model_config, override_config_dict=override_model_config_dict
         )
 
         # get tracing instance
@@ -212,8 +197,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
                 pass
             except InvokeAuthorizationError:
                 queue_manager.publish_error(
-                    InvokeAuthorizationError("Incorrect API key provided"),
-                    PublishFrom.APPLICATION_MANAGER,
+                    InvokeAuthorizationError("Incorrect API key provided"), PublishFrom.APPLICATION_MANAGER
                 )
             except ValidationError as e:
                 logger.exception("Validation Error when generating")
@@ -290,9 +274,7 @@ class CompletionAppGenerator(MessageBasedAppGenerator):
 
         # convert to app config
         app_config = CompletionAppConfigManager.get_app_config(
-            app_model=app_model,
-            app_model_config=app_model_config,
-            override_config_dict=override_model_config_dict,
+            app_model=app_model, app_model_config=app_model_config, override_config_dict=override_model_config_dict
         )
 
         # init application generate entity

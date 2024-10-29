@@ -190,10 +190,7 @@ class Workflow(db.Model):
         if "nodes" not in graph_dict:
             return []
 
-        start_node = next(
-            (node for node in graph_dict["nodes"] if node["data"]["type"] == "start"),
-            None,
-        )
+        start_node = next((node for node in graph_dict["nodes"] if node["data"]["type"] == "start"), None)
         if not start_node:
             return []
 
@@ -380,12 +377,7 @@ class WorkflowRun(db.Model):
     __table_args__ = (
         db.PrimaryKeyConstraint("id", name="workflow_run_pkey"),
         db.Index("workflow_run_triggerd_from_idx", "tenant_id", "app_id", "triggered_from"),
-        db.Index(
-            "workflow_run_tenant_app_sequence_idx",
-            "tenant_id",
-            "app_id",
-            "sequence_number",
-        ),
+        db.Index("workflow_run_tenant_app_sequence_idx", "tenant_id", "app_id", "sequence_number"),
     )
 
     id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
@@ -600,12 +592,7 @@ class WorkflowNodeExecution(db.Model):
             "workflow_run_id",
         ),
         db.Index(
-            "workflow_node_execution_node_run_idx",
-            "tenant_id",
-            "app_id",
-            "workflow_id",
-            "triggered_from",
-            "node_id",
+            "workflow_node_execution_node_run_idx", "tenant_id", "app_id", "workflow_id", "triggered_from", "node_id"
         ),
         db.Index(
             "workflow_node_execution_id_idx",
@@ -780,17 +767,9 @@ class ConversationVariable(db.Model):
     conversation_id: Mapped[str] = db.Column(StringUUID, nullable=False, primary_key=True)
     app_id: Mapped[str] = db.Column(StringUUID, nullable=False, index=True)
     data = db.Column(db.Text, nullable=False)
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        index=True,
-        server_default=db.text("CURRENT_TIMESTAMP(0)"),
-    )
+    created_at = db.Column(db.DateTime, nullable=False, index=True, server_default=db.text("CURRENT_TIMESTAMP(0)"))
     updated_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        server_default=func.current_timestamp(),
-        onupdate=func.current_timestamp(),
+        db.DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
     )
 
     def __init__(self, *, id: str, app_id: str, conversation_id: str, data: str) -> None:

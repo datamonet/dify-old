@@ -59,10 +59,7 @@ class AdvancedChatAppRunner(WorkflowBasedAppRunner):
             raise ValueError("Workflow not initialized")
 
         user_id = None
-        if self.application_generate_entity.invoke_from in {
-            InvokeFrom.WEB_APP,
-            InvokeFrom.SERVICE_API,
-        }:
+        if self.application_generate_entity.invoke_from in {InvokeFrom.WEB_APP, InvokeFrom.SERVICE_API}:
             end_user = db.session.query(EndUser).filter(EndUser.id == self.application_generate_entity.user_id).first()
             if end_user:
                 user_id = end_user.session_id
@@ -115,9 +112,7 @@ class AdvancedChatAppRunner(WorkflowBasedAppRunner):
                     # Create conversation variables if they don't exist.
                     conversation_variables = [
                         ConversationVariable.from_variable(
-                            app_id=self.conversation.app_id,
-                            conversation_id=self.conversation.id,
-                            variable=variable,
+                            app_id=self.conversation.app_id, conversation_id=self.conversation.id, variable=variable
                         )
                         for variable in workflow.conversation_variables
                     ]
@@ -140,6 +135,9 @@ class AdvancedChatAppRunner(WorkflowBasedAppRunner):
                 SystemVariableKey.CONVERSATION_ID: self.conversation.id,
                 SystemVariableKey.USER_ID: user_id,
                 SystemVariableKey.DIALOGUE_COUNT: conversation_dialogue_count,
+                SystemVariableKey.APP_ID: app_config.app_id,
+                SystemVariableKey.WORKFLOW_ID: app_config.workflow_id,
+                SystemVariableKey.WORKFLOW_RUN_ID: self.application_generate_entity.workflow_run_id,
             }
 
             # init variable pool
@@ -206,11 +204,7 @@ class AdvancedChatAppRunner(WorkflowBasedAppRunner):
         return False
 
     def handle_annotation_reply(
-        self,
-        app_record: App,
-        message: Message,
-        query: str,
-        app_generate_entity: AdvancedChatAppGenerateEntity,
+        self, app_record: App, message: Message, query: str, app_generate_entity: AdvancedChatAppGenerateEntity
     ) -> bool:
         annotation_reply = self.query_app_annotations_to_reply(
             app_record=app_record,
@@ -224,8 +218,7 @@ class AdvancedChatAppRunner(WorkflowBasedAppRunner):
             self._publish_event(QueueAnnotationReplyEvent(message_annotation_id=annotation_reply.id))
 
             self._complete_with_stream_output(
-                text=annotation_reply.content,
-                stopped_by=QueueStopEvent.StopBy.ANNOTATION_REPLY,
+                text=annotation_reply.content, stopped_by=QueueStopEvent.StopBy.ANNOTATION_REPLY
             )
             return True
 

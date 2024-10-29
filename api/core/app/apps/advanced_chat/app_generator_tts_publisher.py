@@ -25,10 +25,7 @@ def _invoice_tts(text_content: str, model_instance, tenant_id: str, voice: str):
     if not text_content or text_content.isspace():
         return
     return model_instance.invoke_tts(
-        content_text=text_content.strip(),
-        user="responding_tts",
-        tenant_id=tenant_id,
-        voice=voice,
+        content_text=text_content.strip(), user="responding_tts", tenant_id=tenant_id, voice=voice
     )
 
 
@@ -84,11 +81,7 @@ class AppGeneratorTTSPublisher:
                 if message is None:
                     if self.msg_text and len(self.msg_text.strip()) > 0:
                         futures_result = self.executor.submit(
-                            _invoice_tts,
-                            self.msg_text,
-                            self.model_instance,
-                            self.tenant_id,
-                            self.voice,
+                            _invoice_tts, self.msg_text, self.model_instance, self.tenant_id, self.voice
                         )
                         future_queue.put(futures_result)
                     break
@@ -104,11 +97,7 @@ class AppGeneratorTTSPublisher:
                     self.MAX_SENTENCE += 1
                     text_content = "".join(sentence_arr)
                     futures_result = self.executor.submit(
-                        _invoice_tts,
-                        text_content,
-                        self.model_instance,
-                        self.tenant_id,
-                        self.voice,
+                        _invoice_tts, text_content, self.model_instance, self.tenant_id, self.voice
                     )
                     future_queue.put(futures_result)
                     if text_tmp:

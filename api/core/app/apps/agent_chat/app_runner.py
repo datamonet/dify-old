@@ -8,18 +8,13 @@ from core.agent.fc_agent_runner import FunctionCallAgentRunner
 from core.app.apps.agent_chat.app_config_manager import AgentChatAppConfig
 from core.app.apps.base_app_queue_manager import AppQueueManager, PublishFrom
 from core.app.apps.base_app_runner import AppRunner
-from core.app.entities.app_invoke_entities import (
-    AgentChatAppGenerateEntity,
-    ModelConfigWithCredentialsEntity,
-)
+from core.app.entities.app_invoke_entities import AgentChatAppGenerateEntity, ModelConfigWithCredentialsEntity
 from core.app.entities.queue_entities import QueueAnnotationReplyEvent
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.llm_entities import LLMMode, LLMUsage
 from core.model_runtime.entities.model_entities import ModelFeature, ModelPropertyKey
-from core.model_runtime.model_providers.__base.large_language_model import (
-    LargeLanguageModel,
-)
+from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 from core.moderation.base import ModerationError
 from core.tools.entities.tool_entities import ToolRuntimeVariablePool
 from extensions.ext_database import db
@@ -181,9 +176,7 @@ class AgentChatAppRunner(AppRunner):
 
         # load tool variables
         tool_conversation_variables = self._load_tool_variables(
-            conversation_id=conversation.id,
-            user_id=application_generate_entity.user_id,
-            tenant_id=app_config.tenant_id,
+            conversation_id=conversation.id, user_id=application_generate_entity.user_id, tenant_id=app_config.tenant_id
         )
 
         # convert db variables to tool variables
@@ -327,8 +320,5 @@ class AgentChatAppRunner(AppRunner):
         model_type_instance = cast(LargeLanguageModel, model_type_instance)
 
         return model_type_instance._calc_response_usage(
-            model_config.model,
-            model_config.credentials,
-            all_message_tokens,
-            all_answer_tokens,
+            model_config.model, model_config.credentials, all_message_tokens, all_answer_tokens
         )

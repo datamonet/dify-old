@@ -10,20 +10,13 @@ from flask import Flask, current_app
 from pydantic import ValidationError
 
 import contexts
+from constants import UUID_NIL
 from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
 from core.app.apps.advanced_chat.app_config_manager import AdvancedChatAppConfigManager
 from core.app.apps.advanced_chat.app_runner import AdvancedChatAppRunner
-from core.app.apps.advanced_chat.generate_response_converter import (
-    AdvancedChatAppGenerateResponseConverter,
-)
-from core.app.apps.advanced_chat.generate_task_pipeline import (
-    AdvancedChatAppGenerateTaskPipeline,
-)
-from core.app.apps.base_app_queue_manager import (
-    AppQueueManager,
-    GenerateTaskStoppedError,
-    PublishFrom,
-)
+from core.app.apps.advanced_chat.generate_response_converter import AdvancedChatAppGenerateResponseConverter
+from core.app.apps.advanced_chat.generate_task_pipeline import AdvancedChatAppGenerateTaskPipeline
+from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
 from core.app.apps.message_based_app_generator import MessageBasedAppGenerator
 from core.app.apps.message_based_app_queue_manager import MessageBasedAppQueueManager
 from core.app.entities.app_invoke_entities import AdvancedChatAppGenerateEntity, InvokeFrom
@@ -129,6 +122,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             # always enable retriever resource in debugger mode
             app_config.additional_features.show_retrieve_source = True
 
+        workflow_run_id = str(uuid.uuid4())
         # init application generate entity
         application_generate_entity = AdvancedChatAppGenerateEntity(
             task_id=str(uuid.uuid4()),
@@ -139,12 +133,13 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             else self._prepare_user_inputs(user_inputs=inputs, app_config=app_config, user_id=user.id, role=role),
             query=query,
             files=file_objs,
-            parent_message_id=args.get("parent_message_id"),
+            parent_message_id=args.get("parent_message_id") if invoke_from != InvokeFrom.SERVICE_API else UUID_NIL,
             user_id=user.id,
             stream=stream,
             invoke_from=invoke_from,
             extras=extras,
             trace_manager=trace_manager,
+            workflow_run_id=workflow_run_id,
         )
         contexts.tenant_id.set(application_generate_entity.app_config.tenant_id)
 
@@ -158,13 +153,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         )
 
     def single_iteration_generate(
-        self,
-        app_model: App,
-        workflow: Workflow,
-        node_id: str,
-        user: Account,
-        args: dict,
-        stream: bool = True,
+        self, app_model: App, workflow: Workflow, node_id: str, user: Account, args: dict, stream: bool = True
     ) -> dict[str, Any] | Generator[str, Any, None]:
         """
         Generate App response.
@@ -322,8 +311,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
                 pass
             except InvokeAuthorizationError:
                 queue_manager.publish_error(
-                    InvokeAuthorizationError("Incorrect API key provided"),
-                    PublishFrom.APPLICATION_MANAGER,
+                    InvokeAuthorizationError("Incorrect API key provided"), PublishFrom.APPLICATION_MANAGER
                 )
             except ValidationError as e:
                 logger.exception("Validation Error when generating")

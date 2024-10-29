@@ -12,20 +12,12 @@ from pydantic import ValidationError
 import contexts
 from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
 from core.app.apps.base_app_generator import BaseAppGenerator
-from core.app.apps.base_app_queue_manager import (
-    AppQueueManager,
-    GenerateTaskStoppedError,
-    PublishFrom,
-)
+from core.app.apps.base_app_queue_manager import AppQueueManager, GenerateTaskStoppedError, PublishFrom
 from core.app.apps.workflow.app_config_manager import WorkflowAppConfigManager
 from core.app.apps.workflow.app_queue_manager import WorkflowAppQueueManager
 from core.app.apps.workflow.app_runner import WorkflowAppRunner
-from core.app.apps.workflow.generate_response_converter import (
-    WorkflowAppGenerateResponseConverter,
-)
-from core.app.apps.workflow.generate_task_pipeline import (
-    WorkflowAppGenerateTaskPipeline,
-)
+from core.app.apps.workflow.generate_response_converter import WorkflowAppGenerateResponseConverter
+from core.app.apps.workflow.generate_task_pipeline import WorkflowAppGenerateTaskPipeline
 from core.app.entities.app_invoke_entities import InvokeFrom, WorkflowAppGenerateEntity
 from core.app.entities.task_entities import WorkflowAppBlockingResponse, WorkflowAppStreamResponse
 from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeError
@@ -115,6 +107,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
             invoke_from=invoke_from,
             call_depth=call_depth,
             trace_manager=trace_manager,
+            workflow_run_id=workflow_run_id,
         )
         contexts.tenant_id.set(application_generate_entity.app_config.tenant_id)
 
@@ -184,13 +177,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
         return WorkflowAppGenerateResponseConverter.convert(response=response, invoke_from=invoke_from)
 
     def single_iteration_generate(
-        self,
-        app_model: App,
-        workflow: Workflow,
-        node_id: str,
-        user: Account,
-        args: dict,
-        stream: bool = True,
+        self, app_model: App, workflow: Workflow, node_id: str, user: Account, args: dict, stream: bool = True
     ) -> dict[str, Any] | Generator[str, Any, None]:
         """
         Generate App response.
@@ -268,8 +255,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
                 pass
             except InvokeAuthorizationError:
                 queue_manager.publish_error(
-                    InvokeAuthorizationError("Incorrect API key provided"),
-                    PublishFrom.APPLICATION_MANAGER,
+                    InvokeAuthorizationError("Incorrect API key provided"), PublishFrom.APPLICATION_MANAGER
                 )
             except ValidationError as e:
                 logger.exception("Validation Error when generating")
