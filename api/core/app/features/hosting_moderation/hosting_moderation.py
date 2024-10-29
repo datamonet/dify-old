@@ -9,9 +9,7 @@ logger = logging.getLogger(__name__)
 
 class HostingModerationFeature:
     def check(
-        self,
-        application_generate_entity: EasyUIBasedAppGenerateEntity,
-        prompt_messages: list[PromptMessage],
+        self, application_generate_entity: EasyUIBasedAppGenerateEntity, prompt_messages: list[PromptMessage]
     ) -> bool:
         """
         Check hosting moderation

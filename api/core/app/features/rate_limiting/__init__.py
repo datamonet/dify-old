@@ -1,1 +1,1 @@
-from .rate_limit import RateLimit as RateLimit
+from .rate_limit import RateLimit

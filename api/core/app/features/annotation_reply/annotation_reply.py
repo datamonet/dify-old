@@ -14,12 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AnnotationReplyFeature:
     def query(
-        self,
-        app_record: App,
-        message: Message,
-        query: str,
-        user_id: str,
-        invoke_from: InvokeFrom,
+        self, app_record: App, message: Message, query: str, user_id: str, invoke_from: InvokeFrom
     ) -> Optional[MessageAnnotation]:
         """
         Query app annotations to reply
@@ -60,10 +55,7 @@ class AnnotationReplyFeature:
             vector = Vector(dataset, attributes=["doc_id", "annotation_id", "app_id"])
 
             documents = vector.search_by_vector(
-                query=query,
-                top_k=1,
-                score_threshold=score_threshold,
-                filter={"group_id": [dataset.id]},
+                query=query, top_k=1, score_threshold=score_threshold, filter={"group_id": [dataset.id]}
             )
 
             if documents:

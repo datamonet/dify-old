@@ -96,12 +96,7 @@ class RateLimit:
 
 
 class RateLimitGenerator:
-    def __init__(
-        self,
-        rate_limit: RateLimit,
-        generator: Union[Generator, callable],
-        request_id: str,
-    ):
+    def __init__(self, rate_limit: RateLimit, generator: Union[Generator, callable], request_id: str):
         self.rate_limit = rate_limit
         if callable(generator):
             self.generator = generator()
