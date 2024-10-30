@@ -188,7 +188,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
 
   useMemo(() => {
     if (searchParamsCategory) setCurrCategory(searchParamsCategory);
-    else setCurrCategory(allCategoriesEn);
+    else setCurrCategory("recommended");
     exploreAppMutate();
   }, [searchParamsCategory]);
 
