@@ -14,10 +14,7 @@ from controllers.service_api.dataset.error import (
     NoFileUploadedError,
     TooManyFilesError,
 )
-from controllers.service_api.wraps import (
-    DatasetApiResource,
-    cloud_edition_billing_resource_check,
-)
+from controllers.service_api.wraps import DatasetApiResource, cloud_edition_billing_resource_check
 from core.errors.error import ProviderTokenNotInitError
 from extensions.ext_database import db
 from fields.document_fields import document_fields, document_status_fields
@@ -39,36 +36,14 @@ class DocumentAddByTextApi(DatasetApiResource):
         parser.add_argument("text", type=str, required=True, nullable=False, location="json")
         parser.add_argument("process_rule", type=dict, required=False, nullable=True, location="json")
         parser.add_argument("original_document_id", type=str, required=False, location="json")
+        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_form",
-            type=str,
-            default="text_model",
-            required=False,
-            nullable=False,
-            location="json",
+            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
         )
         parser.add_argument(
-            "doc_language",
-            type=str,
-            default="English",
-            required=False,
-            nullable=False,
-            location="json",
+            "indexing_technique", type=str, choices=Dataset.INDEXING_TECHNIQUE_LIST, nullable=False, location="json"
         )
-        parser.add_argument(
-            "indexing_technique",
-            type=str,
-            choices=Dataset.INDEXING_TECHNIQUE_LIST,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "retrieval_model",
-            type=dict,
-            required=False,
-            nullable=False,
-            location="json",
-        )
+        parser.add_argument("retrieval_model", type=dict, required=False, nullable=False, location="json")
         args = parser.parse_args()
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
@@ -83,10 +58,7 @@ class DocumentAddByTextApi(DatasetApiResource):
         upload_file = FileService.upload_text(args.get("text"), args.get("name"))
         data_source = {
             "type": "upload_file",
-            "info_list": {
-                "data_source_type": "upload_file",
-                "file_info_list": {"file_ids": [upload_file.id]},
-            },
+            "info_list": {"data_source_type": "upload_file", "file_info_list": {"file_ids": [upload_file.id]}},
         }
         args["data_source"] = data_source
         # validate args
@@ -104,10 +76,7 @@ class DocumentAddByTextApi(DatasetApiResource):
             raise ProviderNotInitializeError(ex.description)
         document = documents[0]
 
-        documents_and_batch_fields = {
-            "document": marshal(document, document_fields),
-            "batch": batch,
-        }
+        documents_and_batch_fields = {"document": marshal(document, document_fields), "batch": batch}
         return documents_and_batch_fields, 200
 
 
@@ -121,29 +90,11 @@ class DocumentUpdateByTextApi(DatasetApiResource):
         parser.add_argument("name", type=str, required=False, nullable=True, location="json")
         parser.add_argument("text", type=str, required=False, nullable=True, location="json")
         parser.add_argument("process_rule", type=dict, required=False, nullable=True, location="json")
+        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_form",
-            type=str,
-            default="text_model",
-            required=False,
-            nullable=False,
-            location="json",
+            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
         )
-        parser.add_argument(
-            "doc_language",
-            type=str,
-            default="English",
-            required=False,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "retrieval_model",
-            type=dict,
-            required=False,
-            nullable=False,
-            location="json",
-        )
+        parser.add_argument("retrieval_model", type=dict, required=False, nullable=False, location="json")
         args = parser.parse_args()
         dataset_id = str(dataset_id)
         tenant_id = str(tenant_id)
@@ -156,10 +107,7 @@ class DocumentUpdateByTextApi(DatasetApiResource):
             upload_file = FileService.upload_text(args.get("text"), args.get("name"))
             data_source = {
                 "type": "upload_file",
-                "info_list": {
-                    "data_source_type": "upload_file",
-                    "file_info_list": {"file_ids": [upload_file.id]},
-                },
+                "info_list": {"data_source_type": "upload_file", "file_info_list": {"file_ids": [upload_file.id]}},
             }
             args["data_source"] = data_source
         # validate args
@@ -178,10 +126,7 @@ class DocumentUpdateByTextApi(DatasetApiResource):
             raise ProviderNotInitializeError(ex.description)
         document = documents[0]
 
-        documents_and_batch_fields = {
-            "document": marshal(document, document_fields),
-            "batch": batch,
-        }
+        documents_and_batch_fields = {"document": marshal(document, document_fields), "batch": batch}
         return documents_and_batch_fields, 200
 
 
@@ -219,10 +164,7 @@ class DocumentAddByFileApi(DatasetApiResource):
             raise TooManyFilesError()
 
         upload_file = FileService.upload_file(file, current_user)
-        data_source = {
-            "type": "upload_file",
-            "info_list": {"file_info_list": {"file_ids": [upload_file.id]}},
-        }
+        data_source = {"type": "upload_file", "info_list": {"file_info_list": {"file_ids": [upload_file.id]}}}
         args["data_source"] = data_source
         # validate args
         DocumentService.document_create_args_validate(args)
@@ -238,10 +180,7 @@ class DocumentAddByFileApi(DatasetApiResource):
         except ProviderTokenNotInitError as ex:
             raise ProviderNotInitializeError(ex.description)
         document = documents[0]
-        documents_and_batch_fields = {
-            "document": marshal(document, document_fields),
-            "batch": batch,
-        }
+        documents_and_batch_fields = {"document": marshal(document, document_fields), "batch": batch}
         return documents_and_batch_fields, 200
 
 
@@ -274,10 +213,7 @@ class DocumentUpdateByFileApi(DatasetApiResource):
                 raise TooManyFilesError()
 
             upload_file = FileService.upload_file(file, current_user)
-            data_source = {
-                "type": "upload_file",
-                "info_list": {"file_info_list": {"file_ids": [upload_file.id]}},
-            }
+            data_source = {"type": "upload_file", "info_list": {"file_info_list": {"file_ids": [upload_file.id]}}}
             args["data_source"] = data_source
         # validate args
         args["original_document_id"] = str(document_id)
@@ -294,10 +230,7 @@ class DocumentUpdateByFileApi(DatasetApiResource):
         except ProviderTokenNotInitError as ex:
             raise ProviderNotInitializeError(ex.description)
         document = documents[0]
-        documents_and_batch_fields = {
-            "document": marshal(document, document_fields),
-            "batch": batch,
-        }
+        documents_and_batch_fields = {"document": marshal(document, document_fields), "batch": document.batch}
         return documents_and_batch_fields, 200
 
 
@@ -387,8 +320,7 @@ class DocumentIndexingStatusApi(DatasetApiResource):
                 DocumentSegment.status != "re_segment",
             ).count()
             total_segments = DocumentSegment.query.filter(
-                DocumentSegment.document_id == str(document.id),
-                DocumentSegment.status != "re_segment",
+                DocumentSegment.document_id == str(document.id), DocumentSegment.status != "re_segment"
             ).count()
             document.completed_segments = completed_segments
             document.total_segments = total_segments
@@ -401,17 +333,8 @@ class DocumentIndexingStatusApi(DatasetApiResource):
 
 api.add_resource(DocumentAddByTextApi, "/datasets/<uuid:dataset_id>/document/create_by_text")
 api.add_resource(DocumentAddByFileApi, "/datasets/<uuid:dataset_id>/document/create_by_file")
-api.add_resource(
-    DocumentUpdateByTextApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_text",
-)
-api.add_resource(
-    DocumentUpdateByFileApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_file",
-)
+api.add_resource(DocumentUpdateByTextApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_text")
+api.add_resource(DocumentUpdateByFileApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/update_by_file")
 api.add_resource(DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
 api.add_resource(DocumentListApi, "/datasets/<uuid:dataset_id>/documents")
-api.add_resource(
-    DocumentIndexingStatusApi,
-    "/datasets/<uuid:dataset_id>/documents/<string:batch>/indexing-status",
-)
+api.add_resource(DocumentIndexingStatusApi, "/datasets/<uuid:dataset_id>/documents/<string:batch>/indexing-status")

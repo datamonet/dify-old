@@ -160,10 +160,10 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     icon_background,
     description,
   }) => {
-    const { export_data } = await fetchAppDetail(currApp?.app.id as string);
+    const data = await fetchAppDetail(currApp?.app.id as string);
     try {
       const app = await importApp({
-        data: export_data,
+        data: data.data[0],
         name,
         icon_type,
         icon,
@@ -185,8 +185,9 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
 
   const getDetail = async (id: string) => {
     await fetchAppDetail(id).then((res) => {
-      setDetailApp(res.data[0]);
-      setShowShare(id);
+      console.log(res);
+      // setDetailApp(res.data[0]);
+      // setShowShare(id);
     });
   };
   useMemo(() => {
