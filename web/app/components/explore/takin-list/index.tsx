@@ -43,7 +43,6 @@ export enum PageType {
 const getKey = (
   pageIndex: number,
   previousPageData: AppListResponse,
-  activeTab: string,
   tags: string[],
   keywords: string
 ) => {
@@ -53,7 +52,6 @@ const getKey = (
       params: { page: pageIndex + 1, limit: 30, name: keywords },
     };
 
-    params.params.mode = activeTab;
     params.params.tag_ids = tags;
     return params;
   }
@@ -84,7 +82,6 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   const searchParamsAppId = searchParams.get("id");
   const searchParamsCategory = searchParams.get("category");
   const { hasEditPermission } = useContext(ExploreContext);
-  // const allCategoriesEn = t("explore.apps.allCategories", { lng: "en" });
 
   const [showShare, setShowShare] = useState("");
   const [keywords, setKeywords] = useState("");
@@ -128,7 +125,6 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
       getKey(
         pageIndex,
         previousPageData,
-        "all",
         ["b0524f83-eb2d-4ede-b654-b1a2b9d5fb00"],
         searchKeywords
       ),
