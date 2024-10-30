@@ -1,28 +1,30 @@
-'use client'
-import { useState } from 'react'
-import { useMount } from 'ahooks'
-import { useContext } from 'use-context-selector'
-import { useTranslation } from 'react-i18next'
-import { useSWRConfig } from 'swr'
-import { unstable_serialize } from 'swr/infinite'
-import PermissionSelector from '../permission-selector'
-import IndexMethodRadio from '../index-method-radio'
-import RetrievalSettings from '../../external-knowledge-base/create/RetrievalSettings'
-import RetrievalMethodConfig from '@/app/components/datasets/common/retrieval-method-config'
-import EconomicalRetrievalMethodConfig from '@/app/components/datasets/common/economical-retrieval-method-config'
-import { ToastContext } from '@/app/components/base/toast'
-import Button from '@/app/components/base/button'
-import Input from '@/app/components/base/input'
-import Textarea from '@/app/components/base/textarea'
-import Divider from '@/app/components/base/divider'
-import { ApiConnectionMod } from '@/app/components/base/icons/src/vender/solid/development'
-import { updateDatasetSetting } from '@/service/datasets'
-import type { DataSetListResponse } from '@/models/datasets'
-import DatasetDetailContext from '@/context/dataset-detail'
-import { type RetrievalConfig } from '@/types/app'
-import { useAppContext } from '@/context/app-context'
-import { ensureRerankModelSelected, isReRankModelSelected } from '@/app/components/datasets/common/check-rerank-model'
-import ModelSelector from '@/app/components/header/account-setting/model-provider-page/model-selector'
+"use client";
+import { useState } from "react";
+import { useMount } from "ahooks";
+import { useContext } from "use-context-selector";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
+import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import IndexMethodRadio from "../index-method-radio";
+import RetrievalSettings from "../../external-knowledge-base/create/RetrievalSettings";
+import cn from "@/utils/classnames";
+import RetrievalMethodConfig from "@/app/components/datasets/common/retrieval-method-config";
+import EconomicalRetrievalMethodConfig from "@/app/components/datasets/common/economical-retrieval-method-config";
+import { ToastContext } from "@/app/components/base/toast";
+import Button from "@/app/components/base/button";
+import Divider from "@/app/components/base/divider";
+import { ApiConnectionMod } from "@/app/components/base/icons/src/vender/solid/development";
+import { updateDatasetSetting } from "@/service/datasets";
+import type { DataSetListResponse } from "@/models/datasets";
+import DatasetDetailContext from "@/context/dataset-detail";
+import { type RetrievalConfig } from "@/types/app";
+import { useAppContext } from "@/context/app-context";
+import {
+  ensureRerankModelSelected,
+  isReRankModelSelected,
+} from "@/app/components/datasets/common/check-rerank-model";
+import ModelSelector from "@/app/components/header/account-setting/model-provider-page/model-selector";
 import {
   useModelList,
   useModelListAndDefaultModelAndCurrentProviderAndModel,
@@ -37,7 +39,10 @@ const rowClass = `
 `;
 const labelClass = `
   flex items-center w-[168px] h-9
-`
+`;
+const inputClass = `
+  w-full max-w-[480px] px-3 bg-gray-100 text-sm text-gray-800 rounded-lg outline-none appearance-none
+`;
 
 const getKey = (pageIndex: number, previousPageData: DataSetListResponse) => {
   if (!pageIndex || previousPageData.has_more)
@@ -221,10 +226,14 @@ const Form = () => {
             {t("datasetSettings.form.name")}
           </div>
         </div>
-        <div className='w-full max-w-[480px]'>
-          <Input
+        <div className="w-full max-w-[480px]">
+          <input
             disabled={!currentDataset?.embedding_available}
-            className='h-9'
+            className={cn(
+              inputClass,
+              !currentDataset?.embedding_available && "opacity-60",
+              "h-9"
+            )}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -236,11 +245,14 @@ const Form = () => {
             {t("datasetSettings.form.desc")}
           </div>
         </div>
-        <div className='w-full max-w-[480px]'>
-          <Textarea
+        <div className="w-full max-w-[480px]">
+          <textarea
             disabled={!currentDataset?.embedding_available}
-            className='mb-2 h-[120px] resize-none'
-            placeholder={t('datasetSettings.form.descPlaceholder') || ''}
+            className={cn(
+              `${inputClass} block mb-2 h-[120px] py-2 resize-none`,
+              !currentDataset?.embedding_available && "opacity-60"
+            )}
+            placeholder={t("datasetSettings.form.descPlaceholder") || ""}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -308,9 +320,11 @@ const Form = () => {
         </div>
       )}
       {/* Retrieval Method Config */}
-      {currentDataset?.provider === 'external'
-        ? <>
-          <div className={rowClass}><Divider /></div>
+      {currentDataset?.provider === "external" ? (
+        <>
+          <div className={rowClass}>
+            <Divider />
+          </div>
           <div className={rowClass}>
             <div className={labelClass}>
               <div className="text-text-secondary system-sm-semibold">
@@ -325,7 +339,9 @@ const Form = () => {
               isInRetrievalSetting={true}
             />
           </div>
-          <div className={rowClass}><Divider /></div>
+          <div className={rowClass}>
+            <Divider />
+          </div>
           <div className={rowClass}>
             <div className={labelClass}>
               <div className="text-text-secondary system-sm-semibold">
@@ -368,7 +384,9 @@ const Form = () => {
               </div>
             </div>
           </div>
-          <div className={rowClass}><Divider /></div>
+          <div className={rowClass}>
+            <Divider />
+          </div>
         </>
       ) : (
         <div className={rowClass}>
