@@ -25,8 +25,6 @@ import { ssePost } from '@/service/base'
 import type { Annotation } from '@/models/log'
 import { WorkflowRunningStatus } from '@/app/components/workflow/types'
 import useTimestamp from '@/hooks/use-timestamp'
-import { useAppContext } from '@/context/app-context'
-import { updateUSDWithAgentTool, updateUserCreditsWithUSD } from '@/app/api/pricing'
 import { AudioPlayerManager } from '@/app/components/base/audio-btn/audio.player.manager'
 import type { FileEntity } from '@/app/components/base/file-uploader/types'
 import {
@@ -54,7 +52,6 @@ export const useChat = (
   const { t } = useTranslation()
   const { formatTime } = useTimestamp()
   const { notify } = useToastContext()
-  const { userProfile, mutateUserProfile } = useAppContext()
   const conversationId = useRef('')
   const hasStopResponded = useRef(false)
   const [isResponding, setIsResponding] = useState(false)
@@ -252,7 +249,8 @@ export const useChat = (
       else
         ttsUrl = `/apps/${params.appId}/text-to-audio`
     }
-    const player = AudioPlayerManager.getInstance().getAudioPlayer(ttsUrl, ttsIsPublic, uuidV4(), 'none', 'none', (_: any): any => {})
+    const player = AudioPlayerManager.getInstance().getAudioPlayer(ttsUrl, ttsIsPublic, uuidV4(), 'none', 'none', (_: any): any => {
+    })
     ssePost(
       url,
       {
@@ -260,7 +258,11 @@ export const useChat = (
       },
       {
         isPublicAPI,
-        onData: (message: string, isFirstMessage: boolean, { conversationId: newConversationId, messageId, taskId }: any) => {
+        onData: (message: string, isFirstMessage: boolean, {
+          conversationId: newConversationId,
+          messageId,
+          taskId,
+        }: any) => {
           if (!isAgentMode) {
             responseItem.content = responseItem.content + message
           }
@@ -397,7 +399,7 @@ export const useChat = (
             questionItem,
           })
         },
-        onMessageEnd: async (messageEnd) => {
+        onMessageEnd: (messageEnd) => {
           if (messageEnd.metadata?.annotation_reply) {
             responseItem.id = messageEnd.id
             responseItem.annotation = ({
@@ -431,11 +433,6 @@ export const useChat = (
               draft.push({ ...responseItem })
             })
           handleUpdateChatList(newListWithAnswer)
-
-          const toolsCost = await updateUSDWithAgentTool(responseItem, config?.agent_mode?.tools || [])
-          // 更新用户积分,并且在bill表中记录消费, userId 用户的mongo id, USD 消耗的总金额，单位为美元（包括了输入输出的Token）, type 消费类型, metadata 消费的元数据
-          await updateUserCreditsWithUSD(userProfile.takin_id!, parseFloat(messageEnd.metadata?.usage.total_price) + toolsCost, isAgentMode ? 'Dify Agent' : 'Dify Chat', messageEnd)
-          mutateUserProfile()
         },
         onMessageReplace: (messageReplace) => {
           responseItem.content = messageReplace.answer
@@ -488,7 +485,7 @@ export const useChat = (
         onIterationFinish: ({ data }) => {
           const tracing = responseItem.workflowProcess!.tracing!
           const iterationIndex = tracing.findIndex(item => item.node_id === data.node_id
-            && (item.execution_metadata?.parallel_id === data.execution_metadata?.parallel_id || item.parallel_id === data.execution_metadata?.parallel_id))!
+                        && (item.execution_metadata?.parallel_id === data.execution_metadata?.parallel_id || item.parallel_id === data.execution_metadata?.parallel_id))!
           tracing[iterationIndex] = {
             ...tracing[iterationIndex],
             ...data,
