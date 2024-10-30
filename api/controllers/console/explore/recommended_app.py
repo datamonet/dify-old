@@ -1,5 +1,6 @@
 from flask_login import current_user
-from flask_restful import Resource, fields, marshal_with, reqparse, inputs
+from flask_restful import Resource, fields, inputs, marshal_with, reqparse
+
 from constants.languages import languages
 from controllers.console import api
 from controllers.console.wraps import account_initialization_required
@@ -26,8 +27,6 @@ recommended_app_fields = {
     "position": fields.Integer,
     "is_listed": fields.Boolean,
 }
-
-
 
 
 # takin command: 增加page and limit

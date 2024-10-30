@@ -14,7 +14,7 @@ from tests.integration_tests.vdb.test_vector_store import (
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def oceanbase_vector():
     return OceanBaseVector(
         "dify_test_collection",
@@ -50,13 +50,13 @@ class OceanBaseVectorTest(AbstractVectorTest):
         assert len(ids) == 0
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_mock_oceanbase_client():
     with patch("core.rag.datasource.vdb.oceanbase.oceanbase_vector.ObVecClient", new_callable=MagicMock) as mock_client:
         yield mock_client
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_mock_oceanbase_vector(oceanbase_vector):
     with patch.object(oceanbase_vector, "_client"):
         yield oceanbase_vector

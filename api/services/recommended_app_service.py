@@ -20,12 +20,11 @@ logger = logging.getLogger(__name__)
 class RecommendedAppService:
     builtin_data: Optional[dict] = None
 
-
     @classmethod
-    def get_paginate_recommended_apps(cls,language:str,args: dict) -> Pagination | None:
+    def get_paginate_recommended_apps(cls, language: str, args: dict) -> Pagination | None:
         filters = [
          RecommendedApp.is_listed == True, 
-         App.is_public==True
+         App.is_public == True
         ]
         
         if args["mode"] == "recommended":
@@ -45,11 +44,8 @@ class RecommendedAppService:
             error_out=False,
         )
 
-
         return recommended_apps
    
-
-
     @classmethod
     def get_recommended_apps_and_categories(cls, language: str) -> dict:
         """

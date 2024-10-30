@@ -15,7 +15,7 @@ from models.workflow import WorkflowType
 
 
 class TestLLMNode:
-    @pytest.fixture
+    @pytest.fixture()
     def llm_node(self):
         data = LLMNodeData(
             title="Test LLM",

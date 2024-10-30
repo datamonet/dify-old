@@ -84,7 +84,7 @@ class MockAliyunOssClass:
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_aliyun_oss_mock(monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(Bucket, "__init__", MockAliyunOssClass.__init__)
