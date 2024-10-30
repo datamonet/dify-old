@@ -23,11 +23,9 @@ class RecommendedAppService:
 
     @classmethod
     def get_paginate_recommended_apps(cls,language:str,args: dict) -> Pagination | None:
-        
         filters = [
          RecommendedApp.is_listed == True, 
-         RecommendedApp.language == language,
-         App.is_public.is_(True)
+         App.is_public==True
         ]
         
         if args["mode"] == "recommended":
