@@ -17,7 +17,7 @@ export const fetchExploreAppList: Fetcher<AppListResponse, { url: string; params
 }
 
 export const fetchAppDetail = (id: string): Promise<any> => {
-  return get(`/explore/apps/${id}`)
+  return get(`/explore/apps?app_id=${id}`)
 }
 
 export const fetchInstalledAppList = () => {

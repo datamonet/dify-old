@@ -28,6 +28,7 @@ import { useAppContext } from "@/context/app-context";
 import { getRedirection } from "@/utils/app-redirection";
 // takin command:增加share 卡片
 import Modal from "@/app/components/base/modal";
+import ShareAppCard from "@/app/components/explore/share-app-card";
 import type { AppListResponse } from "@/models/app";
 import Input from "@/app/components/base/input";
 type AppsProps = {
@@ -64,7 +65,6 @@ const getExploreKey = (
   mode: string
 ) => {
   if (!pageIndex || previousPageData.has_more) {
-    console.log("mode", lowerCase(mode));
     const params: any = {
       url: "explore/apps",
       params: { page: pageIndex + 1, limit: 30, mode: lowerCase(mode) },
@@ -84,6 +84,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   const { hasEditPermission } = useContext(ExploreContext);
 
   const [showShare, setShowShare] = useState("");
+  const [detailApp, setDetailApp] = useState<App | undefined>();
   const [keywords, setKeywords] = useState("");
   const [searchKeywords, setSearchKeywords] = useState("");
 
@@ -182,14 +183,21 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     }
   };
 
+  const getDetail = async (id: string) => {
+    await fetchAppDetail(id).then((res) => {
+      setDetailApp(res.data[0]);
+      setShowShare(id);
+    });
+  };
   useMemo(() => {
-    if (searchParamsCategory) setCurrCategory(searchParamsCategory);
-    else setCurrCategory("recommended");
-    exploreAppMutate();
+    if (searchParamsCategory) {
+      setCurrCategory(searchParamsCategory);
+      exploreAppMutate();
+    }
   }, [searchParamsCategory]);
 
   useMemo(() => {
-    if (searchParamsAppId) setShowShare(searchParamsAppId);
+    if (searchParamsAppId) getDetail(searchParamsAppId);
   }, [searchParamsAppId]);
 
   useEffect(() => {
@@ -333,20 +341,18 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
         >
           <RiCloseLine className="w-4 h-4 text-gray-500" />
         </div>
-        {/* {allList
-          .filter((app) => app.app_id === showShare)
-          .map((app) => (
-            <ShareAppCard
-              key={app.app_id}
-              isExplore={pageType === PageType.EXPLORE}
-              app={app}
-              canCreate={hasEditPermission}
-              onCreate={() => {
-                setCurrApp(app);
-                setIsShowCreateModal(true);
-              }}
-            />
-          ))} */}
+        {detailApp && (
+          <ShareAppCard
+            key={detailApp.app_id}
+            isExplore={pageType === PageType.EXPLORE}
+            app={detailApp}
+            canCreate={hasEditPermission}
+            onCreate={() => {
+              setCurrApp(detailApp);
+              setIsShowCreateModal(true);
+            }}
+          />
+        )}
       </Modal>
     </div>
   );

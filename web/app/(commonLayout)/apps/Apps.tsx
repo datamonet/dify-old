@@ -34,7 +34,6 @@ const getKey = (
   tags: string[],
   keywords: string
 ) => {
-  console.log("activeTab", activeTab);
   if (!pageIndex || previousPageData.has_more) {
     const params: any = {
       url: "apps",
@@ -43,7 +42,7 @@ const getKey = (
     if (activeTab !== "all") params.params.mode = activeTab;
     else delete params.params.mode;
 
-    if (activeTab == "recommended") delete params.params.mode;
+    if (activeTab === "recommended") delete params.params.mode;
 
     if (tags.length) params.params.tag_ids = tags;
     return params;
