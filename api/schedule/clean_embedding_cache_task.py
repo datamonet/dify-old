@@ -32,17 +32,11 @@ def clean_embedding_cache_task():
         if embedding_ids:
             for embedding_id in embedding_ids:
                 db.session.execute(
-                    text("DELETE FROM embeddings WHERE id = :embedding_id"),
-                    {"embedding_id": embedding_id},
+                    text("DELETE FROM embeddings WHERE id = :embedding_id"), {"embedding_id": embedding_id}
                 )
 
             db.session.commit()
         else:
             break
     end_at = time.perf_counter()
-    click.echo(
-        click.style(
-            "Cleaned embedding cache from db success latency: {}".format(end_at - start_at),
-            fg="green",
-        )
-    )
+    click.echo(click.style("Cleaned embedding cache from db success latency: {}".format(end_at - start_at), fg="green"))

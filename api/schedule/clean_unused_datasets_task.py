@@ -9,7 +9,9 @@ import app
 from configs import dify_config
 from core.rag.index_processor.index_processor_factory import IndexProcessorFactory
 from extensions.ext_database import db
+from extensions.ext_redis import redis_client
 from models.dataset import Dataset, DatasetQuery, Document
+from services.feature_service import FeatureService
 
 
 @app.celery.task(queue="dataset")
@@ -25,9 +27,7 @@ def clean_unused_datasets_task():
         try:
             # Subquery for counting new documents
             document_subquery_new = (
-                db.session.query(
-                    Document.dataset_id, func.count(Document.id).label("document_count")
-                )
+                db.session.query(Document.dataset_id, func.count(Document.id).label("document_count"))
                 .filter(
                     Document.indexing_status == "completed",
                     Document.enabled == True,
@@ -40,9 +40,7 @@ def clean_unused_datasets_task():
 
             # Subquery for counting old documents
             document_subquery_old = (
-                db.session.query(
-                    Document.dataset_id, func.count(Document.id).label("document_count")
-                )
+                db.session.query(Document.dataset_id, func.count(Document.id).label("document_count"))
                 .filter(
                     Document.indexing_status == "completed",
                     Document.enabled == True,
@@ -56,14 +54,8 @@ def clean_unused_datasets_task():
             # Main query with join and filter
             datasets = (
                 db.session.query(Dataset)
-                .outerjoin(
-                    document_subquery_new,
-                    Dataset.id == document_subquery_new.c.dataset_id,
-                )
-                .outerjoin(
-                    document_subquery_old,
-                    Dataset.id == document_subquery_old.c.dataset_id,
-                )
+                .outerjoin(document_subquery_new, Dataset.id == document_subquery_new.c.dataset_id)
+                .outerjoin(document_subquery_old, Dataset.id == document_subquery_old.c.dataset_id)
                 .filter(
                     Dataset.created_at < plan_sandbox_clean_day,
                     func.coalesce(document_subquery_new.c.document_count, 0) == 0,
@@ -87,16 +79,18 @@ def clean_unused_datasets_task():
             if not dataset_query or len(dataset_query) == 0:
                 try:
                     # remove index
-                    index_processor = IndexProcessorFactory(
-                        dataset.doc_form
-                    ).init_index_processor()
+                    index_processor = IndexProcessorFactory(dataset.doc_form).init_index_processor()
                     index_processor.clean(dataset, None)
 
                     # update document
                     update_params = {Document.enabled: False}
 
-                    Document.query.filter_by(dataset_id=dataset.id).update(
-                        update_params
+                    Document.query.filter_by(dataset_id=dataset.id).update(update_params)
+                    db.session.commit()
+                    click.echo(click.style("Cleaned unused dataset {} from db success!".format(dataset.id), fg="green"))
+                except Exception as e:
+                    click.echo(
+                        click.style("clean dataset index error: {} {}".format(e.__class__.__name__, str(e)), fg="red")
                     )
     page = 1
     while True:
@@ -173,22 +167,9 @@ def clean_unused_datasets_task():
                         click.echo(
                             click.style("Cleaned unused dataset {} from db success!".format(dataset.id), fg="green")
                         )
-                    )
                 except Exception as e:
                     click.echo(
-                        click.style(
-                            "clean dataset index error: {} {}".format(
-                                e.__class__.__name__, str(e)
-                            ),
-                            fg="red",
-                        )
+                        click.style("clean dataset index error: {} {}".format(e.__class__.__name__, str(e)), fg="red")
                     )
     end_at = time.perf_counter()
-    click.echo(
-        click.style(
-            "Cleaned unused dataset from db success latency: {}".format(
-                end_at - start_at
-            ),
-            fg="green",
-        )
-    )
+    click.echo(click.style("Cleaned unused dataset from db success latency: {}".format(end_at - start_at), fg="green"))
