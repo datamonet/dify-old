@@ -13,10 +13,7 @@ from core.indexing_runner import IndexingRunner
 from core.rag.extractor.entity.extract_setting import ExtractSetting
 from core.rag.extractor.notion_extractor import NotionExtractor
 from extensions.ext_database import db
-from fields.data_source_fields import (
-    integrate_list_fields,
-    integrate_notion_info_list_fields,
-)
+from fields.data_source_fields import integrate_list_fields, integrate_notion_info_list_fields
 from libs.login import login_required
 from models import DataSourceOauthBinding, Document
 from services.dataset_service import DatasetService, DocumentService
@@ -191,21 +188,9 @@ class DataSourceNotionApi(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("notion_info_list", type=list, required=True, nullable=True, location="json")
         parser.add_argument("process_rule", type=dict, required=True, nullable=True, location="json")
+        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_form",
-            type=str,
-            default="text_model",
-            required=False,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "doc_language",
-            type=str,
-            default="English",
-            required=False,
-            nullable=False,
-            location="json",
+            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
         )
         args = parser.parse_args()
         # validate args
@@ -271,11 +256,7 @@ class DataSourceNotionDocumentSyncApi(Resource):
         return 200
 
 
-api.add_resource(
-    DataSourceApi,
-    "/data-source/integrates",
-    "/data-source/integrates/<uuid:binding_id>/<string:action>",
-)
+api.add_resource(DataSourceApi, "/data-source/integrates", "/data-source/integrates/<uuid:binding_id>/<string:action>")
 api.add_resource(DataSourceNotionListApi, "/notion/pre-import/pages")
 api.add_resource(
     DataSourceNotionApi,
@@ -284,6 +265,5 @@ api.add_resource(
 )
 api.add_resource(DataSourceNotionDatasetSyncApi, "/datasets/<uuid:dataset_id>/notion/sync")
 api.add_resource(
-    DataSourceNotionDocumentSyncApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/notion/sync",
+    DataSourceNotionDocumentSyncApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/notion/sync"
 )

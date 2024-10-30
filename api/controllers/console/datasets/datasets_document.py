@@ -25,10 +25,7 @@ from controllers.console.datasets.error import (
     InvalidMetadataError,
 )
 from controllers.console.setup import setup_required
-from controllers.console.wraps import (
-    account_initialization_required,
-    cloud_edition_billing_resource_check,
-)
+from controllers.console.wraps import account_initialization_required, cloud_edition_billing_resource_check
 from core.errors.error import (
     LLMBadRequestError,
     ModelCurrentlyNotSupportError,
@@ -148,7 +145,7 @@ class DatasetDocumentListApi(Resource):
         # "yes", "true", "t", "y", "1" convert to True, while others convert to False.
         try:
             fetch = string_to_bool(request.args.get("fetch", default="false"))
-        except (ArgumentTypeError, ValueError, Exception):
+        except (ArgumentTypeError, ValueError, Exception) as e:
             fetch = False
         dataset = DatasetService.get_dataset(dataset_id)
         if not dataset:
@@ -173,10 +170,7 @@ class DatasetDocumentListApi(Resource):
 
         if sort == "hit_count":
             sub_query = (
-                db.select(
-                    DocumentSegment.document_id,
-                    db.func.sum(DocumentSegment.hit_count).label("total_hit_count"),
-                )
+                db.select(DocumentSegment.document_id, db.func.sum(DocumentSegment.hit_count).label("total_hit_count"))
                 .group_by(DocumentSegment.document_id)
                 .subquery()
             )
@@ -206,8 +200,7 @@ class DatasetDocumentListApi(Resource):
                     DocumentSegment.status != "re_segment",
                 ).count()
                 total_segments = DocumentSegment.query.filter(
-                    DocumentSegment.document_id == str(document.id),
-                    DocumentSegment.status != "re_segment",
+                    DocumentSegment.document_id == str(document.id), DocumentSegment.status != "re_segment"
                 ).count()
                 document.completed_segments = completed_segments
                 document.total_segments = total_segments
@@ -224,10 +217,7 @@ class DatasetDocumentListApi(Resource):
 
         return response
 
-    documents_and_batch_fields = {
-        "documents": fields.List(fields.Nested(document_fields)),
-        "batch": fields.String,
-    }
+    documents_and_batch_fields = {"documents": fields.List(fields.Nested(document_fields)), "batch": fields.String}
 
     @setup_required
     @login_required
@@ -253,39 +243,17 @@ class DatasetDocumentListApi(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(
-            "indexing_technique",
-            type=str,
-            choices=Dataset.INDEXING_TECHNIQUE_LIST,
-            nullable=False,
-            location="json",
+            "indexing_technique", type=str, choices=Dataset.INDEXING_TECHNIQUE_LIST, nullable=False, location="json"
         )
         parser.add_argument("data_source", type=dict, required=False, location="json")
         parser.add_argument("process_rule", type=dict, required=False, location="json")
         parser.add_argument("duplicate", type=bool, default=True, nullable=False, location="json")
         parser.add_argument("original_document_id", type=str, required=False, location="json")
+        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_form",
-            type=str,
-            default="text_model",
-            required=False,
-            nullable=False,
-            location="json",
+            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
         )
-        parser.add_argument(
-            "doc_language",
-            type=str,
-            default="English",
-            required=False,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "retrieval_model",
-            type=dict,
-            required=False,
-            nullable=False,
-            location="json",
-        )
+        parser.add_argument("retrieval_model", type=dict, required=False, nullable=False, location="json")
         args = parser.parse_args()
 
         if not dataset.indexing_technique and not args["indexing_technique"]:
@@ -328,37 +296,13 @@ class DatasetInitApi(Resource):
         )
         parser.add_argument("data_source", type=dict, required=True, nullable=True, location="json")
         parser.add_argument("process_rule", type=dict, required=True, nullable=True, location="json")
+        parser.add_argument("doc_form", type=str, default="text_model", required=False, nullable=False, location="json")
         parser.add_argument(
-            "doc_form",
-            type=str,
-            default="text_model",
-            required=False,
-            nullable=False,
-            location="json",
+            "doc_language", type=str, default="English", required=False, nullable=False, location="json"
         )
-        parser.add_argument(
-            "doc_language",
-            type=str,
-            default="English",
-            required=False,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "retrieval_model",
-            type=dict,
-            required=False,
-            nullable=False,
-            location="json",
-        )
+        parser.add_argument("retrieval_model", type=dict, required=False, nullable=False, location="json")
         parser.add_argument("embedding_model", type=str, required=False, nullable=True, location="json")
-        parser.add_argument(
-            "embedding_model_provider",
-            type=str,
-            required=False,
-            nullable=True,
-            location="json",
-        )
+        parser.add_argument("embedding_model_provider", type=str, required=False, nullable=True, location="json")
         args = parser.parse_args()
 
         # The role of the current user in the ta table must be admin, owner, or editor, or dataset_operator
@@ -371,8 +315,7 @@ class DatasetInitApi(Resource):
             try:
                 model_manager = ModelManager()
                 model_manager.get_default_model_instance(
-                    tenant_id=current_user.current_tenant_id,
-                    model_type=ModelType.TEXT_EMBEDDING,
+                    tenant_id=current_user.current_tenant_id, model_type=ModelType.TEXT_EMBEDDING
                 )
             except InvokeAuthorizationError:
                 raise ProviderNotInitializeError(
@@ -387,9 +330,7 @@ class DatasetInitApi(Resource):
 
         try:
             dataset, documents, batch = DocumentService.save_document_without_dataset_id(
-                tenant_id=current_user.current_tenant_id,
-                document_data=args,
-                account=current_user,
+                tenant_id=current_user.current_tenant_id, document_data=args, account=current_user
             )
         except ProviderTokenNotInitError as ex:
             raise ProviderNotInitializeError(ex.description)
@@ -418,13 +359,7 @@ class DocumentIndexingEstimateApi(DocumentResource):
         data_process_rule = document.dataset_process_rule
         data_process_rule_dict = data_process_rule.to_dict()
 
-        response = {
-            "tokens": 0,
-            "total_price": 0,
-            "currency": "USD",
-            "total_segments": 0,
-            "preview": [],
-        }
+        response = {"tokens": 0, "total_price": 0, "currency": "USD", "total_segments": 0, "preview": []}
 
         if document.data_source_type == "upload_file":
             data_source_info = document.data_source_info_dict
@@ -433,10 +368,7 @@ class DocumentIndexingEstimateApi(DocumentResource):
 
                 file = (
                     db.session.query(UploadFile)
-                    .filter(
-                        UploadFile.tenant_id == document.tenant_id,
-                        UploadFile.id == file_id,
-                    )
+                    .filter(UploadFile.tenant_id == document.tenant_id, UploadFile.id == file_id)
                     .first()
                 )
 
@@ -445,9 +377,7 @@ class DocumentIndexingEstimateApi(DocumentResource):
                     raise NotFound("File not found.")
 
                 extract_setting = ExtractSetting(
-                    datasource_type="upload_file",
-                    upload_file=file,
-                    document_model=document.doc_form,
+                    datasource_type="upload_file", upload_file=file, document_model=document.doc_form
                 )
 
                 indexing_runner = IndexingRunner()
@@ -482,13 +412,7 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
         dataset_id = str(dataset_id)
         batch = str(batch)
         documents = self.get_batch_documents(dataset_id, batch)
-        response = {
-            "tokens": 0,
-            "total_price": 0,
-            "currency": "USD",
-            "total_segments": 0,
-            "preview": [],
-        }
+        response = {"tokens": 0, "total_price": 0, "currency": "USD", "total_segments": 0, "preview": []}
         if not documents:
             return response
         data_process_rule = documents[0].dataset_process_rule
@@ -496,8 +420,7 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
         info_list = []
         extract_settings = []
         for document in documents:
-            # takin command:除了错误的都返回
-            if document.indexing_status == "error":
+            if document.indexing_status in {"completed", "error"}:
                 raise DocumentAlreadyFinishedError()
             data_source_info = document.data_source_info_dict
             # format document files info
@@ -509,25 +432,16 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
                 data_source_info and "notion_workspace_id" in data_source_info and "notion_page_id" in data_source_info
             ):
                 pages = []
-                page = {
-                    "page_id": data_source_info["notion_page_id"],
-                    "type": data_source_info["type"],
-                }
+                page = {"page_id": data_source_info["notion_page_id"], "type": data_source_info["type"]}
                 pages.append(page)
-                notion_info = {
-                    "workspace_id": data_source_info["notion_workspace_id"],
-                    "pages": pages,
-                }
+                notion_info = {"workspace_id": data_source_info["notion_workspace_id"], "pages": pages}
                 info_list.append(notion_info)
 
             if document.data_source_type == "upload_file":
                 file_id = data_source_info["upload_file_id"]
                 file_detail = (
                     db.session.query(UploadFile)
-                    .filter(
-                        UploadFile.tenant_id == current_user.current_tenant_id,
-                        UploadFile.id == file_id,
-                    )
+                    .filter(UploadFile.tenant_id == current_user.current_tenant_id, UploadFile.id == file_id)
                     .first()
                 )
 
@@ -535,9 +449,7 @@ class DocumentBatchIndexingEstimateApi(DocumentResource):
                     raise NotFound("File not found.")
 
                 extract_setting = ExtractSetting(
-                    datasource_type="upload_file",
-                    upload_file=file_detail,
-                    document_model=document.doc_form,
+                    datasource_type="upload_file", upload_file=file_detail, document_model=document.doc_form
                 )
                 extract_settings.append(extract_setting)
 
@@ -608,8 +520,7 @@ class DocumentBatchIndexingStatusApi(DocumentResource):
                 DocumentSegment.status != "re_segment",
             ).count()
             total_segments = DocumentSegment.query.filter(
-                DocumentSegment.document_id == str(document.id),
-                DocumentSegment.status != "re_segment",
+                DocumentSegment.document_id == str(document.id), DocumentSegment.status != "re_segment"
             ).count()
             document.completed_segments = completed_segments
             document.total_segments = total_segments
@@ -635,8 +546,7 @@ class DocumentIndexingStatusApi(DocumentResource):
             DocumentSegment.status != "re_segment",
         ).count()
         total_segments = DocumentSegment.query.filter(
-            DocumentSegment.document_id == str(document_id),
-            DocumentSegment.status != "re_segment",
+            DocumentSegment.document_id == str(document_id), DocumentSegment.status != "re_segment"
         ).count()
 
         document.completed_segments = completed_segments
@@ -662,11 +572,7 @@ class DocumentDetailApi(DocumentResource):
             raise InvalidMetadataError(f"Invalid metadata value: {metadata}")
 
         if metadata == "only":
-            response = {
-                "id": document.id,
-                "doc_type": document.doc_type,
-                "doc_metadata": document.doc_metadata,
-            }
+            response = {"id": document.id, "doc_type": document.doc_type, "doc_metadata": document.doc_metadata}
         elif metadata == "without":
             process_rules = DatasetService.get_process_rules(dataset_id)
             data_source_info = document.data_source_detail_dict
@@ -1098,47 +1004,21 @@ api.add_resource(GetProcessRuleApi, "/datasets/process-rule")
 api.add_resource(DatasetDocumentListApi, "/datasets/<uuid:dataset_id>/documents")
 api.add_resource(DatasetInitApi, "/datasets/init")
 api.add_resource(
-    DocumentIndexingEstimateApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/indexing-estimate",
+    DocumentIndexingEstimateApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/indexing-estimate"
 )
-api.add_resource(
-    DocumentBatchIndexingEstimateApi,
-    "/datasets/<uuid:dataset_id>/batch/<string:batch>/indexing-estimate",
-)
-api.add_resource(
-    DocumentBatchIndexingStatusApi,
-    "/datasets/<uuid:dataset_id>/batch/<string:batch>/indexing-status",
-)
-api.add_resource(
-    DocumentIndexingStatusApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/indexing-status",
-)
+api.add_resource(DocumentBatchIndexingEstimateApi, "/datasets/<uuid:dataset_id>/batch/<string:batch>/indexing-estimate")
+api.add_resource(DocumentBatchIndexingStatusApi, "/datasets/<uuid:dataset_id>/batch/<string:batch>/indexing-status")
+api.add_resource(DocumentIndexingStatusApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/indexing-status")
 api.add_resource(DocumentDetailApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
 api.add_resource(
-    DocumentProcessingApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/<string:action>",
+    DocumentProcessingApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/<string:action>"
 )
 api.add_resource(DocumentDeleteApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>")
-api.add_resource(
-    DocumentMetadataApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/metadata",
-)
-api.add_resource(
-    DocumentStatusApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/status/<string:action>",
-)
-api.add_resource(
-    DocumentPauseApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/pause",
-)
-api.add_resource(
-    DocumentRecoverApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/resume",
-)
+api.add_resource(DocumentMetadataApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/metadata")
+api.add_resource(DocumentStatusApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/status/<string:action>")
+api.add_resource(DocumentPauseApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/pause")
+api.add_resource(DocumentRecoverApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/processing/resume")
 api.add_resource(DocumentRetryApi, "/datasets/<uuid:dataset_id>/retry")
 api.add_resource(DocumentRenameApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/rename")
 
-api.add_resource(
-    WebsiteDocumentSyncApi,
-    "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/website-sync",
-)
+api.add_resource(WebsiteDocumentSyncApi, "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/website-sync")

@@ -13,6 +13,7 @@ from libs.login import login_required
 from services.dataset_service import DatasetService
 from services.external_knowledge_service import ExternalDatasetService
 from services.hit_testing_service import HitTestingService
+from services.knowledge_service import ExternalDatasetTestService
 
 
 def _validate_name(name):
@@ -77,9 +78,7 @@ class ExternalApiTemplateListApi(Resource):
 
         try:
             external_knowledge_api = ExternalDatasetService.create_external_knowledge_api(
-                tenant_id=current_user.current_tenant_id,
-                user_id=current_user.id,
-                args=args,
+                tenant_id=current_user.current_tenant_id, user_id=current_user.id, args=args
             )
         except services.errors.dataset.DatasetNameDuplicateError:
             raise DatasetNameDuplicateError()
@@ -169,20 +168,8 @@ class ExternalDatasetCreateApi(Resource):
             raise Forbidden()
 
         parser = reqparse.RequestParser()
-        parser.add_argument(
-            "external_knowledge_api_id",
-            type=str,
-            required=True,
-            nullable=False,
-            location="json",
-        )
-        parser.add_argument(
-            "external_knowledge_id",
-            type=str,
-            required=True,
-            nullable=False,
-            location="json",
-        )
+        parser.add_argument("external_knowledge_api_id", type=str, required=True, nullable=False, location="json")
+        parser.add_argument("external_knowledge_id", type=str, required=True, nullable=False, location="json")
         parser.add_argument(
             "name",
             nullable=False,
@@ -246,14 +233,31 @@ class ExternalKnowledgeHitTestingApi(Resource):
             raise InternalServerError(str(e))
 
 
+class BedrockRetrievalApi(Resource):
+    # this api is only for internal testing
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("retrieval_setting", nullable=False, required=True, type=dict, location="json")
+        parser.add_argument(
+            "query",
+            nullable=False,
+            required=True,
+            type=str,
+        )
+        parser.add_argument("knowledge_id", nullable=False, required=True, type=str)
+        args = parser.parse_args()
+
+        # Call the knowledge retrieval service
+        result = ExternalDatasetTestService.knowledge_retrieval(
+            args["retrieval_setting"], args["query"], args["knowledge_id"]
+        )
+        return result, 200
+
+
 api.add_resource(ExternalKnowledgeHitTestingApi, "/datasets/<uuid:dataset_id>/external-hit-testing")
 api.add_resource(ExternalDatasetCreateApi, "/datasets/external")
 api.add_resource(ExternalApiTemplateListApi, "/datasets/external-knowledge-api")
-api.add_resource(
-    ExternalApiTemplateApi,
-    "/datasets/external-knowledge-api/<uuid:external_knowledge_api_id>",
-)
-api.add_resource(
-    ExternalApiUseCheckApi,
-    "/datasets/external-knowledge-api/<uuid:external_knowledge_api_id>/use-check",
-)
+api.add_resource(ExternalApiTemplateApi, "/datasets/external-knowledge-api/<uuid:external_knowledge_api_id>")
+api.add_resource(ExternalApiUseCheckApi, "/datasets/external-knowledge-api/<uuid:external_knowledge_api_id>/use-check")
+# this api is only for internal test
+api.add_resource(BedrockRetrievalApi, "/test/retrieval")
