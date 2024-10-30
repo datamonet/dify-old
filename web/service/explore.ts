@@ -1,6 +1,8 @@
 import { del, get, patch, post } from './base'
 import type { App, AppCategory } from '@/models/explore'
+import type { AppListResponse } from '@/models/app'
 import type { CommonResponse } from '@/models/common'
+import type { Fetcher } from 'swr'
 
 export const fetchAppList = () => {
   return get<{
@@ -8,6 +10,10 @@ export const fetchAppList = () => {
     recommended_apps: App[]
     community: App[]
   }>('/explore/apps')
+}
+
+export const fetchExploreAppList: Fetcher<AppListResponse, { url: string; params?: Record<string, any> }> = ({ url, params }) => {
+  return get<AppListResponse>(url, { params })
 }
 
 export const fetchAppDetail = (id: string): Promise<any> => {

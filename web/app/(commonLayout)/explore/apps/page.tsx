@@ -1,8 +1,8 @@
-import React from 'react'
-import AppList from '@/app/components/explore/app-list'
+import React from "react";
+import AppList from "@/app/components/explore/takin-list";
 
 const Apps = () => {
-  return <AppList />
-}
+  return <AppList />;
+};
 
-export default React.memo(Apps)
+export default React.memo(Apps);
