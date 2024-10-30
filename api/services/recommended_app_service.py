@@ -6,6 +6,7 @@ from typing import Optional
 
 import requests
 from flask import current_app
+from flask_sqlalchemy.pagination import Pagination
 
 from configs import dify_config
 from constants.languages import languages
@@ -18,6 +19,38 @@ logger = logging.getLogger(__name__)
 
 class RecommendedAppService:
     builtin_data: Optional[dict] = None
+
+
+    @classmethod
+    def get_paginate_recommended_apps(cls,language:str,args: dict) -> Pagination | None:
+        
+        filters = [
+         RecommendedApp.is_listed == True, 
+         RecommendedApp.language == language,
+         App.is_public.is_(True)
+        ]
+        
+        # if args["mode"] == "recommended":
+        #     filters.append(Account.email == "curator@takin.ai")
+        # else:
+        #     filters.append(Account.email != "curator@takin.ai")  
+            
+        recommended_apps = db.paginate(
+            db.select(RecommendedApp)
+            .select_from(RecommendedApp)  # Start from RecommendedApp
+            .join(App, RecommendedApp.app_id == App.id)  # Join with App on 
+            .join(Account, Account.id == App.user_id)  # Then join with Account 
+            .where(*filters)
+            .order_by(RecommendedApp.created_at.desc()),
+            page=args["page"],
+            per_page=args["limit"],
+            error_out=False,
+        )
+
+
+        return recommended_apps
+   
+
 
     @classmethod
     def get_recommended_apps_and_categories(cls, language: str) -> dict:

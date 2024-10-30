@@ -1,6 +1,5 @@
 from flask_login import current_user
-from flask_restful import Resource, fields, marshal_with, reqparse
-
+from flask_restful import Resource, fields, marshal_with, reqparse, inputs
 from constants.languages import languages
 from controllers.console import api
 from controllers.console.wraps import account_initialization_required
@@ -28,10 +27,23 @@ recommended_app_fields = {
     "is_listed": fields.Boolean,
 }
 
+
+
+
+# takin command: 增加page and limit
+
+# recommended_app_list_fields = {
+#     "recommended_apps": fields.List(fields.Nested(recommended_app_fields)),
+#     "community": fields.List(fields.Nested(recommended_app_fields)),
+#     "categories": fields.List(fields.String),
+# }
+
 recommended_app_list_fields = {
-    "recommended_apps": fields.List(fields.Nested(recommended_app_fields)),
-    "community": fields.List(fields.Nested(recommended_app_fields)),
-    "categories": fields.List(fields.String),
+    "page": fields.Integer,
+    "limit": fields.Integer(attribute="per_page"),
+    "total": fields.Integer,
+    "has_more": fields.Boolean(attribute="has_next"),
+    "data": fields.List(fields.Nested(recommended_app_fields), attribute="items"),
 }
 
 
@@ -42,6 +54,30 @@ class RecommendedAppListApi(Resource):
     def get(self):
         # language args
         parser = reqparse.RequestParser()
+        # takin command: page and limit
+        parser.add_argument(
+            "page",
+            type=inputs.int_range(1, 99999),
+            required=False,
+            default=1,
+            location="args",
+        )
+        parser.add_argument(
+            "limit",
+            type=inputs.int_range(1, 100),
+            required=False,
+            default=20,
+            location="args",
+        )
+        parser.add_argument(
+            "mode",
+            type=str,
+            choices=["community", "recommended"],
+            default="recommended",
+            location="args",
+            required=False,
+        )
+
         parser.add_argument("language", type=str, location="args")
         args = parser.parse_args()
 
@@ -52,7 +88,7 @@ class RecommendedAppListApi(Resource):
         else:
             language_prefix = languages[0]
 
-        return RecommendedAppService.get_recommended_apps_and_categories(language_prefix)
+        return RecommendedAppService.get_paginate_recommended_apps(language_prefix, args)
 
     @login_required
     @account_initialization_required
