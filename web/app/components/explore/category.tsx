@@ -17,18 +17,17 @@ export type ICategoryProps = {
   /**
    * default value for search param 'category' in en
    */
-  allCategoriesEn: string;
+  // allCategoriesEn: string;
 };
 
 const Category: FC<ICategoryProps> = ({
   className,
   value,
   onChange,
-  allCategoriesEn,
+  // allCategoriesEn,
 }) => {
   const { t } = useTranslation();
   // takin command:多加了一个community
-  const isAllCategories = value !== "community";
   const itemClassName = (isSelected: boolean) =>
     cn(
       "flex items-center px-3 py-[7px] h-[32px] rounded-lg border-[0.5px] border-transparent text-gray-700 font-medium leading-[18px] cursor-pointer hover:bg-gray-200 capitalize",
@@ -39,11 +38,11 @@ const Category: FC<ICategoryProps> = ({
   return (
     <div className={cn(className, "flex space-x-1 text-[13px] flex-wrap")}>
       <div
-        className={itemClassName(isAllCategories)}
-        onClick={() => onChange(allCategoriesEn)}
+        className={itemClassName(value === "recommended")}
+        onClick={() => onChange("recommended")}
       >
         <ThumbsUp className="mr-1 w-3.5 h-3.5" />
-        {t("explore.apps.allCategories")}
+        Recommended
       </div>
       {/* Takin command:为分类增加一个community */}
       <div
