@@ -30,10 +30,10 @@ class RecommendedAppService:
          App.is_public.is_(True)
         ]
         
-        # if args["mode"] == "recommended":
-        #     filters.append(Account.email == "curator@takin.ai")
-        # else:
-        #     filters.append(Account.email != "curator@takin.ai")  
+        if args["mode"] == "recommended":
+            filters.append(Account.email == "curator@takin.ai")
+        else:
+            filters.append(Account.email != "curator@takin.ai")  
             
         recommended_apps = db.paginate(
             db.select(RecommendedApp)
