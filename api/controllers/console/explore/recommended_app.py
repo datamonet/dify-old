@@ -76,7 +76,7 @@ class RecommendedAppListApi(Resource):
             location="args",
             required=False,
         )
-
+        parser.add_argument("name", type=str, location="args", required=False)
         parser.add_argument("language", type=str, location="args")
         args = parser.parse_args()
 
