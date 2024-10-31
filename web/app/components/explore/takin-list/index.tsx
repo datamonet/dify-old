@@ -62,12 +62,18 @@ const getKey = (
 const getExploreKey = (
   pageIndex: number,
   previousPageData: AppListResponse,
-  mode: string
+  mode: string,
+  keywords: string
 ) => {
   if (!pageIndex || previousPageData.has_more) {
     const params: any = {
       url: "explore/apps",
-      params: { page: pageIndex + 1, limit: 30, mode: lowerCase(mode) },
+      params: {
+        page: pageIndex + 1,
+        limit: 30,
+        mode: lowerCase(mode),
+        name: keywords,
+      },
     };
     return params;
   }
@@ -115,7 +121,12 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   } = useSWRInfinite(
     (pageIndex: number, previousPageData: AppListResponse) => {
       if (currCategory === "favourite") return null;
-      return getExploreKey(pageIndex, previousPageData, currCategory);
+      return getExploreKey(
+        pageIndex,
+        previousPageData,
+        currCategory,
+        searchKeywords
+      );
     },
     fetchExploreAppList,
     { revalidateFirstPage: true }
@@ -209,7 +220,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     }
   }, []);
 
-  if (isLoading) {
+  if (isLoading && data?.length === 0) {
     return (
       <div className="flex h-full items-center">
         <Loading type="area" />
