@@ -135,7 +135,7 @@ services:
 
   # Frontend web application.
   web:
-    image: faye1225/takin-dify-web:0.0.8
+    image: faye1225/takin-dify-web:0.0.9
     restart: always
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
