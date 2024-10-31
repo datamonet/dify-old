@@ -41,7 +41,6 @@ export const FavouriteTag: FC<{
 export const FavouriteBtn: FC<{
   app: AppBasicInfo;
 }> = ({ app }) => {
-  console.log(app);
   const { t } = useTranslation();
   // 首先先创建一个新的app到喜欢里
   const onCreate: CreateAppModalProps["onConfirm"] = async ({
@@ -51,11 +50,11 @@ export const FavouriteBtn: FC<{
     icon_background,
     description,
   }) => {
-    const data = await fetchAppDetail(app.id);
+    const { export_data } = await fetchAppDetail(app.id);
 
     try {
       const app = await importApp({
-        data: data.data[0],
+        data: export_data,
         name,
         icon_type,
         icon,

@@ -160,10 +160,10 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     icon_background,
     description,
   }) => {
-    const data = await fetchAppDetail(currApp?.app.id as string);
+    const { export_data } = await fetchAppDetail(currApp?.app.id as string);
     try {
       const app = await importApp({
-        data: data.data[0],
+        data: export_data,
         name,
         icon_type,
         icon,
@@ -185,11 +185,11 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
 
   const getDetail = async (id: string) => {
     await fetchAppDetail(id).then((res) => {
-      console.log(res);
-      // setDetailApp(res.data[0]);
-      // setShowShare(id);
+      setDetailApp(res);
+      setShowShare(id);
     });
   };
+
   useMemo(() => {
     if (searchParamsCategory) {
       setCurrCategory(searchParamsCategory);
@@ -198,6 +198,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   }, [searchParamsCategory]);
 
   useMemo(() => {
+    console.log(searchParamsAppId);
     if (searchParamsAppId) getDetail(searchParamsAppId);
   }, [searchParamsAppId]);
 
