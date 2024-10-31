@@ -96,7 +96,9 @@ class LogoutApi(Resource):
         account = cast(Account, flask_login.current_user)
         if isinstance(account, flask_login.AnonymousUserMixin):
             return {"result": "success"}
-        AccountService.logout(account=account)
+        # takin command: takin的token来源是头
+        token = request.headers.get("Authorization", "").split(" ")[1]
+        AccountService.logout(account=account, token=token)
         flask_login.logout_user()
         return {"result": "success"}
 
