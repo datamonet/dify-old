@@ -26,7 +26,10 @@ class RecommendedAppService:
          RecommendedApp.is_listed == True, 
          App.is_public == True
         ]
-        
+        if args.get("name"):
+            name = args["name"][:30]
+            filters.append(App.name.ilike(f"%{name}%"))
+            
         if args["mode"] == "recommended":
             filters.append(Account.email == "curator@takin.ai")
         else:
