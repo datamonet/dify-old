@@ -37,9 +37,9 @@ class RecommendedAppService:
             
         recommended_apps = db.paginate(
             db.select(RecommendedApp)
-            .select_from(RecommendedApp)  # Start from RecommendedApp
-            .join(App, RecommendedApp.app_id == App.id)  # Join with App on 
-            .join(Account, Account.id == App.user_id)  # Then join with Account 
+            .select_from(RecommendedApp)
+            .join(App, RecommendedApp.app_id == App.id)
+            .join(Account, Account.id == App.user_id)
             .where(*filters)
             .order_by(RecommendedApp.created_at.desc()),
             page=args["page"],
@@ -47,7 +47,37 @@ class RecommendedAppService:
             error_out=False,
         )
 
-        return recommended_apps
+        # 获取所有 app 对应的 user_id 和 email
+        user_ids = [app.app.user_id for app in recommended_apps.items]
+        accounts_cursor = db.session.query(Account.id, Account.email).filter(Account.id.in_(user_ids)).all()
+        email_to_name = {
+            account.email: account.email for account in accounts_cursor
+        }
+
+        # MongoDB 查询用户名称
+        emails = list(email_to_name.keys())  # 提取所有的 email
+        users_cursor = collection.find({"email": {"$in": emails}}, {"_id": 0, "name": 1,"email":1})
+        # 使用 email 获取用户名，如果没有 name 字段，则使用 email 中 @ 之前的部分
+        email_to_name.update({
+            user.get('email'): user.get('name', user.get('email').split('@')[0])
+            for user in users_cursor if user.get('email')
+        })
+
+        # 将 MongoDB 中的用户名称嵌入到推荐应用数据中
+        for app in recommended_apps.items:
+            # 获取 app 的 email 通过 user_id
+            email = next((account.email for account in accounts_cursor if account.id == app.app.user_id), None)
+            # 根据 email 获取对应的用户名
+            app.app.username = email_to_name.get(email)
+
+        # 返回带有分页和合并后的数据
+        response_data = {
+            "items": recommended_apps.items,
+            "total": recommended_apps.total,
+            "page": recommended_apps.page,
+            "per_page": recommended_apps.per_page
+        }
+        return response_data
    
     @classmethod
     def get_recommended_apps_and_categories(cls, language: str) -> dict:
