@@ -56,7 +56,7 @@ class RecommendedAppService:
 
         # MongoDB 查询用户名称
         emails = list(email_to_name.keys())  # 提取所有的 email
-        users_cursor = collection.find({"email": {"$in": emails}}, {"_id": 0, "name": 1,"email":1})
+        users_cursor = collection.find({"email": {"$in": emails}}, {"_id": 0, "name": 1, "email": 1})
         # 使用 email 获取用户名，如果没有 name 字段，则使用 email 中 @ 之前的部分
         email_to_name.update({
             user.get('email'): user.get('name', user.get('email').split('@')[0])

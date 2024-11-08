@@ -209,7 +209,6 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   }, [searchParamsCategory]);
 
   useEffect(() => {
-    console.log(searchParamsAppId);
     if (searchParamsAppId) getDetail(searchParamsAppId);
   }, [searchParamsAppId]);
 

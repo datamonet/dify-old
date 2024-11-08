@@ -1,7 +1,7 @@
 "use client";
 
 import { SWRConfig } from "swr";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie } from "@/app/api/user";
@@ -27,7 +27,7 @@ const SwrInitor = ({ children, token }: SwrInitorProps) => {
       }
     });
   };
-  useMemo(() => {
+  useEffect(() => {
     if (token) {
       if (
         consoleTokenFromLocalStorage &&
@@ -41,7 +41,7 @@ const SwrInitor = ({ children, token }: SwrInitorProps) => {
       localStorage?.removeItem("console_token");
       handleConsoleToken(); // takin.ai: 防止重定向速度太快，没找到cookie，再查询一次cookie
     }
-  }, []);
+  }, [token]);
 
   return init ? (
     <SWRConfig
