@@ -30,7 +30,6 @@ const SwrInitor = ({ children, token }: SwrInitorProps) => {
     })
   }
   useEffect(() => {
-    console.log('token', token)
     if (token) {
       if (
         consoleTokenFromLocalStorage
