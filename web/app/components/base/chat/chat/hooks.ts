@@ -437,7 +437,7 @@ export const useChat = (
               draft.push({ ...responseItem })
             })
           handleUpdateChatList(newListWithAnswer)
-          console.log('responseItem', responseItem, messageEnd)
+          // takin command:导入扣费模块。
           const toolsCost = await updateUSDWithAgentTool(responseItem, config?.agent_mode?.tools || [])
           // takin command:导入扣费模块。更新用户积分,并且在bill表中记录消费, userId 用户的mongo id, USD 消耗的总金额，单位为美元（包括了输入输出的Token）, type 消费类型, metadata 消费的元数据
           await updateUserCreditsWithUSD(userProfile.takin_id!, parseFloat(messageEnd.metadata?.usage.total_price) + toolsCost, isAgentMode ? 'Dify Agent' : 'Dify Chat', messageEnd)
