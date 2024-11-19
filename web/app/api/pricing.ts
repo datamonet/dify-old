@@ -152,7 +152,7 @@ export async function updateUSDWithAgentTool(responseItem: ChatItem, agentTools:
           // eslint-disable-next-line no-case-declarations
           const emails = agentTool.tool_parameters.to_email.split(',').flatMap((part: string) => part.split('，').map(email => email.trim()))
           // 获取 emails 的长度
-          acc += 0.00008 * (emails.length || 1)
+          acc += 0.001 * (emails.length || 1)
           break
         default:
           return acc + 0
