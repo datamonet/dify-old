@@ -39,13 +39,11 @@ class FluxProTool(BuiltinTool):
         )
 
         result = []
-
-        for image in response:
-            result.append(self.create_image_message(image=image))
-            result.append(
+        result.append(self.create_image_message(image=response))
+        result.append(
                 self.create_json_message(
                     {
-                        "url": image,
+                        "url": response,
                     }
                 )
             )

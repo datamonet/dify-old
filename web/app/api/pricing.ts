@@ -31,8 +31,8 @@ export async function updateUserCreditsWithUSD(userId: string, USD: number, type
     .collection('bill')
 
   const userInfo = await userCollection.findOne({ _id: new ObjectId(userId) })
-  // USD转换为credits，$1=100credits， Takin加价，Takin系数为1.5
-  const cost = USD * 100 * 1.5
+  // USD转换为credits，$1=100credits， Takin加价，Takin系数为1.25
+  const cost = USD * 100 * 1.25
   let totalCost = cost
 
   let subscriptionCredits = userInfo?.subscription_credits as number || 0 // 用户订阅的积分
@@ -236,6 +236,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
           cost += fluxCost
           break
         case 'FLUX PRO':
+          console.log(trace.outputs)
           // eslint-disable-next-line no-case-declarations
           const fluxProCost = 0.055 * (trace.outputs.json.length || 1)
           cost += fluxProCost
@@ -245,7 +246,7 @@ export async function updateUserCreditsWithTracing(userId: string, tracing: Node
           cost += 0.015
           break
         case 'SendEmail':
-          cost += 0.0007 * (trace.outputs.json[0].count || 1)
+          cost += 0.001 * (trace.outputs.json[0].count || 1)
           break
         default:
           break
