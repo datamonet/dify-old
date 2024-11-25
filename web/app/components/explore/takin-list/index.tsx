@@ -171,7 +171,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     icon_background,
     description,
   }) => {
-    const { export_data } = await fetchAppDetail(currApp?.app.id as string);
+    const { export_data } = await fetchAppDetail(currApp?.id as string);
     try {
       const app = await importApp({
         data: export_data,
@@ -329,12 +329,12 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
 
       {isShowCreateModal && (
         <CreateAppModal
-          appIconType={currApp?.app.icon_type || "emoji"}
-          appIcon={currApp?.app.icon || ""}
-          appIconBackground={currApp?.app.icon_background || ""}
-          appIconUrl={currApp?.app.icon_url}
-          appName={currApp?.app.name || ""}
-          appDescription={currApp?.app.description || ""}
+          appIconType={currApp?.icon_type || "emoji"}
+          appIcon={currApp?.icon || ""}
+          appIconBackground={currApp?.icon_background || ""}
+          appIconUrl={currApp?.icon_url}
+          appName={currApp?.name || ""}
+          appDescription={currApp?.description || ""}
           show={isShowCreateModal}
           onConfirm={onCreate}
           onHide={() => setIsShowCreateModal(false)}
