@@ -6,7 +6,7 @@ import pytest
 from core.workflow.nodes.http_request.entities import Response
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_response():
     response = Mock(spec=httpx.Response)
     response.headers = {}

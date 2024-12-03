@@ -1,4 +1,5 @@
 import logging
+import uuid
 from collections.abc import Generator, Mapping, Sequence
 from concurrent.futures import Future, wait
 from datetime import UTC, datetime
@@ -9,8 +10,11 @@ from flask import Flask, current_app
 
 from configs import dify_config
 from core.model_runtime.utils.encoders import jsonable_encoder
-from core.variables import IntegerSegment
-from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult
+from core.workflow.entities.node_entities import (
+    NodeRunMetadataKey,
+    NodeRunResult,
+)
+from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.graph_engine.entities.event import (
     BaseGraphEvent,
     BaseNodeEvent,
@@ -21,6 +25,9 @@ from core.workflow.graph_engine.entities.event import (
     IterationRunNextEvent,
     IterationRunStartedEvent,
     IterationRunSucceededEvent,
+    NodeInIterationFailedEvent,
+    NodeRunFailedEvent,
+    NodeRunStartedEvent,
     NodeRunStreamChunkEvent,
     NodeRunSucceededEvent,
 )
@@ -28,7 +35,7 @@ from core.workflow.graph_engine.entities.graph import Graph
 from core.workflow.nodes.base import BaseNode
 from core.workflow.nodes.enums import NodeType
 from core.workflow.nodes.event import NodeEvent, RunCompletedEvent
-from core.workflow.nodes.iteration.entities import IterationNodeData
+from core.workflow.nodes.iteration.entities import ErrorHandleMode, IterationNodeData
 from models.workflow import WorkflowNodeExecutionStatus
 
 from .exc import (
@@ -52,6 +59,17 @@ class IterationNode(BaseNode[IterationNodeData]):
 
     _node_data_cls = IterationNodeData
     _node_type = NodeType.ITERATION
+
+    @classmethod
+    def get_default_config(cls, filters: Optional[dict] = None) -> dict:
+        return {
+            "type": "iteration",
+            "config": {
+                "is_parallel": False,
+                "parallel_nums": 10,
+                "error_handle_mode": ErrorHandleMode.TERMINATED.value,
+            },
+        }
 
     def _run(self) -> Generator[NodeEvent | InNodeEvent, None, None]:
         """
@@ -144,7 +162,8 @@ class IterationNode(BaseNode[IterationNodeData]):
             if self.node_data.is_parallel:
                 futures: list[Future] = []
                 q = Queue()
-                thread_pool = GraphEngineThreadPool(max_workers=self.node_data.parallel_nums, max_submit_count=100)
+                thread_pool = graph_engine.workflow_thread_pool_mapping[graph_engine.thread_pool_id]
+                thread_pool._max_workers = self.node_data.parallel_nums
                 for index, item in enumerate(iterator_list_value):
                     future: Future = thread_pool.submit(
                         self._run_single_iter_parallel,
@@ -279,12 +298,13 @@ class IterationNode(BaseNode[IterationNodeData]):
             # variable selector to variable mapping
             try:
                 # Get node class
-                from core.workflow.nodes.node_mapping import node_type_classes_mapping
+                from core.workflow.nodes.node_mapping import NODE_TYPE_CLASSES_MAPPING
 
                 node_type = NodeType(sub_node_config.get("data", {}).get("type"))
-                node_cls = node_type_classes_mapping.get(node_type)
-                if not node_cls:
+                if node_type not in NODE_TYPE_CLASSES_MAPPING:
                     continue
+                node_version = sub_node_config.get("data", {}).get("version", "1")
+                node_cls = NODE_TYPE_CLASSES_MAPPING[node_type][node_version]
 
                 sub_node_variable_mapping = node_cls.extract_variable_selector_to_variable_mapping(
                     graph_config=graph_config, config=sub_node_config

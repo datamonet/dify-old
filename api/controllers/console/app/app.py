@@ -193,7 +193,6 @@ class AppCopyApi(Resource):
         parser.add_argument("icon_background", type=str, location="json")
         args = parser.parse_args()
 
-      
         with Session(db.engine) as session:
             import_service = AppDslService(session)
             yaml_content = import_service.export_dsl(app_model=app_model, include_secret=True)

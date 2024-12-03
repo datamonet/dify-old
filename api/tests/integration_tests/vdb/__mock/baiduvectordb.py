@@ -143,7 +143,7 @@ class MockBaiduVectorDBClass:
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
+@pytest.fixture()
 def setup_baiduvectordb_mock(request, monkeypatch: MonkeyPatch):
     if MOCK:
         monkeypatch.setattr(MochowClient, "__init__", MockBaiduVectorDBClass.mock_vector_db_client)

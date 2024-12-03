@@ -54,7 +54,7 @@ class MockTokenBufferMemory:
         return self.history_messages
 
 
-@pytest.fixture
+@pytest.fixture()
 def llm_node():
     data = LLMNodeData(
         title="Test LLM",
@@ -110,7 +110,7 @@ def llm_node():
     return node
 
 
-@pytest.fixture
+@pytest.fixture()
 def model_config():
     # Create actual provider and model type instances
     model_provider_factory = ModelProviderFactory()

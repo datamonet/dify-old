@@ -4,20 +4,24 @@ import dotenv
 from flask_sqlalchemy import SQLAlchemy
 from pymongo import MongoClient
 from sqlalchemy import MetaData
+
 from dify_app import DifyApp
 
 dotenv.load_dotenv()
 
+
 def create_mongo_client():
     """ 创建并返回 MongoDB 客户端 """
-    client = MongoClient(os.getenv("MONGODB_URI"),connect=False)
+    client = MongoClient(os.getenv("MONGODB_URI"), connect=False)
     return client
+
 
 def get_users_collection():
     """ 获取用户集合 """
     client = create_mongo_client()  # 每次调用都创建新的 MongoClient 实例
     mongodb = client.get_database(os.getenv("MONGODB_NAME"))
     return mongodb["users"]
+
 
 collection = get_users_collection()
 
