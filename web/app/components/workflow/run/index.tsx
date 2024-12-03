@@ -13,7 +13,7 @@ import cn from '@/utils/classnames'
 import { ToastContext } from '@/app/components/base/toast'
 import Loading from '@/app/components/base/loading'
 import { fetchRunDetail, fetchTracingList } from '@/service/log'
-import type { NodeTracing } from '@/types/workflow'
+import type { IterationDurationMap, NodeTracing } from '@/types/workflow'
 import type { WorkflowRunDetailResponse } from '@/models/log'
 import { useStore as useAppStore } from '@/app/components/app/store'
 
@@ -62,10 +62,7 @@ const RunPanel: FC<RunProps> = ({ hideResult, activeTab = 'RESULT', runID, getRe
   const formatNodeList = useCallback((list: NodeTracing[]) => {
     const allItems = list.reverse()
     const result: NodeTracing[] = []
-    allItems.forEach((item) => {
-      const { node_type, execution_metadata } = item
-      if (node_type !== BlockEnum.Iteration) {
-        const isInIteration = !!execution_metadata?.iteration_id
+    const nodeGroupMap = new Map<string, Map<string, NodeTracing[]>>()
 
         if (isInIteration) {
           const iterationNode = result.find(node => node.node_id === execution_metadata?.iteration_id)
@@ -89,6 +86,64 @@ const RunPanel: FC<RunProps> = ({ hideResult, activeTab = 'RESULT', runID, getRe
         ...item,
         details: [],
       })
+    }
+
+    const updateParallelModeGroup = (runId: string, item: NodeTracing, iterationNode: NodeTracing) => {
+      if (!nodeGroupMap.has(iterationNode.node_id))
+        nodeGroupMap.set(iterationNode.node_id, new Map())
+
+      const groupMap = nodeGroupMap.get(iterationNode.node_id)!
+
+      if (!groupMap.has(runId))
+        groupMap.set(runId, [item])
+
+      else
+        groupMap.get(runId)!.push(item)
+
+      if (item.status === 'failed') {
+        iterationNode.status = 'failed'
+        iterationNode.error = item.error
+      }
+
+      iterationNode.details = Array.from(groupMap.values())
+    }
+    const updateSequentialModeGroup = (index: number, item: NodeTracing, iterationNode: NodeTracing) => {
+      const { details } = iterationNode
+      if (details) {
+        if (!details[index])
+          details[index] = [item]
+        else
+          details[index].push(item)
+      }
+
+      if (item.status === 'failed') {
+        iterationNode.status = 'failed'
+        iterationNode.error = item.error
+      }
+    }
+    const processNonIterationNode = (item: NodeTracing) => {
+      const { execution_metadata } = item
+      if (!execution_metadata?.iteration_id) {
+        result.push(item)
+        return
+      }
+
+      const iterationNode = result.find(node => node.node_id === execution_metadata.iteration_id)
+      if (!iterationNode || !Array.isArray(iterationNode.details))
+        return
+
+      const { parallel_mode_run_id, iteration_index = 0 } = execution_metadata
+
+      if (parallel_mode_run_id)
+        updateParallelModeGroup(parallel_mode_run_id, item, iterationNode)
+      else
+        updateSequentialModeGroup(iteration_index, item, iterationNode)
+    }
+
+    allItems.forEach((item) => {
+      item.node_type === BlockEnum.Iteration
+        ? processIterationNode(item)
+        : processNonIterationNode(item)
     })
     return result
   }, [])
@@ -141,15 +196,17 @@ const RunPanel: FC<RunProps> = ({ hideResult, activeTab = 'RESULT', runID, getRe
   }, [loading])
 
   const [iterationRunResult, setIterationRunResult] = useState<NodeTracing[][]>([])
+  const [iterDurationMap, setIterDurationMap] = useState<IterationDurationMap>({})
   const [isShowIterationDetail, {
     setTrue: doShowIterationDetail,
     setFalse: doHideIterationDetail,
   }] = useBoolean(false)
 
-  const handleShowIterationDetail = useCallback((detail: NodeTracing[][]) => {
+  const handleShowIterationDetail = useCallback((detail: NodeTracing[][], iterDurationMap: IterationDurationMap) => {
     setIterationRunResult(detail)
     doShowIterationDetail()
-  }, [doShowIterationDetail])
+    setIterDurationMap(iterDurationMap)
+  }, [doShowIterationDetail, setIterationRunResult, setIterDurationMap])
 
   if (isShowIterationDetail) {
     return (
@@ -158,6 +215,7 @@ const RunPanel: FC<RunProps> = ({ hideResult, activeTab = 'RESULT', runID, getRe
           list={iterationRunResult}
           onHide={doHideIterationDetail}
           onBack={doHideIterationDetail}
+          iterDurationMap={iterDurationMap}
         />
       </div>
     )

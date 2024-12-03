@@ -589,6 +589,13 @@ const translation = {
     uploadFromComputerLimit: 'Încărcarea fișierului nu poate depăși {{size}}',
     pasteFileLink: 'Lipiți linkul fișierului',
   },
+  license: {
+    expiring: 'Expiră într-o zi',
+    expiring_plural: 'Expiră în {{count}} zile',
+  },
+  pagination: {
+    perPage: 'Articole pe pagină',
+  },
 }
 
 export default translation

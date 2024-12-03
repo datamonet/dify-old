@@ -9,6 +9,7 @@ import Header from "@/app/components/header";
 import { EventEmitterContextProvider } from "@/context/event-emitter";
 import { ProviderContextProvider } from "@/context/provider-context";
 import { ModalContextProvider } from "@/context/modal-context";
+import { TanstackQueryIniter } from '@/context/query-client'
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const cookieStore = cookies();
@@ -20,18 +21,20 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <>
       <GA gaType={GaType.admin} />
       <SwrInitor token={token?.value}>
-        <AppContextProvider>
-          <EventEmitterContextProvider>
-            <ProviderContextProvider>
-              <ModalContextProvider>
-                <HeaderWrapper>
-                  <Header />
-                </HeaderWrapper>
-                {children}
-              </ModalContextProvider>
-            </ProviderContextProvider>
-          </EventEmitterContextProvider>
-        </AppContextProvider>
+        <TanstackQueryIniter>
+          <AppContextProvider>
+            <EventEmitterContextProvider>
+              <ProviderContextProvider>
+                <ModalContextProvider>
+                  <HeaderWrapper>
+                    <Header />
+                  </HeaderWrapper>
+                  {children}
+                </ModalContextProvider>
+              </ProviderContextProvider>
+            </EventEmitterContextProvider>
+          </AppContextProvider>
+        </TanstackQueryIniter>
       </SwrInitor>
     </>
   );

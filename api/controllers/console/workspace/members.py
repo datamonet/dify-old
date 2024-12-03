@@ -1,3 +1,5 @@
+from urllib import parse
+
 from flask_login import current_user
 from flask_restful import Resource, abort, marshal_with, reqparse
 
@@ -61,11 +63,12 @@ class MemberInviteEmailApi(Resource):
                     role=invitee_role,
                     inviter=inviter,
                 )
+                encoded_invitee_email = parse.quote(invitee_email)
                 invitation_results.append(
                     {
                         "status": "success",
                         "email": invitee_email,
-                        "url": f"{console_web_url}/activate?email={invitee_email}&token={token}",
+                        "url": f"{console_web_url}/activate?email={encoded_invitee_email}&token={token}",
                     }
                 )
             except AccountAlreadyInTenantError:

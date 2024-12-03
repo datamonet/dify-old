@@ -3,16 +3,19 @@ import type { ReactNode } from 'react'
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  XCircleIcon,
-} from '@heroicons/react/20/solid'
+  RiAlertFill,
+  RiCheckboxCircleFill,
+  RiCloseLine,
+  RiErrorWarningFill,
+  RiInformation2Fill,
+} from '@remixicon/react'
 import { createContext, useContext } from 'use-context-selector'
+import ActionButton from '@/app/components/base/action-button'
 import classNames from '@/utils/classnames'
 
 export type IToastProps = {
   type?: 'success' | 'error' | 'warning' | 'info'
+  size?: 'md' | 'sm'
   duration?: number
   message: string
   children?: ReactNode
@@ -21,16 +24,19 @@ export type IToastProps = {
 }
 type IToastContext = {
   notify: (props: IToastProps) => void
+  close: () => void
 }
 
 export const ToastContext = createContext<IToastContext>({} as IToastContext)
 export const useToastContext = () => useContext(ToastContext)
 const Toast = ({
   type = 'info',
+  size = 'md',
   message,
   children,
   className,
 }: IToastProps) => {
+  const { close } = useToastContext()
   // sometimes message is react node array. Not handle it.
   if (typeof message !== 'string')
     return null
@@ -46,36 +52,30 @@ const Toast = ({
     type === 'warning' ? 'bg-yellow-50' : '',
     type === 'info' ? 'bg-blue-50' : '',
   )}>
-    <div className="flex">
-      <div className="flex-shrink-0">
-        {type === 'success' && <CheckCircleIcon className="w-5 h-5 text-green-400" aria-hidden="true" />}
-        {type === 'error' && <XCircleIcon className="w-5 h-5 text-red-400" aria-hidden="true" />}
-        {type === 'warning' && <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" aria-hidden="true" />}
-        {type === 'info' && <InformationCircleIcon className="w-5 h-5 text-blue-400" aria-hidden="true" />}
+    <div className={`absolute inset-0 opacity-40 ${
+      (type === 'success' && 'bg-[linear-gradient(92deg,rgba(23,178,106,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+      || (type === 'warning' && 'bg-[linear-gradient(92deg,rgba(247,144,9,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+      || (type === 'error' && 'bg-[linear-gradient(92deg,rgba(240,68,56,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+      || (type === 'info' && 'bg-[linear-gradient(92deg,rgba(11,165,236,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+    }`}
+    />
+    <div className={`flex ${size === 'md' ? 'gap-1' : 'gap-0.5'}`}>
+      <div className={`flex justify-center items-center ${size === 'md' ? 'p-0.5' : 'p-1'}`}>
+        {type === 'success' && <RiCheckboxCircleFill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-success`} aria-hidden="true" />}
+        {type === 'error' && <RiErrorWarningFill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-destructive`} aria-hidden="true" />}
+        {type === 'warning' && <RiAlertFill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-warning-secondary`} aria-hidden="true" />}
+        {type === 'info' && <RiInformation2Fill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-accent`} aria-hidden="true" />}
       </div>
-      <div className="ml-3">
-        <h3 className={
-          classNames(
-            'text-sm font-medium',
-            type === 'success' ? 'text-green-800' : '',
-            type === 'error' ? 'text-red-800' : '',
-            type === 'warning' ? 'text-yellow-800' : '',
-            type === 'info' ? 'text-blue-800' : '',
-          )
-        }>{message}</h3>
-        {children && <div className={
-          classNames(
-            'mt-2 text-sm',
-            type === 'success' ? 'text-green-700' : '',
-            type === 'error' ? 'text-red-700' : '',
-            type === 'warning' ? 'text-yellow-700' : '',
-            type === 'info' ? 'text-blue-700' : '',
-          )
-        }>
+      <div className={`flex py-1 ${size === 'md' ? 'px-1' : 'px-0.5'} flex-col items-start gap-1 flex-grow`}>
+        <div className='text-text-primary system-sm-semibold'>{message}</div>
+        {children && <div className='text-text-secondary system-xs-regular'>
           {children}
         </div>
         }
       </div>
+      <ActionButton className='z-[1000]' onClick={close}>
+        <RiCloseLine className='w-4 h-4 flex-shrink-0 text-text-tertiary' />
+      </ActionButton>
     </div>
   </div>
 }
@@ -108,6 +108,7 @@ export const ToastProvider = ({
       setMounted(true)
       setParams(props)
     },
+    close: () => setMounted(false),
   }}>
     {mounted && <Toast {...params} />}
     {children}
@@ -116,20 +117,21 @@ export const ToastProvider = ({
 
 Toast.notify = ({
   type,
+  size = 'md',
   message,
   duration,
   className,
-}: Pick<IToastProps, 'type' | 'message' | 'duration' | 'className'>) => {
+}: Pick<IToastProps, 'type' | 'size' | 'message' | 'duration' | 'className'>) => {
+  // takin command:停留时间长一点
+  const defaultDuring = 6000
+  // const defaultDuring = (type === 'success' || type === 'info') ? 3000 : 6000
   if (typeof window === 'object') {
     const holder = document.createElement('div')
     const root = createRoot(holder)
 
-    root.render(<Toast type={type} message={message} duration={duration} className={className} />)
+    root.render(<Toast type={type} size={size} message={message} duration={duration} className={className} />)
     document.body.appendChild(holder)
-
-    // takin command:停留时间长一点
-    const defaultDuring = 6000
-
+ 
     setTimeout(() => {
       if (holder)
         holder.remove()

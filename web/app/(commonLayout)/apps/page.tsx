@@ -1,3 +1,5 @@
+'use client'
+
 import style from '../list.module.css'
 import Apps from './Apps'
 import classNames from '@/utils/classnames'

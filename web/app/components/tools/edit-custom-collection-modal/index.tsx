@@ -201,11 +201,11 @@ const EditCustomCollectionModal: FC<Props> = ({
         isShow
         positionCenter={isAdd && !positionLeft}
         onHide={onHide}
-        title={t(`tools.createTool.${isAdd ? "title" : "editTitle"}`)!}
-        panelClassName="mt-2 !w-[630px]"
-        maxWidthClassName="!max-w-[630px]"
-        height="calc(100vh - 16px)"
-        headerClassName="!border-b-black/5"
+        title={t(`tools.createTool.${isAdd ? 'title' : 'editTitle'}`)!}
+        panelClassName='mt-2 !w-[640px]'
+        maxWidthClassName='!max-w-[640px]'
+        height='calc(100vh - 16px)'
+        headerClassName='!border-b-black/5'
         body={
           <div className="flex flex-col h-full">
             <div className="grow h-0 overflow-y-auto px-6 py-3 space-y-4">

@@ -109,7 +109,7 @@ class CodeExecutionSandboxConfig(BaseSettings):
     )
 
     CODE_MAX_PRECISION: PositiveInt = Field(
-        description="mMaximum number of decimal places for floating-point numbers in code execution",
+        description="Maximum number of decimal places for floating-point numbers in code execution",
         default=20,
     )
 
@@ -271,6 +271,16 @@ class HttpConfig(BaseSettings):
         default=1 * 1024 * 1024,
     )
 
+    SSRF_DEFAULT_MAX_RETRIES: PositiveInt = Field(
+        description="Maximum number of retries for network requests (SSRF)",
+        default=3,
+    )
+
+    SSRF_PROXY_ALL_URL: Optional[str] = Field(
+        description="Proxy URL for HTTP or HTTPS requests to prevent Server-Side Request Forgery (SSRF)",
+        default=None,
+    )
+
     SSRF_PROXY_HTTP_URL: Optional[str] = Field(
         description="Proxy URL for HTTP requests to prevent Server-Side Request Forgery (SSRF)",
         default=None,
@@ -341,7 +351,7 @@ class LoggingConfig(BaseSettings):
 
     LOG_TZ: Optional[str] = Field(
         description="Timezone for log timestamps (e.g., 'America/New_York')",
-        default=None,
+        default="UTC",
     )
 
 
@@ -550,6 +560,11 @@ class RagEtlConfig(BaseSettings):
         default=None,
     )
 
+    SCARF_NO_ANALYTICS: Optional[str] = Field(
+        description="This is about whether to disable Scarf analytics in Unstructured library.",
+        default="false",
+    )
+
 
 class DataSetConfig(BaseSettings):
     """
@@ -576,6 +591,18 @@ class DataSetConfig(BaseSettings):
         default=500,
     )
 
+    CREATE_TIDB_SERVICE_JOB_ENABLED: bool = Field(
+        description="Enable or disable create tidb service job",
+        default=False,
+    )
+
+    PLAN_SANDBOX_CLEAN_MESSAGE_DAY_SETTING: PositiveInt = Field(
+        description="Interval in days for message cleanup operations - plan: sandbox",
+        default=30,
+    )
+
+    RETRIEVAL_TOP_N: int = Field(description="number of retrieval top_n", default=0)
+
 
 class WorkspaceConfig(BaseSettings):
     """
@@ -599,9 +626,14 @@ class IndexingConfig(BaseSettings):
     )
 
 
-class ImageFormatConfig(BaseSettings):
+class VisionFormatConfig(BaseSettings):
     MULTIMODAL_SEND_IMAGE_FORMAT: Literal["base64", "url"] = Field(
         description="Format for sending images in multimodal contexts ('base64' or 'url'), default is base64",
+        default="base64",
+    )
+
+    MULTIMODAL_SEND_VIDEO_FORMAT: Literal["base64", "url"] = Field(
+        description="Format for sending videos in multimodal contexts ('base64' or 'url'), default is base64",
         default="base64",
     )
 
@@ -707,7 +739,7 @@ class FeatureConfig(
     FileAccessConfig,
     FileUploadConfig,
     HttpConfig,
-    ImageFormatConfig,
+    VisionFormatConfig,
     InnerAPIConfig,
     IndexingConfig,
     LoggingConfig,

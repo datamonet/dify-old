@@ -179,6 +179,7 @@ class ElasticSearchVector(BaseVector):
                         Field.VECTOR.value: {  # Make sure the dimension is correct here
                             "type": "dense_vector",
                             "dims": dim,
+                            "index": True,
                             "similarity": "cosine",
                         },
                         Field.METADATA_KEY.value: {

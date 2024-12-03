@@ -180,8 +180,8 @@ const ConfigContent: FC<Props> = ({
     else if (canManuallyToggleRerank && !isRerankDefaultModelValid)
       return false;
 
-    return datasetConfigs.reranking_enable;
-  }, [canManuallyToggleRerank, datasetConfigs.reranking_enable]);
+    return datasetConfigs.reranking_enable
+  }, [canManuallyToggleRerank, datasetConfigs.reranking_enable, isRerankDefaultModelValid])
 
   const handleDisabledSwitchClick = useCallback(() => {
     if (!currentRerankModel && !showRerankModel)

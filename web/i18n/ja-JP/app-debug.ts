@@ -357,7 +357,7 @@ const translation = {
     'content': 'コンテンツ',
     'required': '必須',
     'file': {
-      supportFileTypes: 'サッポトされたファイルタイプ',
+      supportFileTypes: 'サポートされたファイルタイプ',
       image: {
         name: '画像',
       },

@@ -75,7 +75,7 @@ class ChatMessageAudioApi(Resource):
         except ValueError as e:
             raise e
         except Exception as e:
-            logging.exception(f"internal server error, {str(e)}.")
+            logging.exception("Failed to handle post request to ChatMessageAudioApi")
             raise InternalServerError()
 
 
@@ -133,7 +133,7 @@ class ChatMessageTextApi(Resource):
         except ValueError as e:
             raise e
         except Exception as e:
-            logging.exception(f"internal server error, {str(e)}.")
+            logging.exception("Failed to handle post request to ChatMessageTextApi")
             raise InternalServerError()
 
 
@@ -175,7 +175,7 @@ class TextModesApi(Resource):
         except ValueError as e:
             raise e
         except Exception as e:
-            logging.exception(f"internal server error, {str(e)}.")
+            logging.exception("Failed to handle get request to TextModesApi")
             raise InternalServerError()
 
 

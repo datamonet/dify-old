@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Optional
 
 from pydantic import BaseModel, field_validator
@@ -11,7 +11,7 @@ from core.workflow.nodes import NodeType
 from core.workflow.nodes.base import BaseNodeData
 
 
-class QueueEvent(str, Enum):
+class QueueEvent(StrEnum):
     """
     QueueEvent enum
     """
@@ -110,6 +110,7 @@ class QueueIterationNextEvent(AppQueueEvent):
 
     node_run_index: int
     output: Optional[Any] = None  # output for the current iteration
+    duration: Optional[float] = None
 
     @field_validator("output", mode="before")
     @classmethod
@@ -304,6 +305,8 @@ class QueueNodeSucceededEvent(AppQueueEvent):
     execution_metadata: Optional[dict[NodeRunMetadataKey, Any]] = None
 
     error: Optional[str] = None
+    """single iteration duration map"""
+    iteration_duration_map: Optional[dict[str, float]] = None
 
 
 class QueueNodeFailedEvent(AppQueueEvent):

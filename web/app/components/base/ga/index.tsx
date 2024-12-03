@@ -38,6 +38,12 @@ gtag('config', '${gaIdMaps[gaType]}');
         }}
       >
       </Script>
+      {/* Cookie banner */}
+      <Script
+        id="cookieyes"
+        src='https://cdn-cookieyes.com/client_data/2a645945fcae53f8e025a2b1/script.js'
+        nonce={nonce!}
+      ></Script>
     </>
 
   )

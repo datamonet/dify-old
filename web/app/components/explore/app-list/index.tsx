@@ -1,4 +1,30 @@
-"use client";
+'use client'
+
+import React, { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
+import { useContext } from 'use-context-selector'
+import useSWR from 'swr'
+import { useDebounceFn } from 'ahooks'
+import Toast from '../../base/toast'
+import s from './style.module.css'
+import cn from '@/utils/classnames'
+import ExploreContext from '@/context/explore-context'
+import type { App } from '@/models/explore'
+import Category from '@/app/components/explore/category'
+import AppCard from '@/app/components/explore/app-card'
+import { fetchAppDetail, fetchAppList } from '@/service/explore'
+import { importDSL } from '@/service/apps'
+import { useTabSearchParams } from '@/hooks/use-tab-searchparams'
+import CreateAppModal from '@/app/components/explore/create-app-modal'
+import AppTypeSelector from '@/app/components/app/type-selector'
+import type { CreateAppModalProps } from '@/app/components/explore/create-app-modal'
+import Loading from '@/app/components/base/loading'
+import { NEED_REFRESH_APP_LIST_KEY } from '@/config'
+import { useAppContext } from '@/context/app-context'
+import { getRedirection } from '@/utils/app-redirection'
+import Input from '@/app/components/base/input'
+import { DSLImportMode } from '@/models/app'
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -221,8 +247,9 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
   }) => {
     const { export_data } = await fetchAppDetail(currApp?.app.id as string);
     try {
-      const app = await importApp({
-        data: export_data,
+      const app = await importDSL({
+        mode: DSLImportMode.YAML_CONTENT,
+        yaml_content: export_data,
         name,
         icon_type,
         icon,
@@ -231,14 +258,13 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
       });
       setIsShowCreateModal(false);
       Toast.notify({
-        type: "success",
-        message: t("app.newApp.appCreated"),
-      });
-      if (onSuccess) onSuccess();
-      localStorage.setItem(NEED_REFRESH_APP_LIST_KEY, "1");
-      getRedirection(isCurrentWorkspaceEditor, app, push);
-    } catch (e) {
-      Toast.notify({ type: "error", message: t("app.newApp.appCreateFailed") });
+        type: 'success',
+        message: t('app.newApp.appCreated'),
+      })
+      if (onSuccess)
+        onSuccess()
+      localStorage.setItem(NEED_REFRESH_APP_LIST_KEY, '1')
+      getRedirection(isCurrentWorkspaceEditor, { id: app.app_id }, push)
     }
   };
 

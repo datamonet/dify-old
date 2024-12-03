@@ -226,6 +226,7 @@ const Configuration: FC = () => {
   const [rerankSettingModalOpen, setRerankSettingModalOpen] = useState(false)
   const {
     currentModel: currentRerankModel,
+    currentProvider: currentRerankProvider,
   } = useModelListAndDefaultModelAndCurrentProviderAndModel(ModelTypeEnum.rerank)
   const handleSelect = (data: DataSet[]) => {
     if (isEqual(data.map(item => item.id), dataSets.map(item => item.id))) {
@@ -273,7 +274,10 @@ const Configuration: FC = () => {
       reranking_mode: restConfigs.reranking_mode,
       weights: restConfigs.weights,
       reranking_enable: restConfigs.reranking_enable,
-    }, newDatasets, dataSets, !!currentRerankModel)
+    }, newDatasets, dataSets, {
+      provider: currentRerankProvider?.provider,
+      model: currentRerankModel?.model,
+    })
 
     setDatasetConfigs({
       ...retrievalConfig,
@@ -441,7 +445,8 @@ const Configuration: FC = () => {
   }
 
   const isShowVisionConfig = !!currModel?.features?.includes(ModelFeatureEnum.vision)
-
+  const isShowDocumentConfig = !!currModel?.features?.includes(ModelFeatureEnum.document)
+  const isAllowVideoUpload = !!currModel?.features?.includes(ModelFeatureEnum.video)
   // *** web app features ***
   const featuresData: FeaturesData = useMemo(() => {
     return {
@@ -462,8 +467,8 @@ const Configuration: FC = () => {
           transfer_methods: modelConfig.file_upload?.image?.transfer_methods || ['local_file', 'remote_url'],
         },
         enabled: !!(modelConfig.file_upload?.enabled || modelConfig.file_upload?.image?.enabled),
-        allowed_file_types: modelConfig.file_upload?.allowed_file_types || [SupportUploadFileTypes.image],
-        allowed_file_extensions: modelConfig.file_upload?.allowed_file_extensions || FILE_EXTS[SupportUploadFileTypes.image].map(ext => `.${ext}`),
+        allowed_file_types: modelConfig.file_upload?.allowed_file_types || [],
+        allowed_file_extensions: modelConfig.file_upload?.allowed_file_extensions || [...FILE_EXTS[SupportUploadFileTypes.image], ...FILE_EXTS[SupportUploadFileTypes.video]].map(ext => `.${ext}`),
         allowed_file_upload_methods: modelConfig.file_upload?.allowed_file_upload_methods || modelConfig.file_upload?.image?.transfer_methods || ['local_file', 'remote_url'],
         number_limits: modelConfig.file_upload?.number_limits || modelConfig.file_upload?.image?.number_limits || 3,
         fileUploadConfig: fileUploadConfigResponse,
@@ -614,7 +619,10 @@ const Configuration: FC = () => {
 
         syncToPublishedConfig(config)
         setPublishedConfig(config)
-        const retrievalConfig = getMultipleRetrievalConfig(modelConfig.dataset_configs, datasets, datasets, !!currentRerankModel)
+        const retrievalConfig = getMultipleRetrievalConfig(modelConfig.dataset_configs, datasets, datasets, {
+          provider: currentRerankProvider?.provider,
+          model: currentRerankModel?.model,
+        })
         setDatasetConfigs({
           retrieval_model: RETRIEVE_TYPE.multiWay,
           ...modelConfig.dataset_configs,
@@ -848,6 +856,8 @@ const Configuration: FC = () => {
       isShowVisionConfig,
       visionConfig,
       setVisionConfig: handleSetVisionConfig,
+      isAllowVideoUpload,
+      isShowDocumentConfig,
       rerankSettingModalOpen,
       setRerankSettingModalOpen,
     }}

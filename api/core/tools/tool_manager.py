@@ -440,7 +440,7 @@ class ToolManager:
                     yield provider
 
                 except Exception as e:
-                    logger.error(f"load builtin provider {provider} error: {e}")
+                    logger.exception(f"load builtin provider {provider}")
                     continue
         # set builtin providers loaded
         cls._builtin_providers_loaded = True
@@ -613,6 +613,7 @@ class ToolManager:
         """
             get tool provider
         """
+        provider_name = provider
         provider: ApiToolProvider = (
             db.session.query(ApiToolProvider)
             .filter(
@@ -623,7 +624,7 @@ class ToolManager:
         )
 
         if provider is None:
-            raise ValueError(f"you have not added provider {provider}")
+            raise ValueError(f"you have not added provider {provider_name}")
 
         try:
             credentials = json.loads(provider.credentials_str) or {}

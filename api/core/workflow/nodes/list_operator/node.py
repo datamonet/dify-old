@@ -70,8 +70,42 @@ class ListOperatorNode(BaseNode[ListOperatorNodeData]):
                     result = list(filter(filter_func, variable.value))
                     variable = variable.model_copy(update={"value": result})
 
-        # Order
-        if self.node_data.order_by.enabled:
+            # Extract
+            if self.node_data.extract_by.enabled:
+                variable = self._extract_slice(variable)
+
+            # Order
+            if self.node_data.order_by.enabled:
+                variable = self._apply_order(variable)
+
+            # Slice
+            if self.node_data.limit.enabled:
+                variable = self._apply_slice(variable)
+
+            outputs = {
+                "result": variable.value,
+                "first_record": variable.value[0] if variable.value else None,
+                "last_record": variable.value[-1] if variable.value else None,
+            }
+            return NodeRunResult(
+                status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                inputs=inputs,
+                process_data=process_data,
+                outputs=outputs,
+            )
+        except ListOperatorError as e:
+            return NodeRunResult(
+                status=WorkflowNodeExecutionStatus.FAILED,
+                error=str(e),
+                inputs=inputs,
+                process_data=process_data,
+                outputs=outputs,
+            )
+
+    def _apply_filter(
+        self, variable: Union[ArrayFileSegment, ArrayNumberSegment, ArrayStringSegment]
+    ) -> Union[ArrayFileSegment, ArrayNumberSegment, ArrayStringSegment]:
+        for condition in self.node_data.filter_by.conditions:
             if isinstance(variable, ArrayStringSegment):
                 result = _order_string(order=self.node_data.order_by.value, array=variable.value)
                 variable = variable.model_copy(update={"value": result})
@@ -100,6 +134,16 @@ class ListOperatorNode(BaseNode[ListOperatorNodeData]):
             process_data=process_data,
             outputs=outputs,
         )
+
+    def _extract_slice(
+        self, variable: Union[ArrayFileSegment, ArrayNumberSegment, ArrayStringSegment]
+    ) -> Union[ArrayFileSegment, ArrayNumberSegment, ArrayStringSegment]:
+        value = int(self.graph_runtime_state.variable_pool.convert_template(self.node_data.extract_by.serial).text) - 1
+        if len(variable.value) > int(value):
+            result = variable.value[value]
+        else:
+            result = ""
+        return variable.model_copy(update={"value": [result]})
 
 
 def _get_file_extract_number_func(*, key: str) -> Callable[[File], int]:

@@ -21,7 +21,7 @@ class LambdaTranslateUtilsTool(BuiltinTool):
         lambda_name,
     ):
         msg = {
-            "src_content": text_content,
+            "src_contents": [text_content],
             "src_lang": src_lang,
             "dest_lang": dest_lang,
             "dictionary_id": dictionary_name,

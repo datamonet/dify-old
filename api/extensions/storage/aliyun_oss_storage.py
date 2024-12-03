@@ -1,3 +1,4 @@
+import posixpath
 from collections.abc import Generator
 from contextlib import closing
 
@@ -51,9 +52,4 @@ class AliyunOssStorage(BaseStorage):
         self.client.delete_object(self.__wrapper_folder_filename(filename))
 
     def __wrapper_folder_filename(self, filename) -> str:
-        if self.folder:
-            if self.folder.endswith("/"):
-                filename = self.folder + filename
-            else:
-                filename = self.folder + "/" + filename
-        return filename
+        return posixpath.join(self.folder, filename) if self.folder else filename

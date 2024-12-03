@@ -1,8 +1,15 @@
+from enum import StrEnum
 from typing import Any, Optional
 
 from pydantic import Field
 
 from core.workflow.nodes.base import BaseIterationNodeData, BaseIterationState, BaseNodeData
+
+
+class ErrorHandleMode(StrEnum):
+    TERMINATED = "terminated"
+    CONTINUE_ON_ERROR = "continue-on-error"
+    REMOVE_ABNORMAL_OUTPUT = "remove-abnormal-output"
 
 
 class IterationNodeData(BaseIterationNodeData):

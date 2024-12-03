@@ -589,6 +589,13 @@ const translation = {
     uploadFromComputerReadError: 'Lesen der Datei fehlgeschlagen, bitte versuchen Sie es erneut.',
     fileExtensionNotSupport: 'Dateiendung nicht bedient',
   },
+  license: {
+    expiring: 'Läuft an einem Tag ab',
+    expiring_plural: 'Läuft in {{count}} Tagen ab',
+  },
+  pagination: {
+    perPage: 'Artikel pro Seite',
+  },
 }
 
 export default translation

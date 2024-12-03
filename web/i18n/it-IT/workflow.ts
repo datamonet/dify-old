@@ -103,6 +103,8 @@ const translation = {
     featuresDescription: 'Migliora l\'esperienza utente dell\'app Web',
     fileUploadTip: 'Le funzioni di caricamento delle immagini sono state aggiornate al caricamento dei file.',
     ImageUploadLegacyTip: 'Ora è possibile creare variabili di tipo file nel modulo iniziale. In futuro non supporteremo più la funzione di caricamento delle immagini.',
+    importWarning: 'Cautela',
+    importWarningDetails: 'La differenza di versione DSL può influire su alcune funzionalità',
   },
   env: {
     envPanelTitle: 'Variabili d\'Ambiente',
@@ -423,6 +425,11 @@ const translation = {
       },
       binaryFileVariable: 'Variabile file binario',
       type: 'Digitare',
+      extractListPlaceholder: 'Inserisci l\'indice delle voci dell\'elenco, digita \'/\' inserisci la variabile',
+      curl: {
+        placeholder: 'Incolla qui la stringa cURL',
+        title: 'Importazione da cURL',
+      },
     },
     code: {
       inputVars: 'Variabili di Input',
@@ -627,6 +634,7 @@ const translation = {
       desc: 'DESC',
       filterConditionComparisonValue: 'Valore della condizione di filtro',
       orderBy: 'Ordina per',
+      extractsCondition: 'Estrai l\'elemento N',
     },
   },
   tracing: {

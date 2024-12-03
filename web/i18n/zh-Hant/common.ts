@@ -589,6 +589,13 @@ const translation = {
     fileExtensionNotSupport: '不支援檔擴展名',
     uploadFromComputerLimit: '上傳文件不能超過 {{size}}',
   },
+  license: {
+    expiring: '將在1天內過期',
+    expiring_plural: '將在 {{count}} 天后過期',
+  },
+  pagination: {
+    perPage: '每頁項目數',
+  },
 }
 
 export default translation

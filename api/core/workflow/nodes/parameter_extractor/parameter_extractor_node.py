@@ -220,8 +220,8 @@ class ParameterExtractorNode(LLMNode):
             raise ValueError(f"Invalid invoke result: {invoke_result}")
 
         text = invoke_result.message.content
-        if not isinstance(text, str):
-            raise ValueError(f"Invalid text content type: {type(text)}. Expected str.")
+        if not isinstance(text, str | None):
+            raise InvalidTextContentTypeError(f"Invalid text content type: {type(text)}. Expected str.")
 
         usage = invoke_result.usage
         tool_call = invoke_result.message.tool_calls[0] if invoke_result.message.tool_calls else None

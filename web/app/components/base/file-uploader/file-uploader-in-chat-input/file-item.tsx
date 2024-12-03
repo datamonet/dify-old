@@ -96,6 +96,7 @@ const FileItem = ({
             <ProgressCircle
               percentage={progress}
               size={12}
+              className='shrink-0'
             />
           )
         }
