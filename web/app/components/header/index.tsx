@@ -60,7 +60,7 @@ const Header = () => {
           <Bars3Icon className="h-4 w-4 text-gray-500" />
         </div>}
         {!isMobile && <>
-          <Link href="https://app.takin.ai" className='flex items-center mr-4'>
+          <Link href="https://takin.ai" className='flex items-center mr-4'>
             <LogoSite className='object-contain' />
           </Link>
           {/* {systemFeatures.license.status === LicenseStatus.NONE && <GithubStar />} */}
@@ -68,7 +68,7 @@ const Header = () => {
       </div>
       {isMobile && (
         <div className='flex'>
-          <Link href="https://app.takin.ai" className='flex items-center mr-4'>
+          <Link href="https://takin.ai" className='flex items-center mr-4'>
             <LogoSite />
           </Link>
           {/* {systemFeatures.license.status === LicenseStatus.NONE && <GithubStar />} */}

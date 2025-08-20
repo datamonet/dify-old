@@ -24,7 +24,7 @@ const SwrInitor = ({ children, token }: SwrInitorProps) => {
       }
       else {
         router.replace(
-          'https://takin.ai/auth/signin?callbackUrl=https%3A%2F%2Fdify.takin.ai%2Fapps',
+          `${process.env.NEXT_PUBLIC_TAKIN_API_URL}/auth/signin?callbackUrl=${process.env.NEXT_PUBLIC_CALLBACK_URL}`,
         )
       }
     })
