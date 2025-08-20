@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
 import useSWR from 'swr'
+import useSWRInfinite from 'swr/infinite'
 import { useDebounceFn } from 'ahooks'
+import { RiCloseLine } from '@remixicon/react'
 import Toast from '../../base/toast'
 import s from './style.module.css'
 import cn from '@/utils/classnames'
@@ -13,8 +15,9 @@ import ExploreContext from '@/context/explore-context'
 import type { App } from '@/models/explore'
 import Category from '@/app/components/explore/category'
 import AppCard from '@/app/components/explore/app-card'
+import StudioAppCard from '@/app/(commonLayout)/apps/AppCard'
 import { fetchAppDetail, fetchAppList } from '@/service/explore'
-import { importDSL } from '@/service/apps'
+import { fetchAppList as appList, importDSL } from '@/service/apps'
 import { useTabSearchParams } from '@/hooks/use-tab-searchparams'
 import CreateAppModal from '@/app/components/explore/create-app-modal'
 import AppTypeSelector from '@/app/components/app/type-selector'
@@ -23,41 +26,11 @@ import Loading from '@/app/components/base/loading'
 import { NEED_REFRESH_APP_LIST_KEY } from '@/config'
 import { useAppContext } from '@/context/app-context'
 import { getRedirection } from '@/utils/app-redirection'
-import Input from '@/app/components/base/input'
+import Modal from '@/app/components/base/modal'
+import ShareAppCard from '@/app/components/explore/share-app-card'
+import type { AppListResponse } from '@/models/app'
 import { DSLImportMode } from '@/models/app'
-
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
-import { useContext } from "use-context-selector";
-import useSWR from "swr";
-import { useDebounceFn } from "ahooks";
-import { RiCloseLine } from "@remixicon/react";
-import useSWRInfinite from "swr/infinite";
-import Toast from "../../base/toast";
-import s from "./style.module.css";
-import cn from "@/utils/classnames";
-import ExploreContext from "@/context/explore-context";
-import type { App } from "@/models/explore";
-import Category from "@/app/components/explore/category";
-import AppCard from "@/app/components/explore/app-card";
-import StudioAppCard from "@/app/(commonLayout)/apps/AppCard";
-import { fetchAppDetail, fetchAppList } from "@/service/explore";
-import { fetchAppList as appList, importApp } from "@/service/apps";
-import { useTabSearchParams } from "@/hooks/use-tab-searchparams";
-import CreateAppModal from "@/app/components/explore/create-app-modal";
-import AppTypeSelector from "@/app/components/app/type-selector";
-import type { CreateAppModalProps } from "@/app/components/explore/create-app-modal";
-import Loading from "@/app/components/base/loading";
-import { NEED_REFRESH_APP_LIST_KEY } from "@/config";
-import { useAppContext } from "@/context/app-context";
-import { getRedirection } from "@/utils/app-redirection";
-import SearchInput from "@/app/components/base/search-input";
-// takin command:增加share 卡片
-import Modal from "@/app/components/base/modal";
-import ShareAppCard from "@/app/components/explore/share-app-card";
-import type { AppListResponse } from "@/models/app";
-import Input from "@/app/components/base/input";
+import Input from '@/app/components/base/input'
 type AppsProps = {
   pageType?: PageType;
   onSuccess?: () => void;
@@ -236,8 +209,8 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     return () => observer?.disconnect();
   }, [anchorRef, mutate, currCategory, categories]);
 
-  const [currApp, setCurrApp] = React.useState<App | null>(null);
-  const [isShowCreateModal, setIsShowCreateModal] = React.useState(false);
+  const [currApp, setCurrApp] = React.useState<App | null>(null)
+  const [isShowCreateModal, setIsShowCreateModal] = React.useState(false)
   const onCreate: CreateAppModalProps["onConfirm"] = async ({
     name,
     icon_type,
@@ -245,7 +218,7 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
     icon_background,
     description,
   }) => {
-    const { export_data } = await fetchAppDetail(currApp?.app.id as string);
+    const { export_data } = await fetchAppDetail(currApp?.app.id as string)
     try {
       const app = await importDSL({
         mode: DSLImportMode.YAML_CONTENT,
@@ -255,8 +228,8 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
         icon,
         icon_background,
         description,
-      });
-      setIsShowCreateModal(false);
+      })
+      setIsShowCreateModal(false)
       Toast.notify({
         type: 'success',
         message: t('app.newApp.appCreated'),
@@ -265,6 +238,11 @@ const Apps = ({ pageType = PageType.EXPLORE, onSuccess }: AppsProps) => {
         onSuccess()
       localStorage.setItem(NEED_REFRESH_APP_LIST_KEY, '1')
       getRedirection(isCurrentWorkspaceEditor, { id: app.app_id }, push)
+    } catch (err) {
+      Toast.notify({
+        type: 'error',
+        message: `${err}`,
+      })
     }
   };
 

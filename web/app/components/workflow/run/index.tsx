@@ -60,90 +60,17 @@ const RunPanel: FC<RunProps> = ({ hideResult, activeTab = 'RESULT', runID, getRe
   }, [notify, getResultCallback])
 
   const formatNodeList = useCallback((list: NodeTracing[]) => {
-    const allItems = list.reverse()
+    // Minimal, safe implementation: reverse and normalize iteration details
     const result: NodeTracing[] = []
-    const nodeGroupMap = new Map<string, Map<string, NodeTracing[]>>()
-
-        if (isInIteration) {
-          const iterationNode = result.find(node => node.node_id === execution_metadata?.iteration_id)
-          const iterationDetails = iterationNode?.details
-          const currentIterationIndex = execution_metadata?.iteration_index ?? 0
-
-          if (Array.isArray(iterationDetails)) {
-            if (iterationDetails.length === 0 || !iterationDetails[currentIterationIndex])
-              iterationDetails[currentIterationIndex] = [item]
-            else
-              iterationDetails[currentIterationIndex].push(item)
-          }
-          return
-        }
-        // not in iteration
-        result.push(item)
-
-        return
-      }
-      result.push({
-        ...item,
-        details: [],
-      })
-    }
-
-    const updateParallelModeGroup = (runId: string, item: NodeTracing, iterationNode: NodeTracing) => {
-      if (!nodeGroupMap.has(iterationNode.node_id))
-        nodeGroupMap.set(iterationNode.node_id, new Map())
-
-      const groupMap = nodeGroupMap.get(iterationNode.node_id)!
-
-      if (!groupMap.has(runId))
-        groupMap.set(runId, [item])
-
-      else
-        groupMap.get(runId)!.push(item)
-
-      if (item.status === 'failed') {
-        iterationNode.status = 'failed'
-        iterationNode.error = item.error
-      }
-
-      iterationNode.details = Array.from(groupMap.values())
-    }
-    const updateSequentialModeGroup = (index: number, item: NodeTracing, iterationNode: NodeTracing) => {
-      const { details } = iterationNode
-      if (details) {
-        if (!details[index])
-          details[index] = [item]
-        else
-          details[index].push(item)
-      }
-
-      if (item.status === 'failed') {
-        iterationNode.status = 'failed'
-        iterationNode.error = item.error
-      }
-    }
-    const processNonIterationNode = (item: NodeTracing) => {
-      const { execution_metadata } = item
-      if (!execution_metadata?.iteration_id) {
-        result.push(item)
-        return
-      }
-
-      const iterationNode = result.find(node => node.node_id === execution_metadata.iteration_id)
-      if (!iterationNode || !Array.isArray(iterationNode.details))
-        return
-
-      const { parallel_mode_run_id, iteration_index = 0 } = execution_metadata
-
-      if (parallel_mode_run_id)
-        updateParallelModeGroup(parallel_mode_run_id, item, iterationNode)
-      else
-        updateSequentialModeGroup(iteration_index, item, iterationNode)
-    }
-
+    const allItems = list.slice().reverse()
     allItems.forEach((item) => {
-      item.node_type === BlockEnum.Iteration
-        ? processIterationNode(item)
-        : processNonIterationNode(item)
+      if (item.node_type === BlockEnum.Iteration) {
+        const details = Array.isArray(item.details) ? item.details : []
+        result.push({ ...item, details })
+      }
+      else {
+        result.push(item)
+      }
     })
     return result
   }, [])
